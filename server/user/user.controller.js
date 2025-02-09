@@ -1,4 +1,4 @@
-import { addCategory, removeCategory, addItemToCategory, addTransaction, renameCategory } from "./user.model.js";
+import { addCategory, removeCategory, addItemToCategory, addTransaction, renameCategory, removeItemFromCategory } from "./user.model.js";
 
 export async function addCat(req, res) {
     let { username, category } = req.body;
@@ -87,4 +87,28 @@ export async function addTransact(req, res) {
             }
         )
     };
+
+
 }
+export async function removeItem(req, res) {
+    let { username, category, item } = req.body;
+    let removed = await removeItemFromCategory(username, category, item);
+
+    if (removed) {
+        res.status(200).json({ message: "Item removed successfully" });
+    } else {
+        res.status(401).json({ message: "Item wasn't removed" });
+    }
+}
+
+export async function renameItem(req, res) {
+    let { username, category, item, newName } = req.body;
+    let renamed = await renameItemInCategory(username, category, item, newName);
+
+    if (renamed) {
+        res.status(200).json({ message: "Item renamed successfully" });
+    } else {
+        res.status(400).json({ message: "Item wasn't renamed" });
+    }
+}
+
