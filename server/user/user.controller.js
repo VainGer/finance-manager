@@ -1,4 +1,7 @@
-import { addCategory, removeCategory, addItemToCategory, addTransaction, renameCategory, removeItemFromCategory } from "./user.model.js";
+import {
+    addCategory, removeCategory, addItemToCategory, addTransaction, renameCategory, removeItemAndTransactions,
+    editTransPrice, deleteTransaction
+} from "./user.model.js";
 
 export async function addCat(req, res) {
     let { username, category } = req.body;
@@ -17,6 +20,7 @@ export async function addCat(req, res) {
         );
     }
 }
+
 export async function removeCat(req, res) {
     let { username, category } = req.body;
     let removed = await removeCategory(username, category);
@@ -71,28 +75,9 @@ export async function addItemToCat(req, res) {
     };
 }
 
-export async function addTransact(req, res) {
-    let { username, category, item, price, date } = req.body;
-    let added = await addTransaction(username, category, item, price, date);
-    if (added) {
-        res.status(200).json(
-            {
-                message: "spend added to item"
-            }
-        );
-    } else {
-        res.status(401).json(
-            {
-                message: "spend wasn't added to category"
-            }
-        )
-    };
-
-
-}
-export async function removeItem(req, res) {
+export async function removeItemAndTransactions(req, res) {
     let { username, category, item } = req.body;
-    let removed = await removeItemFromCategory(username, category, item);
+    let removed = await removeItemAndTransactions(username, category, item);
 
     if (removed) {
         res.status(200).json({ message: "Item removed successfully" });
@@ -112,3 +97,57 @@ export async function renameItem(req, res) {
     }
 }
 
+
+export async function addTransact(req, res) {
+    let { username, category, item, id, newPrice } = req.body;
+    let added = await editTransPrice(username, category, item, id, newPrice);
+    if (added) {
+        res.status(200).json(
+            {
+                message: "Transaction added successfully"
+            }
+        );
+    } else {
+        res.status(401).json(
+            {
+                message: "Transaction wasn't added to category"
+            }
+        )
+    };
+}
+
+export async function editTransPrice(req, res) {
+    let { username, category, item, price, date } = req.body;
+    let eddited = await addTransaction(username, category, item, price, date);
+    if (eddited) {
+        res.status(200).json(
+            {
+                message: "Transaction price was eddited, new price:" + newPrice
+            }
+        );
+    } else {
+        res.status(401).json(
+            {
+                message: "Transaction wasn't eddited"
+            }
+        )
+    };
+}
+
+export async function deleteTrans(req, res) {
+    let { username, category, item, id } = req.body;
+    let deleted = await deleteTransaction(username, category, item, id);
+    if (deleted) {
+        res.status(200).json(
+            {
+                message: "Transaction was deleted"
+            }
+        );
+    } else {
+        res.status(401).json(
+            {
+                message: "Transaction wasn't deleted"
+            }
+        )
+    };
+}
