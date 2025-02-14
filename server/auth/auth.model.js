@@ -18,7 +18,9 @@ export async function registerUser(username, password) {
 
     users.push({ username, password });
     await writeFile('./data/users.json', JSON.stringify(users));
-    let user = { username, "categories": [], "children": [] };
+    let user = {
+        username, "globalID": 1, "profiles": []
+    };
     writeFile(`./data/users/${username}.json`, JSON.stringify(user));
 
     return true;

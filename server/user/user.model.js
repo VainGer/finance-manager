@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "fs/promises";
 
+//in controller
 export async function addCategory(username, category) {
     try {
         category = { catName: category, items: [] };
@@ -20,6 +21,7 @@ export async function addCategory(username, category) {
     }
 }
 
+//in controller
 export async function removeCategory(username, category) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -37,6 +39,28 @@ export async function removeCategory(username, category) {
     }
 }
 
+
+//in controller
+export async function removeCategorySaveItems(username, category) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let currentCat = data.categories.find(cat => cat.catName === category);
+        if (currentCat) {
+            let uncategorized = data.categories.find(cat => cat.catName === "uncategorized");
+            currentCat.items.forEach(item => uncategorized.items.push(item));
+            data.categories = data.categories.filter(cat => cat.catName !== category);
+            await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+//in controller
 export async function renameCategory(username, category, newName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -54,6 +78,7 @@ export async function renameCategory(username, category, newName) {
     }
 }
 
+//in controller
 export async function addItemToCategory(username, category, item) {
     try {
         let jItem = { iName: item, transactions: [] }
@@ -76,6 +101,9 @@ export async function addItemToCategory(username, category, item) {
         return false;
     }
 }
+
+
+//in controller
 export async function renameItemInCategory(username, category, item, newName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -97,6 +125,25 @@ export async function renameItemInCategory(username, category, item, newName) {
         return false;
     }
 }
+
+export async function migrateItem(username, currentCat, nextCat, itemName) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let currentCategory = data.categories.find(c => c.catName === currentCat);
+        let nextCategory = data.categories.find(c => c.catName === nextCat)
+        let item = currentCategory.items.find(i => i.iName === itemName);
+        nextCategory.items.push(item);
+        currentCategory.items = currentCategory.items.filter(i => i.iName !== itemName);
+        await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+
+//in controller
 export async function removeItemFromCategory(username, category, item) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -119,6 +166,7 @@ export async function removeItemFromCategory(username, category, item) {
     }
 }
 
+//in controller
 export async function addTransaction(username, category, item, price, date) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -133,7 +181,7 @@ export async function addTransaction(username, category, item, price, date) {
             console.log("No such item")
             return false;
         }
-        let id = itemData.transactions.length + 1;
+        let id = data.globalID++;
         let transaction = { id, price, date };
         itemData.transactions.push(transaction);
         await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
@@ -144,6 +192,7 @@ export async function addTransaction(username, category, item, price, date) {
     }
 }
 
+//in controller
 export async function editTransPrice(username, category, item, id, newPrice) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -170,6 +219,7 @@ export async function editTransPrice(username, category, item, id, newPrice) {
     }
 }
 
+//in controller
 export async function deleteTransaction(username, category, item, id) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -184,9 +234,10 @@ export async function deleteTransaction(username, category, item, id) {
             console.log("No such item")
             return false;
         }
-        let initLength = itemsData.transactions.length;
+        let initLength = itemData.transactions.length;
         itemData.transactions = itemData.transactions.filter(d => d.id !== id);
         if (initLength > itemData.transactions.length) {
+            data.globalID--;
             await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
             return true;
         }
