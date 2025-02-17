@@ -1,19 +1,34 @@
 import { readFile, writeFile } from "fs/promises";
 
-//in controller
-export async function addCategory(username, category) {
+export async function createProfile(username, profileName, pin, parent) {
     try {
-        category = { catName: category, items: [] };
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
-        let categories = data.categories;
-        if (categories.find(cat => cat.catName === category.catName)) {
+        let profiles = data.profiles;
+        if (profiles.length === 0) {
+            parent = true;
+        }
+        if (profiles.find(p => p.pName === profileName)) {
+            console.log("profile name exist");
             return false;
         }
-        categories.push(category);
-        data.categories = categories;
+        let profile = {
+            "pName": profileName,
+            "parent": parent,
+            "pin": pin,
+            "expenses": {
+                "categories": [
+                    {
+                        "categoryName": "uncategorized",
+                        "private": false,
+                        "items": []
+                    }
+                ]
+            }
+        };
+        data.profiles.push(profile);
         await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-        console.log("Category added");
+        console.log(profileName + " was added");
         return true;
     } catch (error) {
         console.log(error);
@@ -21,79 +36,12 @@ export async function addCategory(username, category) {
     }
 }
 
-//in controller
-export async function removeCategory(username, category) {
+export async function renameProfile(username, profileName, newProfileName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
-        let initLength = data.categories.length;
-        data.categories = data.categories.filter(cat => cat.catName !== category);
-        if (initLength > data.categories.length) {
-            await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-}
-
-
-//in controller
-export async function removeCategorySaveItems(username, category) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let currentCat = data.categories.find(cat => cat.catName === category);
-        if (currentCat) {
-            let uncategorized = data.categories.find(cat => cat.catName === "uncategorized");
-            currentCat.items.forEach(item => uncategorized.items.push(item));
-            data.categories = data.categories.filter(cat => cat.catName !== category);
-            await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-}
-
-//in controller
-export async function renameCategory(username, category, newName) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let cat = data.categories.find(cat => cat.catName === category)
-        if (cat) {
-            cat.catName = newName;
-            await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-}
-
-//in controller
-export async function addItemToCategory(username, category, item) {
-    try {
-        let jItem = { iName: item, transactions: [] }
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let cat = data.categories.find(c => c.catName === category);
-        if (!cat) {
-            console.log("No such category");
-            return false;
-        }
-        if (cat.items.find(i => i.iName === item)) {
-            console.log("item exist")
-            return false;
-        }
-        cat.items.push(jItem);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        profile.pName = newProfileName;
         await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
         return true;
     } catch (error) {
@@ -102,20 +50,14 @@ export async function addItemToCategory(username, category, item) {
     }
 }
 
-
-//in controller
-export async function renameItemInCategory(username, category, item, newName) {
+export async function changePin(username, profileName, pin, newPin) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
-        let cat = data.categories.find(c => c.catName === category);
-        if (!cat) {
-            console.log("No such category");
-            return false;
-        }
-        let it = cat.items.find(i => i.iName === item);
-        if (it) {
-            it.iName = newName;
+        let profile = data.profiles.find(p => p.pName === profileName);
+        if (profile.pin === pin) {
+            console.log("hehe")
+            profile.pin = newPin;
             await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
             return true;
         }
@@ -126,121 +68,18 @@ export async function renameItemInCategory(username, category, item, newName) {
     }
 }
 
-export async function migrateItem(username, currentCat, nextCat, itemName) {
+export async function deleteProfile(username, profileName, pin) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
-        let currentCategory = data.categories.find(c => c.catName === currentCat);
-        let nextCategory = data.categories.find(c => c.catName === nextCat)
-        let item = currentCategory.items.find(i => i.iName === itemName);
-        nextCategory.items.push(item);
-        currentCategory.items = currentCategory.items.filter(i => i.iName !== itemName);
-        await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
-
-
-//in controller
-export async function removeItemFromCategory(username, category, item) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let cat = data.categories.find(c => c.catName === category);
-        if (!cat) {
-            console.log("No such category");
-            return false;
-        }
-        let initLength = cat.items.length;
-        cat.items = cat.items.filter(i => i.iName !== item);
-        if (initLength > cat.items.length) {
+        let profile = data.profiles.find(p => p.pName === profileName);
+        if (profile.pin === pin) {
+            data.profiles = data.profiles.filter(p => p.pName !== profileName);
             await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
+            console.log("Profile deleted");
             return true;
         }
-        return false;
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-}
-
-//in controller
-export async function addTransaction(username, category, item, price, date) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let cat = data.categories.find(c => c.catName === category);
-        if (!cat) {
-            console.log("No such category");
-            return false;
-        }
-        let itemData = cat.items.find(i => i.iName === item);
-        if (!itemData) {
-            console.log("No such item")
-            return false;
-        }
-        let id = data.globalID++;
-        let transaction = { id, price, date };
-        itemData.transactions.push(transaction);
-        await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-        return true;
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-}
-
-//in controller
-export async function editTransPrice(username, category, item, id, newPrice) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let cat = data.categories.find(c => c.catName === category);
-        if (!cat) {
-            console.log("No such category");
-            return false;
-        }
-        let itemData = cat.items.find(i => i.iName === item);
-        if (!itemData) {
-            console.log("No such item")
-            return false;
-        }
-        let transaction = itemData.transactions.find(d => d.id === id);
-        if (transaction) {
-            transaction.price = newPrice;
-            await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-            return true;
-        }
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-}
-
-//in controller
-export async function deleteTransaction(username, category, item, id) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let cat = data.categories.find(c => c.catName === category);
-        if (!cat) {
-            console.log("No such category");
-            return false;
-        }
-        let itemData = cat.items.find(i => i.iName === item);
-        if (!itemData) {
-            console.log("No such item")
-            return false;
-        }
-        let initLength = itemData.transactions.length;
-        itemData.transactions = itemData.transactions.filter(d => d.id !== id);
-        if (initLength > itemData.transactions.length) {
-            data.globalID--;
-            await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-            return true;
-        }
+        console.log("Pofile wasn't deleted");
         return false;
     } catch (error) {
         console.log(error);
