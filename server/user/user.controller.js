@@ -1,4 +1,4 @@
-import { changePin, createProfile, deleteProfile, renameProfile } from "./user.model.js";
+import { changePin, createProfile, deleteProfile, getProfiles, renameProfile } from "./user.model.js";
 
 export async function addProfile(req, res) {
     let { username, profileName, pin, parent } = req.body;
@@ -52,6 +52,36 @@ export async function deleteP(req, res) {
     } else {
         res.status(401).json({
             message: `Profile ${profileName} wasn't deleted`
+        });
+    }
+}
+
+export async function openProf(req, res) {
+    let { username, profileName, pin } = req.body;
+    let profile = await deleteProfile(username, profileName, pin);
+    if (!profile) {
+        res.status(401).json({
+            message: "Incorrect pin"
+        });
+    } else {
+        res.status(200).json({
+            message: profile
+        });
+    }
+}
+
+export async function getProfs(req, res) {
+    let { username } = req.body;
+    let profiles = await getProfiles(username);
+    if (!profiles) {
+        res.status(401).json({
+            message: "Could not find profiles in accaunt",
+            profiles: profiles
+        });
+    } else {
+        res.status(200).json({
+            message: "Profile list ready",
+            profiles: profiles
         });
     }
 }

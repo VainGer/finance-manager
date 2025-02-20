@@ -86,3 +86,34 @@ export async function deleteProfile(username, profileName, pin) {
         return false;
     }
 }
+
+export async function openProfile(username, profileName, pin) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName && p.pin === pin);
+        if (profile) {
+            return profile;
+        }
+        console.log("Incorrect pin");
+        return false;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+export async function getProfiles(username) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profiles = [];
+        data.profiles.forEach(p => {
+            profiles.push(p.pName);
+        });
+        return profiles;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}

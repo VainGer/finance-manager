@@ -1,12 +1,12 @@
 import { readFile, writeFile } from "fs/promises";
 
 
-export async function addCategory(username, profileName, category) {
+export async function addCategory(username, profileName, category, privacy = false) {
     try {
-        category = { categoryName: category, private: false, items: [] };
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName);
+        category = { categoryName: category, private: privacy, items: [] };
         let categories = profile.expenses.categories;
         if (categories.find(cat => cat.categoryName === category.categoryName)) {
             console.log("category name exists")
@@ -272,5 +272,42 @@ export async function deleteTransaction(username, profileName, category, item, i
     } catch (error) {
         console.log(error);
         return false;
+    }
+}
+
+export async function getProfileExpenses(username, profileName) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        return profile.expenses.categories;
+    } catch (error) {
+        console.log(error);
+        return "Error, could not get profile expenses";
+    }
+}
+
+export async function getAllExpenses(username, profileName) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let expenses = await getProfileExpenses(username, profileName);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        if (!profile.parent) {
+            return expenses;
+        }
+        let profiles = data.profiles.filter(p => p.pName !== profileName);
+        profiles.forEach(p => {
+            let categories = p.expenses.categories;
+            categories.forEach(c => {
+                if (!c.private) {
+                    expenses.push(c);
+                }
+            });
+        });
+        return expenses;
+    } catch (error) {
+        console.log(error);
+        return "Could not get all accaunt expenses";
     }
 }

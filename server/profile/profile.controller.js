@@ -3,13 +3,15 @@ import {
     addTransaction, renameCategory, removeItemFromCategory, renameItemInCategory,
     editTransPrice, deleteTransaction,
     removeCategorySaveItems,
-    migrateItem, setCategoryPrivacy
+    migrateItem, setCategoryPrivacy,
+    getProfileExpenses,
+    getAllExpenses
 } from "./profile.model.js";
 
 
 export async function addCat(req, res) {
-    let { username, profileName, category } = req.body;
-    let added = await addCategory(username, profileName, category);
+    let { username, profileName, category, privacy } = req.body;
+    let added = await addCategory(username, profileName, category, privacy);
     if (added) {
         res.status(200).json(
             {
@@ -194,6 +196,36 @@ export async function deleteTransact(req, res) {
     } else {
         res.status(401).json({
             message: "transaction deletion failed"
+        });
+    }
+}
+
+export async function getProfExpenses(req, res) {
+    let { username, profileName } = req.body;
+    let expenses = await getProfileExpenses(username, profileName);
+    if (expenses === "Error, could not get profile expenses") {
+        res.status(401).json({
+            message: expenses
+        });
+    }
+    else {
+        res.status(200).json({
+            message: "Your profile expenses" + expenses
+        });
+    }
+}
+
+export async function getAccautExpenses(req, res) {
+    let { username, profileName } = req.body;
+    let expenses = await getAllExpenses(username, profileName);
+    if (expenses === "Error, could not get profile expenses") {
+        res.status(401).json({
+            message: expenses
+        });
+    }
+    else {
+        res.status(200).json({
+            message: "Your accaunt expenses"
         });
     }
 }
