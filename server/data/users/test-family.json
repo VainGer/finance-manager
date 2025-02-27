@@ -10,6 +10,12 @@
                 "categories": [
                     {
                         "categoryName": "Utilities",
+                        "budgets": [
+                            {
+                                "date": "01-25",
+                                "amount": 500.00
+                            }
+                        ],
                         "private": false,
                         "items": [
                             {

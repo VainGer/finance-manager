@@ -17,7 +17,7 @@ export default function ProfileList({ username }) {
                 return data.profiles;
             }
             else {
-                return null;
+                return [];
             }
         } catch (error) {
             console.log(error);

@@ -6,6 +6,7 @@ export default function AddProfile({ username }) {
     const [parent, setParent] = useState(false);
 
     async function addProf(e) {
+        e.preventDefault();
         try {
             let response = await fetch('http://localhost:5500/api/user/create', {
                 method: 'POST',
@@ -27,11 +28,12 @@ export default function AddProfile({ username }) {
     }
 
     return (
-        <form className="grid grid-cols-2 w-max *:border-1 gap-1">
+        <form className="grid grid-cols-2 w-max *:border-1 gap-1"
+         onSubmit={(e)=>addProf(e)}>
             <label >שם פרופיל</label>
-            <input type="text" />
+            <input type="text" onChange={(e) => setProfileName(e.target.value)} />
             <label >קוד סודי</label>
-            <input type="password" />
+            <input type="password" onChange={(e) => setPin(e.target.value)} />
             <label >פרופיל הורה</label>
             <input type="checkbox" />
             <input className="col-span-2" type="submit" />
