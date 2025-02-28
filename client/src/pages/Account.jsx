@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import ProfileList from '../components/ProfileList';
+import SelectProfile from '../components/SelectProfile';
 
 
 export default function Account() {
@@ -9,8 +9,7 @@ export default function Account() {
 
     return (
         <div dir='rtl'>
-            <h1>הי, {username}, בחר את הפרופיל שלך</h1>
-            <ProfileList username={username}></ProfileList>
+            <SelectProfile username={username}></SelectProfile>
         </div>
     );
 }

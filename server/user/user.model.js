@@ -93,7 +93,7 @@ export async function openProfile(username, profileName, pin) {
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName && p.pin === pin);
         if (profile) {
-            return profile;
+            return true;
         }
         console.log("Incorrect pin");
         return false;

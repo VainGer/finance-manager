@@ -1,4 +1,4 @@
-import { changePin, createProfile, deleteProfile, getProfiles, renameProfile } from "./user.model.js";
+import { changePin, createProfile, deleteProfile, getProfiles, renameProfile, openProfile } from "./user.model.js";
 
 export async function addProfile(req, res) {
     let { username, profileName, pin, parent } = req.body;
@@ -58,14 +58,14 @@ export async function deleteP(req, res) {
 
 export async function openProf(req, res) {
     let { username, profileName, pin } = req.body;
-    let profile = await deleteProfile(username, profileName, pin);
+    let profile = await openProfile(username, profileName, pin);
     if (!profile) {
         res.status(401).json({
             message: "Incorrect pin"
         });
     } else {
         res.status(200).json({
-            message: profile
+            message: "Profile opened successfully"
         });
     }
 }

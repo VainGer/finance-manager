@@ -1,1 +1,20 @@
-{"username":"test","globalID":1,"profiles":[]}
+{
+    "username": "test",
+    "globalID": 1,
+    "profiles": [
+        {
+            "pName": "t1",
+            "parent": true,
+            "pin": "1234",
+            "expenses": {
+                "categories": [
+                    {
+                        "categoryName": "uncategorized",
+                        "private": false,
+                        "items": []
+                    }
+                ]
+            }
+        }
+    ]
+}
