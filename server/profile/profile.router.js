@@ -4,8 +4,8 @@ import {
     addTransact, removeItem, renameItem, deleteTransact,
     editTransactionPrice, setPrivacy,
     removeCatSaveItems, moveItem,
-    getProfExpenses,
-    getAccautExpenses
+    getProfExpenses, getAccautExpenses,
+    getCats
 } from "./profile.controller.js";
 
 
@@ -27,5 +27,6 @@ profileRouter
     .post('/set_privacy', setPrivacy)
     .post('/profile_expenses', getProfExpenses)
     .post('/acc_expenses', getAccautExpenses)
+    .post('/prof_categories', getCats);
 
 export default profileRouter;

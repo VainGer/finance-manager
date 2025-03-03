@@ -1,11 +1,8 @@
 import {
     addCategory, removeCategory, addItemToCategory,
     addTransaction, renameCategory, removeItemFromCategory, renameItemInCategory,
-    editTransPrice, deleteTransaction,
-    removeCategorySaveItems,
-    migrateItem, setCategoryPrivacy,
-    getProfileExpenses,
-    getAllExpenses
+    editTransPrice, deleteTransaction, removeCategorySaveItems, migrateItem,
+    setCategoryPrivacy, getProfileExpenses, getAllExpenses, getProfileCategories
 } from "./profile.model.js";
 
 
@@ -200,6 +197,22 @@ export async function deleteTransact(req, res) {
     }
 }
 
+export async function getCats(req, res) {
+    let { username, profileName } = req.body;
+    let cats = await getProfileCategories(username, profileName);
+    if (cats.length > 0) {
+        res.status(200).json({
+            message: "Your categories",
+            categories: cats
+        });
+
+    } else {
+        res.status(401).json({
+            message: "Categories not found"
+        });
+    }
+}
+
 export async function getProfExpenses(req, res) {
     let { username, profileName } = req.body;
     let expenses = await getProfileExpenses(username, profileName);
@@ -210,7 +223,8 @@ export async function getProfExpenses(req, res) {
     }
     else {
         res.status(200).json({
-            message: "Your profile expenses" + expenses
+            message: "Your profile expenses ready",
+            expenses: expenses
         });
     }
 }
@@ -220,12 +234,13 @@ export async function getAccautExpenses(req, res) {
     let expenses = await getAllExpenses(username, profileName);
     if (expenses === "Error, could not get profile expenses") {
         res.status(401).json({
-            message: expenses
+            message: "Expenses not found"
         });
     }
     else {
         res.status(200).json({
-            message: "Your accaunt expenses"
+            message: "Your accaunt expenses",
+            expenses: expenses
         });
     }
 }

@@ -275,6 +275,20 @@ export async function deleteTransaction(username, profileName, category, item, i
     }
 }
 
+export async function getProfileCategories(username, profileName) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        let categories = [];
+        profile.expenses.categories.forEach(c => categories.push(c.categoryName));
+        return categories;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+
 export async function getProfileExpenses(username, profileName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -301,6 +315,17 @@ export async function getAllExpenses(username, profileName) {
             let categories = p.expenses.categories;
             categories.forEach(c => {
                 if (!c.private) {
+                    expenses.forEach(e => {
+                        e.items.forEach(i => {
+                            let item = c.items.find(it => it.iName === i.iName);
+                            if (item) {
+                                i.transactions.push(...item.transactions);
+                                c.items = c.items.filter(it => it.iName !== i.iName);
+                            }
+                        }
+                        );
+                    }
+                    );
                     expenses.push(c);
                 }
             });
@@ -308,6 +333,6 @@ export async function getAllExpenses(username, profileName) {
         return expenses;
     } catch (error) {
         console.log(error);
-        return "Could not get all accaunt expenses";
+        return [];
     }
 }

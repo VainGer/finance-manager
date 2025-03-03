@@ -4,10 +4,10 @@ import AuthProfile from './AuthProfile';
 
 export default function SelectProfile({ username }) {
     const [profiles, setProfiles] = useState([]);
-    const [isVisibleProfiles, setIsVisibleProfiles] = useState(true);
-    const [isVisibleAddProfile, setIsVisibleAddProfile] = useState(false);
-    const [isVisibleAddBtn, setIsVisibleAddBtn] = useState(true);
-    const [isVisibleAuthProfile, setIsVisibleAuthProfile] = useState(false);
+    const [toggleProfiles, setToggleProfiles] = useState(true);
+    const [toggleAddProfiles, setToggleAddProfiles] = useState(false);
+    const [toggleAddBtn, setToggleAddBtn] = useState(true);
+    const [toggleAuthProfile, setToggleAuthProfile] = useState(false);
     const [profileName, setProfileName] = useState('');
     async function getProfiles() {
         try {
@@ -42,32 +42,32 @@ export default function SelectProfile({ username }) {
 
     function selectProfile(e) {
         setProfileName(e.target.innerText);
-        setIsVisibleProfiles(false);
-        setIsVisibleAuthProfile(true);
+        setToggleProfiles(false);
+        setToggleAuthProfile(true);
     }
 
     return (
         <div className="grid text-center w-max m-auto align-middle border-1 *:border-1">
             {profiles.length > 0 ? (
                 <div className='*:border-1'>
-                    {isVisibleProfiles && <div>{
+                    {toggleProfiles && <div>{
                         profiles.map((profile, index) => (
                             <button key={index} onClick={(e) => selectProfile(e)}>{profile}</button>
                         ))}
                     </div>
                     }
-                    {isVisibleAuthProfile && <AuthProfile username={username} profileName={profileName} />}
-                    {isVisibleAddBtn && <button onClick={(e) => {
-                        setIsVisibleProfiles(false);
-                        setIsVisibleAddProfile(true);
-                        setIsVisibleAddBtn(false);
+                    {toggleAuthProfile && <AuthProfile username={username} profileName={profileName} />}
+                    {toggleAddBtn && <button onClick={(e) => {
+                        setToggleProfiles(false);
+                        setToggleAddProfiles(true);
+                        setToggleAddBtn(false);
                     }
                     }>הוסף פרופיל</button>}
-                    {isVisibleAddProfile && <div><AddProfile username={username} />
+                    {toggleAddProfiles && <div><AddProfile username={username} />
                         <button onClick={(e) => {
-                            setIsVisibleProfiles(true);
-                            setIsVisibleAddProfile(false);
-                            setIsVisibleAddBtn(true);
+                            setToggleProfiles(true);
+                            setToggleAddProfiles(false);
+                            setToggleAddBtn(true);
                         }}>לחזרה</button>
                     </div>}
                 </div>

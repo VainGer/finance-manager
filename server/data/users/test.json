@@ -3,13 +3,18 @@
     "globalID": 1,
     "profiles": [
         {
-            "pName": "t1",
+            "pName": "p1_test",
             "parent": true,
             "pin": "1234",
             "expenses": {
                 "categories": [
                     {
-                        "categoryName": "uncategorized",
+                        "categoryName": "testCat",
+                        "private": true,
+                        "items": []
+                    },
+                    {
+                        "categoryName": "testCat2",
                         "private": false,
                         "items": []
                     }
