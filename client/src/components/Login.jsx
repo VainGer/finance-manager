@@ -27,14 +27,10 @@ export default function Login() {
     }
 
     return (
-        <>
-            <div>
-                <form onSubmit={login}>
-                    <input type="text" placeholder="Username" onChange={(e) => setUsername(e.target.value)} />
-                    <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
-                    <button type="submit">Login</button>
-                </form>
-            </div>
-        </>
+        <form className='grid grid-cols-3 *:border-1 gap-2' onSubmit={login}>
+            <input type="text" placeholder="Username" onChange={(e) => setUsername(e.target.value)} />
+            <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+            <button type="submit">כניסה</button>
+        </form>
     );
 }
