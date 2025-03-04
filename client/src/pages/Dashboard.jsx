@@ -9,6 +9,8 @@ export default function Dashboard() {
     const location = useLocation();
     const [username, setUsename] = useState(location.state?.username);
     const [profileName, setProfileName] = useState(location.state?.profileName);
+    const [parent, setParent] = useState(location.state?.parent);
+    console.log(parent)
     const [showAccExpenses, setShowAccExpenses] = useState(false);
     const [showProfExpenses, setShowProfExpenses] = useState(false);
 

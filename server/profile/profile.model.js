@@ -296,7 +296,7 @@ export async function getProfileExpenses(username, profileName) {
         let profile = data.profiles.find(p => p.pName === profileName);
         profile.expenses.categories.forEach(c => {
             c.items.forEach(i => {
-                i.transactions.forEach(t => t.related = profile.pName);
+                i.transactions.forEach(t => t.related = "הוצאה בפרופיל שלי");
             });
         });
         return profile.expenses.categories;
@@ -319,7 +319,9 @@ export async function getAllExpenses(username, profileName) {
         profiles.forEach(p => {
             let categories = p.expenses.categories;
             categories.forEach(c => {
-                c.transactions.forEach(t => console.log(t));
+                c.items.forEach(i => {
+                    i.transactions.forEach(t=> t.related = p.pName);
+                })
                 if (!c.private) {
                     expenses.forEach(e => {
                         e.items.forEach(i => {

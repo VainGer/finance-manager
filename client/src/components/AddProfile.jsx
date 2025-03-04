@@ -20,7 +20,7 @@ export default function AddProfile({ username }) {
             });
             let data = await response.json();
             if (response.ok) {
-                navigate('/dashboard', { state: { username, profileName } });
+                navigate('/dashboard', { state: { username, profileName, parent } });
             }
             else {
                 return null;
