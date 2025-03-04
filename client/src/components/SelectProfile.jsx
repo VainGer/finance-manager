@@ -9,6 +9,7 @@ export default function SelectProfile({ username }) {
     const [toggleAddBtn, setToggleAddBtn] = useState(true);
     const [toggleAuthProfile, setToggleAuthProfile] = useState(false);
     const [profileName, setProfileName] = useState('');
+
     async function getProfiles() {
         try {
             let response = await fetch('http://localhost:5500/api/user/get-profiles', {
@@ -34,7 +35,8 @@ export default function SelectProfile({ username }) {
         async function fetchProfiles() {
             const profiles = await getProfiles();
             if (profiles) {
-                setProfiles(profiles);
+               let profArr = profiles.map((profile) => profile.pName);
+                setProfiles(profArr);
             }
         }
         fetchProfiles();
@@ -56,7 +58,7 @@ export default function SelectProfile({ username }) {
                         ))}
                     </div>
                     }
-                    {toggleAuthProfile && <AuthProfile username={username} profileName={profileName} />}
+                    {toggleAuthProfile && <AuthProfile username={username} profileName={profileName} parent={parent}/>}
                     {toggleAddBtn && <button onClick={(e) => {
                         setToggleProfiles(false);
                         setToggleAddProfiles(true);

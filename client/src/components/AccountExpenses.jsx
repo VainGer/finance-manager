@@ -69,6 +69,7 @@ export default function AccountExpenses({ username, profileName }) {
                                 </div>);
                             })}</div>
                     </div>
+
                 )
             })}
         </div>

@@ -109,7 +109,7 @@ export async function getProfiles(username) {
         data = JSON.parse(data);
         let profiles = [];
         data.profiles.forEach(p => {
-            profiles.push(p.pName);
+            profiles.push({ pName: p.pName, parent: p.parent });
         });
         return profiles;
     } catch (error) {

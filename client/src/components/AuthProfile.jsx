@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-export default function AuthProfile({ username, profileName }) {
+export default function AuthProfile({ username, profileName, parent }) {
     const [pin, setPin] = useState('');
     const navigate = useNavigate();
 
@@ -19,7 +19,7 @@ export default function AuthProfile({ username, profileName }) {
             console.log('Response:', response);
             console.log('Data:', data);
             if (response.ok) {
-                navigate('/dashboard', { state: { username, profileName } });
+                navigate('/dashboard', { state: { username, profileName, parent } });
             }
             else {
                 console.log(data.message);
