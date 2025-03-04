@@ -9,6 +9,7 @@ export default function SelectProfile({ username }) {
     const [toggleAddBtn, setToggleAddBtn] = useState(true);
     const [toggleAuthProfile, setToggleAuthProfile] = useState(false);
     const [profileName, setProfileName] = useState('');
+    const [parent, setParent] = useState(false); // Added parent state
 
     async function getProfiles() {
         try {
@@ -22,8 +23,7 @@ export default function SelectProfile({ username }) {
             let data = await response.json();
             if (response.ok) {
                 return data.profiles;
-            }
-            else {
+            } else {
                 return [];
             }
         } catch (error) {
@@ -35,7 +35,7 @@ export default function SelectProfile({ username }) {
         async function fetchProfiles() {
             const profiles = await getProfiles();
             if (profiles) {
-               let profArr = profiles.map((profile) => profile.pName);
+                let profArr = profiles.map((profile) => profile.pName);
                 setProfiles(profArr);
             }
         }
@@ -46,6 +46,7 @@ export default function SelectProfile({ username }) {
         setProfileName(e.target.innerText);
         setToggleProfiles(false);
         setToggleAuthProfile(true);
+        console.log('Profile selected:', e.target.innerText); // Debugging statement
     }
 
     return (
@@ -58,7 +59,7 @@ export default function SelectProfile({ username }) {
                         ))}
                     </div>
                     }
-                    {toggleAuthProfile && <AuthProfile username={username} profileName={profileName} parent={parent}/>}
+                    {toggleAuthProfile && <AuthProfile username={username} profileName={profileName} parent={parent} />}
                     {toggleAddBtn && <button onClick={(e) => {
                         setToggleProfiles(false);
                         setToggleAddProfiles(true);

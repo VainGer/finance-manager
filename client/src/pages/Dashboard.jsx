@@ -5,16 +5,19 @@ import ProfileExpenses from '../components/ProfileExpenses';
 import AddCategory from '../components/AddCategory';
 import EditCategories from '../components/EditCategories';
 import Header from '../components/Header';
+import AddTransact from '../components/AddTransact';
+
 export default function Dashboard() {
 
     const location = useLocation();
-    const [username, setUsename] = useState(location.state?.username);
+    const [username, setUsername] = useState(location.state?.username);
     const [profileName, setProfileName] = useState(location.state?.profileName);
     const [parent, setParent] = useState(location.state?.parent);
-    console.log(parent)
+    console.log(parent);
     const [showAccExpenses, setShowAccExpenses] = useState(false);
     const [showProfExpenses, setShowProfExpenses] = useState(false);
-
+    const [showAddTransact, setShowAddTransact] = useState(false);
+    const [showAddCategory, setShowAddCategory] = useState(false); 
 
     return (<>
         <div dir='rtl'>
@@ -30,8 +33,11 @@ export default function Dashboard() {
                 {showAccExpenses && <AccountExpenses username={username} profileName={profileName}></AccountExpenses>}
                 {showProfExpenses && <ProfileExpenses username={username} profileName={profileName}></ProfileExpenses>}
             </div>
-            <AddCategory username = {username} profileName= {profileName}></AddCategory>
-            <div><EditCategories username={username} profileName={profileName}/></div>
+            <button onClick={() => setShowAddCategory(!showAddCategory)}>הוסף קטגוריה</button> 
+            {showAddCategory && <AddCategory username={username} profileName={profileName} />} 
+            <div><EditCategories username={username} profileName={profileName} /></div>
+            <button onClick={() => setShowAddTransact(!showAddTransact)}>הוסף עסקה</button> 
+            {showAddTransact && <AddTransact username={username} profileName={profileName} />} 
         </div>
     </>);
 }
