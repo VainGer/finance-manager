@@ -289,6 +289,7 @@ export async function getProfileCategories(username, profileName) {
     }
 }
 
+
 export async function getProfileExpenses(username, profileName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -339,6 +340,27 @@ export async function getAllExpenses(username, profileName) {
             });
         });
         return expenses;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+
+export async function getCategoryItems(username, profileName, categoryName) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        if (!profile) {
+            console.log("No such profile");
+            return [];
+        }
+        let category = profile.expenses.categories.find(c => c.categoryName === categoryName);
+        if (!category) {
+            console.log("No such category");
+            return [];
+        }
+        return category.items.map(item => item.iName);
     } catch (error) {
         console.log(error);
         return [];

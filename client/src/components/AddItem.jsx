@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
-export default function AddTransact({ username, profileName }) {
+export default function AddItem({ username, profileName }) {
     const [category, setCategory] = useState('');
     const [item, setItem] = useState('');
-    const [price, setPrice] = useState('');
-    const [date, setDate] = useState('');
     const [categories, setCategories] = useState([]);
 
     // Fetch categories when the component mounts
@@ -31,22 +29,22 @@ export default function AddTransact({ username, profileName }) {
         fetchCategories();
     }, [username, profileName]);
 
-    async function addTransaction(e) {
+    async function addItem(e) {
         e.preventDefault();
         try {
-            let response = await fetch('http://localhost:5500/api/profile/add_trans', {
+            let response = await fetch('http://localhost:5500/api/profile/add_item', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, profileName, category, item, price, date })
+                body: JSON.stringify({ username, profileName, category, item })
             });
             let data = await response.json();
             if (response.ok) {
-                console.log(data.message);
+                console.log(`Item ${item} added successfully to category ${category}`);
+                setItem(''); // Clear the item input field
             } else {
                 console.log(data.message);
-                // TODO: Handle error
             }
         } catch (error) {
             console.log(error);
@@ -54,25 +52,17 @@ export default function AddTransact({ username, profileName }) {
     }
 
     return (
-        <form className="border-1" onSubmit={addTransaction}>
-            <label>קטגוריה:</label>
+        <form className='grid w-max text-center' onSubmit={addItem}>
+            <label>בחר קטגוריה</label>
             <select value={category} onChange={(e) => setCategory(e.target.value)}>
                 <option value="">בחר קטגוריה</option>
                 {categories.map((cat, index) => (
                     <option key={index} value={cat}>{cat}</option>
                 ))}
             </select>
-
-            <label>פריט:</label>
+            <label>הוסף פריט</label>
             <input type="text" value={item} onChange={(e) => setItem(e.target.value)} />
-
-            <label>מחיר:</label>
-            <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
-
-            <label>תאריך:</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-
-            <input type="submit" value="הוסף עסקה" />
+            <input type="submit" value="הוסף פריט" />
         </form>
     );
 }
