@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import SelectProfile from '../components/SelectProfile';
+import Header from '../components/Header';
 
 
 export default function Account() {
@@ -9,6 +10,7 @@ export default function Account() {
 
     return (
         <div dir='rtl'>
+            <Header username={username}></Header>
             <SelectProfile username={username}></SelectProfile>
         </div>
     );
