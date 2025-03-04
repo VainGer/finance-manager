@@ -25,6 +25,7 @@ export async function rename(req, res) {
         res.status(401).json({
             message: `Profile name wasn't changed`
         });
+
     }
 }
 
