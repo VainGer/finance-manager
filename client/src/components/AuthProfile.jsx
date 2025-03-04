@@ -31,7 +31,7 @@ export default function AuthProfile({ username, profileName, parent }) {
     }
     return (
         <form className='grid text-center *:border-1' onSubmit={(e) => authProf(e)}>
-            <input className=' placeholder:text-center' placeholder='קוד סודי' onChange={(e) => setPin(e.target.value)} type="password" />
+            <input className=' placeholder:text-center text-center' placeholder='קוד סודי' onChange={(e) => setPin(e.target.value)} type="password" />
             <input type="submit" value="כניסה לפרופיל" />
         </form>
     );

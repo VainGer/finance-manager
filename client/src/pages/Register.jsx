@@ -31,14 +31,17 @@ export default function Register() {
     }
 
     return (
-        <div dir="rtl">
-            <Header />
-            <h1>Register</h1>
-            <form onSubmit={register}>
+        <div dir="rtl" className="text-center">
+            <div className="grid grid-cols-2 w-full h-max place-items-center">
+                <img className="w-25" src="./src/assets/images/logo.jpg" alt="logo" />
+                <a href="/">חזרה לדף הבית</a>
+            </div>
+            <h1>הרשמה</h1>
+            <form onSubmit={register} className="grid text-center place-items-center">
                 <label>Username</label>
-                <input className='border 2 border-solid' type="text" onChange={(e) => setUsername(e.target.value)} />
+                <input className='border-1' type="text" onChange={(e) => setUsername(e.target.value)} />
                 <label>Password</label>
-                <input className='border 2 border-solid' type="password" onChange={(e) => setPassword(e.target.value)} />
+                <input className='border-1' type="password" onChange={(e) => setPassword(e.target.value)} />
                 <input type="submit" value="Register" />
             </form>
         </div>

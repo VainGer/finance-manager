@@ -17,9 +17,9 @@ export default function Dashboard() {
     const [showAccExpenses, setShowAccExpenses] = useState(false);
     const [showProfExpenses, setShowProfExpenses] = useState(false);
     const [showAddTransact, setShowAddTransact] = useState(false);
-    const [showAddCategory, setShowAddCategory] = useState(false); 
+    const [showAddCategory, setShowAddCategory] = useState(false);
 
-    return (<>
+    return (
         <div dir='rtl'>
             <Header username={username} profileName={profileName}></Header>
             <div className='grid place-items-center'>
@@ -33,11 +33,11 @@ export default function Dashboard() {
                 {showAccExpenses && <AccountExpenses username={username} profileName={profileName}></AccountExpenses>}
                 {showProfExpenses && <ProfileExpenses username={username} profileName={profileName}></ProfileExpenses>}
             </div>
-            <button onClick={() => setShowAddCategory(!showAddCategory)}>הוסף קטגוריה</button> 
-            {showAddCategory && <AddCategory username={username} profileName={profileName} />} 
+            <button onClick={() => setShowAddCategory(!showAddCategory)}>הוסף קטגוריה</button>
+            {showAddCategory && <AddCategory username={username} profileName={profileName} />}
             <div><EditCategories username={username} profileName={profileName} /></div>
-            <button onClick={() => setShowAddTransact(!showAddTransact)}>הוסף עסקה</button> 
-            {showAddTransact && <AddTransact username={username} profileName={profileName} />} 
+            <button onClick={() => setShowAddTransact(!showAddTransact)}>הוסף עסקה</button>
+            {showAddTransact && <AddTransact username={username} profileName={profileName} />}
         </div>
-    </>);
+    );
 }
