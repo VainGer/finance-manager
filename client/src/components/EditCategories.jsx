@@ -1,10 +1,13 @@
 import { useState, useEffect, useLayoutEffect } from "react";
+import CategoryEditor from "./CategoryEditor";
+import RenameCategory from "./RenameCategory";
 
 export default function EditCategories({ username, profileName }) {
 
     const [categoriesList, setCategoriesList] = useState([]);
     const [choosenCategory, setChoosenCategory] = useState('');
     const [viewCategories, setViewCategories] = useState(true);
+
     async function getCategoriesList() {
         try {
             let response = await fetch('http://localhost:5500/api/profile/prof_categories', {
@@ -44,6 +47,7 @@ export default function EditCategories({ username, profileName }) {
                     return (
                         <li key={index}>
                             <button>{category}</button>
+                            <div><RenameCategory username={username} profileName={profileName} category={category} /></div>
                         </li>
                     )
                 })}

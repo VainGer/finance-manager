@@ -294,6 +294,11 @@ export async function getProfileExpenses(username, profileName) {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName);
+        profile.expenses.categories.forEach(c => {
+            c.items.forEach(i => {
+                i.transactions.forEach(t => t.related = profile.pName);
+            });
+        });
         return profile.expenses.categories;
     } catch (error) {
         console.log(error);
@@ -314,6 +319,7 @@ export async function getAllExpenses(username, profileName) {
         profiles.forEach(p => {
             let categories = p.expenses.categories;
             categories.forEach(c => {
+                c.transactions.forEach(t => console.log(t));
                 if (!c.private) {
                     expenses.forEach(e => {
                         e.items.forEach(i => {

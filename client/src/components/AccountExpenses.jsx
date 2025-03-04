@@ -52,6 +52,7 @@ export default function AccountExpenses({ username, profileName }) {
                                             <tr className="border-1">
                                                 <th className="border-1">תאריך</th>
                                                 <th className="border-1">סכום</th>
+                                                <th>פרופיל ההוצאה</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -60,6 +61,7 @@ export default function AccountExpenses({ username, profileName }) {
                                                     <tr key={index} className="table-auto border-1 text-center w-full">
                                                         <td className="border-1">{transactions.date}</td>
                                                         <td className="border-1">{transactions.price}</td>
+                                                        <td className="border-1">{transactions.related}</td>
                                                     </tr>);
                                             })}
                                         </tbody>
