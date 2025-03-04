@@ -2,7 +2,7 @@ import {
     addCategory, removeCategory, addItemToCategory,
     addTransaction, renameCategory, removeItemFromCategory, renameItemInCategory,
     editTransPrice, deleteTransaction, removeCategorySaveItems, migrateItem,
-    setCategoryPrivacy, getProfileExpenses, getAllExpenses, getProfileCategories
+    setCategoryPrivacy, getProfileExpenses, getAllExpenses, getProfileCategories,getCategoryItems
 } from "./profile.model.js";
 
 
@@ -242,5 +242,15 @@ export async function getAccautExpenses(req, res) {
             message: "Your accaunt expenses",
             expenses: expenses
         });
+    }
+}
+export async function getItems(req, res) {
+    const { username, profileName, categoryName } = req.body;
+    try {
+        const items = await getCategoryItems(username, profileName, categoryName);
+        res.status(200).json({ items });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to fetch items' });
     }
 }
