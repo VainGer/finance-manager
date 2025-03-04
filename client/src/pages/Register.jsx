@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-
+import Header from "../components/Header";
 export default function Register() {
 
     const [username, setUsername] = useState("");
@@ -31,7 +31,8 @@ export default function Register() {
     }
 
     return (
-        <div>
+        <div dir="rtl">
+            <Header />
             <h1>Register</h1>
             <form onSubmit={register}>
                 <label>Username</label>

@@ -52,10 +52,10 @@ export default function SelectProfile({ username }) {
     return (
         <div className="grid text-center w-max m-auto align-middle border-1 *:border-1">
             {profiles.length > 0 ? (
-                <div className='*:border-1'>
-                    {toggleProfiles && <div>{
+                <div>
+                    {toggleProfiles && <div className='grid *:border-1'>{
                         profiles.map((profile, index) => (
-                            <button key={index} onClick={(e) => selectProfile(e)}>{profile}</button>
+                            <button className='hover:bg-blue-100 hover:cursor-pointer' key={index} onClick={(e) => selectProfile(e)}>{profile}</button>
                         ))}
                     </div>
                     }

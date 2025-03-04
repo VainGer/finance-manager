@@ -4,6 +4,7 @@ import AccountExpenses from '../components/AccountExpenses';
 import ProfileExpenses from '../components/ProfileExpenses';
 import AddCategory from '../components/AddCategory';
 import EditCategories from '../components/EditCategories';
+import Header from '../components/Header';
 import AddTransact from '../components/AddTransact';
 
 export default function Dashboard() {
@@ -20,6 +21,7 @@ export default function Dashboard() {
 
     return (<>
         <div dir='rtl'>
+            <Header username={username} profileName={profileName}></Header>
             <div className='grid place-items-center'>
                 <h1>Dashboard</h1>
                 <h2>Hi, {username}! Welcome to your dashboard</h2>
