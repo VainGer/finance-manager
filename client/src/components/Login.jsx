@@ -27,9 +27,9 @@ export default function Login() {
     }
 
     return (
-        <form className='grid grid-cols-3 *:border-1 gap-2' onSubmit={login}>
-            <input type="text" placeholder="שם משתמש" onChange={(e) => setUsername(e.target.value)} />
-            <input type="password" placeholder="סיסמה" onChange={(e) => setPassword(e.target.value)} />
+        <form className='grid grid-cols-3 *:border-1 gap-2 w-full' onSubmit={login}>
+            <input className='text-center' type="text" placeholder="שם משתמש" onChange={(e) => setUsername(e.target.value)} />
+            <input className='text-center' type="password" placeholder="סיסמה" onChange={(e) => setPassword(e.target.value)} />
             <button type="submit">כניסה</button>
         </form>
     );

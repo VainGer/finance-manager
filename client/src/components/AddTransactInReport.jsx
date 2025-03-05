@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import ItemsToSelcet from "./ItemsToSelcet";
 
-export default function AddTransact({ username, profileName, category }) {
-    const [item, setItem] = useState('');
+export default function AddTransactInReport({ username, profileName, category, item }) {
     const [price, setPrice] = useState('');
     const [date, setDate] = useState('');
 
@@ -28,14 +27,9 @@ export default function AddTransact({ username, profileName, category }) {
         }
     }
 
-    function onSelectedOpt(opt) {
-        setItem(opt);
-    }
 
     return (
         <form className="grid grid-cols-2 border-1 *:border-1" onSubmit={addTransaction}>
-            <label>פריט:</label>
-            <ItemsToSelcet username={username} profileName={profileName} category={category} onSelectedOpt={onSelectedOpt}></ItemsToSelcet>
 
             <label>מחיר:</label>
             <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />

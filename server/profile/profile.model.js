@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "fs/promises";
 
-
+//in use
 export async function addCategory(username, profileName, category, privacy = false) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -23,7 +23,7 @@ export async function addCategory(username, profileName, category, privacy = fal
     }
 }
 
-
+//in use
 export async function removeCategory(username, profileName, category) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -43,16 +43,16 @@ export async function removeCategory(username, profileName, category) {
 }
 
 
-
-export async function removeCategorySaveItems(username, profileName, category) {
+//in use
+export async function removeCategorySaveItems(username, profileName, category, nextCat) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName);
         let currentCat = profile.expenses.categories.find(cat => cat.categoryName === category);
         if (currentCat) {
-            let uncategorized = profile.expenses.categories[0];
-            currentCat.items.forEach(item => uncategorized.items.push(item));
+            let nextCategory = profile.expenses.categories.find(c => c.categoryName === nextCat);
+            currentCat.items.forEach(item => nextCategory.items.push(item));
             profile.expenses.categories = profile.expenses.categories.filter(cat => cat.categoryName !== category);
             await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
             return true;
@@ -64,7 +64,7 @@ export async function removeCategorySaveItems(username, profileName, category) {
     }
 }
 
-
+//in use
 export async function renameCategory(username, profileName, category, newName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -83,7 +83,7 @@ export async function renameCategory(username, profileName, category, newName) {
     }
 }
 
-
+//in use
 export async function addItemToCategory(username, profileName, category, item) {
     try {
         let jItem = { iName: item, transactions: [] }
@@ -108,7 +108,7 @@ export async function addItemToCategory(username, profileName, category, item) {
     }
 }
 
-
+//in use
 export async function setCategoryPrivacy(username, profileName, category, privacy) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -124,7 +124,7 @@ export async function setCategoryPrivacy(username, profileName, category, privac
     }
 }
 
-
+//TODO
 export async function renameItemInCategory(username, profileName, category, item, newName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -148,6 +148,7 @@ export async function renameItemInCategory(username, profileName, category, item
     }
 }
 
+//TODO
 export async function migrateItem(username, profileName, currentCat, nextCat, itemName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -166,7 +167,7 @@ export async function migrateItem(username, profileName, currentCat, nextCat, it
 }
 
 
-
+//TODO
 export async function removeItemFromCategory(username, profileName, category, item) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -190,7 +191,7 @@ export async function removeItemFromCategory(username, profileName, category, it
     }
 }
 
-
+//in use
 export async function addTransaction(username, profileName, category, item, price, date) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -245,7 +246,7 @@ export async function editTransPrice(username, profileName, category, item, id, 
     }
 }
 
-
+//in use
 export async function deleteTransaction(username, profileName, category, item, id) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -262,7 +263,10 @@ export async function deleteTransaction(username, profileName, category, item, i
             return false;
         }
         let initLength = itemData.transactions.length;
-        itemData.transactions = itemData.transactions.filter(d => d.id !== id);
+        console.log(itemData.transactions);
+        console.log(id);
+        itemData.transactions = itemData.transactions.filter(t => t.id != id);
+        console.log(itemData.transactions);
         if (initLength > itemData.transactions.length) {
             data.globalID--;
             await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
@@ -280,9 +284,7 @@ export async function getProfileCategories(username, profileName) {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName);
-        let categories = [];
-        profile.expenses.categories.forEach(c => categories.push(c.categoryName));
-        return categories;
+        return profile.expenses.categories;
     } catch (error) {
         console.log(error);
         return [];
@@ -297,7 +299,7 @@ export async function getProfileExpenses(username, profileName) {
         let profile = data.profiles.find(p => p.pName === profileName);
         profile.expenses.categories.forEach(c => {
             c.items.forEach(i => {
-                i.transactions.forEach(t => t.related = "הוצאה בפרופיל שלי");
+                i.transactions.forEach(t => t.related = "פרופיל שלי");
             });
         });
         return profile.expenses.categories;
@@ -321,7 +323,7 @@ export async function getAllExpenses(username, profileName) {
             let categories = p.expenses.categories;
             categories.forEach(c => {
                 c.items.forEach(i => {
-                    i.transactions.forEach(t=> t.related = p.pName);
+                    i.transactions.forEach(t => t.related = p.pName);
                 })
                 if (!c.private) {
                     expenses.forEach(e => {

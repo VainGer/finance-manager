@@ -36,13 +36,13 @@ export default function AccountExpenses({ username, profileName }) {
     }, [username, profileName]);
 
     return (
-        <div className="w-max">
+        <div className="w-max m-auto">
             {accExpenses.map((category, index) => {
                 return (
                     <div key={index}>
                         <h3>קטגוריה: {category.categoryName}</h3>
                         <h4>בעלי עסק:</h4>
-                        <div >
+                        <div>
                             {category.items.map((item, index) => {
                                 return (<div key={index}>
                                     <h5>שם בעל העסק: {item.iName}</h5>

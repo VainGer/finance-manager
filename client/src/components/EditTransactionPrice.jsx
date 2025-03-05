@@ -1,60 +1,7 @@
 import { useState, useEffect } from 'react';
 
-export default function EditTransactionPrice({ username, profileName }) {
-    const [category, setCategory] = useState('');
-    const [transaction, setTransaction] = useState('');
-    const [newPrice, setNewPrice] = useState('');
-    const [categories, setCategories] = useState([]);
-    const [transactions, setTransactions] = useState([]);
-
-    // Fetch categories when the component mounts
-    useEffect(() => {
-        async function fetchCategories() {
-            try {
-                let response = await fetch('http://localhost:5500/api/profile/prof_categories', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, profileName })
-                });
-                let data = await response.json();
-                if (response.ok) {
-                    setCategories(data.categories);
-                } else {
-                    console.log(data.message);
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        fetchCategories();
-    }, [username, profileName]);
-
-    useEffect(() => {
-        async function fetchTransactions() {
-            if (category) {
-                try {
-                    let response = await fetch('http://localhost:5500/api/profile/getItems', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ username, profileName, categoryName: category })
-                    });
-                    let data = await response.json();
-                    if (response.ok) {
-                        setTransactions(data.items);
-                    } else {
-                        console.log(data.message);
-                    }
-                } catch (error) {
-                    console.log(error);
-                }
-            }
-        }
-        fetchTransactions();
-    }, [category, username, profileName]);
+export default function EditTransactionPrice({ username, profileName, category, item, id }) {
+    
 
     async function editTransactionPrice(e) {
         e.preventDefault();
@@ -64,13 +11,13 @@ export default function EditTransactionPrice({ username, profileName }) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, profileName, category, transaction, newPrice })
+                body: JSON.stringify({ username, profileName, category, item, id, newPrice })
             });
             let data = await response.json();
             if (response.ok) {
                 console.log(`Transaction ${transaction} price updated to ${newPrice} successfully`);
-                setTransaction(''); 
-                setNewPrice(''); 
+                setTransaction('');
+                setNewPrice('');
             } else {
                 console.log(data.message);
             }

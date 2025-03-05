@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 
-export default function GetCats({ username, profileName, onCategoriesFetched }) {
+export default function GetCats({ username, profileName, onCategoryClick }) {
     const [categories, setCategories] = useState([]);
 
-    // Fetch categories when the component mounts
     useEffect(() => {
         async function fetchCategories() {
             try {
@@ -16,10 +15,7 @@ export default function GetCats({ username, profileName, onCategoriesFetched }) 
                 });
                 let data = await response.json();
                 if (response.ok) {
-                    setCategories(data.categories);
-                    if (onCategoriesFetched) {
-                        onCategoriesFetched(data.categories);
-                    }
+                    setCategories(data.categories)
                 } else {
                     console.log(data.message);
                 }
@@ -28,15 +24,14 @@ export default function GetCats({ username, profileName, onCategoriesFetched }) 
             }
         }
         fetchCategories();
-    }, [username, profileName, onCategoriesFetched]);
+    }, [username, profileName]);
 
     return (
         <div>
-            <h2>קטגוריות</h2>
             {categories.length > 0 ? (
                 <ul>
                     {categories.map((category, index) => (
-                        <li key={index}>{category}</li>
+                        <li key={index}><button onClick={(e) => onCategoryClick(category.categoryName)}>{category.categoryName}</button></li>
                     ))}
                 </ul>
             ) : (

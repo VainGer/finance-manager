@@ -2,42 +2,42 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import AccountExpenses from '../components/AccountExpenses';
 import ProfileExpenses from '../components/ProfileExpenses';
-import AddCategory from '../components/AddCategory';
-import EditCategories from '../components/EditCategories';
 import Header from '../components/Header';
-import AddTransact from '../components/AddTransact';
+import GetCats from '../components/GetCats';
+import ExpenseEditor from '../components/ExpenseEditor';
 
 export default function Dashboard() {
 
     const location = useLocation();
-    const [username, setUsername] = useState(location.state?.username);
-    const [profileName, setProfileName] = useState(location.state?.profileName);
-    const [parent, setParent] = useState(location.state?.parent);
-    console.log(parent);
+    const username = location.state?.username;
+    const profileName = location.state?.profileName
+    const parent = location.state?.parent;
     const [showAccExpenses, setShowAccExpenses] = useState(false);
     const [showProfExpenses, setShowProfExpenses] = useState(false);
-    const [showAddTransact, setShowAddTransact] = useState(false);
-    const [showAddCategory, setShowAddCategory] = useState(false);
+
 
     return (
-        <div dir='rtl'>
-            <Header username={username} profileName={profileName}></Header>
-            <div className='grid place-items-center'>
-                <h1>Dashboard</h1>
-                <h2>Hi, {username}! Welcome to your dashboard</h2>
-                <h3>Profile: {profileName}</h3>
-                <div className='grid grid-cols-2 w-max gap-2 *:border-1 *:hover:bg-blue-200 *:hover:cursor-pointer'>
-                    <button onClick={(e) => { setShowProfExpenses(!showProfExpenses); setShowAccExpenses(false) }}>הצג הוצאות בפרופיל שלך</button>
-                    <button onClick={(e) => { setShowAccExpenses(!showAccExpenses); setShowProfExpenses(false) }}>הצג הוצאות בכל הפרופילים</button>
+        <div dir='rtl' className='text-center'>
+            <Header username={username} profileName={profileName} parent={parent}></Header>
+            <div className='grid grid-cols-4 w-full mt-4'>
+                <div>
+                    <h2>פאנל עריכה</h2>
+                    <span>בחר קטגוריה</span>
+                    <div>
+                        <ExpenseEditor username={username} profileName={profileName} />
+                    </div>
                 </div>
-                {showAccExpenses && <AccountExpenses username={username} profileName={profileName}></AccountExpenses>}
-                {showProfExpenses && <ProfileExpenses username={username} profileName={profileName}></ProfileExpenses>}
+                <div className='col-span-3 grid mx-auto'>
+                    <div className='*:border-1 *:hover:bg-blue-200 *:hover:cursor-pointer *:w-max *:ms-5'>
+                        {parent ?
+                            (<button onClick={(e) => { setShowProfExpenses(!showProfExpenses); setShowAccExpenses(false) }}>הצג הוצאות בפרופיל שלך</button>) :
+                            (<button className='col-span-2' onClick={(e) => { setShowProfExpenses(!showProfExpenses); setShowAccExpenses(false) }}>הצג הוצאות בפרופיל שלך</button>)}
+                        {parent && (<button onClick={(e) => { setShowAccExpenses(!showAccExpenses); setShowProfExpenses(false) }}>הצג הוצאות בכל הפרופילים</button>)}
+                    </div>
+                    {showAccExpenses && <div><AccountExpenses username={username} profileName={profileName}></AccountExpenses></div>}
+                    {showProfExpenses && <div><ProfileExpenses username={username} profileName={profileName}></ProfileExpenses></div>}
+                </div>
             </div>
-            <button onClick={() => setShowAddCategory(!showAddCategory)}>הוסף קטגוריה</button>
-            {showAddCategory && <AddCategory username={username} profileName={profileName} />}
-            <div><EditCategories username={username} profileName={profileName} /></div>
-            <button onClick={() => setShowAddTransact(!showAddTransact)}>הוסף עסקה</button>
-            {showAddTransact && <AddTransact username={username} profileName={profileName} />}
         </div>
     );
 }

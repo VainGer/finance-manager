@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 
-export default function GetItems({ username, profileName, category, onItemsFetched }) {
+export default function ItemsToSelcet({ username, profileName, category, onSelectedOpt }) {
     const [items, setItems] = useState([]);
 
-    // Fetch items when the component mounts or when category changes
     useEffect(() => {
         async function fetchItems() {
             if (category) {
@@ -18,9 +17,6 @@ export default function GetItems({ username, profileName, category, onItemsFetch
                     let data = await response.json();
                     if (response.ok) {
                         setItems(data.items);
-                        if (onItemsFetched) {
-                            onItemsFetched(data.items);
-                        }
                     } else {
                         console.log(data.message);
                     }
@@ -30,19 +26,18 @@ export default function GetItems({ username, profileName, category, onItemsFetch
             }
         }
         fetchItems();
-    }, [username, profileName, category, onItemsFetched]);
+    }, [username, profileName, category]);
 
     return (
-        <div>
-            <h2>פריטים</h2>
+        <div className='w-full'>
             {items.length > 0 ? (
-                <ul>
+                <select onChange={(e) => onSelectedOpt(e.target.value)} className='w-full'>
+                    <option className='text-center' disabled selected>בחר ערך</option>
                     {items.map((item, index) => (
-                        <li key={index}>{item}</li>
+                        <option className='text-center' key={index}>{item}</option>
                     ))}
-                </ul>
-            ) : (
-                <p>אין פריטים להצגה</p>
+                </select>) : (
+                <option>אין פריטים להצגה</option>
             )}
         </div>
     );

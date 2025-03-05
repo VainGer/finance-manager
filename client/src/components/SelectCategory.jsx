@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
-export default function GetCategories({ username, profileName, onCategoriesFetched }) {
-    const [categories, setCategories] = useState([]); 
+export default function SelectCategory({ username, profileName, onSelectedCategory }) {
+    const [categories, setCategories] = useState([]);
 
     useEffect(() => {
         async function fetchCategories() {
@@ -15,10 +15,7 @@ export default function GetCategories({ username, profileName, onCategoriesFetch
                 });
                 let data = await response.json();
                 if (response.ok) {
-                    setCategories(data.categories);
-                    if (onCategoriesFetched) {
-                        onCategoriesFetched(data.categories);
-                    }
+                    setCategories(data.categories)
                 } else {
                     console.log(data.message);
                 }
@@ -27,16 +24,14 @@ export default function GetCategories({ username, profileName, onCategoriesFetch
             }
         }
         fetchCategories();
-    }, [username, profileName, onCategoriesFetched]);
+    }, [username, profileName]);
 
     return (
-        <div>
-            <h3>קטגוריות</h3>
-            <ul>
-                {categories.map((cat, index) => (
-                    <li key={index}>{cat}</li>
-                ))}
-            </ul>
-        </div>
+        <select onChange={(e) => onSelectedCategory(e.target.value)}>
+            <option className='text-center' selected disabled>בחר קטגוריה</option>
+            {categories.map((cat, index) => (
+                <option className='text-center' key={index}>{cat.categoryName}</option>
+            ))}
+        </select>
     );
 }

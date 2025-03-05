@@ -35,19 +35,11 @@ export default function SelectProfile({ username }) {
         async function fetchProfiles() {
             const profiles = await getProfiles();
             if (profiles) {
-                let profArr = profiles.map((profile) => profile.pName);
-                setProfiles(profArr);
+                setProfiles(profiles);
             }
         }
         fetchProfiles();
     }, [username]);
-
-    function selectProfile(e) {
-        setProfileName(e.target.innerText);
-        setToggleProfiles(false);
-        setToggleAuthProfile(true);
-        console.log('Profile selected:', e.target.innerText); // Debugging statement
-    }
 
     return (
         <div className="grid text-center w-max m-auto align-middle border-1 *:border-1">
@@ -55,11 +47,26 @@ export default function SelectProfile({ username }) {
                 <div>
                     {toggleProfiles && <div className='grid *:border-1'>{
                         profiles.map((profile, index) => (
-                            <button className='hover:bg-blue-100 hover:cursor-pointer' key={index} onClick={(e) => selectProfile(e)}>{profile}</button>
-                        ))}
+                            <button className='hover:bg-blue-100 hover:cursor-pointer' key={index} onClick={(e) => {
+                                setProfileName(e.target.innerText);
+                                setParent(profile.parent)
+                                setToggleAuthProfile(true);
+                                setToggleProfiles(false);
+                                setToggleAddBtn(false);
+                            }}>{profile.pName}</button>
+                        ))
+                    }
                     </div>
                     }
-                    {toggleAuthProfile && <AuthProfile username={username} profileName={profileName} parent={parent} />}
+                    {toggleAuthProfile && <div>
+                        <AuthProfile username={username} profileName={profileName} parent={parent} />
+                        <button onClick={(e) => {
+                            setToggleProfiles(true);
+                            setToggleAddProfiles(false);
+                            setToggleAddBtn(true);
+                            setToggleAuthProfile(false);
+                        }}>לחזרה</button>
+                    </div>}
                     {toggleAddBtn && <button onClick={(e) => {
                         setToggleProfiles(false);
                         setToggleAddProfiles(true);

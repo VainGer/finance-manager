@@ -27,9 +27,9 @@ export default function AddCategory({ username, profileName }) {
             console.log(error);
         }
     }
-    return (<form className='grid w-max text-center' onSubmit={addCat}>
-        <label>שם קטגוריה</label>
-        <input className='border 2 border-solid' type="text" onChange={(e) => setCategory(e.target.value)} />
+    return (
+    <form className='grid w-max text-center' onSubmit={addCat}>
+        <input className='border 2 border-solid text-center' placeholder='הזן שם קטגוריה' type="text" onChange={(e) => setCategory(e.target.value)} />
         <label >קטגוריה פרטית</label>
         <input type="checkbox" onChange={(e)=> setPrivate(e.target.checked)}/>
         <input type="submit" value="הוסף קטגוריה" />
