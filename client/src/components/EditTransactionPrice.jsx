@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 
-export default function EditTransactionPrice({ username, profileName, category, item, id }) {
-    
+export default function EditTransactionPrice({ username, profileName, category, item, id, onTransactionUpdate }) {
+
+    const [newPrice, setNewPrice] = useState();
 
     async function editTransactionPrice(e) {
         e.preventDefault();
@@ -15,9 +16,8 @@ export default function EditTransactionPrice({ username, profileName, category, 
             });
             let data = await response.json();
             if (response.ok) {
-                console.log(`Transaction ${transaction} price updated to ${newPrice} successfully`);
-                setTransaction('');
-                setNewPrice('');
+                console.log(`Transaction ${id} price updated to ${newPrice} successfully`);
+                onTransactionUpdate();
             } else {
                 console.log(data.message);
             }
@@ -27,23 +27,8 @@ export default function EditTransactionPrice({ username, profileName, category, 
     }
 
     return (
-        <form className="border-1" onSubmit={editTransactionPrice}>
-            <label>בחר קטגוריה:</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                <option value="">בחר קטגוריה</option>
-                {categories.map((cat, index) => (
-                    <option key={index} value={cat}>{cat}</option>
-                ))}
-            </select>
-            <label>בחר עסקה:</label>
-            <select value={transaction} onChange={(e) => setTransaction(e.target.value)}>
-                <option value="">בחר עסקה</option>
-                {transactions.map((trans, index) => (
-                    <option key={index} value={trans}>{trans}</option>
-                ))}
-            </select>
-            <label>מחיר חדש:</label>
-            <input type="number" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} />
+        <form className="border-1 grid *:border-1" onSubmit={editTransactionPrice}>
+            <input type="number" onChange={(e) => setNewPrice(e.target.value)} />
             <input type="submit" value="עדכן מחיר" />
         </form>
     );

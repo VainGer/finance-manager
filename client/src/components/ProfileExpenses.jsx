@@ -40,6 +40,15 @@ export default function ProfileExpenses({ username, profileName }) {
         fetchExpenses();
     }, [username, profileName]);
 
+    async function refreshExpenses() {
+        const updatedExpenses = await getAccExpenses();
+        setAccExpenses(updatedExpenses);
+    }
+
+    useEffect(() => {
+        refreshExpenses();
+    }, [username, profileName]);
+
 
     return (
         <div className="w-max m-auto">
@@ -94,13 +103,20 @@ export default function ProfileExpenses({ username, profileName }) {
                                             </tr>
                                         </tbody>
                                     </table>
-                                    {showAddTransact && <AddTransactInReport username={username} profileName={profileName} category={choosenCategory} item={choosenItem}></AddTransactInReport>}
+                                    {showAddTransact && <AddTransactInReport username={username} profileName={profileName}
+                                        category={choosenCategory} item={choosenItem} onTransactionUpdate={refreshExpenses} />}
                                 </div>);
                             })}</div>
                     </div>
                 )
             })}
-            <TransactionEditor username={username} profileName={profileName} category={choosenCategory} item={choosenItem} id={id} />
+            <TransactionEditor
+                username={username}
+                profileName={profileName}
+                category={choosenCategory}
+                item={choosenItem}
+                id={id}
+                onTransactionUpdate={refreshExpenses} />
         </div>
     )
 }

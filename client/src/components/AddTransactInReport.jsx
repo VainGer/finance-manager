@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ItemsToSelcet from "./ItemsToSelcet";
 
-export default function AddTransactInReport({ username, profileName, category, item }) {
+export default function AddTransactInReport({ username, profileName, category, item, onTransactionUpdate }) {
     const [price, setPrice] = useState('');
     const [date, setDate] = useState('');
 
@@ -18,6 +18,7 @@ export default function AddTransactInReport({ username, profileName, category, i
             let data = await response.json();
             if (response.ok) {
                 console.log(data.message);
+                onTransactionUpdate();
             } else {
                 console.log(data.message);
                 // TODO: Handle error

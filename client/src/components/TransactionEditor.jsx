@@ -1,14 +1,25 @@
 import { useState, useEffect } from "react";
 import DeleteTransact from "./DeleteTransact";
-export default function TransactionEditor({ username, profileName, category, item, id }) {
+import EditTransactionPrice from "./EditTransactionPrice";
+export default function TransactionEditor({ username, profileName, category, item, id, onTransactionUpdate }) {
 
     return (
-        <div className="grid">
-            <div>
-                
-                <DeleteTransact username={username} profileName={profileName} category={category} item={item} id={id} />
-                <button>אשר שינויים</button>
-            </div>
+        <div>
+            <EditTransactionPrice
+                username={username}
+                profileName={profileName}
+                category={category}
+                item={item}
+                id={id}
+                onTransactionUpdate={onTransactionUpdate} />
+            <DeleteTransact username={username}
+                profileName={profileName}
+                category={category}
+                item={item}
+                id={id}
+                onTransactionUpdate={onTransactionUpdate} />
+            <button>אשר שינויים</button>
         </div>
+
     )
 }

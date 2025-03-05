@@ -234,7 +234,7 @@ export async function editTransPrice(username, profileName, category, item, id, 
             console.log("No such item")
             return false;
         }
-        let transaction = itemData.transactions.find(d => d.id === id);
+        let transaction = itemData.transactions.find(d => d.id == id);
         if (transaction) {
             transaction.price = newPrice;
             await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
@@ -263,10 +263,7 @@ export async function deleteTransaction(username, profileName, category, item, i
             return false;
         }
         let initLength = itemData.transactions.length;
-        console.log(itemData.transactions);
-        console.log(id);
         itemData.transactions = itemData.transactions.filter(t => t.id != id);
-        console.log(itemData.transactions);
         if (initLength > itemData.transactions.length) {
             data.globalID--;
             await writeFile(`./data/users/${username}.json`, JSON.stringify(data));

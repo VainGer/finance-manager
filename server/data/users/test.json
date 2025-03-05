@@ -1,1 +1,1 @@
-{"username":"test","globalID":6,"profiles":[{"pName":"p1_test","parent":true,"pin":"1234","expenses":{"categories":[{"categoryName":"testCat1","private":true,"items":[{"iName":"test","transactions":[{"id":5,"price":"5","date":"2025-03-05"}]}]}]}}]}
+{"username":"test","globalID":6,"profiles":[{"pName":"p1_test","parent":true,"pin":"1234","expenses":{"categories":[{"categoryName":"testCat1","private":true,"items":[{"iName":"test","transactions":[{"id":5,"price":"12345","date":"2025-03-05"}]}]}]}}]}
