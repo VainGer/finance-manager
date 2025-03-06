@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import GetCats from './GetCats';
 import AddTransact from './AddTransact';
 import AddItem from './AddItem';
@@ -8,7 +8,7 @@ import RemoveCategoryMoveItem from './RemoveCategoryMoveItem';
 import RenameCategory from './RenameCategory';
 import SetPrivacy from './SetPrivacy';
 
-export default function ExpenseEditor({ username, profileName }) {
+export default function ExpenseEditor({ username, profileName, refreshExpenses }) {
     const [chosenCategory, setChosenCategory] = useState("");
     const [showCategories, setShowCategories] = useState(true);
     const [showEditMenu, setShowEditMenu] = useState(false);
@@ -45,14 +45,14 @@ export default function ExpenseEditor({ username, profileName }) {
             {showCategories && !showAddCategory && (
                 <GetCats username={username} profileName={profileName} onCategoryClick={onCategoryClick} />
             )}
-            
+
             {showAddCategory && (
                 <div>
-                    <AddCategory username={username} profileName={profileName} />
+                    <AddCategory username={username} profileName={profileName} refreshExpenses={refreshExpenses} />
                     <button className='px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition' onClick={back}>חזרה</button>
                 </div>
             )}
-            
+
             {showEditMenu && (
                 <div className='grid gap-4'>
                     <button className='px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition' onClick={() => {
@@ -62,9 +62,9 @@ export default function ExpenseEditor({ username, profileName }) {
                         הוסף עסקה
                     </button>
                     {showAddTransact && (
-                        <AddTransact username={username} profileName={profileName} category={chosenCategory} />
+                        <AddTransact username={username} profileName={profileName} category={chosenCategory} refreshExpenses={refreshExpenses} />
                     )}
-                    
+
                     <button className='px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition' onClick={() => {
                         setShowAddItem(!showAddItem);
                         setShowAddTransact(false);
@@ -72,13 +72,13 @@ export default function ExpenseEditor({ username, profileName }) {
                         הוסף פריט לקטגוריה
                     </button>
                     {showAddItem && (
-                        <AddItem username={username} profileName={profileName} category={chosenCategory} />
+                        <AddItem username={username} profileName={profileName} category={chosenCategory} refreshExpenses={refreshExpenses} />
                     )}
-                    
-                    <RemoveCategory username={username} profileName={profileName} />
-                    <RemoveCategoryMoveItem username={username} profileName={profileName} category={chosenCategory} />
-                    <RenameCategory username={username} profileName={profileName} category={chosenCategory} />
-                    <SetPrivacy username={username} profileName={profileName} category={chosenCategory} />
+
+                    <RemoveCategory username={username} profileName={profileName} category={chosenCategory} refreshExpenses={refreshExpenses} />
+                    <RemoveCategoryMoveItem username={username} profileName={profileName} category={chosenCategory} refreshExpenses={refreshExpenses} />
+                    <RenameCategory username={username} profileName={profileName} category={chosenCategory} refreshExpenses={refreshExpenses} />
+                    <SetPrivacy username={username} profileName={profileName} category={chosenCategory} refreshExpenses={refreshExpenses} />
                     <button className='px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition' onClick={back}>חזרה</button>
                 </div>
             )}

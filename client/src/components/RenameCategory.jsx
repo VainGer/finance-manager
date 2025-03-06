@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export default function RenameCategory({username, profileName, category}) {
+export default function RenameCategory({ username, profileName, category, refreshExpenses }) {
 
     const [newName, setNewName] = useState('');
 
@@ -17,6 +17,7 @@ export default function RenameCategory({username, profileName, category}) {
             let data = await response.json();
             if (response.ok) {
                 console.log(data.message);
+                refreshExpenses();
             }
             else {
                 console.log(data.message);

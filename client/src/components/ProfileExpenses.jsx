@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import AddTransactInReport from "./AddTransactInReport";
 import TransactionEditor from "./TransactionEditor";
 
-export default function ProfileExpenses({ username, profileName }) {
+export default function ProfileExpenses({ username, profileName, refreshExpenses }) {
     const [accExpenses, setAccExpenses] = useState([]);
     const [showAddTransact, setShowAddTransact] = useState(false);
     const [editTransaction, setEditTransaction] = useState(null);
@@ -14,9 +14,11 @@ export default function ProfileExpenses({ username, profileName }) {
     const [showTransactionEditor, SetShowTransactionEditor] = useState(false);
 
     function closeEditor() {
-        if (showTransactionEditor) {
-            SetShowTransactionEditor(false);
-        }
+        SetShowTransactionEditor(false);
+    }
+
+    function closeAddTransact() {
+        setShowAddTransact(false);
     }
 
     async function getAccExpenses() {
@@ -85,7 +87,7 @@ export default function ProfileExpenses({ username, profileName }) {
                                                 {sortedTransactions.map((transactions, index) => {
                                                     const isEditing = editTransaction === transactions.id;
                                                     return (
-                                                        <>
+                                                        < >
                                                             <tr key={index} className="border-1 *:border-1">
                                                                 <td className="border-1">{transactions.date}</td>
                                                                 <td className="border-1">{transactions.price}</td>
@@ -104,8 +106,8 @@ export default function ProfileExpenses({ username, profileName }) {
                                                                             setPrice(button.dataset.currentprice);
                                                                             setDate(button.dataset.currentdate);
                                                                             SetShowTransactionEditor(true);
-                                                                            console.log(currentDate)
-                                                                            console.log(currentPrice)
+                                                                            console.log(date)
+                                                                            console.log(price)
                                                                         }}>
                                                                         <img src="./src/assets/images/edit.svg" alt="edit icon" />
                                                                     </button>
@@ -142,7 +144,7 @@ export default function ProfileExpenses({ username, profileName }) {
                                             </tbody>
                                         </table>
                                         {showAddTransact && <AddTransactInReport username={username} profileName={profileName}
-                                            category={choosenCategory} item={choosenItem} onTransactionUpdate={refreshExpenses} />}
+                                            category={choosenCategory} item={choosenItem} onTransactionUpdate={refreshExpenses} closeAddTransact={closeAddTransact} />}
                                     </div>
                                 );
                             })}

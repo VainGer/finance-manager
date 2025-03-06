@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function AddCategory({ username, profileName }) {
+export default function AddCategory({ username, profileName, refreshExpenses }) {
 
     const [category, setCategory] = useState('');
     const [privateC, setPrivate] = useState(false);
@@ -16,7 +16,7 @@ export default function AddCategory({ username, profileName }) {
                 body: JSON.stringify({ username, profileName, category, privacy: privateC })
             });
             if (response.ok) {
-                //TODO
+                refreshExpenses();
             }
             else {
 
@@ -28,10 +28,10 @@ export default function AddCategory({ username, profileName }) {
         }
     }
     return (
-    <form className='grid w-max text-center' onSubmit={addCat}>
-        <input className='border 2 border-solid text-center' placeholder='הזן שם קטגוריה' type="text" onChange={(e) => setCategory(e.target.value)} />
-        <label >קטגוריה פרטית</label>
-        <input type="checkbox" onChange={(e)=> setPrivate(e.target.checked)}/>
-        <input type="submit" value="הוסף קטגוריה" />
-    </form>)
+        <form className='grid w-max text-center *:border-1' onSubmit={addCat}>
+            <input className='border 2 border-solid text-center' placeholder='הזן שם קטגוריה' type="text" onChange={(e) => setCategory(e.target.value)} />
+            <label >קטגוריה פרטית</label>
+            <input type="checkbox" onChange={(e) => setPrivate(e.target.checked)} />
+            <input type="submit" value="הוסף קטגוריה" />
+        </form>)
 }

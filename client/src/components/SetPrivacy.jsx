@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function SetPrivacy({ username, profileName, category }) {
+export default function SetPrivacy({ username, profileName, category, refreshExpenses }) {
     const [privacy, setPrivacy] = useState('');
 
     async function updatePrivacy(e) {
@@ -15,6 +15,7 @@ export default function SetPrivacy({ username, profileName, category }) {
             let data = await response.json();
             if (response.ok) {
                 console.log(`Privacy setting updated to ${privacy}`);
+                refreshExpenses();
             } else {
                 console.log(data.message);
             }

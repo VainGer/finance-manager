@@ -12,24 +12,26 @@ export default function Dashboard() {
     const parent = location.state?.parent;
     const [showAccExpenses, setShowAccExpenses] = useState(false);
     const [showProfExpenses, setShowProfExpenses] = useState(false);
+    const [expensesKey, setExpensesKey] = useState(0);
 
-    useEffect(() => {
-        console.log('Dashboard loaded with:', { username, profileName, parent });
-    }, [username, profileName, parent]);
+
+    async function refreshExpenses() {
+        setExpensesKey((prevKey) => prevKey + 1);
+    }
 
     return (
-        <div dir='rtl' className='text-center'>
+        <div dir='rtl' className='text-center h-full'>
             <Header username={username} profileName={profileName} parent={parent}></Header>
-            <div className='grid grid-cols-4 w-full mt-4'>
-                <div>
+            <div className='grid grid-cols-4 w-full h-full '>
+                <div className='h-full'>
                     <h2>פאנל עריכה</h2>
                     <span>בחר קטגוריה</span>
                     <div>
-                        <ExpenseEditor username={username} profileName={profileName} />
+                        <ExpenseEditor username={username} profileName={profileName} refreshExpenses={refreshExpenses} />
                     </div>
                 </div>
                 <div className='col-span-3 grid mx-auto'>
-                    <div className='flex gap-4'>
+                    <div className='flex gap-4 h-max'>
                         <button
                             className='px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition'
                             onClick={(e) => {
@@ -53,9 +55,9 @@ export default function Dashboard() {
                             </button>
                         )}
                     </div>
-                    <div className='flex flex-col space-y-4'>
-                        {showAccExpenses && <div><AccountExpenses username={username} profileName={profileName}></AccountExpenses></div>}
-                        {showProfExpenses && <div><ProfileExpenses username={username} profileName={profileName}></ProfileExpenses></div>}
+                    <div className='mt-23'>
+                        {showAccExpenses && <div key={`acc-${expensesKey}`}><AccountExpenses username={username} profileName={profileName}></AccountExpenses></div>}
+                        {showProfExpenses && <div key={`prof-${expensesKey}`}><ProfileExpenses username={username} profileName={profileName}></ProfileExpenses></div>}
                     </div>
                 </div>
             </div>

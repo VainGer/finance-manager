@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ItemsToSelcet from "./ItemsToSelcet";
 
-export default function AddTransactInReport({ username, profileName, category, item, onTransactionUpdate }) {
+export default function AddTransactInReport({ username, profileName, category, item, onTransactionUpdate, closeAddTransact }) {
     const [price, setPrice] = useState('');
     const [date, setDate] = useState('');
 
@@ -19,6 +19,7 @@ export default function AddTransactInReport({ username, profileName, category, i
             if (response.ok) {
                 console.log(data.message);
                 onTransactionUpdate();
+                closeAddTransact();
             } else {
                 console.log(data.message);
                 // TODO: Handle error
@@ -30,15 +31,17 @@ export default function AddTransactInReport({ username, profileName, category, i
 
 
     return (
-        <form className="grid grid-cols-2 border-1 *:border-1" onSubmit={addTransaction}>
-
-            <label>מחיר:</label>
-            <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
-
-            <label>תאריך:</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-
-            <input className="col-span-2" type="submit" value="הוסף עסקה" />
-        </form >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <form className="grid grid-cols-2 bg-white p-6 rounded-lg shadow-lg *:border-1" onSubmit={addTransaction}>
+                <label>מחיר:</label>
+                <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
+                <label>תאריך:</label>
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                {price !== "" && date !== "" ?
+                    (<input className="col-span-2 bg-green-200" type="submit" value="הוסף עסקה" />) :
+                    (<input className="col-span-2 bg-gray-400" type="submit" value="הוסף עסקה" disabled />)}
+                <button className="col-span-2" onClick={(e) => closeAddTransact()}>לחזרה</button>
+            </form >
+        </div>
     );
 }

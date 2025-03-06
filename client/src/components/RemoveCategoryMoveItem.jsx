@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import SelectCategory from './SelectCategory'
 
-export default function RemoveCategoryMoveItem({ username, profileName, category }) {
+export default function RemoveCategoryMoveItem({ username, profileName, category, refreshExpenses }) {
     const [newCategory, setNewCategory] = useState("");
 
     const onSelectedCategory = (opt) => {
@@ -21,6 +21,7 @@ export default function RemoveCategoryMoveItem({ username, profileName, category
             });
             if (response.ok) {
                 console.log(`Category ${category} removed successfully`);
+                refreshExpenses();
             } else {
                 console.log(`Failed to remove category ${category}`);
             }
