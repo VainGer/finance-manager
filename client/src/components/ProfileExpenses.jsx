@@ -8,6 +8,15 @@ export default function ProfileExpenses({ username, profileName }) {
     const [choosenCategory, setChoosenCategory] = useState("");
     const [choosenItem, setChoosenItem] = useState("");
     const [id, setId] = useState("");
+    const [price, setPrice] = useState("");
+    const [date, setDate] = useState("");
+    const [showTransactionEditor, SetShowTransactionEditor] = useState(false);
+
+    function closeEditor() {
+        if (showTransactionEditor) {
+            SetShowTransactionEditor(false);
+        }
+    }
 
     async function getAccExpenses() {
         try {
@@ -71,20 +80,26 @@ export default function ProfileExpenses({ username, profileName }) {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {item.transactions.map((transactions, index) => {
+                                            {item.transactions.map((transaction, index) => {
                                                 return (
                                                     <tr key={index} className="border-1 *:border-1">
-                                                        <td className="border-1">{transactions.date}</td>
-                                                        <td className="border-1">{transactions.price}</td>
+                                                        <td className="border-1">{transaction.date}</td>
+                                                        <td className="border-1">{transaction.price}</td>
                                                         <td>
                                                             <button className="hover:bg-red-300 hover:cursor-pointer"
-                                                                data-cat={category.categoryName} data-item={item.iName} data-id={transactions.id}
+                                                                data-cat={category.categoryName}
+                                                                data-item={item.iName}
+                                                                data-id={transaction.id}
+                                                                data-currentprice={transaction.price}
+                                                                data-currentdate={transaction.date}
                                                                 onClick={(e) => {
                                                                     const button = e.currentTarget;
                                                                     setId(button.dataset.id);
                                                                     setChoosenCategory(button.dataset.cat);
                                                                     setChoosenItem(button.dataset.item);
-                                                                    console.log(choosenCategory, choosenItem, id)
+                                                                    setPrice(button.dataset.currentprice);
+                                                                    setDate(button.dataset.currentdate);
+                                                                    SetShowTransactionEditor(true);
                                                                 }}>
                                                                 <img src="./src/assets/images/edit.svg" alt="edit icon" />
                                                             </button>
@@ -110,13 +125,19 @@ export default function ProfileExpenses({ username, profileName }) {
                     </div>
                 )
             })}
-            <TransactionEditor
-                username={username}
-                profileName={profileName}
-                category={choosenCategory}
-                item={choosenItem}
-                id={id}
-                onTransactionUpdate={refreshExpenses} />
+            {showTransactionEditor &&
+                <TransactionEditor
+                    username={username}
+                    profileName={profileName}
+                    category={choosenCategory}
+                    item={choosenItem}
+                    id={id}
+                    currentPrice={price}
+                    currentDate={date}
+                    onTransactionUpdate={refreshExpenses}
+                    closeEditor={closeEditor}
+                />
+            }
         </div>
     )
 }

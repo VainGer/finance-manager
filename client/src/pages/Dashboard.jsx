@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import AccountExpenses from '../components/AccountExpenses';
 import ProfileExpenses from '../components/ProfileExpenses';
 import Header from '../components/Header';
-import GetCats from '../components/GetCats';
 import ExpenseEditor from '../components/ExpenseEditor';
 
 export default function Dashboard() {

@@ -2,10 +2,11 @@ import {
     addCategory, removeCategory, addItemToCategory,
     addTransaction, renameCategory, removeItemFromCategory, renameItemInCategory,
     editTransPrice, deleteTransaction, removeCategorySaveItems, migrateItem,
-    setCategoryPrivacy, getProfileExpenses, getAllExpenses, getProfileCategories, getCategoryItems
+    setCategoryPrivacy, getProfileExpenses, getAllExpenses,
+    getProfileCategories, getCategoryItems, editTransactionDate
 } from "./profile.model.js";
 
-//in use
+
 export async function addCat(req, res) {
     let { username, profileName, category, privacy } = req.body;
     let added = await addCategory(username, profileName, category, privacy);
@@ -24,7 +25,7 @@ export async function addCat(req, res) {
     }
 }
 
-//in use
+
 export async function removeCat(req, res) {
     let { username, profileName, category } = req.body;
     let removed = await removeCategory(username, profileName, category);
@@ -43,7 +44,7 @@ export async function removeCat(req, res) {
     }
 }
 
-//in use
+
 export async function removeCatSaveItems(req, res) {
     let { username, profileName, category, newCategory } = req.body;
     let removed = await removeCategorySaveItems(username, profileName, category, newCategory);
@@ -62,7 +63,7 @@ export async function removeCatSaveItems(req, res) {
     }
 }
 
-//in use
+
 export async function renameCat(req, res) {
     let { username, profileName, category, newName } = req.body;
     let renamed = await renameCategory(username, profileName, category, newName);
@@ -81,7 +82,7 @@ export async function renameCat(req, res) {
     }
 }
 
-//in use
+
 export async function setPrivacy(req, res) {
     let { username, profileName, category, privacy } = req.body;
     let privacySet = await setCategoryPrivacy(username, profileName, category, privacy);
@@ -96,7 +97,7 @@ export async function setPrivacy(req, res) {
     }
 }
 
-//in use
+
 export async function addItemToCat(req, res) {
     let { username, profileName, category, item } = req.body;
     let added = await addItemToCategory(username, profileName, category, item);
@@ -115,7 +116,7 @@ export async function addItemToCat(req, res) {
     };
 }
 
-//TODO
+
 export async function renameItem(req, res) {
     let { username, profileName, category, item, newName } = req.body;
     let renamed = await renameItemInCategory(username, profileName, category, item, newName);
@@ -127,7 +128,7 @@ export async function renameItem(req, res) {
     }
 }
 
-//TODO
+
 export async function removeItem(req, res) {
     let { username, profileName, category, item } = req.body;
     let removed = await removeItemFromCategory(username, profileName, category, item);
@@ -138,7 +139,7 @@ export async function removeItem(req, res) {
     }
 }
 
-//TODO
+
 export async function moveItem(req, res) {
     let { username, profileName, currentCat, nextCat, itemName } = req.body;
     let moved = await migrateItem(username, profileName, currentCat, nextCat, itemName);
@@ -150,7 +151,7 @@ export async function moveItem(req, res) {
 }
 
 
-//in use
+
 export async function addTransact(req, res) {
     let { username, profileName, category, item, price, date } = req.body;
     let added = await addTransaction(username, profileName, category, item, price, date);
@@ -169,22 +170,35 @@ export async function addTransact(req, res) {
     }
 }
 
-//TODO
+
 export async function editTransactionPrice(req, res) {
     let { username, profileName, category, item, id, newPrice } = req.body;
     let edited = await editTransPrice(username, profileName, category, item, id, newPrice);
     if (edited) {
         res.status(200).json({
-            message: "transaction price was edited"
+            message: "transaction price was updated"
         });
     } else {
         res.status(401).json({
-            message: "transaction price edit failed"
+            message: "transaction price update failed"
         });
     }
 }
 
-//in use
+export async function editTransDate(req, res) {
+    let { username, profileName, category, item, id, newDate } = req.body;
+    let edited = await editTransactionDate(username, profileName, category, item, id, newDate);
+    if (edited) {
+        res.status(200).json({
+            message: "transaction date was updated"
+        });
+    } else {
+        res.status(401).json({
+            message: "transaction date update failed"
+        });
+    }
+}
+
 export async function deleteTransact(req, res) {
     let { username, profileName, category, item, id } = req.body;
     let delted = await deleteTransaction(username, profileName, category, item, id);
@@ -199,7 +213,7 @@ export async function deleteTransact(req, res) {
     }
 }
 
-//in use
+
 export async function getCats(req, res) {
     let { username, profileName } = req.body;
     let cats = await getProfileCategories(username, profileName);
@@ -216,7 +230,7 @@ export async function getCats(req, res) {
     }
 }
 
-//in use
+
 export async function getProfExpenses(req, res) {
     let { username, profileName } = req.body;
     let expenses = await getProfileExpenses(username, profileName);
@@ -233,7 +247,7 @@ export async function getProfExpenses(req, res) {
     }
 }
 
-//in use
+
 export async function getAccautExpenses(req, res) {
     let { username, profileName } = req.body;
     let expenses = await getAllExpenses(username, profileName);
@@ -250,7 +264,7 @@ export async function getAccautExpenses(req, res) {
     }
 }
 
-//in use
+
 export async function getItems(req, res) {
     const { username, profileName, categoryName } = req.body;
     try {

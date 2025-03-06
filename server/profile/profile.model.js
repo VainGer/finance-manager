@@ -221,6 +221,7 @@ export async function addTransaction(username, profileName, category, item, pric
 
 export async function editTransPrice(username, profileName, category, item, id, newPrice) {
     try {
+        newPrice = Number(newPrice);
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName);
@@ -237,6 +238,33 @@ export async function editTransPrice(username, profileName, category, item, id, 
         let transaction = itemData.transactions.find(d => d.id == id);
         if (transaction) {
             transaction.price = newPrice;
+            await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
+            return true;
+        }
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+export async function editTransactionDate(username, profileName, category, item, id, newDate) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        let cat = profile.expenses.categories.find(c => c.categoryName === category);
+        if (!cat) {
+            console.log("No such category");
+            return false;
+        }
+        let itemData = cat.items.find(i => i.iName === item);
+        if (!itemData) {
+            console.log("No such item")
+            return false;
+        }
+        let transaction = itemData.transactions.find(d => d.id == id);
+        if (transaction) {
+            transaction.date = newDate;
             await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
             return true;
         }

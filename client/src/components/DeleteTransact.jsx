@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 
-export default function DeleteTransact({ username, profileName, category, item, id, onTransactionUpdate }) {
+export default function DeleteTransact({ username, profileName, category, item, id, onTransactionUpdate, closeEditor }) {
 
     async function deleteTransaction(e) {
-        console.log(username, profileName, category, item, id)
         try {
             let response = await fetch('http://localhost:5500/api/profile/delete_spend', {
                 method: 'POST',
@@ -16,6 +15,7 @@ export default function DeleteTransact({ username, profileName, category, item, 
             if (response.ok) {
                 console.log(`Transaction ${id} deleted successfully from category ${category}`);
                 onTransactionUpdate();
+                closeEditor();
             } else {
                 console.log(data.message);
             }
