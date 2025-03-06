@@ -6,14 +6,16 @@ import Header from '../components/Header';
 import ExpenseEditor from '../components/ExpenseEditor';
 
 export default function Dashboard() {
-
     const location = useLocation();
     const username = location.state?.username;
-    const profileName = location.state?.profileName
+    const profileName = location.state?.profileName;
     const parent = location.state?.parent;
     const [showAccExpenses, setShowAccExpenses] = useState(false);
     const [showProfExpenses, setShowProfExpenses] = useState(false);
 
+    useEffect(() => {
+        console.log('Dashboard loaded with:', { username, profileName, parent });
+    }, [username, profileName, parent]);
 
     return (
         <div dir='rtl' className='text-center'>
@@ -27,14 +29,34 @@ export default function Dashboard() {
                     </div>
                 </div>
                 <div className='col-span-3 grid mx-auto'>
-                    <div className='*:border-1 *:hover:bg-blue-200 *:hover:cursor-pointer *:w-max *:ms-5'>
-                        {parent ?
-                            (<button onClick={(e) => { setShowProfExpenses(!showProfExpenses); setShowAccExpenses(false) }}>הצג הוצאות בפרופיל שלך</button>) :
-                            (<button className='col-span-2' onClick={(e) => { setShowProfExpenses(!showProfExpenses); setShowAccExpenses(false) }}>הצג הוצאות בפרופיל שלך</button>)}
-                        {parent && (<button onClick={(e) => { setShowAccExpenses(!showAccExpenses); setShowProfExpenses(false) }}>הצג הוצאות בכל הפרופילים</button>)}
+                    <div className='flex gap-4'>
+                        <button
+                            className='px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition'
+                            onClick={(e) => {
+                                setShowProfExpenses(!showProfExpenses);
+                                setShowAccExpenses(false);
+                                console.log('showProfExpenses:', !showProfExpenses);
+                            }}
+                        >
+                            הצג הוצאות בפרופיל שלך
+                        </button>
+                        {parent && (
+                            <button
+                                className='px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition'
+                                onClick={(e) => {
+                                    setShowAccExpenses(!showAccExpenses);
+                                    setShowProfExpenses(false);
+                                    console.log('showAccExpenses:', !showAccExpenses);
+                                }}
+                            >
+                                הצג הוצאות בכל הפרופילים
+                            </button>
+                        )}
                     </div>
-                    {showAccExpenses && <div><AccountExpenses username={username} profileName={profileName}></AccountExpenses></div>}
-                    {showProfExpenses && <div><ProfileExpenses username={username} profileName={profileName}></ProfileExpenses></div>}
+                    <div className='flex flex-col space-y-4'>
+                        {showAccExpenses && <div><AccountExpenses username={username} profileName={profileName}></AccountExpenses></div>}
+                        {showProfExpenses && <div><ProfileExpenses username={username} profileName={profileName}></ProfileExpenses></div>}
+                    </div>
                 </div>
             </div>
         </div>
