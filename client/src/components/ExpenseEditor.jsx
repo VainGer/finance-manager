@@ -22,7 +22,7 @@ export default function ExpenseEditor({ username, profileName }) {
         setShowEditMenu(true);
     }
 
-    function back(e) {
+    function back() {
         setShowCategories(true);
         setShowAddTransact(false);
         setShowEditMenu(false);
@@ -49,13 +49,13 @@ export default function ExpenseEditor({ username, profileName }) {
             {showAddCategory && (
                 <div>
                     <AddCategory username={username} profileName={profileName} />
-                    <button onClick={back}>חזרה</button>
+                    <button className='px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition' onClick={back}>חזרה</button>
                 </div>
             )}
             
             {showEditMenu && (
                 <div className='grid gap-4'>
-                    <button onClick={() => {
+                    <button className='px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition' onClick={() => {
                         setShowAddTransact(!showAddTransact);
                         setShowAddItem(false);
                     }}>
@@ -65,7 +65,7 @@ export default function ExpenseEditor({ username, profileName }) {
                         <AddTransact username={username} profileName={profileName} category={chosenCategory} />
                     )}
                     
-                    <button onClick={() => {
+                    <button className='px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition' onClick={() => {
                         setShowAddItem(!showAddItem);
                         setShowAddTransact(false);
                     }}>
@@ -79,7 +79,7 @@ export default function ExpenseEditor({ username, profileName }) {
                     <RemoveCategoryMoveItem username={username} profileName={profileName} category={chosenCategory} />
                     <RenameCategory username={username} profileName={profileName} category={chosenCategory} />
                     <SetPrivacy username={username} profileName={profileName} category={chosenCategory} />
-                    <button onClick={back}>חזרה</button>
+                    <button className='px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition' onClick={back}>חזרה</button>
                 </div>
             )}
         </div>
