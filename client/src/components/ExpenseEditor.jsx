@@ -1,12 +1,13 @@
-import { useState, useEffect, use } from 'react';
+import { useState } from 'react';
 import GetCats from './GetCats';
-import AddTransact from './AddTransact'
+import AddTransact from './AddTransact';
 import AddItem from './AddItem';
-import AddCategory from './AddCategory'
+import AddCategory from './AddCategory';
 import RemoveCategory from './RemoveCategory';
 import RemoveCategoryMoveItem from './RemoveCategoryMoveItem';
 import RenameCategory from './RenameCategory';
 import SetPrivacy from './SetPrivacy';
+
 export default function ExpenseEditor({ username, profileName }) {
     const [chosenCategory, setChosenCategory] = useState("");
     const [showCategories, setShowCategories] = useState(true);
@@ -30,34 +31,57 @@ export default function ExpenseEditor({ username, profileName }) {
     }
 
     return (
-        <div className='grid'>
-            <button onClick={(e) => {
-                setShowAddTransact(true);
-                setShowAddItem(false);
-                setShowAddCategory(true);
-                setShowCategories(false);
-            }}>הוסף קטגוריה</button>
-            {showCategories && <GetCats username={username} profileName={profileName} onCategoryClick={onCategoryClick} />}
-            {showEditMenu && <div className='grid'>
-                <button onClick={(e) => {
-                    setShowAddTransact(true);
-                    setShowAddItem(false);
-                    setShowAddCategory(false);
-                }} > הוסף עסקה</button>
-                {showAddTransact && <AddTransact username={username} profileName={profileName} category={chosenCategory}></AddTransact>}
-                <button onClick={(e) => {
-                    setShowAddTransact(false);
-                    setShowAddItem(true);
-                    setShowAddCategory(false);
-                }}>הוסף פריט לקטגוריה</button>
-                {showAddItem && <AddItem username={username} profileName={profileName} category={chosenCategory}></AddItem>}
-                <RemoveCategory username={username} profileName={profileName} />
-                <RemoveCategoryMoveItem username={username} profileName={profileName} category={chosenCategory}></RemoveCategoryMoveItem>
-                {showAddCategory && <AddCategory username={username} profileName={profileName} />}
-                {<RenameCategory username={username} profileName={profileName} category={chosenCategory} />}
-                {<SetPrivacy username={username} profileName={profileName} category={chosenCategory} />}
-                <button onClick={(e) => back(e)}>חזרה</button>
-            </div >}
-        </div >
-    )
+        <div className='grid gap-4'>
+            <button
+                className='px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition'
+                onClick={() => {
+                    setShowAddCategory(!showAddCategory);
+                    setShowCategories(!showCategories);
+                }}
+            >
+                הוסף קטגוריה
+            </button>
+            {showCategories && !showAddCategory && <h2>הקטגוריות שלך:</h2>}
+            {showCategories && !showAddCategory && (
+                <GetCats username={username} profileName={profileName} onCategoryClick={onCategoryClick} />
+            )}
+            
+            {showAddCategory && (
+                <div>
+                    <AddCategory username={username} profileName={profileName} />
+                    <button onClick={back}>חזרה</button>
+                </div>
+            )}
+            
+            {showEditMenu && (
+                <div className='grid gap-4'>
+                    <button onClick={() => {
+                        setShowAddTransact(!showAddTransact);
+                        setShowAddItem(false);
+                    }}>
+                        הוסף עסקה
+                    </button>
+                    {showAddTransact && (
+                        <AddTransact username={username} profileName={profileName} category={chosenCategory} />
+                    )}
+                    
+                    <button onClick={() => {
+                        setShowAddItem(!showAddItem);
+                        setShowAddTransact(false);
+                    }}>
+                        הוסף פריט לקטגוריה
+                    </button>
+                    {showAddItem && (
+                        <AddItem username={username} profileName={profileName} category={chosenCategory} />
+                    )}
+                    
+                    <RemoveCategory username={username} profileName={profileName} />
+                    <RemoveCategoryMoveItem username={username} profileName={profileName} category={chosenCategory} />
+                    <RenameCategory username={username} profileName={profileName} category={chosenCategory} />
+                    <SetPrivacy username={username} profileName={profileName} category={chosenCategory} />
+                    <button onClick={back}>חזרה</button>
+                </div>
+            )}
+        </div>
+    );
 }
