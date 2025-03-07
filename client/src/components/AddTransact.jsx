@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ItemsToSelcet from "./ItemsToSelcet";
 
-export default function AddTransact({ username, profileName, category }) {
+export default function AddTransact({ username, profileName, category, refreshExpenses }) {
     const [item, setItem] = useState('');
     const [price, setPrice] = useState('');
     const [date, setDate] = useState('');
@@ -18,6 +18,7 @@ export default function AddTransact({ username, profileName, category }) {
             });
             let data = await response.json();
             if (response.ok) {
+                refreshExpenses();
                 console.log(data.message);
             } else {
                 console.log(data.message);
