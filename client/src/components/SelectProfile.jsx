@@ -9,7 +9,7 @@ export default function SelectProfile({ username }) {
     const [toggleAddBtn, setToggleAddBtn] = useState(true);
     const [toggleAuthProfile, setToggleAuthProfile] = useState(false);
     const [profileName, setProfileName] = useState('');
-    const [parent, setParent] = useState(false); // Added parent state
+    const [parent, setParent] = useState(false);
 
     async function getProfiles() {
         try {
@@ -49,7 +49,8 @@ export default function SelectProfile({ username }) {
                         profiles.map((profile, index) => (
                             <button className='hover:bg-blue-100 hover:cursor-pointer' key={index} onClick={(e) => {
                                 setProfileName(e.target.innerText);
-                                setParent(profile.parent)
+                                setParent(profile.parent);
+                                console.log(parent);
                                 setToggleAuthProfile(true);
                                 setToggleProfiles(false);
                                 setToggleAddBtn(false);

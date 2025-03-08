@@ -304,6 +304,7 @@ export async function deleteTransaction(username, profileName, category, item, i
     }
 }
 
+//in use
 export async function getProfileCategories(username, profileName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -316,7 +317,7 @@ export async function getProfileCategories(username, profileName) {
     }
 }
 
-
+//in use
 export async function getProfileExpenses(username, profileName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -330,10 +331,11 @@ export async function getProfileExpenses(username, profileName) {
         return profile.expenses.categories;
     } catch (error) {
         console.log(error);
-        return "Error, could not get profile expenses";
+        return [];
     }
 }
 
+//in use
 export async function getAllExpenses(username, profileName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -373,6 +375,7 @@ export async function getAllExpenses(username, profileName) {
     }
 }
 
+//in use
 export async function getCategoryItems(username, profileName, categoryName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');

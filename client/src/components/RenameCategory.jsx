@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export default function RenameCategory({ username, profileName, category, refreshExpenses }) {
+export default function RenameCategory({ username, profileName, category, refreshExpenses, showConfirm }) {
 
     const [newName, setNewName] = useState('');
 
@@ -18,6 +18,7 @@ export default function RenameCategory({ username, profileName, category, refres
             if (response.ok) {
                 console.log(data.message);
                 refreshExpenses();
+                showConfirm(false);
             }
             else {
                 console.log(data.message);
@@ -31,10 +32,16 @@ export default function RenameCategory({ username, profileName, category, refres
 
 
     return (
-        <form className="border-1" onSubmit={(e) => renameCategory(e)}>
-            <label>שם חדש לקטגוריה:</label>
-            <input type="text" onChange={(e) => setNewName(e.target.value)}></input>
-            <input type="submit" value="שנה שם"></input>
-        </form>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black opacity-50'>
+            <form className='bg-white grid border-blue-600 border-10 rounded-2xl h-50'
+                onSubmit={(e) => renameCategory(e)}>
+                <label>שם חדש לקטגוריה:</label>
+                <input type="text" onChange={(e) => setNewName(e.target.value)}></input>
+                <div className='grid grid-cols-2 *:border-1 *:rounded-2xl mb-6'>
+                    <input type="submit" value="שנה שם"></input>
+                    <input type="button" value="ביטול" onClick={() => showConfirm(false)}></input>
+                </div>
+            </form>
+        </div>
     )
 }

@@ -106,8 +106,6 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
                                                                             setPrice(button.dataset.currentprice);
                                                                             setDate(button.dataset.currentdate);
                                                                             SetShowTransactionEditor(true);
-                                                                            console.log(date)
-                                                                            console.log(price)
                                                                         }}>
                                                                         <img src="./src/assets/images/edit.svg" alt="edit icon" />
                                                                     </button>

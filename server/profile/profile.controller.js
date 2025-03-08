@@ -224,8 +224,8 @@ export async function getCats(req, res) {
         });
 
     } else {
-        res.status(401).json({
-            message: "Categories not found"
+        res.status(404).json({
+            message: "Could not find categories in profile"
         });
     }
 }

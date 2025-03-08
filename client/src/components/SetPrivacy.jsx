@@ -4,6 +4,7 @@ export default function SetPrivacy({ username, profileName, category, refreshExp
     const [privacy, setPrivacy] = useState('');
 
     async function updatePrivacy(e) {
+        e.preventDefault();
         try {
             let response = await fetch('http://localhost:5500/api/profile/set_privacy', {
                 method: 'POST',
@@ -25,9 +26,12 @@ export default function SetPrivacy({ username, profileName, category, refreshExp
     }
 
     return (
-        <div>
-            <label>לסמן קטגוריה כפרטית</label>
-            <input type='checkbox' onChange={(e) => { setPrivacy(e.target.checked); updatePrivacy(e); }}></input>
-        </div>
+        <form onSubmit={updatePrivacy} className='grid w-max mx-auto'>
+            <div>
+                <label className='ml-4'>לסמן קטגוריה כפרטית</label>
+                <input type='checkbox' onChange={(e) => { setPrivacy(e.target.checked); }}></input>
+            </div>
+            <input type="submit" value={"שמור שינוי"} />
+        </form>
     );
 }

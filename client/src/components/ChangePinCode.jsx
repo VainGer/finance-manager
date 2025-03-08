@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-export default function ChangePinCode({ username, profileName }) {
-    const [currentPin, setCurrentPin] = useState('');
+export default function ChangePinCode({ username, profileName, setShowBtns, setShowChangePinCode }) {
+    const [pin, setpin] = useState('');
     const [newPin, setNewPin] = useState('');
     const [confirmNewPin, setConfirmNewPin] = useState('');
 
@@ -17,14 +17,13 @@ export default function ChangePinCode({ username, profileName }) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, profileName, currentPin, newPin })
+                body: JSON.stringify({ username, profileName, pin, newPin })
             });
             let data = await response.json();
             if (response.ok) {
                 console.log('PIN code changed successfully');
-                setCurrentPin('');
-                setNewPin('');
-                setConfirmNewPin('');
+                setShowBtns(true);
+                setShowChangePinCode(false);
             } else {
                 console.log(data.message);
             }
@@ -34,14 +33,17 @@ export default function ChangePinCode({ username, profileName }) {
     }
 
     return (
-        <form className="grid w-max text-center" onSubmit={changePin}>
+        <form className="grid w-max text-center mt-3.5 *:border-1" onSubmit={changePin}>
             <label>קוד סודי נוכחי</label>
-            <input type="password" value={currentPin} onChange={(e) => setCurrentPin(e.target.value)} />
+            <input type="password" value={pin} onChange={(e) => setpin(e.target.value)} />
             <label>קוד סודי חדש</label>
             <input type="password" value={newPin} onChange={(e) => setNewPin(e.target.value)} />
             <label>אשר קוד סודי חדש</label>
             <input type="password" value={confirmNewPin} onChange={(e) => setConfirmNewPin(e.target.value)} />
-            <input type="submit" value="שנה קוד סודי" />
+            <div className="grid grid-cols-2 *:border-1">
+                <input type="button" value="ביטול" onClick={(e) => { setShowChangePinCode(false); setShowBtns(true); }} />
+                <input type="submit" value="שנה קוד סודי" />
+            </div>
         </form>
     );
 }

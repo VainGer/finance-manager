@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 
-export default function RemoveCategory({ username, profileName, category, refreshExpenses }) {
+export default function RemoveCategory({ username, profileName, category, refreshExpenses, showConfirm }) {
 
     async function removeCat(e) {
-        console.log(username, profileName, category)
         try {
             let response = await fetch('http://localhost:5500/api/profile/rem_cat_items', {
                 method: 'POST',
@@ -16,6 +15,7 @@ export default function RemoveCategory({ username, profileName, category, refres
             if (response.ok) {
                 console.log(`Category ${category} removed successfully`);
                 refreshExpenses();
+                showConfirm(false);
             } else {
                 console.log(`Failed to remove category ${category}`);
             }
@@ -25,6 +25,14 @@ export default function RemoveCategory({ username, profileName, category, refres
     }
 
     return (
-        <button onClick={(e) => removeCat(e)}>מחק קטגוריה ואת הפריטים</button>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black opacity-50'>
+            <div className='bg-white grid border-blue-600 border-10 rounded-2xl h-50'>
+                <p className='break-words w-50'>הפעולה תמחק את הקטגוריה ואת הפריטים שבה, לאישור הפעולה לחץ אישור</p>
+                <div className='grid grid-cols-2 *:border-1 *:rounded-2xl mb-6'>
+                    <button onClick={(e) => removeCat(e)}>אישור</button>
+                    <button onClick={(e) => showConfirm(false)}>ביטול</button>
+                </div>
+            </div>
+        </div>
     );
 }

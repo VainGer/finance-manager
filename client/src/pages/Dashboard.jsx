@@ -13,8 +13,6 @@ export default function Dashboard() {
     const [showAccExpenses, setShowAccExpenses] = useState(false);
     const [showProfExpenses, setShowProfExpenses] = useState(false);
     const [expensesKey, setExpensesKey] = useState(0);
-
-
     async function refreshExpenses() {
         setExpensesKey((prevKey) => prevKey + 1);
     }
@@ -26,9 +24,7 @@ export default function Dashboard() {
                 <div className='h-full'>
                     <h2>פאנל עריכה</h2>
                     <span>בחר קטגוריה</span>
-                    <div>
-                        <ExpenseEditor username={username} profileName={profileName} refreshExpenses={refreshExpenses} />
-                    </div>
+                    <ExpenseEditor username={username} profileName={profileName} refreshExpenses={refreshExpenses} />
                 </div>
                 <div className='col-span-3 grid mx-auto'>
                     <div className='flex gap-4 h-max'>
@@ -37,7 +33,6 @@ export default function Dashboard() {
                             onClick={(e) => {
                                 setShowProfExpenses(!showProfExpenses);
                                 setShowAccExpenses(false);
-                                console.log('showProfExpenses:', !showProfExpenses);
                             }}
                         >
                             הצג הוצאות בפרופיל שלך
@@ -48,7 +43,6 @@ export default function Dashboard() {
                                 onClick={(e) => {
                                     setShowAccExpenses(!showAccExpenses);
                                     setShowProfExpenses(false);
-                                    console.log('showAccExpenses:', !showAccExpenses);
                                 }}
                             >
                                 הצג הוצאות בכל הפרופילים

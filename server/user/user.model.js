@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "fs/promises";
 
+//in use
 export async function createProfile(username, profileName, pin, parent) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -17,13 +18,7 @@ export async function createProfile(username, profileName, pin, parent) {
             "parent": parent,
             "pin": pin,
             "expenses": {
-                "categories": [
-                    {
-                        "categoryName": "uncategorized",
-                        "private": false,
-                        "items": []
-                    }
-                ]
+                "categories": []
             }
         };
         data.profiles.push(profile);
@@ -36,11 +31,12 @@ export async function createProfile(username, profileName, pin, parent) {
     }
 }
 
+//in use
 export async function renameProfile(username, profileName, newProfileName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
-        let profile = data.profiles.find(p => p.pName === profileName);
+        let profile = data.profiles.find(p => p.pName == profileName);
         profile.pName = newProfileName;
         await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
         return true;
@@ -50,6 +46,8 @@ export async function renameProfile(username, profileName, newProfileName) {
     }
 }
 
+
+//in use
 export async function changePin(username, profileName, pin, newPin) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -68,6 +66,7 @@ export async function changePin(username, profileName, pin, newPin) {
     }
 }
 
+//in use
 export async function deleteProfile(username, profileName, pin) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -87,6 +86,7 @@ export async function deleteProfile(username, profileName, pin) {
     }
 }
 
+//in use
 export async function openProfile(username, profileName, pin) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -103,6 +103,7 @@ export async function openProfile(username, profileName, pin) {
     }
 }
 
+//in use
 export async function getProfiles(username) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
