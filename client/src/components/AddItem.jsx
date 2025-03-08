@@ -31,7 +31,7 @@ export default function AddItem({ username, profileName, category, refreshExpens
 
 
     return (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black opacity-50'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
             <form onSubmit={addItem} className='bg-white grid border-blue-600 border-10 rounded-2xl h-50 **:h-max items-center'>
                 <input className='text-center' type="text" placeholder='הזן שם פריט' onChange={(e) => setItem(e.target.value)} />
                 <div className='grid grid-cols-2 *:border-1 *:rounded-2xl *:p-2'>

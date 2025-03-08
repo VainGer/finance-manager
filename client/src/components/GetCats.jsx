@@ -27,13 +27,12 @@ export default function GetCats({ username, profileName, onCategoryClick }) {
     }, [username, profileName]);
 
     return (
-        <div>
+        <div className='grid'>
             {categories.length > 0 ? (
-                <ul>
-                    {categories.map((category, index) => (
-                        <li key={index}><button onClick={(e) => onCategoryClick(category.categoryName)}>{category.categoryName}</button></li>
-                    ))}
-                </ul>
+                categories.map((category, index) => (
+                    <button className='hover: cursor-pointer border-1 rounded-md mt-4 bg-blue-500 text-white p-3 hover:bg-blue-600'
+                     key={index} onClick={(e) => onCategoryClick(category.categoryName)}>{category.categoryName}</button>
+                ))
             ) : (
                 <p>אין קטגוריות להצגה</p>
             )}

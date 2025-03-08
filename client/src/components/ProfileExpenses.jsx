@@ -12,6 +12,9 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
     const [price, setPrice] = useState("");
     const [date, setDate] = useState("");
     const [showTransactionEditor, SetShowTransactionEditor] = useState(false);
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [showFilterDates, setShowFilterDates] = useState(false);
 
     function closeEditor() {
         SetShowTransactionEditor(false);
@@ -21,7 +24,7 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
         setShowAddTransact(false);
     }
 
-    async function getAccExpenses() {
+    async function getProfExpenses() {
         try {
             let response = await fetch('http://localhost:5500/api/profile/profile_expenses', {
                 method: 'POST',
@@ -41,9 +44,51 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
         }
     }
 
+
+    async function filterDates(e) {
+        e.preventDefault();
+        let tmpExpenses = await getProfExpenses();
+        let res = [];
+        tmpExpenses.forEach(cat => {
+            res.push({ categoryName: cat.categoryName, items: [] });
+            cat.items.forEach(i => {
+                let category = res.find(c => c.categoryName === cat.categoryName);
+                category.items.push({ iName: i.iName, transactions: [] });
+                i.transactions.forEach(t => {
+                    let item = category.items.find(it => it.iName === i.iName);
+                    let transactionDate = new Date(t.date);
+                    if (transactionDate >= new Date(startDate) && transactionDate <= new Date(endDate)) {
+                        item.transactions.push(t);
+                    }
+                });
+            });
+        });
+        setShowFilterDates(false);
+        setAccExpenses(res);
+    }
+
+    async function resetFilter() {
+        refreshExpenses();
+        let tmpTransactions = await getProfExpenses();
+        console.log(tmpTransactions)
+        let minDate = new Date();
+        let maxDate = new Date(0);
+        tmpTransactions.forEach(cat => {
+            cat.items.forEach(i => {
+                i.transactions.forEach(t => {
+                    let transactionDate = new Date(t.date);
+                    if (transactionDate < minDate) minDate = transactionDate;
+                    if (transactionDate > maxDate) maxDate = transactionDate;
+                });
+            });
+        });
+        setStartDate(minDate.toISOString().slice(0, 10));
+        setEndDate(maxDate.toISOString().slice(0, 10));
+    }
+
     useEffect(() => {
         async function fetchExpenses() {
-            const expnses = await getAccExpenses();
+            const expnses = await getProfExpenses();
             if (expnses) {
                 setAccExpenses(expnses);
             }
@@ -51,10 +96,12 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
         fetchExpenses();
     }, [username, profileName]);
 
+
     async function refreshExpenses() {
-        const updatedExpenses = await getAccExpenses();
+        const updatedExpenses = await getProfExpenses();
         setAccExpenses(updatedExpenses);
     }
+
 
     useEffect(() => {
         refreshExpenses();
@@ -62,6 +109,23 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
 
     return (
         <div className="w-max m-auto">
+            <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mb-4"
+                onClick={(e) => { setShowFilterDates(!showFilterDates); resetFilter(); }}>סינון לפי תאריך</button>
+            {showFilterDates &&
+                <form className="grid fixed inset-0 w-full h-full bg-black/50 items-center justify-center"
+                    onSubmit={(e) => { filterDates(e) }}>
+                    <div className="grid grid-cols-2 *:border-1 bg-white border-6 border-white rounded-md">
+                        <label>בחר תאריך התחלה:</label>
+                        <input type="date" defaultValue={startDate} onChange={(e) => { setStartDate(e.target.value); }}></input>
+                        <label>בחר תאריך סיום:</label>
+                        <input type="date" defaultValue={endDate} onChange={(e) => { setEndDate(e.target.value); }}></input>
+                        <input type="button" value="אפס סינון" onClick={resetFilter} />
+                        <input type="submit" value="חפש" />
+                        <input className="col-span-2"
+                            type="button" value="סגור" onClick={(e) => { setShowFilterDates(false); }} />
+                    </div>
+                </form>
+            }
             {accExpenses.map((category, index) => {
                 return (
                     <div key={index}>

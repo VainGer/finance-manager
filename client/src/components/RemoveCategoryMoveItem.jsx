@@ -32,7 +32,7 @@ export default function RemoveCategoryMoveItem({ username, profileName, category
     }
 
     return (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black opacity-50'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
             <div className='bg-white grid border-blue-600 border-10 rounded-2xl h-50'>
                 <SelectCategory username={username} profileName={profileName} onSelectedCategory={onSelectedCategory} />
                 <button onClick={(e) => removeCat(e)}>מחק קטגוריה והעבר פריטים</button>

@@ -25,7 +25,7 @@ export default function RemoveCategory({ username, profileName, category, refres
     }
 
     return (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black opacity-50'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
             <div className='bg-white grid border-blue-600 border-10 rounded-2xl h-50'>
                 <p className='break-words w-50'>הפעולה תמחק את הקטגוריה ואת הפריטים שבה, לאישור הפעולה לחץ אישור</p>
                 <div className='grid grid-cols-2 *:border-1 *:rounded-2xl mb-6'>

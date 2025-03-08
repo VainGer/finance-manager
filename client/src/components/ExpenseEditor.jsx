@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import GetCats from './GetCats';
-import AddTransact from './AddTransact';
 import AddItem from './AddItem';
 import AddCategory from './AddCategory';
 import RemoveCategory from './RemoveCategory';
@@ -14,7 +13,7 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
     const [showEditMenu, setShowEditMenu] = useState(false);
     const [showAddItem, setShowAddItem] = useState(false);
     const [showAddCategory, setShowAddCategory] = useState(false);
-    const [showAddCategoryBtn, setShowAddCategoryBtn] = useState(false);
+    const [showAddCategoryBtn, setShowAddCategoryBtn] = useState(true);
     const [showDeleteCategory, setShowDeleteCategory] = useState(false);
     const [showDeleteCategoryMoveItem, setShowDeleteCategoryMoveItem] = useState(false);
     const [showRenameCategory, setShowRenameCategory] = useState(false);
@@ -23,6 +22,7 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
         setChosenCategory(category);
         setShowCategories(false);
         setShowEditMenu(true);
+        setShowAddCategoryBtn(false);
     }
 
     function back() {
@@ -32,10 +32,6 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
         setShowAddCategory(false);
         setShowAddCategoryBtn(true);
     }
-
-    useEffect(() => {
-        setShowAddCategoryBtn(!showAddCategoryBtn);
-    }, [chosenCategory])
 
     return (
         <div className='grid gap-4 mt-8'>

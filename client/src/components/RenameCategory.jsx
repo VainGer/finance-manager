@@ -32,7 +32,7 @@ export default function RenameCategory({ username, profileName, category, refres
 
 
     return (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black opacity-50'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
             <form className='bg-white grid border-blue-600 border-10 rounded-2xl h-50'
                 onSubmit={(e) => renameCategory(e)}>
                 <label>שם חדש לקטגוריה:</label>

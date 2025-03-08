@@ -49,7 +49,7 @@ export default function Dashboard() {
                             </button>
                         )}
                     </div>
-                    <div className='mt-23'>
+                    <div className='mt-16'>
                         {showAccExpenses && <div key={`acc-${expensesKey}`}><AccountExpenses username={username} profileName={profileName}></AccountExpenses></div>}
                         {showProfExpenses && <div key={`prof-${expensesKey}`}><ProfileExpenses username={username} profileName={profileName}></ProfileExpenses></div>}
                     </div>
