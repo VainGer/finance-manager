@@ -10,7 +10,7 @@
                 "categories": [
                     {
                         "categoryName": "חשבונות",
-                        "private": false,
+                        "private": "",
                         "items": [
                             {
                                 "iName": "חשמל",

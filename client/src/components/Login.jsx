@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
@@ -27,10 +27,32 @@ export default function Login() {
     }
 
     return (
-        <form className='grid grid-cols-3 *:border-1 gap-2 w-full' onSubmit={login}>
-            <input className='text-center' type="text" placeholder="שם משתמש" onChange={(e) => setUsername(e.target.value)} />
-            <input className='text-center' type="password" placeholder="סיסמה" onChange={(e) => setPassword(e.target.value)} />
-            <button type="submit">כניסה</button>
-        </form>
+        <div className='flex items-center justify-center min-h-screen bg-gray-100'>
+            <div className='w-full max-w-md p-6 bg-white rounded-md shadow-md'>
+                <form className='grid grid-cols-1 gap-4' onSubmit={login}>
+                    <h2 className='text-2xl font-semibold text-center text-blue-500'>התחברות</h2>
+                    <label className='text-gray-700'>שם משתמש</label>
+                    <input 
+                        className='p-2 border border-gray-300 rounded-md text-center' 
+                        type="text" 
+                        placeholder="שם משתמש" 
+                        onChange={(e) => setUsername(e.target.value)} 
+                    />
+                    <label className='text-gray-700'>סיסמה</label>
+                    <input 
+                        className='p-2 border border-gray-300 rounded-md text-center' 
+                        type="password" 
+                        placeholder="סיסמה" 
+                        onChange={(e) => setPassword(e.target.value)} 
+                    />
+                    <button 
+                        className='px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition' 
+                        type="submit"
+                    >
+                        כניסה
+                    </button>
+                </form>
+            </div>
+        </div>
     );
 }
