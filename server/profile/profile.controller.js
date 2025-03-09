@@ -5,7 +5,8 @@ import {
     setCategoryPrivacy, getProfileExpenses, getAllExpenses,
     getProfileCategories, getCategoryItems, editTransactionDate,
     setProfileBudget, setCategoryBudget, getProfileBudget,
-    getCategoryBudget
+    getCategoryBudget, getAllCategoriesBetweenDates,
+    getCategory
 } from "./profile.model.js";
 
 
@@ -326,5 +327,33 @@ export async function getCatBudg(req, res) {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to get budget' });
+    }
+}
+
+export async function getCatsByDates(req, res) {
+    const { username, profileName, startDate, endDate } = req.body;
+    try {
+        const categories = await getAllCategoriesBetweenDates(username, profileName, startDate, endDate);
+        res.status(200).json({
+            message: 'Categories fetched successfully',
+            categories: categories
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to get categories' });
+    }
+}
+
+export async function getCat(req, res) {
+    const { username, profileName, choosenCategory } = req.body;
+    try {
+        const cat = await getCategory(username, profileName, choosenCategory);
+        res.status(200).json({
+            message: 'Category fetched successfully',
+            category: cat
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to get category' });
     }
 }

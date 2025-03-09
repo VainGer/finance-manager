@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import AddTransactInReport from "./AddTransactInReport";
 import TransactionEditor from "./TransactionEditor";
+import GetCats from "./GetCats";
 
-export default function ProfileExpenses({ username, profileName, refreshExpenses, category, budgetStart, budgetEnd }) {
+export default function ProfileExpenses({ username, profileName, refreshExpenses, showFilterDatesBtn }) {
     const [profExpenses, setProfExpenses] = useState([]);
     const [showAddTransact, setShowAddTransact] = useState(false);
     const [editTransaction, setEditTransaction] = useState(null);
@@ -15,6 +16,7 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [showFilterDates, setShowFilterDates] = useState(false);
+    const [showFilterCats, setShowFilterCats] = useState(false);
 
     function closeEditor() {
         SetShowTransactionEditor(false);
@@ -22,6 +24,10 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
 
     function closeAddTransact() {
         setShowAddTransact(false);
+    }
+
+    function onCategorySelect(category) {
+        setChoosenCategory(category);
     }
 
     async function getProfExpenses() {
@@ -44,33 +50,55 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
         }
     }
 
-
-    async function filterDates(e) {
-        e.preventDefault();
-        let tmpExpenses = await getProfExpenses();
-        let res = [];
-        tmpExpenses.forEach(cat => {
-            res.push({ categoryName: cat.categoryName, items: [] });
-            cat.items.forEach(i => {
-                let category = res.find(c => c.categoryName === cat.categoryName);
-                category.items.push({ iName: i.iName, transactions: [] });
-                i.transactions.forEach(t => {
-                    let item = category.items.find(it => it.iName === i.iName);
-                    let transactionDate = new Date(t.date);
-                    if (transactionDate >= new Date(startDate) && transactionDate <= new Date(endDate)) {
-                        item.transactions.push(t);
-                    }
-                });
+    async function getProfExpensesByDate() {
+        try {
+            let response = await fetch('http://localhost:5500/api/profile/get_cats_dates', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, profileName, startDate, endDate })
             });
-        });
-        setShowFilterDates(false);
-        setProfExpenses(res);
+            let data = await response.json();
+            if (response.ok) {
+                return data.category;
+            } else {
+                return [];
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function getOneCategory() {
+        try {
+            let response = await fetch('http://localhost:5500/api/profile/get_cat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, profileName, choosenCategory })
+            });
+            let data = await response.json();
+            if (response.ok) {
+                console.log(data.category);
+                return data.category;
+            } else {
+                return [];
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function setProfExpensesByDate() {
+        let tmpTransactions = await getProfExpensesByDate();
+        setProfExpenses(tmpTransactions);
     }
 
     async function resetFilter() {
         refreshExpenses();
         let tmpTransactions = await getProfExpenses();
-        console.log(tmpTransactions)
         let minDate = new Date();
         let maxDate = new Date(0);
         tmpTransactions.forEach(cat => {
@@ -107,20 +135,39 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
         refreshExpenses();
     }, [username, profileName]);
 
+
     return (
         <div>
-            <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mb-4"
-                onClick={(e) => { setShowFilterDates(!showFilterDates); resetFilter(); }}>סינון לפי תאריך</button>
+            {!showFilterDatesBtn &&
+                <div className="grid grid-cols-3 *:w-max *:place-self-center">
+                    <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mb-4"
+                        onClick={(e) => { setShowFilterDates(!showFilterDates); resetFilter(); }}>סינון לפי תאריך</button>
+                    <button className=" px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mb-4"
+                        onClick={(e) => { setShowFilterCats(!showFilterCats); }}>סינון לפי קטגוריה</button>
+                    <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mb-4"
+                        onClick={async (e) => { setProfExpenses(await getProfExpenses()); }}>בטל סינון</button>
+                </div>
+            }
+            {
+                showFilterCats &&
+                <div className="mt-2 mb-4 text-center">
+                    <GetCats username={username} profileName={profileName}
+                        refreshExpenses={refreshExpenses} select={true} onCategorySelect={onCategorySelect} />
+                    <button
+                        onClick={async (e) => { setProfExpenses(await getOneCategory()); }}
+                    >חפש</button>
+                </div>
+            }
             {showFilterDates &&
-                <form className="grid fixed inset-0 w-full h-full bg-black/50 items-center justify-center"
-                    onSubmit={(e) => { filterDates(e) }}>
+                <form className="grid fixed inset-0 w-full h-full bg-black/50 items-center justify-center">
                     <div className="grid grid-cols-2 *:border-1 bg-white border-6 border-white rounded-md">
                         <label>בחר תאריך התחלה:</label>
                         <input type="date" defaultValue={startDate} onChange={(e) => { setStartDate(e.target.value); }}></input>
                         <label>בחר תאריך סיום:</label>
                         <input type="date" defaultValue={endDate} onChange={(e) => { setEndDate(e.target.value); }}></input>
                         <input type="button" value="אפס סינון" onClick={resetFilter} />
-                        <input type="submit" value="חפש" />
+                        <input type="button" value="חפש"
+                            onClick={(e) => { setProfExpensesByDate(username, profileName, startDate, endDate); setShowFilterDates(false); }} />
                         <input className="col-span-2"
                             type="button" value="סגור" onClick={(e) => { setShowFilterDates(false); }} />
                     </div>
