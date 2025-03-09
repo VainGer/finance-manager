@@ -5,8 +5,8 @@ import {
     editTransactionPrice, setPrivacy,
     removeCatSaveItems, moveItem,
     getProfExpenses, getAccautExpenses,
-    getCats, getItems,
-    editTransDate, setBudg
+    getCats, getItems, editTransDate, setProfBudg,
+    setCatBudg, getProfBudg, getCatBudg
 } from "./profile.controller.js";
 
 
@@ -31,7 +31,9 @@ profileRouter
     .post('/acc_expenses', getAccautExpenses)
     .post('/prof_categories', getCats)
     .post('/get_items', getItems)
-    .post('/set_budget', setBudg)
-
+    .post('/set_prof_budget', setProfBudg)
+    .post('/set_cat_budget', setCatBudg)
+    .post('/get_prof_budget', getProfBudg)
+    .post('/get_cat_budget', getCatBudg)
 
 export default profileRouter;

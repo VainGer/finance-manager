@@ -4,7 +4,8 @@ import {
     editTransPrice, deleteTransaction, removeCategorySaveItems, migrateItem,
     setCategoryPrivacy, getProfileExpenses, getAllExpenses,
     getProfileCategories, getCategoryItems, editTransactionDate,
-    setBudget
+    setProfileBudget, setCategoryBudget, getProfileBudget,
+    getCategoryBudget
 } from "./profile.model.js";
 
 
@@ -277,13 +278,53 @@ export async function getItems(req, res) {
     }
 }
 
-export async function setBudg(req, res) {
+
+export async function setProfBudg(req, res) {
     const { username, profileName, category, amount, startDay, endDay } = req.body;
     try {
-        const result = await setBudget(username, profileName, category, amount, startDay, endDay);
+        const result = await setProfileBudget(username, profileName, category, amount, startDay, endDay);
         res.status(200).json({ message: result });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to set budget' });
+    }
+}
+
+export async function setCatBudg(req, res) {
+    const { username, profileName, category, amount, startDay, endDay } = req.body;
+    try {
+        const result = await setCategoryBudget(username, profileName, category, amount, startDay, endDay);
+        res.status(200).json({ message: result });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to set budget' });
+    }
+}
+
+export async function getProfBudg(req, res) {
+    const { username, profileName } = req.body;
+    try {
+        const budget = await getProfileBudget(username, profileName);
+        res.status(200).json({
+            message: 'Budget fetched successfully',
+            budget: budget
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to get budget' });
+    }
+}
+
+export async function getCatBudg(req, res) {
+    const { username, profileName, category } = req.body;
+    try {
+        const budget = await getCategoryBudget(username, profileName, category);
+        res.status(200).json({
+            message: 'Budget fetched successfully',
+            budget: budget
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to get budget' });
     }
 }

@@ -18,6 +18,7 @@ export async function createProfile(username, profileName, pin, parent) {
             "parent": parent,
             "pin": pin,
             "expenses": {
+                "budget": [],
                 "categories": []
             }
         };

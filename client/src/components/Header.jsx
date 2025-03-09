@@ -8,8 +8,8 @@ export default function Header({ username, profileName, parent }) {
     const navigate = useNavigate();
 
     return (
-        <div className='grid grid-cols-3 text-center items-center w-full'>
-            <img className='w-25 place-self-center' src="./src/assets/images/logo.jpg" alt="LOGO" />
+        <div className='grid grid-cols-3 text-center items-center w-full h-15'>
+            <img className='h-15 place-self-center' src="./src/assets/images/logo.jpg" alt="LOGO" />
             {location.pathname === '/dashboard' ? (
                 <div className='grid col-span-2 grid-cols-3'>
                     <h2>Profile Name: {profileName}</h2>

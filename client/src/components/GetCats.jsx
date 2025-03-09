@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function GetCats({ username, profileName, onCategoryClick, onCategorySelect, inEditMenu }) {
+export default function GetCats({ username, profileName, onCategoryClick, onCategorySelect, select }) {
     const [categories, setCategories] = useState([]);
 
 
@@ -30,7 +30,7 @@ export default function GetCats({ username, profileName, onCategoryClick, onCate
     return (
         <div>
             {
-                inEditMenu ? (<select onChange={(e) => onCategorySelect(e.target.value)}>
+                select ? (<select onChange={(e) => onCategorySelect(e.target.value)}>
                     <option className='text-center' selected disabled>בחר קטגוריה</option>
                     {categories.length > 0 ? (categories.map((category, index) => (
                         <option key={index} className='text-center'

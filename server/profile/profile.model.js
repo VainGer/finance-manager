@@ -399,21 +399,61 @@ export async function getCategoryItems(username, profileName, categoryName) {
     }
 }
 
-export async function setBudget(username, profileName, category, amount, startDate, endDate) {
+//in use
+export async function setProfileBudget(username, profileName, category, amount, startDate, endDate) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        profile.expenses.budget.push({ amount: amount, startDate: startDate, endDate: endDate });
+        await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+export async function setCategoryBudget(username, profileName, category, amount, startDate, endDate) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName);
         let cat = profile.expenses.categories.find(c => c.categoryName === category);
-        if (!cat) {
-            console.log("No such category");
-            return false;
-        }
         cat.budget.push({ amount: amount, startDate: startDate, endDate: endDate });
         await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
         return true;
     } catch (error) {
         console.log(error);
         return false;
+    }
+}
+
+export async function getProfileBudget(username, profileName) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        return profile.expenses.budget;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+
+export async function getCategoryBudget(username, profileName) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        let budgets = [];
+        profile.expenses.categories.forEach(c => {
+            budgets.push(...c.budget);
+        });
+        console.log(budgets)
+        return budgets;
+    } catch (error) {
+        console.log(error);
+        return [];
     }
 }
