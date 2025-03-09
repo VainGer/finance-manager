@@ -6,7 +6,7 @@ export async function addCategory(username, profileName, category, privacy = fal
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName);
-        category = { categoryName: category, private: privacy, items: [] };
+        category = { categoryName: category, private: privacy, budget: [], items: [] };
         let categories = profile.expenses.categories;
         if (categories.find(cat => cat.categoryName === category.categoryName)) {
             console.log("category name exists")
@@ -124,7 +124,7 @@ export async function setCategoryPrivacy(username, profileName, category, privac
     }
 }
 
-//TODO
+//in use
 export async function renameItemInCategory(username, profileName, category, item, newName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -148,7 +148,7 @@ export async function renameItemInCategory(username, profileName, category, item
     }
 }
 
-//TODO
+//in use
 export async function migrateItem(username, profileName, currentCat, nextCat, itemName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -157,6 +157,7 @@ export async function migrateItem(username, profileName, currentCat, nextCat, it
         let currentCategory = profile.expenses.categories.find(c => c.categoryName === currentCat);
         let nextCategory = profile.expenses.categories.find(c => c.categoryName === nextCat)
         let item = currentCategory.items.find(i => i.iName === itemName);
+        console.log(console.log(item));
         nextCategory.items.push(item);
         currentCategory.items = currentCategory.items.filter(i => i.iName !== itemName);
         await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
@@ -167,7 +168,7 @@ export async function migrateItem(username, profileName, currentCat, nextCat, it
 }
 
 
-//TODO
+//in use
 export async function removeItemFromCategory(username, profileName, category, item) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -218,7 +219,7 @@ export async function addTransaction(username, profileName, category, item, pric
     }
 }
 
-
+//in use
 export async function editTransPrice(username, profileName, category, item, id, newPrice) {
     try {
         newPrice = Number(newPrice);
@@ -247,6 +248,7 @@ export async function editTransPrice(username, profileName, category, item, id, 
     }
 }
 
+//in use
 export async function editTransactionDate(username, profileName, category, item, id, newDate) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -394,5 +396,24 @@ export async function getCategoryItems(username, profileName, categoryName) {
     } catch (error) {
         console.log(error);
         return [];
+    }
+}
+
+export async function setBudget(username, profileName, category, amount, startDate, endDate) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        let cat = profile.expenses.categories.find(c => c.categoryName === category);
+        if (!cat) {
+            console.log("No such category");
+            return false;
+        }
+        cat.budget.push({ amount: amount, startDate: startDate, endDate: endDate });
+        await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
     }
 }

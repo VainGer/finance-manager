@@ -6,6 +6,10 @@ import RemoveCategory from './RemoveCategory';
 import RemoveCategoryMoveItem from './RemoveCategoryMoveItem';
 import RenameCategory from './RenameCategory';
 import SetPrivacy from './SetPrivacy';
+import RenameItem from './RenameItem';
+import MoveItem from './MoveItem';
+import RemoveItem from './RemoveItem';
+import SetBudget from './SetBudget';
 
 export default function ExpenseEditor({ username, profileName, refreshExpenses }) {
     const [chosenCategory, setChosenCategory] = useState("");
@@ -17,12 +21,20 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
     const [showDeleteCategory, setShowDeleteCategory] = useState(false);
     const [showDeleteCategoryMoveItem, setShowDeleteCategoryMoveItem] = useState(false);
     const [showRenameCategory, setShowRenameCategory] = useState(false);
+    const [showRenameItem, setShowRenameItem] = useState(false);
+    const [showMoveItem, setShowMoveItem] = useState(false);
+    const [showRemoveItem, setShowRemoveItem] = useState(false);
+    const [showSetBudget, setShowSetBudget] = useState(false);
 
     const onCategoryClick = (category) => {
         setChosenCategory(category);
         setShowCategories(false);
         setShowEditMenu(true);
         setShowAddCategoryBtn(false);
+    }
+
+    const onCategorySelect = (category) => {
+        setChosenCategory(category);
     }
 
     function back() {
@@ -41,6 +53,21 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
             )}
             {showEditMenu && (
                 <div className='grid gap-4'>
+                    <button className='px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition' onClick={() => {
+                        setShowSetBudget(!showSetBudget);
+                    }}>
+                        הגדר תקציב לתאריך
+                    </button>
+                    {
+                        showSetBudget && (
+                            <SetBudget username={username}
+                                profileName={profileName}
+                                category={chosenCategory}
+                                refreshExpenses={refreshExpenses}
+                                showConfirm={setShowSetBudget}
+                            />
+                        )
+                    }
                     <button className='px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition' onClick={() => {
                         setShowAddItem(!showAddItem);
                     }}>
@@ -75,6 +102,32 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
                         <RenameCategory username={username} profileName={profileName}
                             category={chosenCategory} refreshExpenses={refreshExpenses}
                             showConfirm={setShowRenameCategory} />
+                    }
+                    <button className='px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition'
+                        onClick={(e) => setShowRenameItem(!showRenameItem)}>
+                        שנה שם פריט</button>
+                    {
+                        showRenameItem &&
+                        <RenameItem username={username} profileName={profileName}
+                            category={chosenCategory} refreshExpenses={refreshExpenses}
+                            showConfirm={setShowRenameItem} />
+                    }
+                    <button className='px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition'
+                        onClick={(e) => setShowMoveItem(!showMoveItem)}>
+                        העבר פריט לקטגוריה חדשה</button>
+                    {
+                        showMoveItem &&
+                        <MoveItem username={username} profileName={profileName}
+                            category={chosenCategory} refreshExpenses={refreshExpenses}
+                            showConfirm={setShowMoveItem} />
+                    }
+                    <button className='px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition'
+                        onClick={(e) => setShowRemoveItem(!showRemoveItem)}>
+                        מחק פריט</button>
+                    {
+                        showRemoveItem &&
+                        <RemoveItem username={username} profileName={profileName} category={chosenCategory}
+                            refreshExpenses={refreshExpenses} showConfirm={setShowRemoveItem} />
                     }
                     <SetPrivacy username={username} profileName={profileName} category={chosenCategory} refreshExpenses={refreshExpenses} />
                     <button className='px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition' onClick={back}>חזרה</button>

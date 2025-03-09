@@ -1,1 +1,32 @@
-{"username":"test","globalID":26,"profiles":[{"pName":"testP","parent":true,"pin":"1234","expenses":{"categories":[{"categoryName":"Cat1","private":false,"items":[{"iName":"item1","transactions":[{"id":24,"price":"111","date":"2025-03-08"},{"id":25,"price":"234","date":"2025-03-06"}]}]},{"categoryName":"2Cat1","private":false,"items":[{"iName":"p2","transactions":[]}]}]}},{"pName":"testP2","parent":true,"pin":"1234","expenses":{"categories":[{"categoryName":"asqwe","private":false,"items":[]}]}},{"pName":"test1C","parent":false,"pin":"1234","expenses":{"categories":[]}}]}
+{
+    "username": "test",
+    "globalID": 26,
+    "profiles": [
+        {
+            "pName": "testP",
+            "parent": true,
+            "pin": "1234",
+            "expenses": {
+                "categories": [
+                    {
+                        "categoryName": "testCat",
+                        "private": false,
+                        "budget": [
+                            {
+                                "amount": "500",
+                                "startDate": "2025-03-01",
+                                "endDate": "2025-03-31"
+                            }
+                        ],
+                        "items": [
+                            {
+                                "iName": "testItem",
+                                "transactions": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

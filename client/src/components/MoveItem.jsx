@@ -1,35 +1,11 @@
 import { useState, useEffect } from 'react';
+import GetCats from './GetCats';
+import ItemsToSelcet from './ItemsToSelcet';
 
-export default function MoveItem({ username, profileName }) {
-    const [sourceCategory, setSourceCategory] = useState('');
-    const [targetCategory, setTargetCategory] = useState('');
-    const [item, setItem] = useState('');
-    const [categories, setCategories] = useState([]);
-
-    // Fetch categories when the component mounts
-    useEffect(() => {
-        async function fetchCategories() {
-            try {
-                let response = await fetch('http://localhost:5500/api/profile/getCats', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, profileName })
-                });
-                let data = await response.json();
-                if (response.ok) {
-                    setCategories(data.categories);
-                } else {
-                    console.log(data.message);
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        fetchCategories();
-    }, [username, profileName]);
-
+export default function MoveItem({ username, profileName, category, refreshExpenses, showConfirm }) {
+    const [nextCat, setnextCat] = useState('');
+    const [itemName, setItemName] = useState('');
+    const [currentCat, setCurrentCat] = useState(category);
 
     async function moveItem(e) {
         e.preventDefault();
@@ -39,13 +15,13 @@ export default function MoveItem({ username, profileName }) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, profileName, sourceCategory, targetCategory, item })
+                body: JSON.stringify({ username, profileName, currentCat, nextCat, itemName })
             });
             let data = await response.json();
             if (response.ok) {
-                console.log(`Item ${item} moved from ${sourceCategory} to ${targetCategory} successfully`);
-                setItem(''); 
-                setTargetCategory(''); 
+                console.log(`Item ${itemName} moved from ${category} to ${nextCat} successfully`);
+                refreshExpenses();
+                showConfirm(false);
             } else {
                 console.log(data.message);
             }
@@ -55,29 +31,16 @@ export default function MoveItem({ username, profileName }) {
     }
 
     return (
-        <form className='grid w-max text-center' onSubmit={moveItem}>
-            <label>בחר קטגוריית מקור</label>
-            <select value={sourceCategory} onChange={(e) => setSourceCategory(e.target.value)}>
-                <option value="">בחר קטגוריית מקור</option>
-                {categories.map((cat, index) => (
-                    <option key={index} value={cat}>{cat}</option>
-                ))}
-            </select>
-            <label>בחר פריט</label>
-            <select value={item} onChange={(e) => setItem(e.target.value)}>
-                <option value="">בחר פריט</option>
-                {items.map((itm, index) => (
-                    <option key={index} value={itm}>{itm}</option>
-                ))}
-            </select>
-            <label>בחר קטגוריית יעד</label>
-            <select value={targetCategory} onChange={(e) => setTargetCategory(e.target.value)}>
-                <option value="">בחר קטגוריית יעד</option>
-                {categories.map((cat, index) => (
-                    <option key={index} value={cat}>{cat}</option>
-                ))}
-            </select>
-            <input type="submit" value="העבר פריט" />
-        </form>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
+            <form className='bg-white grid border-blue-600 border-10 rounded-2xl h-50'
+                onSubmit={moveItem}>
+                <label>בחר פריט</label>
+                <ItemsToSelcet username={username} profileName={profileName} category={category} onSelectedOpt={setItemName} />
+                <label>בחר קטגוריה אליה תעביר את הפריט</label>
+                <GetCats username={username} profileName={profileName} onCategorySelect={setnextCat} inEditMenu={true}></GetCats>
+                <input type="submit" value="שמור" />
+                <input type="button" value="סגור" onClick={(e) => { showConfirm(false); }} />
+            </form>
+        </div>
     );
 }

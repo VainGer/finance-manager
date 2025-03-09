@@ -3,7 +3,8 @@ import {
     addTransaction, renameCategory, removeItemFromCategory, renameItemInCategory,
     editTransPrice, deleteTransaction, removeCategorySaveItems, migrateItem,
     setCategoryPrivacy, getProfileExpenses, getAllExpenses,
-    getProfileCategories, getCategoryItems, editTransactionDate
+    getProfileCategories, getCategoryItems, editTransactionDate,
+    setBudget
 } from "./profile.model.js";
 
 
@@ -273,5 +274,16 @@ export async function getItems(req, res) {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to fetch items' });
+    }
+}
+
+export async function setBudg(req, res) {
+    const { username, profileName, category, amount, startDay, endDay } = req.body;
+    try {
+        const result = await setBudget(username, profileName, category, amount, startDay, endDay);
+        res.status(200).json({ message: result });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to set budget' });
     }
 }

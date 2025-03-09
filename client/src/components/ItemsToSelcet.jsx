@@ -30,15 +30,16 @@ export default function ItemsToSelcet({ username, profileName, category, onSelec
 
     return (
         <div className='w-full'>
-            {items.length > 0 ? (
-                <select onChange={(e) => onSelectedOpt(e.target.value)} className='w-full'>
-                    <option className='text-center' disabled selected>בחר ערך</option>
-                    {items.map((item, index) => (
-                        <option className='text-center' key={index}>{item}</option>
-                    ))}
-                </select>) : (
-                <option>אין פריטים להצגה</option>
-            )}
+            <select className='w-full' onChange={(e) => onSelectedOpt(e.target.value)}>
+                <option selected disabled>בחר פריט</option>
+                {items.length > 0 ? (
+                    items.map((item, index) => (
+                        <option key={index} value={item}>{item}</option>
+                    ))
+                ) : (
+                    <option value="" disabled>אין פריטים להצגה</option>
+                )}
+            </select>
         </div>
     );
 }

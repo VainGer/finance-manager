@@ -1,61 +1,10 @@
 import { useState, useEffect } from 'react';
+import ItemsToSelcet from './ItemsToSelcet';
 
-export default function RenameItem({ username, profileName }) {
-    const [category, setCategory] = useState('');
+export default function RenameItem({ username, profileName, category, refreshExpenses, showConfirm }) {
     const [item, setItem] = useState('');
-    const [newItemName, setNewItemName] = useState('');
-    const [categories, setCategories] = useState([]);
-    const [items, setItems] = useState([]);
+    const [newName, setNewName] = useState('');
 
-    // Fetch categories when the component mounts
-    useEffect(() => {
-        async function fetchCategories() {
-            try {
-                let response = await fetch('http://localhost:5500/api/profile/getCats', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, profileName })
-                });
-                let data = await response.json();
-                if (response.ok) {
-                    setCategories(data.categories);
-                } else {
-                    console.log(data.message);
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        fetchCategories();
-    }, [username, profileName]);
-
-    // Fetch items when a category is selected
-    useEffect(() => {
-        async function fetchItems() {
-            if (category) {
-                try {
-                    let response = await fetch('http://localhost:5500/api/profile/getItems', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ username, profileName, categoryName: category })
-                    });
-                    let data = await response.json();
-                    if (response.ok) {
-                        setItems(data.items);
-                    } else {
-                        console.log(data.message);
-                    }
-                } catch (error) {
-                    console.log(error);
-                }
-            }
-        }
-        fetchItems();
-    }, [category, username, profileName]);
 
     async function renameItem(e) {
         e.preventDefault();
@@ -65,13 +14,13 @@ export default function RenameItem({ username, profileName }) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, profileName, category, item, newItemName })
+                body: JSON.stringify({ username, profileName, category, item, newName })
             });
             let data = await response.json();
             if (response.ok) {
-                console.log(`Item ${item} renamed to ${newItemName} successfully`);
-                setItem(''); // Clear the item input field
-                setNewItemName(''); // Clear the new item name input field
+                console.log(`Item ${item} renamed to ${newName} successfully`);
+                refreshExpenses();
+                showConfirm(false);
             } else {
                 console.log(data.message);
             }
@@ -81,24 +30,16 @@ export default function RenameItem({ username, profileName }) {
     }
 
     return (
-        <form className='grid w-max text-center' onSubmit={renameItem}>
-            <label>בחר קטגוריה</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                <option value="">בחר קטגוריה</option>
-                {categories.map((cat, index) => (
-                    <option key={index} value={cat}>{cat}</option>
-                ))}
-            </select>
-            <label>בחר פריט</label>
-            <select value={item} onChange={(e) => setItem(e.target.value)}>
-                <option value="">בחר פריט</option>
-                {items.map((itm, index) => (
-                    <option key={index} value={itm}>{itm}</option>
-                ))}
-            </select>
-            <label>שם חדש לפריט</label>
-            <input type="text" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} />
-            <input type="submit" value="שנה שם פריט" />
-        </form>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
+            <form className='bg-white grid border-blue-600 border-10 rounded-2xl h-50'
+                onSubmit={renameItem}>
+                <label>בחר פריט</label>
+                <ItemsToSelcet key={item} username={username} profileName={profileName} category={category} onSelectedOpt={setItem} />
+                <label>הכנס שם חדש</label>
+                <input type="text" onChange={(e) => setNewName(e.target.value)} />
+                <input type="submit" value="שמור" />
+                <input type="button" value="סגור" onClick={(e) => { showConfirm(false); }} />
+            </form>
+        </div>
     );
 }

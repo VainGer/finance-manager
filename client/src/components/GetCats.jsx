@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 
-export default function GetCats({ username, profileName, onCategoryClick }) {
+export default function GetCats({ username, profileName, onCategoryClick, onCategorySelect, inEditMenu }) {
     const [categories, setCategories] = useState([]);
+
 
     useEffect(() => {
         async function fetchCategories() {
@@ -15,7 +16,7 @@ export default function GetCats({ username, profileName, onCategoryClick }) {
                 });
                 let data = await response.json();
                 if (response.ok) {
-                    setCategories(data.categories)
+                    setCategories(data.categories);
                 } else {
                     console.log(data.message);
                 }
@@ -27,15 +28,28 @@ export default function GetCats({ username, profileName, onCategoryClick }) {
     }, [username, profileName]);
 
     return (
-        <div className='grid'>
-            {categories.length > 0 ? (
-                categories.map((category, index) => (
-                    <button className='hover: cursor-pointer border-1 rounded-md mt-4 bg-blue-500 text-white p-3 hover:bg-blue-600'
-                     key={index} onClick={(e) => onCategoryClick(category.categoryName)}>{category.categoryName}</button>
-                ))
-            ) : (
-                <p>אין קטגוריות להצגה</p>
-            )}
-        </div>
+        <div>
+            {
+                inEditMenu ? (<select onChange={(e) => onCategorySelect(e.target.value)}>
+                    <option className='text-center' selected disabled>בחר קטגוריה</option>
+                    {categories.length > 0 ? (categories.map((category, index) => (
+                        <option key={index} className='text-center'
+                        >{category.categoryName}</option>
+                    ))) : (<></>)}
+                </select>
+                ) :
+                    <div className='grid'>
+                        {categories.length > 0 ? (
+                            categories.map((category, index) => (
+                                <button className='px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mt-4'
+                                    key={index} onClick={(e) => onCategoryClick(category.categoryName)}>{category.categoryName}</button>
+                            ))
+                        ) : (
+                            <p>אין קטגוריות להצגה</p>
+                        )
+                        }
+                    </div >
+            }</div>
+
     );
 }
