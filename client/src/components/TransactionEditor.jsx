@@ -1,19 +1,36 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState } from "react";
 import DeleteTransact from "./DeleteTransact";
 import EditTransactionPriceAndDate from "./EditTransactionPriceAndDate";
-export default function TransactionEditor({ username, profileName, category, item, id, currentPrice, currentDate, onTransactionUpdate, closeEditor }) {
 
+export default function TransactionEditor({ 
+    username, 
+    profileName, 
+    category, 
+    item, 
+    id, 
+    currentPrice, 
+    currentDate, 
+    onTransactionUpdate, 
+    closeEditor 
+}) {
     const [updateFunction, setUpdateDateFunc] = useState(null);
 
     const updateTransactionBtn = () => {
         if (updateFunction) {
             updateFunction();
         }
-    }
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
+            <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-300 w-full max-w-md">
+                
+                
+                <h2 className="text-xl font-semibold text-blue-600 text-center mb-4">
+                    עריכת הוצאה
+                </h2>
+
+               
                 <EditTransactionPriceAndDate
                     username={username}
                     profileName={profileName}
@@ -26,16 +43,38 @@ export default function TransactionEditor({ username, profileName, category, ite
                     onSubmitEdit={setUpdateDateFunc}
                     closeEditor={closeEditor}
                 />
-                <div className="grid grid-cols-2 *:border-1">
-                    <DeleteTransact username={username}
+
+               
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                    
+                   
+                    <button 
+                        className="px-4 py-2 bg-green-500 text-white font-medium rounded-lg shadow-md hover:bg-blue-600 transition"
+                        onClick={updateTransactionBtn}
+                    >
+                        אשר שינויים
+                    </button>
+
+                    
+                    <DeleteTransact 
+                    
+                        username={username}
                         profileName={profileName}
                         category={category}
                         item={item}
                         id={id}
                         onTransactionUpdate={onTransactionUpdate}
-                        closeEditor={closeEditor} />
-                    <button onClick={updateTransactionBtn}>אשר שינויים</button>
+                        closeEditor={closeEditor} 
+                    />
                 </div>
+
+               
+                <button 
+                    className="mt-4 px-4 py-2 bg-red-500 text-white font-medium rounded-lg shadow-md hover:bg-gray-600 transition w-full"
+                    onClick={closeEditor}
+                >
+                    ביטול
+                </button>
             </div>
         </div>
     );

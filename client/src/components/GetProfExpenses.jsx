@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 export default function GetProfExpenses({ username, profileName }) {
     const [expenses, setExpenses] = useState([]);
 
-    // Fetch profile expenses when the component mounts
     useEffect(() => {
         async function fetchExpenses() {
             try {

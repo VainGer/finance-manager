@@ -17,7 +17,7 @@ export default function Home() {
             <Header />
             <div className='flex flex-col items-center justify-center min-h-screen px-4 text-gray-900'>
 
-                {/* תיאור קצר נוסף */}
+          
                 <motion.p 
                     initial={{ opacity: 0, y: -20 }} 
                     animate={{ opacity: 1, y: 0 }} 
@@ -27,7 +27,7 @@ export default function Home() {
                     ברוכים הבאים לאפליקציית ניהול הכספים החכמה שלנו! כאן תוכלו לנתח את הוצאותיכם, לשלוט בתקציב שלכם ולנהל את כל ההוצאות במקום אחד בצורה קלה ויעילה.
                 </motion.p>
 
-                {/* כותרת עם אנימציה */}
+             
                 <motion.h1 
                     initial={{ opacity: 0, y: -50 }} 
                     animate={{ opacity: 1, y: 0 }} 
@@ -37,7 +37,7 @@ export default function Home() {
                     ניהול כספים חכם
                 </motion.h1>
 
-                {/* כרטיסים עם אייקונים */}
+             
                 <motion.div 
                     initial="hidden"
                     animate="visible"
@@ -67,7 +67,7 @@ export default function Home() {
                     />
                 </motion.div>
 
-                {/* כפתור התחלה */}
+           
                 <motion.button 
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
@@ -82,7 +82,6 @@ export default function Home() {
     );
 }
 
-// קומפוננטת כרטיסים עם קישור למעבר לעמוד
 function FeatureCard({ icon, title, desc, onClick }) {
     return (
         <motion.div 
