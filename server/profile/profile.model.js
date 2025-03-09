@@ -414,6 +414,7 @@ export async function setProfileBudget(username, profileName, category, amount, 
     }
 }
 
+//in use
 export async function setCategoryBudget(username, profileName, category, amount, startDate, endDate) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -429,6 +430,7 @@ export async function setCategoryBudget(username, profileName, category, amount,
     }
 }
 
+//in use
 export async function getProfileBudget(username, profileName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -441,6 +443,7 @@ export async function getProfileBudget(username, profileName) {
     }
 }
 
+//in use
 export async function getCategoryBudget(username, profileName) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -448,10 +451,57 @@ export async function getCategoryBudget(username, profileName) {
         let profile = data.profiles.find(p => p.pName === profileName);
         let budgets = [];
         profile.expenses.categories.forEach(c => {
-            budgets.push(...c.budget);
+            c.budget.forEach(b => {
+                budgets.push({ category: c.categoryName, amount: b.amount, startDate: b.startDate, endDate: b.endDate });
+            });
         });
-        console.log(budgets)
         return budgets;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+
+//in use
+export async function getAllCategoriesBetweenDates(username, profileName, startDate, endDate) {
+    try {
+        startDate = new Date(startDate);
+        endDate = new Date(endDate);
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        let filteredCategories = [];
+        profile.expenses.categories.forEach(category => {
+            let filteredItems = [];
+            category.items.forEach(item => {
+                let filteredTransactions = item.transactions.filter(transaction => {
+                    let transactionDate = new Date(transaction.date);
+                    return transactionDate >= startDate && transactionDate <= endDate;
+                });
+                filteredItems.push({
+                    iName: item.iName,
+                    transactions: filteredTransactions
+                });
+            });
+            filteredCategories.push({
+                categoryName: category.categoryName,
+                items: filteredItems
+            });
+        });
+        return filteredCategories;
+    } catch (error) {
+        console.error("Error fetching filtered categories:", error.message);
+        return [];
+    }
+}
+
+export async function getCategory(username, profileName, category) {
+    try {
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        let cat = profile.expenses.categories.find(c => c.categoryName === category);
+        return [cat];
     } catch (error) {
         console.log(error);
         return [];
