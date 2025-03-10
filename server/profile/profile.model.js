@@ -327,7 +327,7 @@ export async function getProfileExpenses(username, profileName) {
         let profile = data.profiles.find(p => p.pName === profileName);
         profile.expenses.categories.forEach(c => {
             c.items.forEach(i => {
-                i.transactions.forEach(t => t.related = "פרופיל שלי");
+                i.transactions.forEach(t => t.related = true);
             });
         });
         return profile.expenses.categories;
@@ -352,7 +352,7 @@ export async function getAllExpenses(username, profileName) {
             let categories = p.expenses.categories;
             categories.forEach(c => {
                 c.items.forEach(i => {
-                    i.transactions.forEach(t => t.related = p.pName);
+                    i.transactions.forEach(t => { t.related === p.pName ? true : false });
                 })
                 if (!c.private) {
                     expenses.forEach(e => {
@@ -511,23 +511,8 @@ export async function getCategory(username, profileName, category) {
 
 export async function getCategoryBetweenDates(username, profileName, category, startDate, endDate) {
     try {
-        startDate = new Date(startDate);
-        endDate = new Date(endDate);
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let profile = data.profiles.find(p => p.pName === profileName);
-        let cat = profile.expenses.categories.find(c => c.categoryName === category);
-        let filteredCategories = cat.items.filter(item => {
-            let filteredTransactions = item.transactions.filter(transaction => {
-                let transactionDate = new Date(transaction.date);
-                return transactionDate >= startDate && transactionDate <= endDate;
-            });
-            if (filteredTransactions.length > 0) {
-                return true;
-            }
-            return false;
-        });
-        console.log(filteredCategories)
+        let categoriesByDate = await getAllCategoriesBetweenDates(username, profileName, startDate, endDate);
+        let filteredCategories = categoriesByDate.filter(cat => cat.categoryName === category);
         return filteredCategories;
     } catch (error) {
         console.error(error);

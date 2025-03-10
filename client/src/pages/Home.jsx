@@ -17,28 +17,28 @@ export default function Home() {
             <Header />
             <div className='flex flex-col items-center justify-center min-h-screen px-4 text-gray-900'>
 
-          
-                <motion.p 
-                    initial={{ opacity: 0, y: -20 }} 
-                    animate={{ opacity: 1, y: 0 }} 
+
+                <motion.p
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: 'easeOut' }}
                     className='text-lg text-gray-600 text-center mb-4 max-w-2xl'
                 >
                     ברוכים הבאים לאפליקציית ניהול הכספים החכמה שלנו! כאן תוכלו לנתח את הוצאותיכם, לשלוט בתקציב שלכם ולנהל את כל ההוצאות במקום אחד בצורה קלה ויעילה.
                 </motion.p>
 
-             
-                <motion.h1 
-                    initial={{ opacity: 0, y: -50 }} 
-                    animate={{ opacity: 1, y: 0 }} 
+
+                <motion.h1
+                    initial={{ opacity: 0, y: -50 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: 'easeOut' }}
                     className='text-6xl font-bold text-blue-700 tracking-wide text-center mb-6'
                 >
                     ניהול כספים חכם
                 </motion.h1>
 
-             
-                <motion.div 
+
+                <motion.div
                     initial="hidden"
                     animate="visible"
                     variants={{
@@ -47,28 +47,29 @@ export default function Home() {
                     }}
                     className='grid grid-cols-1 md:grid-cols-3 gap-6 text-center'
                 >
-                    <FeatureCard 
-                        icon={<FaChartLine />} 
-                        title="ניתוח הוצאות" 
+                    <FeatureCard
+                        icon={<FaChartLine />}
+                        title="ניתוח הוצאות"
                         desc="צפו בגרפים ודוחות מפורטים שיעזרו לכם לנהל את התקציב."
-                        
+
                     />
-                    <FeatureCard 
-                        icon={<FaWallet />} 
-                        title="שליטה בתקציב" 
+                    <FeatureCard
+                        icon={<FaWallet />}
+                        title="שליטה בתקציב"
                         desc="קבעו גבולות תקציב וקבלו התראות כשמתקרבים אליהם."
-                        
+
                     />
-                    <FeatureCard 
-                        icon={<FaClipboardList />} 
-                        title="רישום הוצאות חכם" 
+                    <FeatureCard
+                        icon={<FaClipboardList />}
+                        title="רישום הוצאות חכם"
                         desc="תעדו בקלות כל הוצאה והכנסה ונהלו הכל במקום אחד."
-                        
+
                     />
                 </motion.div>
 
-           
-                <motion.button 
+
+                <motion.button
+                    transition={{ duration: 0 }}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     className='mt-8 px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-xl shadow-lg hover:bg-blue-700 transition-all'
@@ -84,7 +85,8 @@ export default function Home() {
 
 function FeatureCard({ icon, title, desc, onClick }) {
     return (
-        <motion.div 
+        <motion.div
+            transition={{ duration: 0 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className='p-6 bg-white rounded-2xl shadow-lg flex flex-col items-center border border-gray-200 max-w-xs cursor-pointer hover:bg-gray-100 transition-all'

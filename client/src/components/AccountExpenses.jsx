@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import ExpensesTable from "./ExpensesTable";
 export default function AccountExpenses({ username, profileName }) {
 
     const [accExpenses, setAccExpenses] = useState([]);
@@ -36,42 +36,6 @@ export default function AccountExpenses({ username, profileName }) {
     }, [username, profileName]);
 
     return (
-        <div className="w-max m-auto">
-            {accExpenses.map((category, index) => {
-                return (
-                    <div key={index}>
-                        <h3>קטגוריה: {category.categoryName}</h3>
-                        <h4>בעלי עסק:</h4>
-                        <div>
-                            {category.items.map((item, index) => {
-                                return (<div key={index}>
-                                    <h5>שם בעל העסק: {item.iName}</h5>
-                                    <h5>הוצאות:</h5>
-                                    <table className="w-full">
-                                        <thead>
-                                            <tr className="border-1">
-                                                <th className="border-1">תאריך</th>
-                                                <th className="border-1">סכום</th>
-                                                <th>פרופיל ההוצאה</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {item.transactions.map((transactions, index) => {
-                                                return (
-                                                    <tr key={index} className="table-auto border-1 text-center w-full">
-                                                        <td className="border-1">{transactions.date}</td>
-                                                        <td className="border-1">{transactions.price}</td>
-                                                        <td className="border-1">{transactions.related}</td>
-                                                    </tr>);
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>);
-                            })}</div>
-                    </div>
-
-                )
-            })}
-        </div>
+        <ExpensesTable username={username} profileName={profileName} expenseData={accExpenses} refreshExpenses={getAccExpenses} showEditBtn={false} showRelation={true} />
     )
 }

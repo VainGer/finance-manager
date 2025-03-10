@@ -47,14 +47,15 @@ export default function SelectProfile({ username }) {
             {profiles.length > 0 ? (
                 <div className="flex flex-col items-center gap-4">
                     {toggleProfiles && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: -10 }} 
-                            animate={{ opacity: 1, y: 0 }} 
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
                             className="grid grid-cols-1 gap-4 w-full"
                         >
                             {profiles.map((profile, index) => (
-                                <motion.button 
+                                <motion.button
+                                    transition={{ duration: 0 }}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     key={index}
@@ -74,14 +75,14 @@ export default function SelectProfile({ username }) {
                     )}
 
                     {toggleAuthProfile && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: -10 }} 
-                            animate={{ opacity: 1, y: 0 }} 
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
                             className="w-full"
                         >
                             <AuthProfile username={username} profileName={profileName} parent={parent} />
-                            <motion.button 
+                            <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 className="mt-4 px-4 py-2 bg-gray-300 text-gray-800 font-medium rounded-lg shadow-md hover:bg-gray-400 transition"
@@ -98,7 +99,7 @@ export default function SelectProfile({ username }) {
                     )}
 
                     {toggleAddBtn && (
-                        <motion.button 
+                        <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className="mt-4 px-6 py-3 bg-green-600 text-white text-lg font-medium rounded-lg shadow-md hover:bg-green-700 transition"
@@ -113,14 +114,14 @@ export default function SelectProfile({ username }) {
                     )}
 
                     {toggleAddProfiles && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: -10 }} 
-                            animate={{ opacity: 1, y: 0 }} 
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
                             className="w-full"
                         >
                             <AddProfile username={username} />
-                            <motion.button 
+                            <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 className="mt-4 px-4 py-2 bg-gray-300 text-gray-800 font-medium rounded-lg shadow-md hover:bg-gray-400 transition"
@@ -136,9 +137,9 @@ export default function SelectProfile({ username }) {
                     )}
                 </div>
             ) : (
-                <motion.div 
-                    initial={{ opacity: 0, y: -10 }} 
-                    animate={{ opacity: 1, y: 0 }} 
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                     className="text-center"
                 >

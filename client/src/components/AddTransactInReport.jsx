@@ -3,7 +3,9 @@ import ItemsToSelcet from "./ItemsToSelcet";
 
 export default function AddTransactInReport({ username, profileName, category, item, onTransactionUpdate, closeAddTransact }) {
     const [price, setPrice] = useState('');
-    const [date, setDate] = useState('');
+    const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+
+
 
     async function addTransaction(e) {
         e.preventDefault();
@@ -22,7 +24,6 @@ export default function AddTransactInReport({ username, profileName, category, i
                 closeAddTransact();
             } else {
                 console.log(data.message);
-                // TODO: Handle error
             }
         } catch (error) {
             console.log(error);

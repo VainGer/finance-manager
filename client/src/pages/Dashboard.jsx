@@ -37,7 +37,7 @@ export default function Dashboard() {
                         amount: expense.items.reduce((sum, item) => sum + item.transactions.reduce((sum, transaction) => sum + parseFloat(transaction.price), 0), 0)
                     }))
                     .filter(expense => expense.category && expense.amount > 0);
-                console.log('Expenses Data:', processedData);
+                // console.log('Expenses Data:', processedData);
                 setExpensesData(processedData);
             } else {
                 console.error('Failed to fetch expenses:', data);
@@ -57,8 +57,7 @@ export default function Dashboard() {
         <div dir='rtl' className='text-center bg-gray-100 min-h-screen'>
             <Header username={username} profileName={profileName} parent={parent} />
             
-            <div className='grid grid-cols-4 gap-6 w-full mx-4 relative mt-12 p-4'>
-                
+            <div className='grid grid-cols-4 gap-6 w-full mx-4 relative mt-4 p-4'>
                 
                 <div className='h-full bg-white shadow-md rounded-xl p-6 border border-gray-300'>
                     <h2 className='text-xl font-semibold text-blue-600 mb-4'>פאנל עריכה</h2>

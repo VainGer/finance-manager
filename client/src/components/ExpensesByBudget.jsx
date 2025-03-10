@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import ExpensesTable from "./ExpensesTable";
 
 export default function ExpensesByBudget({ username, profileName }) {
     const [profBudgets, setProfBudgets] = useState([]);
@@ -11,7 +11,6 @@ export default function ExpensesByBudget({ username, profileName }) {
     const [showProfBudgetSelect, setShowProfBudgetSelect] = useState(false);
     const [showExpenses, setShowExpenses] = useState(false);
     const [showCategoryBudgetSelect, setShowCategoryBudgetSelect] = useState(false);
-
 
     async function getProfBudgetsDates() {
         try {
@@ -104,7 +103,6 @@ export default function ExpensesByBudget({ username, profileName }) {
         if (catBudgets) {
             setCatBudgets(catBudgets);
         }
-        console.log(catBudgets);
     }
 
     useEffect(() => {
@@ -142,12 +140,18 @@ export default function ExpensesByBudget({ username, profileName }) {
             <div className="grid-cols-2 *:p-2 *:bg-blue-500 *:text-white *:hover:bg-blue-600 *:transition *:rounded-md *:m-2">
                 <button onClick={(e) => {
                     setShowProfBudgetSelect(!showProfBudgetSelect);
-                    setShowExpenses(() => { if (showExpenses) return false; });
+                    setShowExpenses(() => {
+                        if (showExpenses) { return false; }
+                    });
+                    setShowCategoryBudgetSelect(false);
                 }}
                 >הצג הוצאות לפי תאריך</button>
                 <button onClick={(e) => {
                     setShowCategoryBudgetSelect(!showCategoryBudgetSelect);
-                    setShowExpenses(() => { if (showExpenses) return false; });
+                    setShowExpenses(() => {
+                        if (showExpenses) { return false; }
+                    });
+                    setShowProfBudgetSelect(false);
                 }}
                 >הצג הוצאות לפי קטגוריה</button>
             </div>
@@ -169,6 +173,7 @@ export default function ExpensesByBudget({ username, profileName }) {
                     <button onClick={(e) => {
                         removeBlankAndSetExpenses(true);
                         setShowExpenses(true);
+                        setShowCategoryBudgetSelect(false);
                     }}
                     >הצג</button>
                 </div>
@@ -198,6 +203,7 @@ export default function ExpensesByBudget({ username, profileName }) {
                         <button onClick={(e) => {
                             removeBlankAndSetExpenses(false);
                             setShowExpenses(true);
+                            setShowProfBudgetSelect(false);
                         }}
                         >הצג</button>
                     </div>
@@ -205,49 +211,15 @@ export default function ExpensesByBudget({ username, profileName }) {
             }
             {showExpenses && (
                 expenses.length > 0 ? (
-                    <div className=' grid max-h-110 overflow-y-auto border-1 rounded-md'>
-                        {expenses.map((category, index) => {
-                            return (
-                                <div key={index}>
-                                    <h3>קטגוריה: {category.categoryName}</h3>
-                                    <div>
-                                        {category.items.map((item, index) => {
-                                            // מיון ההוצאות לפי תאריך
-                                            const sortedTransactions = item.transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
-                                            return (
-                                                <div key={index}>
-                                                    <h5>שם בעל העסק: {item.iName}</h5>
-                                                    <h5>הוצאות:</h5>
-                                                    <table className="w-full">
-                                                        <thead>
-                                                            <tr className="border-1 *:border-1">
-                                                                <th>תאריך</th>
-                                                                <th>סכום</th>
-                                                                <th>עריכה</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {sortedTransactions.map((transactions, index) => {
-                                                                return (
-                                                                    < >
-                                                                        <tr key={index} className="border-1 *:border-1">
-                                                                            <td className="border-1">{transactions.date}</td>
-                                                                            <td className="border-1">{transactions.price}</td>
-                                                                        </tr>
-                                                                    </>
-                                                                );
-                                                            })}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                ) : (<h3>לא נמצאו הוצאות</h3>)
+                    <ExpensesTable username={username}
+                        profileName={profileName}
+                        expenseData={expenses}
+                        refreshExpenses={removeBlankAndSetExpenses}
+                        showEditBtn={false}
+                        showRelation={false}
+                    />
+                )
+                    : (<h3>לא נמצאו הוצאות</h3>)
             )}
         </div>
     );

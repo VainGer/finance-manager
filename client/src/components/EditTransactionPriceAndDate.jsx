@@ -61,17 +61,18 @@ export default function EditTransactionPriceAndDate({ username, profileName, cat
     }, [currentPrice])
 
     return (
-        <form className="border-1 grid *:border-1" name='price-form'>
+        <form className="grid *:my-2 text-center *:text-center" name='price-form '>
+            <labe className='font-bold'>הזן סכום חדש</labe>
             <input
-                className='text-center'
+                className='border-1'
                 type="number"
                 defaultValue={newPrice}
                 placeholder='הזן סכום חדש'
                 onChange={(e) => setNewPrice(e.target.value)}
             />
-            <label>בחר תאריך חדש</label>
+            <label className='font-bold'>בחר תאריך חדש</label>
             <input
-                className='text-center w-full'
+                className='text-center w-full border-1'
                 type="date"
                 defaultValue={newDate}
                 onChange={(e) => setNewDate(e.target.value)}
