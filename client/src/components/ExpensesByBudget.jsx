@@ -13,7 +13,7 @@ export default function ExpensesByBudget({ username, profileName }) {
     const [showCategoryBudgetSelect, setShowCategoryBudgetSelect] = useState(false);
     const [budgetTarget, setBudgetTarget] = useState(0);
     const [transactionsSum, setTransactionsSum] = useState(0);
-
+    const [sumKey, setSumKey] = useState(0);
     async function getProfBudgetsDates() {
         try {
             let response = await fetch('http://localhost:5500/api/profile/get_prof_budget', {
@@ -107,11 +107,6 @@ export default function ExpensesByBudget({ username, profileName }) {
         }
     }
 
-    useEffect(() => {
-        fetchBudgets();
-    }, [username, profileName]);
-
-
     async function removeBlankAndSetExpenses(byDate) {
         let expenses
         if (byDate) {
@@ -136,6 +131,23 @@ export default function ExpensesByBudget({ username, profileName }) {
         });
         setExpenses(tmp);
     }
+
+    useEffect(() => {
+        fetchBudgets();
+    }, [username, profileName]);
+
+    useEffect(() => {
+        let sum = 0;
+        expenses.forEach(expense => {
+            expense.items.forEach(item => {
+                item.transactions.forEach(transaction => {
+                    sum += parseFloat(transaction.price);
+                });
+            });
+        });
+        setTransactionsSum(sum);
+    }, [expenses]);
+
 
     return (
         <div>
@@ -172,27 +184,17 @@ export default function ExpensesByBudget({ username, profileName }) {
                             );
                         })}
                     </select>
-                    <button onClick={(e) => {
-                        removeBlankAndSetExpenses(true);
+                    <button onClick={async (e) => {
+                        await removeBlankAndSetExpenses(true);
                         setShowExpenses(true);
                         setShowCategoryBudgetSelect(false);
-                        setTransactionsSum(() => {
-                            let sum = 0;
-                            expenses.forEach(expense => {
-                                expense.items.forEach(item => {
-                                    item.transactions.forEach(transaction => {
-                                        sum += parseFloat(transaction.price);
-                                    })
-                                });
-                            });
-                            return sum;
-                        });
                         setBudgetTarget(() => {
                             let target = profBudgets.find(budget => {
                                 return budget.startDate === startDate && budget.endDate === endDate;
                             })
                             return target.amount;
                         })
+                        setSumKey(() => sumKey + 1);
                     }}
                     >הצג</button>
                 </div>
@@ -219,21 +221,10 @@ export default function ExpensesByBudget({ username, profileName }) {
                                 );
                             })}
                         </select>
-                        <button onClick={(e) => {
-                            removeBlankAndSetExpenses(false);
+                        <button onClick={async (e) => {
+                            await removeBlankAndSetExpenses(false);
                             setShowExpenses(true);
                             setShowProfBudgetSelect(false);
-                            setTransactionsSum(() => {
-                                let sum = 0;
-                                expenses.forEach(expense => {
-                                    expense.items.forEach(item => {
-                                        item.transactions.forEach(transaction => {
-                                            sum += parseFloat(transaction.price);
-                                        })
-                                    });
-                                });
-                                return sum;
-                            });
                             setBudgetTarget(() => {
                                 let target = catBudgets.find(budget => {
                                     return budget.startDate === startDate
@@ -242,13 +233,14 @@ export default function ExpensesByBudget({ username, profileName }) {
                                 })
                                 return Number(target.amount);
                             })
+                            setSumKey(() => sumKey + 1);
                         }}
                         >הצג</button>
                     </div>
                 )
             }
             {showExpenses && (
-                expenses.length > 0 ? (<div className="grid grid-cols-2">
+                expenses.length > 0 ? (<div key={`summary-${sumKey}}`} className="grid grid-cols-2">
                     <div>
                         <h3>יעד: {budgetTarget}</h3>
                         <h3>סה"כ הוצאות: {transactionsSum}</h3>
