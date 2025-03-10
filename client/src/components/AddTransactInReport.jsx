@@ -31,7 +31,7 @@ export default function AddTransactInReport({ username, profileName, category, i
 
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed h-full w-full inset-0 z-50 flex items-center justify-center bg-black/10">
             <form className="grid grid-cols-2 bg-white p-6 rounded-lg shadow-lg *:border-1" onSubmit={addTransaction}>
                 <label>מחיר:</label>
                 <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />

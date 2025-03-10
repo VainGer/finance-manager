@@ -6,7 +6,7 @@ import {
     getProfileCategories, getCategoryItems, editTransactionDate,
     setProfileBudget, setCategoryBudget, getProfileBudget,
     getCategoryBudget, getAllCategoriesBetweenDates,
-    getCategory
+    getCategory, getCategoryBetweenDates
 } from "./profile.model.js";
 
 
@@ -348,6 +348,20 @@ export async function getCat(req, res) {
     const { username, profileName, choosenCategory } = req.body;
     try {
         const cat = await getCategory(username, profileName, choosenCategory);
+        res.status(200).json({
+            message: 'Category fetched successfully',
+            category: cat
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to get category' });
+    }
+}
+
+export async function getCatDate(req, res) {
+    const { username, profileName, choosenCategory, startDate, endDate } = req.body;
+    try {
+        const cat = await getCategoryBetweenDates(username, profileName, choosenCategory, startDate, endDate);
         res.status(200).json({
             message: 'Category fetched successfully',
             category: cat

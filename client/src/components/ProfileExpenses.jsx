@@ -1,9 +1,10 @@
-import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
 import AddTransactInReport from "./AddTransactInReport";
 import TransactionEditor from "./TransactionEditor";
 import GetCats from "./GetCats";
 
-export default function ProfileExpenses({ username, profileName, refreshExpenses, showFilterDatesBtn }) {
+export default function ProfileExpenses({ username, profileName, refreshExpenses
+    , showFilterDatesBtn, filterByDates, filterByCategory, filterDates, category }) {
     const [profExpenses, setProfExpenses] = useState([]);
     const [showAddTransact, setShowAddTransact] = useState(false);
     const [editTransaction, setEditTransaction] = useState(null);
@@ -61,7 +62,7 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
             });
             let data = await response.json();
             if (response.ok) {
-                return data.category;
+                return data.categories;
             } else {
                 return [];
             }
@@ -81,7 +82,6 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
             });
             let data = await response.json();
             if (response.ok) {
-                console.log(data.category);
                 return data.category;
             } else {
                 return [];
@@ -159,26 +159,25 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
                 </div>
             }
             {showFilterDates &&
-                <form className="grid fixed inset-0 w-full h-full bg-black/50 items-center justify-center">
-                    <div className="grid grid-cols-2 *:border-1 bg-white border-6 border-white rounded-md">
+                <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-black/50">
+                    <form className="grid grid-cols-2 *:border-1 bg-white border-6 border-white rounded-md w-max h-max">
                         <label>בחר תאריך התחלה:</label>
-                        <input type="date" defaultValue={startDate} onChange={(e) => { setStartDate(e.target.value); }}></input>
+                        <input key={`start${startDate}`} type="date" defaultValue={startDate} onChange={(e) => { setStartDate(e.target.value); }}></input>
                         <label>בחר תאריך סיום:</label>
-                        <input type="date" defaultValue={endDate} onChange={(e) => { setEndDate(e.target.value); }}></input>
+                        <input key={`end${endDate}`} type="date" defaultValue={endDate} onChange={(e) => { setEndDate(e.target.value); }}></input>
                         <input type="button" value="אפס סינון" onClick={resetFilter} />
                         <input type="button" value="חפש"
-                            onClick={(e) => { setProfExpensesByDate(username, profileName, startDate, endDate); setShowFilterDates(false); }} />
+                            onClick={async (e) => { await setProfExpensesByDate(username, profileName, startDate, endDate); setShowFilterDates(false); }} />
                         <input className="col-span-2"
                             type="button" value="סגור" onClick={(e) => { setShowFilterDates(false); }} />
-                    </div>
-                </form>
+                    </form>
+                </div>
             }
-            <div className=' grid max-h-110 overflow-y-auto border-1 rounded-md **:h-max'>
+            <div className=' grid max-h-110 overflow-y-auto border-1 rounded-md'>
                 {profExpenses.map((category, index) => {
                     return (
                         <div key={index}>
                             <h3>קטגוריה: {category.categoryName}</h3>
-                            <h4>בעלי עסק:</h4>
                             <div>
                                 {category.items.map((item, index) => {
                                     // מיון ההוצאות לפי תאריך
@@ -242,11 +241,13 @@ export default function ProfileExpenses({ username, profileName, refreshExpenses
                                                     })}
                                                     <tr className="border-1 *:border-1">
                                                         <td colSpan={3}>
-                                                            <button data-cat={category.categoryName} data-item={item.iName} onClick={(e) => {
-                                                                setShowAddTransact(!showAddTransact);
-                                                                setChoosenCategory(e.target.dataset.cat);
-                                                                setChoosenItem(e.target.dataset.item);
-                                                            }}>
+                                                            <button data-cat={category.categoryName}
+                                                                data-item={item.iName}
+                                                                onClick={(e) => {
+                                                                    setShowAddTransact(!showAddTransact);
+                                                                    setChoosenCategory(e.target.dataset.cat);
+                                                                    setChoosenItem(e.target.dataset.item);
+                                                                }}>
                                                                 הוספת עסקה
                                                             </button>
                                                         </td>

@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import ProfileExpenses from "./ProfileExpenses";
+
 
 export default function ExpensesByBudget({ username, profileName }) {
     const [profBudgets, setProfBudgets] = useState([]);
     const [catBudgets, setCatBudgets] = useState([]);
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
-    const [category, setCategory] = useState("");
-    const [showProfBudgets, setShowProfBudgets] = useState(false);
-    const [showCatBudgets, setShowCatBudgets] = useState(false);
-    const [showTable, setShowTable] = useState(false);
+    const [choosenCategory, setCategory] = useState("");
+    const [expenses, setExpenses] = useState([]);
+    const [showProfBudgetSelect, setShowProfBudgetSelect] = useState(false);
+    const [showExpenses, setShowExpenses] = useState(false);
+    const [showCategoryBudgetSelect, setShowCategoryBudgetSelect] = useState(false);
+
 
     async function getProfBudgetsDates() {
         try {
@@ -52,6 +54,47 @@ export default function ExpensesByBudget({ username, profileName }) {
     }
 
 
+    async function getProfileCategoriesByDate() {
+        try {
+            let response = await fetch('http://localhost:5500/api/profile/get_cats_dates', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, profileName, startDate, endDate })
+            });
+            let data = await response.json();
+            if (response.ok) {
+                return data.categories;
+            } else {
+                return [];
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function getCategoryByDate() {
+        try {
+            let response = await fetch('http://localhost:5500/api/profile/get_cat_date', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, profileName, choosenCategory, startDate, endDate })
+            });
+            let data = await response.json();
+            if (response.ok) {
+                return data.category;
+            } else {
+                return [];
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
     async function fetchBudgets() {
         const profBudgets = await getProfBudgetsDates();
         const catBudgets = await getCatBudgets();
@@ -61,6 +104,7 @@ export default function ExpensesByBudget({ username, profileName }) {
         if (catBudgets) {
             setCatBudgets(catBudgets);
         }
+        console.log(catBudgets);
     }
 
     useEffect(() => {
@@ -68,98 +112,143 @@ export default function ExpensesByBudget({ username, profileName }) {
     }, [username, profileName]);
 
 
-    function setDates(e) {
-        const selectedOption = e.target.selectedOptions[0];
-        setStartDate(selectedOption.dataset.startdate);
-        setEndDate(selectedOption.dataset.enddate);
-    }
-
-
-    function setDatesAndCategory(e) {
-        const selectedOption = e.target.selectedOptions[0];
-        setStartDate(selectedOption.dataset.startdate);
-        setEndDate(selectedOption.dataset.enddate);
-        setCategory(selectedOption.dataset.category);
+    async function removeBlankAndSetExpenses(byDate) {
+        let expenses
+        if (byDate) {
+            expenses = await getProfileCategoriesByDate();
+        }
+        else {
+            expenses = await getCategoryByDate();
+        }
+        let tmp = [];
+        expenses.forEach(expense => {
+            expense.items.forEach(item => {
+                if (item.transactions.length > 0) {
+                    tmp.push({
+                        categoryName: expense.categoryName,
+                        items: [{
+                            iName: item.iName,
+                            transactions: item.transactions
+                        }]
+                    });
+                }
+            })
+        });
+        setExpenses(tmp);
     }
 
     return (
         <div>
-            <div className="mb-4 flex-col *:py-2 *:px-2 *:bg-blue-500 *:text-white *:rounded-md *:mx-1 *:hover:bg-blue-600 *:h-max">
+            <div className="grid-cols-2 *:p-2 *:bg-blue-500 *:text-white *:hover:bg-blue-600 *:transition *:rounded-md *:m-2">
                 <button onClick={(e) => {
-                    setShowProfBudgets(!showProfBudgets);
-                    setShowCatBudgets(false)
-                    setShowTable(false);
+                    setShowProfBudgetSelect(!showProfBudgetSelect);
+                    setShowExpenses(() => { if (showExpenses) return false; });
                 }}
-                >לצפות בתקופת תקציב כללית</button>
+                >הצג הוצאות לפי תאריך</button>
                 <button onClick={(e) => {
-                    setShowProfBudgets(false);
-                    setShowCatBudgets(!showCatBudgets);
-                    setShowTable(false);
+                    setShowCategoryBudgetSelect(!showCategoryBudgetSelect);
+                    setShowExpenses(() => { if (showExpenses) return false; });
                 }}
-                >לצפות בתקופת תקציב לקטגוריות</button>
+                >הצג הוצאות לפי קטגוריה</button>
             </div>
-            {showProfBudgets && (
-                profBudgets.length > 0 ? (
-                    <div className="grid">
-                        <select className="text-center" onChange={(e) => setDates(e)}>
-                            <option selected disabled>בחר תקופת תקציב</option>
-                            {profBudgets.map((budget, index) => {
-                                return (<option data-startdate={budget.startDate} data-enddate={budget.endDate}
-                                    key={index}>
-                                    {budget.startDate} - {budget.endDate}</option>)
-                            })}
-                        </select>
-                        <div className="*:mx-2 *:p-2 mb-3">
-                            <button
-                                className=" bg-blue-500 text-white rounded-md hover:bg-blue-600 h-max w-max mx-auto mt-4"
-                                onClick={(e) => {
-                                    setShowCatBudgets(false);
-                                    setShowTable(true);
-                                }}
-                            >הצג תוצאות</button>
-                            <button className=" bg-blue-500 text-white rounded-md hover:bg-blue-600 h-max w-max mx-auto mt-4"
-                                onClick={(e) => setShowTable(false)}>
-                                סגור טבלה
-                            </button>
-                        </div>
-                    </div>
-                )
-                    : (
-                        <p>לא נמצאו הגדרות תקציב לפרופיל</p>
-                    )
-            )}
-            {showCatBudgets && (
-                catBudgets.length > 0 ? (
-                    <div className="grid">
-                        <select className="text-center" onChange={(e) => setDatesAndCategory(e)}>
-                            <option selected disabled>בחר תקופת תקציב וקטגוריה</option>
-                            {catBudgets.map((budget, index) => {
-                                return (<option data-category={budget.category} data-startdate={budget.startDate} data-enddate={budget.endDate}
-                                    key={index}>
-                                    {budget.category} - {budget.startDate} - {budget.endDate}</option>)
-                            })}
-                        </select>
-                        <div className="*:mx-2 *:p-2 mb-3">
-                            <button
-                                className=" bg-blue-500 text-white rounded-md hover:bg-blue-600 h-max w-max mx-auto mt-4"
-                                onClick={(e) => {
-                                    setShowProfBudgets(false);
-                                    setShowTable(true);
-                                }}
-                            >הצג תוצאות</button>
-                            <button className=" bg-blue-500 text-white rounded-md hover:bg-blue-600 h-max w-max mx-auto mt-4"
-                                onClick={(e) => setShowTable(false)}>
-                                סגור טבלה
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <p>לא נמצאו הגדרות תקציב לקטגוריות</p>
-                )
-            )}
-            {showTable &&
-                <ProfileExpenses username={username} profileName={profileName} showFilterDatesBtn={true} />
+            {showProfBudgetSelect && (
+                <div className="grid grid-cols-2 w-max mx-auto my-4">
+                    <select onChange={(e) => {
+                        const option = e.target.selectedOptions[0];
+                        setStartDate(option.dataset.start);
+                        setEndDate(option.dataset.end);
+                    }}>
+                        <option selected disabled>בחר תקופת תקציב</option>
+                        {profBudgets.map((budget, index) => {
+                            return (
+                                <option data-start={budget.startDate} data-end={budget.endDate}
+                                    key={index}>{budget.startDate + " - " + budget.endDate}</option>
+                            );
+                        })}
+                    </select>
+                    <button onClick={(e) => {
+                        removeBlankAndSetExpenses(true);
+                        setShowExpenses(true);
+                    }}
+                    >הצג</button>
+                </div>
+            )
             }
+            {
+                showCategoryBudgetSelect && (
+                    <div className="grid grid-cols-2 w-max mx-auto my-4">
+                        <select onChange={(e) => {
+                            const option = e.target.selectedOptions[0];
+                            setStartDate(option.dataset.start);
+                            setEndDate(option.dataset.end);
+                            setCategory(option.dataset.category);
+                        }}>
+                            <option selected disabled>בחר תקופת תקציב</option>
+                            {catBudgets.map((budget, index) => {
+                                return (
+                                    <option
+                                        data-start={budget.startDate}
+                                        data-end={budget.endDate}
+                                        data-category={budget.category}
+                                        key={index}>{budget.category + " - "
+                                            + budget.startDate + " - " + budget.endDate}</option>
+                                );
+                            })}
+                        </select>
+                        <button onClick={(e) => {
+                            removeBlankAndSetExpenses(false);
+                            setShowExpenses(true);
+                        }}
+                        >הצג</button>
+                    </div>
+                )
+            }
+            {showExpenses && (
+                expenses.length > 0 ? (
+                    <div className=' grid max-h-110 overflow-y-auto border-1 rounded-md'>
+                        {expenses.map((category, index) => {
+                            return (
+                                <div key={index}>
+                                    <h3>קטגוריה: {category.categoryName}</h3>
+                                    <div>
+                                        {category.items.map((item, index) => {
+                                            // מיון ההוצאות לפי תאריך
+                                            const sortedTransactions = item.transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+                                            return (
+                                                <div key={index}>
+                                                    <h5>שם בעל העסק: {item.iName}</h5>
+                                                    <h5>הוצאות:</h5>
+                                                    <table className="w-full">
+                                                        <thead>
+                                                            <tr className="border-1 *:border-1">
+                                                                <th>תאריך</th>
+                                                                <th>סכום</th>
+                                                                <th>עריכה</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {sortedTransactions.map((transactions, index) => {
+                                                                return (
+                                                                    < >
+                                                                        <tr key={index} className="border-1 *:border-1">
+                                                                            <td className="border-1">{transactions.date}</td>
+                                                                            <td className="border-1">{transactions.price}</td>
+                                                                        </tr>
+                                                                    </>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                ) : (<h3>לא נמצאו הוצאות</h3>)
+            )}
         </div>
     );
 }

@@ -46,7 +46,7 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
     }
 
     return (
-        <div className='relative grid mt-20 h-110 overflow-y-auto border-1 rounded-md bg-blue-100 **:h-max'>
+        <div className='relative grid mt-20 h-110 overflow-y-auto border-1 rounded-md bg-blue-100 *:h-max'>
             {showCategories && !showAddCategory && <h2>הקטגוריות שלך:</h2>}
             {showCategories && !showAddCategory && (
                 <GetCats username={username} profileName={profileName} onCategoryClick={onCategoryClick} />

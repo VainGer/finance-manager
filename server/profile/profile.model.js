@@ -495,6 +495,7 @@ export async function getAllCategoriesBetweenDates(username, profileName, startD
     }
 }
 
+//in use
 export async function getCategory(username, profileName, category) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
@@ -504,6 +505,32 @@ export async function getCategory(username, profileName, category) {
         return [cat];
     } catch (error) {
         console.log(error);
+        return [];
+    }
+}
+
+export async function getCategoryBetweenDates(username, profileName, category, startDate, endDate) {
+    try {
+        startDate = new Date(startDate);
+        endDate = new Date(endDate);
+        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
+        data = JSON.parse(data);
+        let profile = data.profiles.find(p => p.pName === profileName);
+        let cat = profile.expenses.categories.find(c => c.categoryName === category);
+        let filteredCategories = cat.items.filter(item => {
+            let filteredTransactions = item.transactions.filter(transaction => {
+                let transactionDate = new Date(transaction.date);
+                return transactionDate >= startDate && transactionDate <= endDate;
+            });
+            if (filteredTransactions.length > 0) {
+                return true;
+            }
+            return false;
+        });
+        console.log(filteredCategories)
+        return filteredCategories;
+    } catch (error) {
+        console.error(error);
         return [];
     }
 }
