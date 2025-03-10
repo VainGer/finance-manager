@@ -1,14 +1,18 @@
-import { useEffect, useState } from "react"
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import Header from "../components/Header";
-export default function Register() {
+import { FaUser, FaLock } from "react-icons/fa";
 
+export default function Register() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     async function register(e) {
         e.preventDefault();
+        setError(null);
         try {
             let response = await fetch('http://localhost:5500/api/auth/register', {
                 method: 'POST',
@@ -19,31 +23,69 @@ export default function Register() {
             });
             if (response.ok) {
                 navigate('/account', { state: { username } });
+            } else {
+                setError("שם משתמש או סיסמה לא תקינים");
             }
-            else {
-                alert("Invalid username or password");
-                //TODO
-            }
-        }
-        catch (error) {
+        } catch (error) {
+            setError("שגיאה ברשת, נסה שוב מאוחר יותר.");
             console.log(error);
         }
     }
 
     return (
-        <div dir="rtl" className="text-center">
-            <div className="grid grid-cols-2 w-full h-max place-items-center">
-                <img className="w-25" src="./src/assets/images/logo.jpg" alt="logo" />
-                <a href="/">חזרה לדף הבית</a>
+        <div dir="rtl" className="bg-gradient-to-br from-gray-100 to-gray-300 min-h-screen flex flex-col items-center">
+            <Header />
+            <div className="flex flex-col items-center justify-center mt-10 w-full max-w-md bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                <h1 className="text-3xl font-bold text-blue-700 mb-6">הרשמה</h1>
+                
+                {/* הודעת שגיאה */}
+                {error && (
+                    <motion.p 
+                        initial={{ opacity: 0 }} 
+                        animate={{ opacity: 1 }} 
+                        className="text-red-500 mb-4 text-sm"
+                    >
+                        {error}
+                    </motion.p>
+                )}
+
+                <form onSubmit={register} className="grid gap-4 w-full">
+                    {/* שם משתמש */}
+                    <div className="relative">
+                        <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                        <input 
+                            className="w-full p-3 pl-10 border border-gray-300 rounded-md text-gray-900 bg-white focus:border-blue-500 focus:ring focus:ring-blue-200" 
+                            type="text" 
+                            placeholder="שם משתמש"
+                            onChange={(e) => setUsername(e.target.value)} 
+                        />
+                    </div>
+
+                    {/* סיסמה */}
+                    <div className="relative">
+                        <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                        <input 
+                            className="w-full p-3 pl-10 border border-gray-300 rounded-md text-gray-900 bg-white focus:border-blue-500 focus:ring focus:ring-blue-200" 
+                            type="password" 
+                            placeholder="סיסמה"
+                            onChange={(e) => setPassword(e.target.value)} 
+                        />
+                    </div>
+
+                    {/* כפתור הרשמה */}
+                    <motion.button 
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-6 py-3 bg-blue-600 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-blue-700 transition-all"
+                        type="submit"
+                    >
+                        הרשמה
+                    </motion.button>
+                </form>
+
+                {/* חזרה לדף הבית */}
+                <a href="/" className="mt-4 text-blue-600 hover:underline">חזרה לדף הבית</a>
             </div>
-            <h1>הרשמה</h1>
-            <form onSubmit={register} className="grid text-center place-items-center">
-                <label>Username</label>
-                <input className='border-1' type="text" onChange={(e) => setUsername(e.target.value)} />
-                <label>Password</label>
-                <input className='border-1' type="password" onChange={(e) => setPassword(e.target.value)} />
-                <input type="submit" value="Register" />
-            </form>
         </div>
     );
 }
