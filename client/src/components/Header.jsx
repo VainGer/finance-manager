@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import LoginPopup from './LoginPopup';
+import { div } from 'framer-motion/client';
 
 export default function Header({ username, profileName, parent }) {
     const navigate = useNavigate();
@@ -33,13 +34,13 @@ export default function Header({ username, profileName, parent }) {
     }
 
     return (
-        <header className='relative w-full h-16 bg-blue-600 text-white shadow-md flex justify-between items-center px-6'>
+        <header className='relative w-full h-16 bg-blue-600 text-white shadow-md flex items-center px-6'>
             <img className='h-12' src="./src/assets/images/logo.jpg" alt="LOGO" />
 
-            <div className='flex gap-6 items-center'>
-                {username ? (
+            <div className='flex gap-6 items-center mx-auto'>
+                {username && !profileName && (
                     <div className='flex gap-4 items-center'>
-                        <h2 className='text-lg font-medium'>שלום, {username}!</h2>
+                        <h2 className='place-self-start text-lg font-medium'>שלום, {username}!</h2>
                         {location.pathname === '/dashboard' && (
                             <motion.button
                                 transition={{ duration: 0 }}
@@ -61,7 +62,43 @@ export default function Header({ username, profileName, parent }) {
                             יציאה
                         </motion.button>
                     </div>
-                ) : (
+                )}
+                {username && profileName ? (
+                    <div className='flex gap-4 items-center'>
+                        <h2 className='text-lg font-medium'>שלום, {profileName}!</h2>
+                        {location.pathname === '/dashboard' && (
+                            <div className='*:mx-4'>
+                                <motion.button
+                                    transition={{ duration: 0 }}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className='px-4 py-2 bg-gray-200 text-blue-600 rounded-md hover:bg-gray-300 transition'
+                                    onClick={() => navigate('/acc_settings', { state: { username, profileName, parent } })}
+                                >
+                                    הגדרות משתמש
+                                </motion.button>
+                                <motion.button
+                                    transition={{ duration: 0 }}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className='px-4 py-2 bg-gray-200 text-blue-600 rounded-md hover:bg-gray-300 transition'
+                                    onClick={() => navigate('/account', { state: { username, profileName, parent } })}
+                                >
+                                    לצאת מהפרופיל
+                                </motion.button>
+                            </div>
+                        )}
+                        <motion.button
+                            transition={{ duration: 0 }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className='px-4 py-2 bg-white text-blue-600 rounded-md hover:bg-gray-200 transition'
+                            onClick={() => navigate('/')}
+                        >
+                            יציאה
+                        </motion.button>
+                    </div>
+                ) : (!username && !profileName &&
                     <div className='flex gap-4 items-center'>
                         <motion.button
                             transition={{ duration: 0 }}
@@ -87,5 +124,6 @@ export default function Header({ username, profileName, parent }) {
 
             {showLogin && <LoginPopup isOpen={showLogin} setIsOpen={setShowLogin} login={login} />}
         </header>
+
     );
 }

@@ -3,7 +3,7 @@ import {
     addTransaction, renameCategory, removeItemFromCategory, renameItemInCategory,
     editTransPrice, deleteTransaction, removeCategorySaveItems, migrateItem,
     setCategoryPrivacy, getProfileExpenses, getAllExpenses,
-    getProfileCategories, getCategoryItems, editTransactionDate,
+    getCategoriesList, getCategoryItems, editTransactionDate,
     setProfileBudget, setCategoryBudget, getProfileBudget,
     getCategoryBudget, getAllCategoriesBetweenDates,
     getCategory, getCategoryBetweenDates
@@ -218,8 +218,8 @@ export async function deleteTransact(req, res) {
 
 
 export async function getCats(req, res) {
-    let { username, profileName } = req.body;
-    let cats = await getProfileCategories(username, profileName);
+    let { username, profileName, forAccount } = req.body;
+    let cats = await getCategoriesList(username, profileName, forAccount);
     if (cats.length > 0) {
         res.status(200).json({
             message: "Your categories",
@@ -331,9 +331,9 @@ export async function getCatBudg(req, res) {
 }
 
 export async function getCatsByDates(req, res) {
-    const { username, profileName, startDate, endDate } = req.body;
+    const { username, profileName, startDate, endDate, forAccount } = req.body;
     try {
-        const categories = await getAllCategoriesBetweenDates(username, profileName, startDate, endDate);
+        const categories = await getAllCategoriesBetweenDates(username, profileName, startDate, endDate, forAccount);
         res.status(200).json({
             message: 'Categories fetched successfully',
             categories: categories
@@ -345,9 +345,9 @@ export async function getCatsByDates(req, res) {
 }
 
 export async function getCat(req, res) {
-    const { username, profileName, choosenCategory } = req.body;
+    const { username, profileName, choosenCategory, forAccount } = req.body;
     try {
-        const cat = await getCategory(username, profileName, choosenCategory);
+        const cat = await getCategory(username, profileName, choosenCategory, forAccount);
         res.status(200).json({
             message: 'Category fetched successfully',
             category: cat

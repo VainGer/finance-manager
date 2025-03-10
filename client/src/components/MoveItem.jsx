@@ -37,7 +37,11 @@ export default function MoveItem({ username, profileName, category, refreshExpen
                 <label>בחר פריט</label>
                 <ItemsToSelcet username={username} profileName={profileName} category={category} onSelectedOpt={setItemName} />
                 <label>בחר קטגוריה אליה תעביר את הפריט</label>
-                <GetCats username={username} profileName={profileName} onCategorySelect={setnextCat} select={true}></GetCats>
+                <GetCats username={username}
+                    profileName={profileName}
+                    onCategorySelect={setnextCat}
+                    select={true}
+                    forAccount={false}></GetCats>
                 <input type="submit" value="שמור" />
                 <input type="button" value="סגור" onClick={(e) => { showConfirm(false); }} />
             </form>

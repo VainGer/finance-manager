@@ -42,7 +42,7 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, profileName, startDate, endDate })
+                body: JSON.stringify({ username, profileName, startDate, endDate, forAccount: false })
             });
             let data = await response.json();
             if (response.ok) {
@@ -62,7 +62,7 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, profileName, choosenCategory })
+                body: JSON.stringify({ username, profileName, choosenCategory, forAccount: false })
             });
             let data = await response.json();
             if (response.ok) {
@@ -136,7 +136,7 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
                 showFilterCats &&
                 <div className="mt-2 mb-4 text-center">
                     <GetCats username={username} profileName={profileName}
-                        refreshExpenses={refreshExpenses} select={true} onCategorySelect={onCategorySelect} />
+                        refreshExpenses={refreshExpenses} select={true} onCategorySelect={onCategorySelect} forAccount={false} />
                     <button
                         onClick={async (e) => { setProfExpenses(await getOneCategory()); }}
                     >חפש</button>
@@ -157,7 +157,13 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
                     </form>
                 </div>
             }
-            <ExpensesTable username={username} profileName={profileName} expenseData={profExpenses} refreshExpenses={refreshExpenses} showRelation={false} showEditBtn={true} />
+            <ExpensesTable username={username}
+                profileName={profileName}
+                expenseData={profExpenses}
+                refreshExpenses={refreshExpenses}
+                showRelation={false}
+                showEditBtn={true}
+                showAddTransactBtn={true} />
         </div>
     );
 }

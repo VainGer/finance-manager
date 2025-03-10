@@ -13,7 +13,7 @@ export default function Home() {
     }, []);
 
     return (
-        <div dir='rtl' className='bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen'>
+        <div dir='rtl' className='bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen mb-4'>
             <Header />
             <div className='flex flex-col items-center justify-center min-h-screen px-4 text-gray-900'>
 

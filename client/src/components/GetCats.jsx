@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
 
-export default function GetCats({ username, profileName, onCategoryClick, onCategorySelect, select }) {
+export default function GetCats({ username, profileName, onCategoryClick, onCategorySelect, select, forAccount }) {
     const [categories, setCategories] = useState([]);
 
 
     useEffect(() => {
         async function fetchCategories() {
             try {
-                let response = await fetch('http://localhost:5500/api/profile/prof_categories', {
+                let response = await fetch('http://localhost:5500/api/profile/categories_list', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ username, profileName })
+                    body: JSON.stringify({ username, profileName, forAccount })
                 });
                 let data = await response.json();
                 if (response.ok) {
@@ -35,7 +35,7 @@ export default function GetCats({ username, profileName, onCategoryClick, onCate
                     {categories.length > 0 ? (categories.map((category, index) => (
                         <option key={index} className='text-center'
                         >{category.categoryName}</option>
-                    ))) : (<></>)}
+                    ))) : (<option>לא נמצאו קטגוריות</option>)}
                 </select>
                 ) :
                     <div className='grid'>

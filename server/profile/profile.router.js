@@ -30,7 +30,7 @@ profileRouter
     .post('/set_privacy', setPrivacy)
     .post('/profile_expenses', getProfExpenses)
     .post('/acc_expenses', getAccautExpenses)
-    .post('/prof_categories', getCats)
+    .post('/categories_list', getCats)
     .post('/get_items', getItems)
     .post('/set_prof_budget', setProfBudg)
     .post('/set_cat_budget', setCatBudg)

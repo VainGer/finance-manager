@@ -11,7 +11,7 @@ export default function Account() {
         <div dir='rtl' className="bg-gradient-to-br from-gray-100 to-gray-300 min-h-screen">
             <Header username={username} />
 
-            <div className="flex flex-col items-center justify-center min-h-screen text-gray-900">
+            <div className="flex flex-col items-center justify-center mt-16 mx-4 md:mx-0 text-gray-900">
 
 
                 <motion.h1

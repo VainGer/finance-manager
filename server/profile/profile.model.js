@@ -307,12 +307,14 @@ export async function deleteTransaction(username, profileName, category, item, i
 }
 
 //in use
-export async function getProfileCategories(username, profileName) {
+export async function getCategoriesList(username, profileName, forAccount) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
-        let profile = data.profiles.find(p => p.pName === profileName);
-        return profile.expenses.categories;
+        if (forAccount) {
+            return await getAllExpenses(username, profileName);
+        }
+        return await getProfileExpenses(username, profileName);
     } catch (error) {
         console.log(error);
         return [];
@@ -352,7 +354,7 @@ export async function getAllExpenses(username, profileName) {
             let categories = p.expenses.categories;
             categories.forEach(c => {
                 c.items.forEach(i => {
-                    i.transactions.forEach(t => { t.related === p.pName ? true : false });
+                    i.transactions.forEach(t => { t.related ? true : false });
                 })
                 if (!c.private) {
                     expenses.forEach(e => {
@@ -463,15 +465,15 @@ export async function getCategoryBudget(username, profileName) {
 }
 
 //in use
-export async function getAllCategoriesBetweenDates(username, profileName, startDate, endDate) {
+export async function getAllCategoriesBetweenDates(username, profileName, startDate, endDate, forAccount) {
     try {
         startDate = new Date(startDate);
         endDate = new Date(endDate);
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
-        let profile = data.profiles.find(p => p.pName === profileName);
         let filteredCategories = [];
-        profile.expenses.categories.forEach(category => {
+        let categories = forAccount ? await getAllExpenses(username, profileName) : await getProfileExpenses(username, profileName);
+        categories.forEach(category => {
             let filteredItems = [];
             category.items.forEach(item => {
                 let filteredTransactions = item.transactions.filter(transaction => {
@@ -496,13 +498,15 @@ export async function getAllCategoriesBetweenDates(username, profileName, startD
 }
 
 //in use
-export async function getCategory(username, profileName, category) {
+export async function getCategory(username, profileName, category, forAccount) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName);
-        let cat = profile.expenses.categories.find(c => c.categoryName === category);
-        return [cat];
+        let expenses = forAccount ? await getAllExpenses(username, profileName)
+            : await getProfileExpenses(username, profileName);
+        expenses = expenses.filter(c => c.categoryName === category);
+        return expenses;
     } catch (error) {
         console.log(error);
         return [];

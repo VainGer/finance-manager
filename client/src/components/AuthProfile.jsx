@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-export default function AuthProfile({ username, profileName, parent }) {
+import { motion } from 'framer-motion';
+
+export default function AuthProfile({ username, profileName, parent, backToSelect }) {
     const [pin, setPin] = useState('');
     const navigate = useNavigate();
 
@@ -30,10 +32,31 @@ export default function AuthProfile({ username, profileName, parent }) {
         }
     }
     return (
-        <form onSubmit={(e) => authProf(e)}>
-            <label>הזן את הקוד הסודי</label>
-            <input onChange={(e) => setPin(e.target.value)} type="password" />
-            <input type="submit" value="כניסה לפרופיל" />
+        <form className='grid grid-cols-1 gap-4 text-center'
+            onSubmit={(e) => authProf(e)}>
+            <label className='font-medium'>הזן את הקוד הסודי</label>
+            <input className='p-2 border border-gray-300 rounded-lg shadow-lg text-center'
+                onChange={(e) => setPin(e.target.value)} type="password" />
+            <motion.button
+                transition={{ duration: 0 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className='p-2 bg-green-500 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-green-600 transition-all'
+                type="submit"
+            >
+                כניסה לפרופיל
+            </motion.button>
+            <motion.button
+                transition={{ duration: 0 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="mt-4 px-4 py-2 bg-gray-300 text-gray-800 font-medium rounded-lg shadow-md hover:bg-gray-400 transition"
+                onClick={(e) => {
+                    backToSelect();
+                }}
+            >
+                חזרה לבחירת פרופיל
+            </motion.button>
         </form>
     );
 }

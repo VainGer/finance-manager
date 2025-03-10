@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import AddTransactInReport from "./AddTransactInReport";
 import TransactionEditor from "./TransactionEditor";
 
-export default function ExpensesTable({ username, profileName, expenseData, refreshExpenses, showEditBtn, showRelation }) {
+export default function ExpensesTable({ username, profileName, expenseData, refreshExpenses, showEditBtn, showRelation,
+    showAddTransactBtn }) {
 
 
     const [expenses, setExpenses] = useState([]);
@@ -104,17 +105,19 @@ export default function ExpensesTable({ username, profileName, expenseData, refr
                                                     );
                                                 })}
                                                 <tr className="border-1 *:border-1">
-                                                    <td colSpan={3}>
-                                                        <button data-cat={category.categoryName}
-                                                            data-item={item.iName}
-                                                            onClick={(e) => {
-                                                                setShowAddTransact(true);
-                                                                setChoosenCategory(e.target.dataset.cat);
-                                                                setChoosenItem(e.target.dataset.item);
-                                                            }}>
-                                                            הוספת עסקה
-                                                        </button>
-                                                    </td>
+                                                    {showAddTransactBtn &&
+                                                        <td colSpan={3}>
+                                                            <button data-cat={category.categoryName}
+                                                                data-item={item.iName}
+                                                                onClick={(e) => {
+                                                                    setShowAddTransact(true);
+                                                                    setChoosenCategory(e.target.dataset.cat);
+                                                                    setChoosenItem(e.target.dataset.item);
+                                                                }}>
+                                                                הוספת עסקה
+                                                            </button>
+                                                        </td>
+                                                    }
                                                 </tr>
                                             </tbody>
                                         </table>

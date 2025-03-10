@@ -34,7 +34,7 @@ export default function SetCategoryBudget({ username, profileName, category, sho
 
     return (<div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
         <form onSubmit={setBudget} className='bg-white grid border-blue-600 border-10 rounded-2xl h-70 *:h-max *:border-b-1'>
-            <GetCats username={username} profileName={profileName} select={true} />
+            <GetCats username={username} profileName={profileName} select={true} forAccount={false}/>
             <label>הכנס סכום</label>
             <input type="number" onChange={(e) => setAmount(e.target.value)} />
             <label>בחר תאריך התחלה</label>

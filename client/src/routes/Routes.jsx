@@ -5,7 +5,6 @@ import Account from "../pages/Account"
 import Home from "../pages/Home";
 import Dashboard from "../pages/Dashboard";
 import AccountSettings from "../pages/AccountSettings";
-import Login from "../components/Login";
 
 export const router = createBrowserRouter([
     {
@@ -22,9 +21,6 @@ export const router = createBrowserRouter([
     },
     {
         path: '/acc_settings', element :<AccountSettings/>
-    },
-    {
-        path: '/login', element :<Login/>
     }
     
 ]);

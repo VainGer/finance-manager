@@ -35,14 +35,14 @@ export default function Register() {
     return (
         <div dir="rtl" className="bg-gradient-to-br from-gray-100 to-gray-300 min-h-screen flex flex-col items-center">
             <Header />
-            <div className="flex flex-col items-center justify-center mt-10 w-full max-w-md bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="flex flex-col self-center items-center justify-center mt-20  md:w-full md:max-w-md bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
                 <h1 className="text-3xl font-bold text-blue-700 mb-6">הרשמה</h1>
-                
+
                 {/* הודעת שגיאה */}
                 {error && (
-                    <motion.p 
-                        initial={{ opacity: 0 }} 
-                        animate={{ opacity: 1 }} 
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         className="text-red-500 mb-4 text-sm"
                     >
                         {error}
@@ -53,27 +53,27 @@ export default function Register() {
                     {/* שם משתמש */}
                     <div className="relative">
                         <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                        <input 
-                            className="w-full p-3 pl-10 border border-gray-300 rounded-md text-gray-900 bg-white focus:border-blue-500 focus:ring focus:ring-blue-200" 
-                            type="text" 
+                        <input
+                            className="w-full p-3 pl-10 border border-gray-300 rounded-md text-gray-900 bg-white focus:border-blue-500 focus:ring focus:ring-blue-200"
+                            type="text"
                             placeholder="שם משתמש"
-                            onChange={(e) => setUsername(e.target.value)} 
+                            onChange={(e) => setUsername(e.target.value)}
                         />
                     </div>
 
                     {/* סיסמה */}
                     <div className="relative">
                         <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                        <input 
-                            className="w-full p-3 pl-10 border border-gray-300 rounded-md text-gray-900 bg-white focus:border-blue-500 focus:ring focus:ring-blue-200" 
-                            type="password" 
+                        <input
+                            className="w-full p-3 pl-10 border border-gray-300 rounded-md text-gray-900 bg-white focus:border-blue-500 focus:ring focus:ring-blue-200"
+                            type="password"
                             placeholder="סיסמה"
-                            onChange={(e) => setPassword(e.target.value)} 
+                            onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
 
                     {/* כפתור הרשמה */}
-                    <motion.button 
+                    <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className="px-6 py-3 bg-blue-600 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-blue-700 transition-all"

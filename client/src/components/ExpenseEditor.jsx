@@ -48,7 +48,7 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
     return (
         <div className='relative my-6 grid h-110 overflow-y-auto border-1 rounded-md bg-blue-100 *:h-max *:mx-4'>
             {showCategories && !showAddCategory && (
-                <GetCats username={username} profileName={profileName} onCategoryClick={onCategoryClick} />
+                <GetCats username={username} profileName={profileName} onCategoryClick={onCategoryClick} forAccount={false}/>
             )}
             {showEditMenu && (
                 <div className='grid gap-4 mt-4'>

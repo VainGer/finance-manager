@@ -42,6 +42,14 @@ export default function SelectProfile({ username }) {
         fetchProfiles();
     }, [username]);
 
+    function backToSelect() {
+        setToggleProfiles(true);
+        setToggleAddProfiles(false);
+        setToggleAddBtn(true);
+        setToggleAuthProfile(false);
+    }
+
+
     return (
         <div className="w-full max-w-md mx-auto mt-8 p-6 bg-white rounded-2xl shadow-lg border border-gray-200">
             {profiles.length > 0 ? (
@@ -81,20 +89,7 @@ export default function SelectProfile({ username }) {
                             transition={{ duration: 0.5 }}
                             className="w-full"
                         >
-                            <AuthProfile username={username} profileName={profileName} parent={parent} />
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="mt-4 px-4 py-2 bg-gray-300 text-gray-800 font-medium rounded-lg shadow-md hover:bg-gray-400 transition"
-                                onClick={() => {
-                                    setToggleProfiles(true);
-                                    setToggleAddProfiles(false);
-                                    setToggleAddBtn(true);
-                                    setToggleAuthProfile(false);
-                                }}
-                            >
-                                חזרה לבחירת פרופיל
-                            </motion.button>
+                            <AuthProfile username={username} profileName={profileName} parent={parent} backToSelect={backToSelect} />
                         </motion.div>
                     )}
 

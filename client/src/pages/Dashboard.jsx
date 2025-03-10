@@ -56,24 +56,23 @@ export default function Dashboard() {
     return (
         <div dir='rtl' className='text-center bg-gray-100 min-h-screen'>
             <Header username={username} profileName={profileName} parent={parent} />
-            
+
             <div className='grid grid-cols-4 gap-6 w-full mx-4 relative mt-4 p-4'>
-                
+
                 <div className='h-full bg-white shadow-md rounded-xl p-6 border border-gray-300'>
                     <h2 className='text-xl font-semibold text-blue-600 mb-4'>פאנל עריכה</h2>
                     <span className='text-gray-600 text-sm'>בחר קטגוריה</span>
                     <ExpenseEditor username={username} profileName={profileName} refreshExpenses={refreshExpenses} />
                 </div>
 
-               
+
                 <div className='col-span-3 bg-white shadow-md rounded-xl p-6 border border-gray-300'>
 
-                    
+
                     <div className='grid grid-cols-4 gap-4 mb-6'>
                         <button
-                            className={`px-6 py-3 text-white font-medium rounded-lg shadow-md transition ${
-                                showProfExpenses ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
-                            }`}
+                            className={`px-6 py-3 text-white font-medium rounded-lg shadow-md transition ${showProfExpenses ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+                                }`}
                             onClick={() => {
                                 setShowProfExpenses(!showProfExpenses);
                                 setShowAccExpenses(false);
@@ -84,9 +83,8 @@ export default function Dashboard() {
                             הוצאות בפרופיל שלך
                         </button>
                         <button
-                            className={`px-6 py-3 text-white font-medium rounded-lg shadow-md transition ${
-                                showExpensesByBudget ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
-                            }`}
+                            className={`px-6 py-3 text-white font-medium rounded-lg shadow-md transition ${showExpensesByBudget ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+                                }`}
                             onClick={() => {
                                 setShowProfExpenses(false);
                                 setShowAccExpenses(false);
@@ -98,9 +96,8 @@ export default function Dashboard() {
                         </button>
                         {parent && (
                             <button
-                                className={`px-6 py-3 text-white font-medium rounded-lg shadow-md transition ${
-                                    showAccExpenses ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
-                                }`}
+                                className={`px-6 py-3 text-white font-medium rounded-lg shadow-md transition ${showAccExpenses ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+                                    }`}
                                 onClick={() => {
                                     setShowAccExpenses(!showAccExpenses);
                                     setShowProfExpenses(false);
@@ -112,9 +109,8 @@ export default function Dashboard() {
                             </button>
                         )}
                         <button
-                            className={`px-6 py-3 text-white font-medium rounded-lg shadow-md transition ${
-                                showGraphs ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
-                            }`}
+                            className={`px-6 py-3 text-white font-medium rounded-lg shadow-md transition ${showGraphs ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+                                }`}
                             onClick={() => {
                                 setShowGraphs(!showGraphs);
                                 setShowProfExpenses(false);
@@ -126,7 +122,7 @@ export default function Dashboard() {
                         </button>
                     </div>
 
-                   
+
                     <div className='mt-4'>
                         {showAccExpenses && <div key={`acc-${expensesKey}`} className="bg-gray-50 p-4 rounded-lg shadow-md"><AccountExpenses username={username} profileName={profileName} /></div>}
                         {showProfExpenses && <div key={`prof-${expensesKey}`} className="bg-gray-50 p-4 rounded-lg shadow-md"><ProfileExpenses username={username} profileName={profileName} /></div>}
