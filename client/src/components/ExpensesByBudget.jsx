@@ -11,6 +11,8 @@ export default function ExpensesByBudget({ username, profileName }) {
     const [showProfBudgetSelect, setShowProfBudgetSelect] = useState(false);
     const [showExpenses, setShowExpenses] = useState(false);
     const [showCategoryBudgetSelect, setShowCategoryBudgetSelect] = useState(false);
+    const [budgetTarget, setBudgetTarget] = useState(0);
+    const [transactionsSum, setTransactionsSum] = useState(0);
 
     async function getProfBudgetsDates() {
         try {
@@ -174,6 +176,23 @@ export default function ExpensesByBudget({ username, profileName }) {
                         removeBlankAndSetExpenses(true);
                         setShowExpenses(true);
                         setShowCategoryBudgetSelect(false);
+                        setTransactionsSum(() => {
+                            let sum = 0;
+                            expenses.forEach(expense => {
+                                expense.items.forEach(item => {
+                                    item.transactions.forEach(transaction => {
+                                        sum += parseFloat(transaction.price);
+                                    })
+                                });
+                            });
+                            return sum;
+                        });
+                        setBudgetTarget(() => {
+                            let target = profBudgets.find(budget => {
+                                return budget.startDate === startDate && budget.endDate === endDate;
+                            })
+                            return target.amount;
+                        })
                     }}
                     >הצג</button>
                 </div>
@@ -204,13 +223,37 @@ export default function ExpensesByBudget({ username, profileName }) {
                             removeBlankAndSetExpenses(false);
                             setShowExpenses(true);
                             setShowProfBudgetSelect(false);
+                            setTransactionsSum(() => {
+                                let sum = 0;
+                                expenses.forEach(expense => {
+                                    expense.items.forEach(item => {
+                                        item.transactions.forEach(transaction => {
+                                            sum += parseFloat(transaction.price);
+                                        })
+                                    });
+                                });
+                                return sum;
+                            });
+                            setBudgetTarget(() => {
+                                let target = catBudgets.find(budget => {
+                                    return budget.startDate === startDate
+                                        && budget.endDate === endDate
+                                        && budget.category === choosenCategory
+                                })
+                                return Number(target.amount);
+                            })
                         }}
                         >הצג</button>
                     </div>
                 )
             }
             {showExpenses && (
-                expenses.length > 0 ? (
+                expenses.length > 0 ? (<div className="grid grid-cols-2">
+                    <div>
+                        <h3>יעד: {budgetTarget}</h3>
+                        <h3>סה"כ הוצאות: {transactionsSum}</h3>
+                        <h3>נותר לשימוש: {budgetTarget - transactionsSum}</h3>
+                    </div>
                     <ExpensesTable username={username}
                         profileName={profileName}
                         expenseData={expenses}
@@ -218,6 +261,7 @@ export default function ExpensesByBudget({ username, profileName }) {
                         showEditBtn={false}
                         showRelation={false}
                     />
+                </div>
                 )
                     : (<h3>לא נמצאו הוצאות</h3>)
             )}

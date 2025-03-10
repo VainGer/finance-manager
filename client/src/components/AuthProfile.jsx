@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 
 export default function AuthProfile({ username, profileName, parent, backToSelect }) {
     const [pin, setPin] = useState('');
+    const [showError, setShowError] = useState(false);
     const navigate = useNavigate();
 
     async function authProf(e) {
@@ -25,7 +26,7 @@ export default function AuthProfile({ username, profileName, parent, backToSelec
             }
             else {
                 console.log(data.message);
-                //TODO
+                setShowError(true);
             }
         } catch (error) {
             console.log(error);
@@ -37,6 +38,7 @@ export default function AuthProfile({ username, profileName, parent, backToSelec
             <label className='font-medium'>הזן את הקוד הסודי</label>
             <input className='p-2 border border-gray-300 rounded-lg shadow-lg text-center'
                 onChange={(e) => setPin(e.target.value)} type="password" />
+            {showError && <p className='text-red-500'>קוד סודי לא נכון</p>}
             <motion.button
                 transition={{ duration: 0 }}
                 whileHover={{ scale: 1.05 }}
