@@ -1,48 +1,58 @@
-import { useState, useEffect } from "react";
-import ItemsToSelcet from "./ItemsToSelcet";
+import { useState } from 'react';
 
 export default function AddTransactInReport({ username, profileName, category, item, onTransactionUpdate, closeAddTransact }) {
-    const [price, setPrice] = useState('');
-    const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+    const [date, setDate] = useState('');
+    const [amount, setAmount] = useState('');
 
-
-
-    async function addTransaction(e) {
+    async function handleSubmit(e) {
         e.preventDefault();
         try {
-            let response = await fetch('http://localhost:5500/api/profile/add_transact', {
+            let response = await fetch('http://localhost:5500/api/transactions/add', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, profileName, category, item, price, date })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, profileName, category, item, date, amount })
             });
-            let data = await response.json();
+
             if (response.ok) {
-                console.log(data.message);
                 onTransactionUpdate();
                 closeAddTransact();
             } else {
-                console.log(data.message);
+                console.log('Error adding transaction');
             }
         } catch (error) {
             console.log(error);
         }
     }
 
-
     return (
-        <div className="fixed h-full w-full inset-0 z-50 flex items-center justify-center bg-black/10">
-            <form className="grid grid-cols-2 bg-white p-6 rounded-lg shadow-lg *:border-1" onSubmit={addTransaction}>
-                <label>מחיר:</label>
-                <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
-                <label>תאריך:</label>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-                {price !== "" && date !== "" ?
-                    (<input className="col-span-2 bg-green-200" type="submit" value="הוסף עסקה" />) :
-                    (<input className="col-span-2 bg-gray-400" type="submit" value="הוסף עסקה" disabled />)}
-                <button className="col-span-2" onClick={(e) => closeAddTransact()}>לחזרה</button>
-            </form >
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl border border-gray-300 w-full max-w-md">
+                <h2 className="text-xl font-semibold text-blue-600 text-center mb-4">הוספת עסקה</h2>
+                <form className="grid gap-4" onSubmit={handleSubmit}>
+                    
+                    <div className="grid">
+                        <label className="text-gray-700 font-medium">תאריך</label>
+                        <input type="date" className="p-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200"
+                            value={date} onChange={(e) => setDate(e.target.value)} required />
+                    </div>
+
+                    <div className="grid">
+                        <label className="text-gray-700 font-medium">סכום</label>
+                        <input type="number" className="p-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200"
+                            value={amount} onChange={(e) => setAmount(e.target.value)} required />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                        <button type="button" className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition"
+                            onClick={closeAddTransact}>
+                            ביטול
+                        </button>
+                        <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                            שמור עסקה
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }

@@ -19,39 +19,31 @@ export default function PieChart({ data }) {
                     label: 'הוצאות',
                     data: data.map(item => item.amount),
                     backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
+                        '#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40'
                     ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
+                    borderColor: ['#fff', '#fff', '#fff', '#fff', '#fff', '#fff'],
+                    borderWidth: 2
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         position: 'top',
+                        labels: {
+                            font: {
+                                size: 14
+                            }
+                        }
                     },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
                                 let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
+                                if (label) label += ': ';
                                 if (context.parsed !== null) {
-                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed);
+                                    label += new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS' }).format(context.parsed);
                                 }
                                 return label;
                             }
@@ -69,29 +61,38 @@ export default function PieChart({ data }) {
     }, [data]);
 
     return (
-        <div className="flex justify-center items-center">
-            <div className="w-1/3">
-                <h2>דו"ח הוצאות חודשי</h2>
+        <div className="flex flex-col lg:flex-row justify-center items-center gap-6 p-6 bg-white shadow-md rounded-lg w-full max-w-5xl mx-auto">
+            
+            {/* קונטיינר לגרף עוגה */}
+            <div className="w-full lg:w-1/2 h-72 flex justify-center">
                 <canvas ref={chartRef}></canvas>
             </div>
-            <div className="w-1/3 ml-4">
-                <h3>סכום הוצאות לפי קטגוריה</h3>
-                <table className="min-w-full bg-white">
-                    <thead>
-                        <tr>
-                            <th className="py-2">קטגוריה</th>
-                            <th className="py-2">סכום</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.map((item, index) => (
-                            <tr key={index}>
-                                <td className="border px-4 py-2">{item.category}</td>
-                                <td className="border px-4 py-2">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.amount)}</td>
+
+            {/* קונטיינר לטבלה עם גלילה אופקית */}
+            <div className="w-full lg:w-1/2 bg-gray-50 p-4 rounded-md shadow-lg overflow-x-auto">
+                <h3 className="text-xl font-semibold text-blue-600 mb-4 text-center">סכום הוצאות לפי קטגוריה</h3>
+                
+                {/* גלילה במסכים קטנים */}
+                <div className="overflow-x-auto">
+                    <table className="w-full min-w-[350px] text-center border border-gray-300 rounded-lg overflow-hidden">
+                        <thead>
+                            <tr className="bg-blue-500 text-white">
+                                <th className="py-3 px-4">קטגוריה</th>
+                                <th className="py-3 px-4">סכום</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {data.map((item, index) => (
+                                <tr key={index} className="border-b border-gray-200 hover:bg-gray-100 transition">
+                                    <td className="py-3 px-4">{item.category}</td>
+                                    <td className="py-3 px-4 font-medium">
+                                        {new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS' }).format(item.amount)}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );
