@@ -1,4 +1,4 @@
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaEdit, FaPlus } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { useState, useEffect } from 'react';
 import AddTransactInReport from "./AddTransactInReport";
@@ -30,6 +30,13 @@ export default function ExpensesTable({ username, profileName, expenseData, refr
         setShowAddTransact(false);
     }
 
+    function reformatDate(date) {
+        let year = date.slice(0, 4);
+        let month = date.slice(5, 7);
+        let day = date.slice(8, 10);
+        return day + "/" + month + "/" + year;
+    }
+
     return (
         <div className=' grid max-h-110 overflow-y-auto border-1 rounded-md w-1/2 *:m-2 mx-auto'>
             {expenses.map((category, index) => {
@@ -58,27 +65,28 @@ export default function ExpensesTable({ username, profileName, expenseData, refr
                                                     return (
                                                         < >
                                                             <tr key={index} className="border-1 *:border-1">
-                                                                <td className="border-1">{transactions.date}</td>
+                                                                <td className="border-1">{reformatDate(transactions.date)}</td>
                                                                 <td className="border-1">{transactions.price}</td>
                                                                 {showEditBtn &&
-                                                                    <td>
-                                                                        <button className="hover:bg-red-300 hover:cursor-pointer"
+                                                                    <td className="hover:cursor-pointer"
+                                                                        onClick={(e) => {
+                                                                            const button = e.currentTarget;
+                                                                            setId(button.dataset.id);
+                                                                            setChoosenCategory(button.dataset.cat);
+                                                                            setChoosenItem(button.dataset.item);
+                                                                            setPrice(button.dataset.currentprice);
+                                                                            setDate(button.dataset.currentdate);
+                                                                            SetShowTransactionEditor(true);
+                                                                        }}
+                                                                    >
+                                                                        <FaEdit className="mx-auto"
                                                                             data-cat={category.categoryName}
                                                                             data-item={item.iName}
                                                                             data-id={transactions.id}
                                                                             data-currentprice={transactions.price}
-                                                                            data-currentdate={transactions.date}
-                                                                            onClick={(e) => {
-                                                                                const button = e.currentTarget;
-                                                                                setId(button.dataset.id);
-                                                                                setChoosenCategory(button.dataset.cat);
-                                                                                setChoosenItem(button.dataset.item);
-                                                                                setPrice(button.dataset.currentprice);
-                                                                                setDate(button.dataset.currentdate);
-                                                                                SetShowTransactionEditor(true);
-                                                                            }}>
+                                                                            data-currentdate={transactions.date}>
                                                                             <img src="./src/assets/images/edit.svg" alt="edit icon" />
-                                                                        </button>
+                                                                        </FaEdit>
                                                                     </td>
                                                                 }
                                                                 {showRelation && <td>{transactions.related ? <div className="text-green-500 *:mx-auto"><FaCheck /> </div> : <div className="text-red-500 *:mx-auto"> <RxCross2 /></div>}</td>}
@@ -107,14 +115,17 @@ export default function ExpensesTable({ username, profileName, expenseData, refr
                                                 <tr className="border-1 *:border-1">
                                                     {showAddTransactBtn &&
                                                         <td colSpan={3}>
-                                                            <button data-cat={category.categoryName}
+                                                            <button className="hover:bg-green-200 w-full"
+                                                                data-cat={category.categoryName}
                                                                 data-item={item.iName}
                                                                 onClick={(e) => {
                                                                     setShowAddTransact(true);
                                                                     setChoosenCategory(e.target.dataset.cat);
                                                                     setChoosenItem(e.target.dataset.item);
                                                                 }}>
-                                                                הוספת עסקה
+                                                                <span className="mx-auto w-max flex flex-row items-center *:mx-4">
+                                                                    הוסף עסקה
+                                                                    <b className="text-green-500"><FaPlus /></b></span>
                                                             </button>
                                                         </td>
                                                     }

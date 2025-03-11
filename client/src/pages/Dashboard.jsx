@@ -56,9 +56,7 @@ export default function Dashboard() {
     return (
         <div dir='rtl' className='text-center bg-gray-100 min-h-screen'>
             <Header username={username} profileName={profileName} parent={parent} />
-
             <div className='grid grid-cols-4 gap-6 w-full mx-4 relative mt-4 p-4'>
-
                 <div className='h-full bg-white shadow-md rounded-xl p-6 border border-gray-300'>
                     <h2 className='text-xl font-semibold text-blue-600 mb-4'>פאנל עריכה</h2>
                     <span className='text-gray-600 text-sm'>בחר קטגוריה</span>

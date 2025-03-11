@@ -1,6 +1,7 @@
-import { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
+import { useState, useEffect } from "react";
 import GetCats from "./GetCats";
 import ExpensesTable from "./ExpensesTable";
+import { motion } from 'framer-motion';
 
 export default function ProfileExpenses({ username, profileName, showFilterDatesBtn }) {
     const [profExpenses, setProfExpenses] = useState([]);
@@ -134,12 +135,12 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
             }
             {
                 showFilterCats &&
-                <div className="mt-2 mb-4 text-center">
+                <div className="grid grid-cols-2 mt-2 mb-4 text-center *:w-3/4 *:mx-auto">
                     <GetCats username={username} profileName={profileName}
                         refreshExpenses={refreshExpenses} select={true} onCategorySelect={onCategorySelect} forAccount={false} />
-                    <button
+                    <motion.button className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition disabled:bg-gray-200 disabled:text-gray-400"
                         onClick={async (e) => { setProfExpenses(await getOneCategory()); }}
-                    >חפש</button>
+                        disabled={!choosenCategory}>חפש</motion.button>
                 </div>
             }
             {showFilterDates &&

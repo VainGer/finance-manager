@@ -3,7 +3,7 @@ import AddProfile from './AddProfile';
 import AuthProfile from './AuthProfile';
 import { motion } from 'framer-motion';
 
-export default function SelectProfile({ username }) {
+export default function SelectProfile({ username, showSelectH1 }) {
     const [profiles, setProfiles] = useState([]);
     const [toggleProfiles, setToggleProfiles] = useState(true);
     const [toggleAddProfiles, setToggleAddProfiles] = useState(false);
@@ -47,6 +47,7 @@ export default function SelectProfile({ username }) {
         setToggleAddProfiles(false);
         setToggleAddBtn(true);
         setToggleAuthProfile(false);
+        showSelectH1(true);
     }
 
 
@@ -74,6 +75,7 @@ export default function SelectProfile({ username }) {
                                         setToggleAuthProfile(true);
                                         setToggleProfiles(false);
                                         setToggleAddBtn(false);
+                                        showSelectH1(false);
                                     }}
                                 >
                                     {profile.pName}
@@ -113,17 +115,18 @@ export default function SelectProfile({ username }) {
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
-                            className="w-full"
+                            className="w-full *:text-center"
                         >
-                            <AddProfile username={username} />
+                            <AddProfile username={username} showSelectH1={showSelectH1} />
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="mt-4 px-4 py-2 bg-gray-300 text-gray-800 font-medium rounded-lg shadow-md hover:bg-gray-400 transition"
+                                className="w-full mt-4 px-4 py-2 bg-gray-300 text-gray-800 font-medium rounded-lg shadow-md hover:bg-gray-400 transition"
                                 onClick={() => {
                                     setToggleProfiles(true);
                                     setToggleAddProfiles(false);
                                     setToggleAddBtn(true);
+                                    showSelectH1(true);
                                 }}
                             >
                                 חזרה לבחירת פרופיל
@@ -139,7 +142,8 @@ export default function SelectProfile({ username }) {
                     className="text-center"
                 >
                     <h1 className="text-lg font-semibold text-gray-800">לא נמצאו פרופילים, צור פרופיל חדש</h1>
-                    <AddProfile username={username} />
+                    <AddProfile username={username}
+                        showSelectH1={showSelectH1} firstProfile={true} />
                 </motion.div>
             )}
         </div>

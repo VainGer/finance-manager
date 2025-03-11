@@ -30,7 +30,8 @@ export default function GetCats({ username, profileName, onCategoryClick, onCate
     return (
         <div>
             {
-                select ? (<select onChange={(e) => onCategorySelect(e.target.value)}>
+                select ? (<select className='border w-full h-full rounded-md'
+                    onChange={(e) => onCategorySelect(e.target.value)}>
                     <option className='text-center' selected disabled>בחר קטגוריה</option>
                     {categories.length > 0 ? (categories.map((category, index) => (
                         <option key={index} className='text-center'

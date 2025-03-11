@@ -7,7 +7,7 @@ import { FaUser, FaLock } from "react-icons/fa";
 export default function Register() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState(null);
+    const [error, setError] = useState("");
     const navigate = useNavigate();
 
     async function register(e) {
@@ -38,16 +38,13 @@ export default function Register() {
             <div className="flex flex-col self-center items-center justify-center mt-20  md:w-full md:max-w-md bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
                 <h1 className="text-3xl font-bold text-blue-700 mb-6">הרשמה</h1>
 
-                {/* הודעת שגיאה */}
-                {error && (
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="text-red-500 mb-4 text-sm"
-                    >
-                        {error}
-                    </motion.p>
-                )}
+                <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-red-500 mb-4 text-sm"
+                >
+                    {error}
+                </motion.p>
 
                 <form onSubmit={register} className="grid gap-4 w-full">
                     {/* שם משתמש */}
@@ -76,8 +73,9 @@ export default function Register() {
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-6 py-3 bg-blue-600 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-blue-700 transition-all"
+                        className="px-6 py-3 bg-blue-600 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-blue-700 transition-all disabled:bg-gray-400"
                         type="submit"
+                        disabled={username === "" || password === ""}
                     >
                         הרשמה
                     </motion.button>
