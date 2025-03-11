@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import ExpensesTable from "./ExpensesTable";
 import GetCats from "./GetCats";
-
 export default function AccountExpenses({ username, profileName }) {
+
     const [accExpenses, setAccExpenses] = useState([]);
     const [choosenCategory, setChoosenCategory] = useState("");
     const [startDate, setStartDate] = useState("");
@@ -110,73 +110,54 @@ export default function AccountExpenses({ username, profileName }) {
         fetchExpenses();
     }, [username, profileName]);
 
-    return (
-        <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-300">
-            <h2 className="text-2xl font-semibold text-blue-600 text-center mb-4">הוצאות חשבון</h2>
 
-            {!showFilterDatesBtn &&
-                <div className="grid grid-cols-3 gap-4 justify-center mb-6">
-                    <button className="w-48 px-6 py-3 bg-blue-500 text-white font-medium rounded-lg shadow-md hover:bg-blue-600 transition"
-                        onClick={(e) => { setShowFilterDates(!showFilterDates); resetFilter(); }}>
-                        סינון לפי תאריך
-                    </button>
-                    <button className="w-48 px-6 py-3 bg-blue-500 text-white font-medium rounded-lg shadow-md hover:bg-blue-600 transition"
-                        onClick={(e) => { setShowFilterCats(!showFilterCats); }}>
-                        סינון לפי קטגוריה
-                    </button>
-                    <button className="w-48 px-6 py-3 bg-gray-500 text-white font-medium rounded-lg shadow-md hover:bg-gray-600 transition"
-                        onClick={async (e) => { await setExpenses() }}>
-                        בטל סינון
-                    </button>
-                </div>
-            }
 
-            {showFilterCats &&
-                <div className="mt-4 mb-6 text-center">
-                    <GetCats username={username} profileName={profileName}
-                        setExpenses={setExpenses} select={true} 
-                        onCategorySelect={onCategorySelect} forAccount={true} />
-                    <button className="mt-4 px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
-                        onClick={async (e) => { setAccExpenses(await getOneCategory()) }}>
-                        חפש
-                    </button>
-                </div>
-            }
-
-            {showFilterDates &&
-                <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-black/50">
-                    <form className="grid grid-cols-2 gap-4 bg-white p-6 border-2 border-gray-300 shadow-xl rounded-lg w-max">
-                        <label className="text-lg font-semibold">בחר תאריך התחלה:</label>
-                        <input type="date" className="p-2 border rounded-md text-center" />
-
-                        <label className="text-lg font-semibold">בחר תאריך סיום:</label>
-                        <input type="date" className="p-2 border rounded-md text-center" />
-
-                        <button className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition"
-                            onClick={resetFilter}>
-                            אפס סינון
-                        </button>
-                        <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-                            onClick={async (e) => { await setAccExpensesByDate(username, profileName, startDate, endDate); setShowFilterDates(false); }}>
-                            חפש
-                        </button>
-                        <button className="col-span-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
-                            onClick={(e) => { setShowFilterDates(false); }}>
-                            סגור
-                        </button>
-                    </form>
-                </div>
-            }
-
-            <div className="mt-4">
-                <ExpensesTable username={username}
-                    profileName={profileName}
-                    expenseData={accExpenses}
-                    setExpenses={getAccExpenses}
-                    showEditBtn={false}
-                    showRelation={true}
-                    showAddTransactBtn={false} />
+    return (<div>
+        {!showFilterDatesBtn &&
+            <div className="grid grid-cols-3 *:w-max *:place-self-center">
+                <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mb-4"
+                    onClick={(e) => { setShowFilterDates(!showFilterDates); resetFilter(); }}>סינון לפי תאריך</button>
+                <button className=" px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mb-4"
+                    onClick={(e) => { setShowFilterCats(!showFilterCats); }}>סינון לפי קטגוריה</button>
+                <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mb-4"
+                    onClick={async (e) => { await setExpenses() }}>בטל סינון</button>
             </div>
-        </div>
+        }
+        {
+            showFilterCats &&
+            <div className="mt-2 mb-4 text-center">
+                <GetCats username={username} profileName={profileName}
+                    setExpenses={setExpenses} select={true} onCategorySelect={onCategorySelect} forAccount={true} />
+                <button
+                    onClick={async (e) => { setAccExpenses(await getOneCategory()) }}
+                >חפש</button>
+            </div>
+        }
+        {showFilterDates &&
+            <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-black/50">
+                <form className="grid grid-cols-2 *:border-1 bg-white border-6 border-white rounded-md w-max h-max">
+                    <label>בחר תאריך התחלה:</label>
+                    <input key={`start${startDate}`} type="date" defaultValue={startDate} onChange={(e) => { setStartDate(e.target.value); }}></input>
+                    <label>בחר תאריך סיום:</label>
+                    <input key={`end${endDate}`} type="date" defaultValue={endDate} onChange={(e) => { setEndDate(e.target.value); }}></input>
+                    <input type="button" value="אפס סינון" onClick={resetFilter} />
+                    <input type="button" value="חפש"
+                        onClick={async (e) => {
+                            await setAccExpensesByDate(username, profileName, startDate, endDate);
+                            setShowFilterDates(false);
+                        }} />
+                    <input className="col-span-2"
+                        type="button" value="סגור" onClick={(e) => { setShowFilterDates(false); }} />
+                </form>
+            </div>
+        }
+        <ExpensesTable username={username}
+            profileName={profileName}
+            expenseData={accExpenses}
+            setExpenses={getAccExpenses}
+            showEditBtn={false}
+            showRelation={true}
+            showAddTransactBtn={false} />
+    </div>
     )
 }

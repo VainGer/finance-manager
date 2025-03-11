@@ -3,7 +3,11 @@ import { RxCross2 } from "react-icons/rx";
 import { useState, useEffect } from 'react';
 import AddTransactInReport from "./AddTransactInReport";
 import TransactionEditor from "./TransactionEditor";
-export default function ExpensesTable({ username, profileName, expenseData, refreshExpenses, showEditBtn, showRelation, showAddTransactBtn }) {
+
+export default function ExpensesTable({ username, profileName, expenseData, refreshExpenses, showEditBtn, showRelation,
+    showAddTransactBtn }) {
+
+
     const [expenses, setExpenses] = useState([]);
     const [showAddTransact, setShowAddTransact] = useState(false);
     const [choosenCategory, setChoosenCategory] = useState("");
@@ -12,6 +16,7 @@ export default function ExpensesTable({ username, profileName, expenseData, refr
     const [date, setDate] = useState("");
     const [choosenItem, setChoosenItem] = useState("");
     const [showTransactionEditor, SetShowTransactionEditor] = useState(false);
+
 
     useEffect(() => {
         setExpenses(expenseData);
@@ -158,8 +163,7 @@ export default function ExpensesTable({ username, profileName, expenseData, refr
                     onTransactionUpdate={refreshExpenses}
                     closeEditor={closeEditor}
                 />
-            )
             }
-        </div>
+        </div >
     );
 }
