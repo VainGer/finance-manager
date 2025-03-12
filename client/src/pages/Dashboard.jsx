@@ -454,7 +454,7 @@ export default function Dashboard() {
                                     animate={{ opacity: 1, y: 0 }}
                                     whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
                                     className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-lg p-6 flex flex-col items-center justify-center
-                                     transform transition-all duration-300 hover:shadow-xl col-span-3"
+                                     transform transition-all duration-300 hover:shadow-xl md:col-span-3"
                                 >
                                     <h3 className="text-lg text-blue-800 mb-3 font-semibold">תקופת הגדרת תקציב אחרונה</h3>
                                     <motion.p
