@@ -48,14 +48,7 @@ export default function Dashboard() {
         return () => clearInterval(timer);
     }, []);
 
-    useEffect(() => {
-        if (expensesData.length === 0) {
-            refreshExpenses();
-        }
-        if (expensesData.length > 0) {
-            getProfileBudgetInfo();
-        }
-    }, [expensesData, profileBudget]);
+
 
     function formatCurrency(amount) {
         if (!amount || isNaN(amount)) return "₪0.0";
@@ -167,7 +160,7 @@ export default function Dashboard() {
             const expensesData = await expensesResponse.json();
 
 
-
+            let budgetAmount = 0;
             // עדכון התקציב
             if (budgetResponse.ok && budgetData.budget && budgetData.budget.length > 0) {
                 const currentBudget = budgetData.budget.reduce((latest, current) => {
@@ -182,10 +175,9 @@ export default function Dashboard() {
                 }, budgetData.budget[0]);
                 setStartBudgetDate(currentBudget.startDate);
                 setEndBudgetDate(currentBudget.endDate);
-                const budgetAmount = parseFloat(currentBudget.amount || 0);
+                budgetAmount = parseFloat(currentBudget.amount || 0);
                 setProfileBudget(budgetAmount);
             }
-
 
             // חישוב סך ההוצאות
             let total = 0;
@@ -200,7 +192,7 @@ export default function Dashboard() {
                         });
                     });
                 });
-                setProfitLoss(profileBudget - total);
+                setProfitLoss(budgetAmount - total);
             }
             setTotalExpenses(total);
         } catch (error) {

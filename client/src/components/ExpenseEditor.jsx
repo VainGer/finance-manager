@@ -20,8 +20,8 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
     const [showSetBudget, setShowSetBudget] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [currentTipIndex, setCurrentTipIndex] = useState(0);
+    const [categoryKey, setCategoryKey] = useState(0);
 
-    
 
 
     const onCategoryClick = (category) => {
@@ -81,9 +81,8 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
             {showCategories && (
                 <div>
                     <h2 className="text-lg md:text-xl font-semibold text-center text-blue-700 mb-3 md:mb-4">בחר קטגוריה</h2>
-                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div key={categoryKey} className="bg-white rounded-lg p-4 shadow-sm">
                         <GetCats username={username} profileName={profileName} onCategoryClick={onCategoryClick} forAccount={false} />
-
                         <div className="grid gap-3 md:gap-4 mt-4">
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
@@ -113,7 +112,7 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
                                 transition={{ duration: 0.5 }}
                                 className="mt-4 bg-blue-50 p-3 rounded-lg shadow-sm"
                             >
-                                
+
                             </motion.div>
                         </AnimatePresence>
                     </div>
@@ -173,8 +172,8 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
                                 <span className="font-medium">העבר פריט</span>
                             </motion.button>
 
-                            <motion.button 
-                                whileHover={{ scale: 1.05 }} 
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 className="px-3 md:px-4 py-2 md:py-3 bg-red-600 text-white rounded-lg flex items-center gap-2 md:gap-3 justify-center hover:bg-red-700 transition text-sm md:text-base"
                                 onClick={() => setShowDeleteConfirm(true)}
@@ -199,17 +198,17 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
             )}
 
             {showAddCategory && (
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }} 
-                    animate={{ opacity: 1, scale: 1 }} 
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md px-4 z-50"
                 >
                     <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg text-center relative">
-                        <AddCategory 
-                            username={username} 
-                            profileName={profileName} 
-                            refreshExpenses={refreshExpenses} 
-                            onClose={() => setShowAddCategory(false)} 
+                        <AddCategory
+                            username={username}
+                            profileName={profileName}
+                            refreshExpenses={refreshExpenses}
+                            onClose={() => { setShowAddCategory(false); setCategoryKey(categoryKey + 1) }}
                         />
                     </div>
                 </motion.div>
@@ -219,21 +218,21 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md px-4 z-50">
                     <div className="">
                         <SetProfBudget username={username} profileName={profileName} refreshExpenses={refreshExpenses} showConfirm={setShowSetBudget} />
-                       
+
                     </div>
                 </motion.div>
             )}
 
             {showDeleteConfirm && (
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }} 
-                    animate={{ opacity: 1, scale: 1 }} 
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md px-4 z-[60]"
                 >
                     <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-md text-center relative">
                         <h3 className="text-xl font-bold text-gray-800 mb-4">האם אתה בטוח?</h3>
                         <p className="text-gray-600 mb-6">האם אתה בטוח שברצונך למחוק את הקטגוריה "{chosenCategory}"?</p>
-                        
+
                         <div className="flex justify-center gap-4">
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
@@ -243,7 +242,7 @@ export default function ExpenseEditor({ username, profileName, refreshExpenses }
                             >
                                 אישור
                             </motion.button>
-                            
+
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}

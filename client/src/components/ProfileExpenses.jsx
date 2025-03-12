@@ -66,14 +66,14 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
-                    username, 
+                body: JSON.stringify({
+                    username,
                     profileName
                 })
             });
             let data = await response.json();
             console.log("Raw data from server:", data);
-            
+
             if (response.ok && data.expenses) {
                 return data.expenses.filter(cat => cat.categoryName === category);
             } else {
@@ -123,12 +123,12 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
             if (updatedExpenses && updatedExpenses.length > 0) {
                 console.log("ProfileExpenses: Setting new expenses:", updatedExpenses);
                 setProfExpenses(updatedExpenses);
-                
+
                 if (onFilteredData) {
                     console.log("ProfileExpenses: Updating filtered data");
                     onFilteredData(updatedExpenses);
                 }
-                
+
                 return updatedExpenses;
             }
             console.log("ProfileExpenses: No expenses found or empty array");
@@ -164,19 +164,19 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
         <div>
             {!showFilterDatesBtn &&
                 <div className="flex flex-wrap gap-3 justify-center items-center mb-6 px-4">
-                    <button 
+                    <button
                         className="min-w-[120px] px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm md:text-base font-medium shadow-sm"
                         onClick={(e) => { setShowFilterDates(!showFilterDates); resetFilter(); }}
                     >
                         סינון לפי תאריך
                     </button>
-                    <button 
+                    <button
                         className="min-w-[120px] px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm md:text-base font-medium shadow-sm"
                         onClick={(e) => { setShowFilterCats(!showFilterCats); }}
                     >
                         סינון לפי קטגוריה
                     </button>
-                    <button 
+                    <button
                         className="min-w-[120px] px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm md:text-base font-medium shadow-sm"
                         onClick={resetFilter}
                     >
@@ -196,9 +196,9 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
                             initialCategory={selectedCategory}
                         />
                     </div>
-                    <motion.button 
+                    <motion.button
                         className="w-full sm:w-1/3 px-4 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition disabled:bg-gray-200 disabled:text-gray-400 text-sm md:text-base font-medium shadow-sm"
-                        onClick={async () => { 
+                        onClick={async () => {
                             try {
                                 if (selectedCategory) {
                                     const filteredData = await getOneCategory(selectedCategory);
@@ -235,20 +235,20 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
                         <form className="space-y-4">
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">תאריך התחלה:</label>
-                                <input 
-                                    key={`start${startDate}`} 
-                                    type="date" 
-                                    defaultValue={startDate} 
+                                <input
+                                    key={`start${startDate}`}
+                                    type="date"
+                                    defaultValue={startDate}
                                     onChange={(e) => { setStartDate(e.target.value); }}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">תאריך סיום:</label>
-                                <input 
-                                    key={`end${endDate}`} 
-                                    type="date" 
-                                    defaultValue={endDate} 
+                                <input
+                                    key={`end${endDate}`}
+                                    type="date"
+                                    defaultValue={endDate}
                                     onChange={(e) => { setEndDate(e.target.value); }}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
@@ -288,7 +288,7 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
                 </div>
             }
             {!showOnlyFilters && (
-                <ExpensesTable
+                < ExpensesTable
                     username={username}
                     profileName={profileName}
                     expenseData={profExpenses}
@@ -300,6 +300,6 @@ export default function ProfileExpenses({ username, profileName, showFilterDates
                     onTransactionUpdate={onTransactionUpdate}
                 />
             )}
-        </div>
+        </div >
     );
 }
