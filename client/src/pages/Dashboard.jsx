@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import AccountExpenses from '../components/AccountExpenses';
 import ProfileExpenses from '../components/ProfileExpenses';
 import Header from '../components/Header';
@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Dashboard() {
     const location = useLocation();
+    const navigate = useNavigate();
     const username = location.state?.username;
     const profileName = location.state?.profileName;
     const parent = location.state?.parent;
@@ -26,6 +27,12 @@ export default function Dashboard() {
     const [totalExpenses, setTotalExpenses] = useState(0);
     const [profitLoss, setProfitLoss] = useState(0);
     const [currentTipIndex, setCurrentTipIndex] = useState(0);
+    const [startBudgetDate, setStartBudgetDate] = useState(new Date().toISOString().slice(0, 10));
+    const [endBudgetDate, setEndBudgetDate] = useState(new Date().toISOString().slice(0, 10));
+
+    useEffect(() => {
+        if (!username || !profileName) navigate('/', { state: { notLogedIn: true } });
+    }, [username, profileName]);
 
     const tips = [
         { icon: "💡", text: "טיפ: כאן תוכל להוסיף ולערוך את הקטגוריות שלך בקלות" },
@@ -51,6 +58,13 @@ export default function Dashboard() {
         }).format(amount);
     }
 
+    function formatDate(date) {
+        let year = date.slice(0, 4);
+        let month = date.slice(5, 7);
+        let day = date.slice(8, 10);
+        return day + "/" + month + "/" + year;;
+    }
+
     async function refreshExpenses() {
         setExpensesKey((prevKey) => prevKey + 1);
         try {
@@ -66,8 +80,8 @@ export default function Dashboard() {
                 const processedData = data.expenses
                     .map(expense => ({
                         category: expense.categoryName,
-                        amount: expense.items.reduce((sum, item) => 
-                            sum + item.transactions.reduce((tSum, transaction) => 
+                        amount: expense.items.reduce((sum, item) =>
+                            sum + item.transactions.reduce((tSum, transaction) =>
                                 tSum + parseFloat(transaction.price || 0), 0), 0)
                     }))
                     .filter(expense => expense.category && expense.amount > 0);
@@ -91,21 +105,21 @@ export default function Dashboard() {
             if (response.ok && data.expenses) {
                 // מיפוי הוצאות לפי פרופיל
                 const profileExpenses = {};
-                
+
                 // סיכום כל ההוצאות לכל פרופיל
                 data.expenses.forEach(category => {
                     const profileName = category.profileName || 'לא ידוע';
                     if (!profileExpenses[profileName]) {
                         profileExpenses[profileName] = 0;
                     }
-                    
+
                     category.items?.forEach(item => {
                         item.transactions?.forEach(transaction => {
                             profileExpenses[profileName] += parseFloat(transaction.price || 0);
                         });
                     });
                 });
-                
+
                 // המרה למבנה הנתונים הנדרש לגרף
                 const processedData = Object.entries(profileExpenses)
                     .map(([profileName, amount]) => ({
@@ -113,7 +127,7 @@ export default function Dashboard() {
                         amount: amount
                     }))
                     .filter(profile => profile.amount > 0);
-                
+
                 setExpensesData(processedData);
             }
         } catch (error) {
@@ -143,29 +157,47 @@ export default function Dashboard() {
             });
             const expensesData = await expensesResponse.json();
 
+
+
+            // עדכון התקציב
+            if (budgetResponse.ok && budgetData.budget && budgetData.budget.length > 0) {
+                const currentBudget = budgetData.budget.reduce((latest, current) => {
+                    const latestStartDate = new Date(latest.startDate);
+                    const latestEndDate = new Date(latest.endDate);
+                    const currentStartDate = new Date(current.startDate);
+                    const currentEndDate = new Date(current.endDate);
+                    if (currentStartDate > latestStartDate) {
+                        return current;
+                    }
+                    return latest;
+                }, budgetData.budget[0]);
+                setStartBudgetDate(currentBudget.startDate);
+                setEndBudgetDate(currentBudget.endDate);
+                const budgetAmount = parseFloat(currentBudget.amount || 0);
+                setProfileBudget(budgetAmount);
+            }
+
+
             // חישוב סך ההוצאות
             let total = 0;
             if (expensesResponse.ok && expensesData.expenses) {
                 expensesData.expenses.forEach(category => {
                     category.items.forEach(item => {
                         item.transactions.forEach(transaction => {
-                            total += parseFloat(transaction.price || 0);
+                            let date = new Date(transaction.date);
+                            if (date >= new Date(startBudgetDate) && date <= new Date(endBudgetDate)) {
+                                total += parseFloat(transaction.price || 0);
+                            }
                         });
                     });
                 });
+                setProfitLoss(profileBudget - total);
             }
-            setTotalExpenses(total);
-
-            // עדכון התקציב
-            if (budgetResponse.ok && budgetData.budget && budgetData.budget.length > 0) {
-                const currentBudget = budgetData.budget[0];
-                const budgetAmount = parseFloat(currentBudget.amount || 0);
-                setProfileBudget(budgetAmount);
-                setProfitLoss(budgetAmount - total);
-            } else {
+            else {
                 setProfileBudget(0);
                 setProfitLoss(-total);
             }
+            setTotalExpenses(total);
 
         } catch (error) {
             console.error('Error fetching profile budget:', error);
@@ -215,7 +247,7 @@ export default function Dashboard() {
 
         window.addEventListener('transactionUpdated', handleTransactionUpdate);
         window.addEventListener('budgetUpdated', handleBudgetUpdate);
-        
+
         return () => {
             window.removeEventListener('transactionUpdated', handleTransactionUpdate);
             window.removeEventListener('budgetUpdated', handleBudgetUpdate);
@@ -236,25 +268,25 @@ export default function Dashboard() {
 
     const handleFilteredData = (data, type = 'profile') => {
         let processedData = [];
-        
+
         if (type === 'account') {
             // מיפוי הוצאות לפי פרופיל
             const profileExpenses = {};
-            
+
             // סיכום כל ההוצאות לכל פרופיל
             data.forEach(category => {
                 const profileName = category.profileName || 'לא ידוע';
                 if (!profileExpenses[profileName]) {
                     profileExpenses[profileName] = 0;
                 }
-                
+
                 category.items?.forEach(item => {
                     item.transactions?.forEach(transaction => {
                         profileExpenses[profileName] += parseFloat(transaction.price || 0);
                     });
                 });
             });
-            
+
             // המרה למבנה הנתונים הנדרש לגרף
             processedData = Object.entries(profileExpenses)
                 .map(([profileName, amount]) => ({
@@ -271,7 +303,7 @@ export default function Dashboard() {
                         tSum + parseFloat(transaction.price || 0), 0) || 0), 0) || 0
             })).filter(expense => expense.category && expense.amount > 0);
         }
-        
+
         if (processedData.length > 0) {
             setExpensesData(processedData);
         }
@@ -298,18 +330,18 @@ export default function Dashboard() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-md p-4 mb-4 hover:shadow-lg transition-shadow duration-300"
                     >
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
                             className="flex items-center justify-center space-x-2 mb-4"
                         >
                             <motion.div
-                                animate={{ 
+                                animate={{
                                     scale: [1, 1.2, 1],
                                     rotate: [0, 5, -5, 0]
                                 }}
-                                transition={{ 
+                                transition={{
                                     duration: 2,
                                     repeat: Infinity,
                                     repeatType: "reverse"
@@ -319,15 +351,15 @@ export default function Dashboard() {
                                 ✏️
                             </motion.div>
                         </motion.div>
-                        <ExpenseEditor 
-                            username={username} 
-                            profileName={profileName} 
+                        <ExpenseEditor
+                            username={username}
+                            profileName={profileName}
                             refreshExpenses={refreshExpenses}
                             onBudgetUpdate={dispatchBudgetUpdate}
                         />
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.5, delay: 0.4 }}
@@ -343,7 +375,7 @@ export default function Dashboard() {
                                 className="bg-blue-50 p-3 rounded-lg shadow-sm"
                             >
                                 <motion.div className="flex items-center justify-center gap-2 text-gray-700">
-                                    <motion.span 
+                                    <motion.span
                                         className="text-xl"
                                         animate={{ scale: [1, 1.2, 1] }}
                                         transition={{ duration: 1, repeat: Infinity }}
@@ -412,14 +444,32 @@ export default function Dashboard() {
                     {!showProfExpenses && !showAccExpenses && !showExpensesByBudget && (
                         <div className="space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <motion.div 
+                                {/* תקופת תקציב לתצוגה*/}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+                                    className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-lg p-6 flex flex-col items-center justify-center
+                                     transform transition-all duration-300 hover:shadow-xl col-span-3"
+                                >
+                                    <h3 className="text-lg text-blue-800 mb-3 font-semibold">תקופת הגדרת תקציב אחרונה</h3>
+                                    <motion.p
+                                        key={profileBudget}
+                                        initial={{ scale: 0.5 }}
+                                        animate={{ scale: 1 }}
+                                        className="text-2xl font-bold text-blue-600"
+                                    >
+                                        מתאריך:{formatDate(startBudgetDate)}<br></br> עד תאריך: {formatDate(endBudgetDate)}
+                                    </motion.p>
+                                </motion.div>
+                                <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
                                     className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-lg p-6 flex flex-col items-center justify-center transform transition-all duration-300 hover:shadow-xl"
                                 >
                                     <h3 className="text-lg text-blue-800 mb-3 font-semibold">תקציב פרופיל</h3>
-                                    <motion.p 
+                                    <motion.p
                                         key={profileBudget}
                                         initial={{ scale: 0.5 }}
                                         animate={{ scale: 1 }}
@@ -429,14 +479,14 @@ export default function Dashboard() {
                                     </motion.p>
                                 </motion.div>
 
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
                                     className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow-lg p-6 flex flex-col items-center justify-center transform transition-all duration-300 hover:shadow-xl"
                                 >
                                     <h3 className="text-lg text-purple-800 mb-3 font-semibold">סך הוצאות</h3>
-                                    <motion.p 
+                                    <motion.p
                                         key={totalExpenses}
                                         initial={{ scale: 0.5 }}
                                         animate={{ scale: 1 }}
@@ -446,14 +496,14 @@ export default function Dashboard() {
                                     </motion.p>
                                 </motion.div>
 
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
                                     className={`bg-gradient-to-br ${profitLoss >= 0 ? 'from-green-50 to-green-100' : 'from-red-50 to-red-100'} rounded-lg shadow-lg p-6 flex flex-col items-center justify-center transform transition-all duration-300 hover:shadow-xl`}
                                 >
                                     <h3 className={`text-lg ${profitLoss >= 0 ? 'text-green-800' : 'text-red-800'} mb-3 font-semibold`}>רווח/הפסד</h3>
-                                    <motion.p 
+                                    <motion.p
                                         key={profitLoss}
                                         initial={{ scale: 0.5 }}
                                         animate={{ scale: 1 }}
@@ -463,7 +513,7 @@ export default function Dashboard() {
                                     </motion.p>
                                 </motion.div>
                             </div>
-                            
+
                             <div className="bg-white rounded-xl p-6 shadow-lg">
                                 <h3 className="text-xl font-semibold text-gray-800 mb-4">סטטיסטיקות מהירות</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -483,23 +533,22 @@ export default function Dashboard() {
                                                     </span>
                                                 </div>
                                             </div>
-                                            <motion.div 
+                                            <motion.div
                                                 className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200"
                                                 initial={{ width: 0 }}
-                                                animate={{ 
+                                                animate={{
                                                     width: '100%',
                                                     transition: { duration: 0.5 }
                                                 }}
                                             >
-                                                <motion.div 
+                                                <motion.div
                                                     initial={{ width: 0 }}
-                                                    animate={{ 
+                                                    animate={{
                                                         width: `${profileBudget > 0 ? Math.min(100, Math.round((totalExpenses / profileBudget) * 100)) : 0}%`,
                                                         transition: { duration: 0.8, delay: 0.3 }
                                                     }}
-                                                    className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center ${
-                                                        totalExpenses > profileBudget ? 'bg-red-500' : 'bg-blue-500'
-                                                    }`}
+                                                    className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center ${totalExpenses > profileBudget ? 'bg-red-500' : 'bg-blue-500'
+                                                        }`}
                                                 ></motion.div>
                                             </motion.div>
                                         </div>
@@ -509,7 +558,7 @@ export default function Dashboard() {
                                     <div className="bg-gray-50 rounded-lg p-4">
                                         <h4 className="text-lg font-medium text-gray-700 mb-3">סטטוס תקציב</h4>
                                         <div className="flex flex-col items-center gap-2">
-                                            <motion.div 
+                                            <motion.div
                                                 className={`text-lg font-semibold ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
@@ -517,13 +566,13 @@ export default function Dashboard() {
                                             >
                                                 {profitLoss >= 0 ? 'בתקציב ✓' : 'חריגה מהתקציב ⚠️'}
                                             </motion.div>
-                                            <motion.div 
+                                            <motion.div
                                                 className={`text-base ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}
                                                 initial={{ y: 20, opacity: 0 }}
                                                 animate={{ y: 0, opacity: 1 }}
                                                 transition={{ duration: 0.5, delay: 0.2 }}
                                             >
-                                                {profitLoss >= 0 
+                                                {profitLoss >= 0
                                                     ? `נשאר ${formatCurrency(profitLoss)} בתקציב`
                                                     : `חריגה של ${formatCurrency(Math.abs(profitLoss))}`
                                                 }
@@ -605,6 +654,7 @@ export default function Dashboard() {
                                         profileName={profileName}
                                         onFilteredData={(data) => handleFilteredData(data, 'account')}
                                         showOnlyFilters={true}
+                                        inGraph={showGraphs}
                                     />
                                 )}
                                 {showProfExpenses && (
@@ -626,13 +676,14 @@ export default function Dashboard() {
                                         />
                                     </div>
                                     <div className="flex justify-center">
-                                        <BarChart
+                                        {!showAccExpenses && < BarChart
                                             key={`bar-${currentType}-${JSON.stringify(expensesData)}`}
                                             data={expensesData}
                                             chartType={currentType}
                                             username={username}
                                             profileName={profileName}
                                         />
+                                        }
                                     </div>
                                 </div>
                             </div>

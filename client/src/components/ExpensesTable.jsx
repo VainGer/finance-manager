@@ -19,32 +19,39 @@ export default function ExpensesTable({ username, profileName, expenseData, refr
 
     useEffect(() => {
         if (expenseData && expenseData.length > 0) {
-            console.log("Updating expenses from expenseData:", expenseData);
-            setExpenses(expenseData);
-            if (onFilteredData) {
-                onFilteredData(expenseData);
-            }
+            setExpenses(prevExpenses => {
+                const prevDataString = JSON.stringify(prevExpenses);
+                const newDataString = JSON.stringify(expenseData);
+                if (prevDataString !== newDataString) {
+                    console.log("Updating expenses from expenseData:", expenseData);
+                    if (onFilteredData) {
+                        onFilteredData(expenseData);
+                    }
+                    return expenseData;
+                }
+                return prevExpenses;
+            });
         }
     }, [expenseData, onFilteredData]);
 
     async function handleTransactionUpdate() {
         try {
             console.log("Starting transaction update in ExpensesTable...");
-            
+
             // קודם נעדכן את ההורה
             if (onTransactionUpdate) {
                 console.log("Calling parent onTransactionUpdate");
                 await onTransactionUpdate();
             }
-            
+
             // אז נעדכן את הנתונים המקומיים
             const updatedExpenses = await refreshExpenses();
             console.log("Got updated expenses:", updatedExpenses);
-            
+
             if (updatedExpenses && updatedExpenses.length > 0) {
                 console.log("Setting new expenses state");
                 setExpenses(updatedExpenses);
-                
+
                 if (onFilteredData) {
                     console.log("Updating filtered data");
                     onFilteredData(updatedExpenses);
@@ -121,7 +128,7 @@ export default function ExpensesTable({ username, profileName, expenseData, refr
                                                             <td className="px-3 py-2 text-sm text-gray-700 whitespace-nowrap">{formatCurrency(Number(transactions.price))}</td>
                                                             {showEditBtn &&
                                                                 <td className="px-3 py-2 text-sm text-gray-700">
-                                                                    <motion.button 
+                                                                    <motion.button
                                                                         initial={{ opacity: 0, scale: 0.9 }}
                                                                         animate={{ opacity: 1, scale: 1 }}
                                                                         whileHover={{ scale: 1.1 }}
@@ -141,10 +148,10 @@ export default function ExpensesTable({ username, profileName, expenseData, refr
                                                                     </motion.button>
                                                                 </td>
                                                             }
-                                                            {showRelation && 
+                                                            {showRelation &&
                                                                 <td className="px-3 py-2 text-sm">
-                                                                    {transactions.related ? 
-                                                                        <div className="text-green-500"><FaCheck className="mx-auto" /></div> : 
+                                                                    {transactions.related ?
+                                                                        <div className="text-green-500"><FaCheck className="mx-auto" /></div> :
                                                                         <div className="text-red-500"><RxCross2 className="mx-auto" /></div>
                                                                     }
                                                                 </td>
@@ -154,7 +161,7 @@ export default function ExpensesTable({ username, profileName, expenseData, refr
                                                     {showAddTransactBtn &&
                                                         <tr>
                                                             <td colSpan={showEditBtn ? 3 : 2}>
-                                                                <motion.button 
+                                                                <motion.button
                                                                     initial={{ opacity: 0, scale: 0.9 }}
                                                                     animate={{ opacity: 1, scale: 1 }}
                                                                     whileHover={{ scale: 1.02 }}
@@ -184,45 +191,45 @@ export default function ExpensesTable({ username, profileName, expenseData, refr
                 );
             })}
             <AnimatePresence>
-            {showAddTransact && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md px-4 z-50"
-                >
-                    <div className="md:p-6 rounded-lg shadow-2xl w-full max-w-lg text-center relative mx-4">
-                        <AddTransactInReport
-                            username={username}
-                            profileName={profileName}
-                            category={choosenCategory}
-                            item={choosenItem}
-                            onTransactionUpdate={handleTransactionUpdate}
-                            closeAddTransact={closeAddTransact}
-                        />
-                    </div>
-                </motion.div>
-            )}
-            {showTransactionEditor && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md px-4 z-50"
-                >
-                    <div className="md:p-6 rounded-lg shadow-2xl w-full max-w-lg text-center relative mx-4">
-                        <TransactionEditor
-                            username={username}
-                            profileName={profileName}
-                            category={choosenCategory}
-                            item={choosenItem}
-                            id={id}
-                            initialPrice={price}
-                            initialDate={date}
-                            onTransactionUpdate={handleTransactionUpdate}
-                            onClose={closeEditor}
-                        />
-                    </div>
-                </motion.div>
-            )}
+                {showAddTransact && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md px-4 z-50"
+                    >
+                        <div className="md:p-6 rounded-lg shadow-2xl w-full max-w-lg text-center relative mx-4">
+                            <AddTransactInReport
+                                username={username}
+                                profileName={profileName}
+                                category={choosenCategory}
+                                item={choosenItem}
+                                onTransactionUpdate={handleTransactionUpdate}
+                                closeAddTransact={closeAddTransact}
+                            />
+                        </div>
+                    </motion.div>
+                )}
+                {showTransactionEditor && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md px-4 z-50"
+                    >
+                        <div className="md:p-6 rounded-lg shadow-2xl w-full max-w-lg text-center relative mx-4">
+                            <TransactionEditor
+                                username={username}
+                                profileName={profileName}
+                                category={choosenCategory}
+                                item={choosenItem}
+                                id={id}
+                                initialPrice={price}
+                                initialDate={date}
+                                onTransactionUpdate={handleTransactionUpdate}
+                                onClose={closeEditor}
+                            />
+                        </div>
+                    </motion.div>
+                )}
             </AnimatePresence>
         </div>
     );

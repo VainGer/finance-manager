@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import { motion } from 'framer-motion';
 import { FaChartLine, FaWallet, FaClipboardList } from 'react-icons/fa';
 
 export default function Home() {
     const [isVisible, setIsVisible] = useState(false);
+    const location = useLocation();
     const navigate = useNavigate();
+    const [wasNotLogedIn, setWasNotLogedIn] = useState(location.state?.notLogedIn);
 
     useEffect(() => {
         setIsVisible(true);
@@ -79,8 +81,32 @@ export default function Home() {
                 </motion.button>
 
             </div>
+            {wasNotLogedIn &&
+                <div className='fixed inset-0 flex items-center justify-center bg-black/50 z-50'>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className='w-full max-w-md p-6 bg-white rounded-2xl shadow-2xl border border-gray-300 relative text-center'
+                    >
+                        <p>לפני שימוש במערכת עליך קודם להתחבר</p>
+                        <motion.button
+                            transition={{ duration: 0 }}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            className='mt-8 px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-xl shadow-lg hover:bg-blue-700 transition-all'
+                            onClick={() => setWasNotLogedIn(false)}
+                        >
+                            לאישור לחץ כאן
+                        </motion.button>
+                    </motion.div>
+                </div>
+            }
         </div>
     );
+
+
+
 }
 
 function FeatureCard({ icon, title, desc, onClick }) {

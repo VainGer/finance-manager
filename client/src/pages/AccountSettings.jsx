@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import RenameProfileName from "../components/RenameProfileName";
 import Header from "../components/Header";
@@ -16,6 +16,10 @@ export default function AccountSettings() {
     const [showChangePinCode, setShowChangePinCode] = useState(false);
     const [showDeleteProfile, setShowDeleteProfile] = useState(false);
     const [showBtns, setShowBtns] = useState(true);
+
+    useEffect(() => {
+        if (!username || !profileName) navigate('/', { state: { notLogedIn: true } });;
+    }, [username, profileName]);
 
     return (
         <div dir="rtl" className="min-h-screen bg-gray-100">
@@ -54,14 +58,14 @@ export default function AccountSettings() {
                             מחק פרופיל
                         </button>
 
-                      
+
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className="mt-2 px-4 py-2 text-sm bg-gray-400 text-white font-medium rounded-md shadow-sm hover:bg-gray-500 transition"
                             onClick={() => navigate('/dashboard', { state: { username, profileName, parent } })}
                         >
-                             חזרה
+                            חזרה
                         </motion.button>
                     </div>
                 )}

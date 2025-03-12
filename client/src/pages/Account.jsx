@@ -1,13 +1,19 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import SelectProfile from '../components/SelectProfile';
 import Header from '../components/Header';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Account() {
     const location = useLocation();
+    const navigate = useNavigate();
     const username = location.state?.username;
     const [showSelectH1, setShowSelectH1] = useState(true);
+
+    useEffect(() => {
+        if (!username) navigate('/', { state: { notLogedIn: true } });
+    }, [username]);
+
     return (
         <div dir='rtl' className="bg-gradient-to-br from-gray-100 to-gray-300 min-h-screen">
             <Header username={username} />
