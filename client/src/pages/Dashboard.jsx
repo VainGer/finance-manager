@@ -48,6 +48,15 @@ export default function Dashboard() {
         return () => clearInterval(timer);
     }, []);
 
+    useEffect(() => {
+        if (expensesData.length === 0) {
+            refreshExpenses();
+        }
+        if (expensesData.length > 0) {
+            getProfileBudgetInfo();
+        }
+    }, [expensesData, profileBudget]);
+
     function formatCurrency(amount) {
         if (!amount || isNaN(amount)) return "₪0.0";
         return new Intl.NumberFormat('he-IL', {
@@ -85,7 +94,7 @@ export default function Dashboard() {
                                 tSum + parseFloat(transaction.price || 0), 0), 0)
                     }))
                     .filter(expense => expense.category && expense.amount > 0);
-                setExpensesData(processedData);
+                await setExpensesData(processedData);
             }
         } catch (error) {
             console.error('Error fetching expenses:', error);
@@ -166,7 +175,7 @@ export default function Dashboard() {
                     const latestEndDate = new Date(latest.endDate);
                     const currentStartDate = new Date(current.startDate);
                     const currentEndDate = new Date(current.endDate);
-                    if (currentStartDate > latestStartDate) {
+                    if (currentStartDate > latestStartDate && currentEndDate > latestEndDate) {
                         return current;
                     }
                     return latest;
@@ -193,12 +202,7 @@ export default function Dashboard() {
                 });
                 setProfitLoss(profileBudget - total);
             }
-            else {
-                setProfileBudget(0);
-                setProfitLoss(-total);
-            }
             setTotalExpenses(total);
-
         } catch (error) {
             console.error('Error fetching profile budget:', error);
             setProfileBudget(0);
@@ -212,7 +216,7 @@ export default function Dashboard() {
         if (username && profileName) {
             getProfileBudgetInfo();
         }
-    }, [username, profileName]);
+    }, [username, profileName, expensesData]);
 
     useEffect(() => {
         if (showAccExpenses) {
@@ -443,7 +447,7 @@ export default function Dashboard() {
                     {/* תצוגת מידע על תקציב - מוצג רק כשאין תצוגת הוצאות פעילה */}
                     {!showProfExpenses && !showAccExpenses && !showExpensesByBudget && (
                         <div className="space-y-8">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div key={profitLoss} className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {/* תקופת תקציב לתצוגה*/}
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
@@ -459,7 +463,7 @@ export default function Dashboard() {
                                         animate={{ scale: 1 }}
                                         className="text-2xl font-bold text-blue-600"
                                     >
-                                        מתאריך:{formatDate(startBudgetDate)}<br></br> עד תאריך: {formatDate(endBudgetDate)}
+                                        מתאריך: {formatDate(startBudgetDate)}<br></br> עד תאריך: {formatDate(endBudgetDate)}
                                     </motion.p>
                                 </motion.div>
                                 <motion.div
