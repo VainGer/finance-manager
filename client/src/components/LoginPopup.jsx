@@ -5,24 +5,24 @@ import { FaUser, FaLock, FaTimes } from 'react-icons/fa';
 export default function LoginPopup({ isOpen, setIsOpen, login }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState(null); 
+    const [error, setError] = useState(null);
 
     async function handleSubmit(e) {
         e.preventDefault();
-        setError(null); 
-    
+        setError(null);
+
         // בדיקה אם השדות ריקים
         if (!username.trim() || !password.trim()) {
             setError("שם משתמש וסיסמה אינם יכולים להיות ריקים.");
             return;
         }
-    
+
         try {
-            let response = await login(username, password); 
-    
-            if (!response.ok) { 
+            let response = await login(username, password);
+
+            if (!response.ok) {
                 let data = await response.json();
-                setError(data.message || "שם משתמש או סיסמה שגויים."); 
+                setError(data.message || "שם משתמש או סיסמה שגויים.");
             } else {
                 setIsOpen(false);
             }
@@ -32,7 +32,7 @@ export default function LoginPopup({ isOpen, setIsOpen, login }) {
             setError("שם משתמש או סיסמה שגויים.");
         }
     }
-    
+
     if (!isOpen) return null;
 
     return (
@@ -53,7 +53,7 @@ export default function LoginPopup({ isOpen, setIsOpen, login }) {
                 <form className='grid grid-cols-1 gap-6 text-center' onSubmit={handleSubmit}>
                     <h2 className='text-3xl font-bold text-blue-600'>התחברות</h2>
 
-                
+
                     {error && (
                         <motion.p
                             initial={{ opacity: 0 }}
@@ -71,6 +71,7 @@ export default function LoginPopup({ isOpen, setIsOpen, login }) {
                             type="text"
                             placeholder="שם משתמש"
                             value={username}
+                            data-testid="login"
                             onChange={(e) => setUsername(e.target.value)}
                         />
                     </div>
@@ -82,6 +83,7 @@ export default function LoginPopup({ isOpen, setIsOpen, login }) {
                             type="password"
                             placeholder="סיסמה"
                             value={password}
+                            data-testid="password"
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
@@ -91,6 +93,7 @@ export default function LoginPopup({ isOpen, setIsOpen, login }) {
                         whileTap={{ scale: 0.95 }}
                         className='px-6 py-3 bg-blue-600 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-blue-700 transition-all'
                         type="submit"
+                        data-testid="submit"
                     >
                         כניסה
                     </motion.button>
