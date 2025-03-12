@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
-import ItemsToSelcet from "./ItemsToSelcet";
+import { useState } from "react";
+import { motion } from "framer-motion";
 
 export default function AddTransactInReport({ username, profileName, category, item, onTransactionUpdate, closeAddTransact }) {
     const [price, setPrice] = useState('');
     const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-
-
 
     async function addTransaction(e) {
         e.preventDefault();
@@ -15,12 +13,19 @@ export default function AddTransactInReport({ username, profileName, category, i
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, profileName, category, item, price, date })
+                body: JSON.stringify({ 
+                    username, 
+                    profileName, 
+                    category, 
+                    item, 
+                    price: Number(price), 
+                    date 
+                })
             });
             let data = await response.json();
             if (response.ok) {
                 console.log(data.message);
-                onTransactionUpdate();
+                await onTransactionUpdate();
                 closeAddTransact();
             } else {
                 console.log(data.message);
@@ -30,19 +35,68 @@ export default function AddTransactInReport({ username, profileName, category, i
         }
     }
 
-
     return (
-        <div className="fixed h-full w-full inset-0 z-50 flex items-center justify-center bg-black/10">
-            <form className="grid grid-cols-2 bg-white p-6 rounded-lg shadow-lg *:border-1" onSubmit={addTransaction}>
-                <label>מחיר:</label>
-                <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
-                <label>תאריך:</label>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-                {price !== "" && date !== "" ?
-                    (<input className="col-span-2 bg-green-200" type="submit" value="הוסף עסקה" />) :
-                    (<input className="col-span-2 bg-gray-400" type="submit" value="הוסף עסקה" disabled />)}
-                <button className="col-span-2" onClick={(e) => closeAddTransact()}>לחזרה</button>
-            </form >
+        <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-black/50 backdrop-blur-md p-4 z-50">
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md"
+            >
+                <h3 className="text-lg font-semibold mb-4 text-center">הוספת עסקה חדשה</h3>
+                <div className="mb-4">
+                    <div className="text-sm text-gray-600 mb-2">
+                        <span className="font-medium">קטגוריה:</span> {category}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                        <span className="font-medium">פריט:</span> {item}
+                    </div>
+                </div>
+                <form className="space-y-4" onSubmit={addTransaction}>
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">מחיר:</label>
+                        <input
+                            type="number"
+                            value={price}
+                            onChange={(e) => setPrice(Number(e.target.value))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="הכנס מחיר"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">תאריך:</label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                    <div className="flex flex-col gap-2 mt-6">
+                        <motion.button
+                            type="submit"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full px-4 py-2 rounded-lg text-white text-sm font-medium transition
+                                ${price !== "" && date !== "" 
+                                    ? "bg-green-500 hover:bg-green-600" 
+                                    : "bg-gray-300 cursor-not-allowed"}`}
+                            disabled={price === "" || date === ""}
+                        >
+                            הוסף עסקה
+                        </motion.button>
+                        <motion.button
+                            type="button"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium"
+                            onClick={closeAddTransact}
+                        >
+                            סגור
+                        </motion.button>
+                    </div>
+                </form>
+            </motion.div>
         </div>
     );
 }

@@ -220,17 +220,10 @@ export async function deleteTransact(req, res) {
 export async function getCats(req, res) {
     let { username, profileName, forAccount } = req.body;
     let cats = await getCategoriesList(username, profileName, forAccount);
-    if (cats.length > 0) {
-        res.status(200).json({
-            message: "Your categories",
-            categories: cats
-        });
-
-    } else {
-        res.status(404).json({
-            message: "Could not find categories in profile"
-        });
-    }
+    res.status(200).json({
+        message: cats.length > 0 ? "Your categories" : "No categories found",
+        categories: cats
+    });
 }
 
 
@@ -281,9 +274,9 @@ export async function getItems(req, res) {
 
 
 export async function setProfBudg(req, res) {
-    const { username, profileName, category, amount, startDay, endDay } = req.body;
+    const { username, profileName, amount, startDate, endDate } = req.body;
     try {
-        const result = await setProfileBudget(username, profileName, category, amount, startDay, endDay);
+        const result = await setProfileBudget(username, profileName, amount, startDate, endDate);
         res.status(200).json({ message: result });
     } catch (error) {
         console.error(error);

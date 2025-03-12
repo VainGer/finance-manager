@@ -22,7 +22,7 @@ export default function RenameCategory({ username, profileName, category, refres
             if (response.ok) {
                 console.log(data.message);
                 refreshExpenses();
-                showConfirm(false);
+                showConfirm({ type: 'rename', newName });
             } else {
                 console.log(data.message);
                 setError(data.message);

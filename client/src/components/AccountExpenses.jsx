@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ExpensesTable from "./ExpensesTable";
 import GetCats from "./GetCats";
-export default function AccountExpenses({ username, profileName }) {
+export default function AccountExpenses({ username, profileName, onFilteredData, showOnlyFilters }) {
 
     const [accExpenses, setAccExpenses] = useState([]);
     const [choosenCategory, setChoosenCategory] = useState("");
@@ -92,6 +92,9 @@ export default function AccountExpenses({ username, profileName }) {
     async function setExpenses() {
         const updatedExpenses = await getAccExpenses();
         setAccExpenses(updatedExpenses);
+        if (onFilteredData) {
+            onFilteredData(updatedExpenses);
+        }
     }
 
     function onCategorySelect(category) {
@@ -101,6 +104,9 @@ export default function AccountExpenses({ username, profileName }) {
     async function setAccExpensesByDate() {
         let tmpTransactions = await getAccExpensesByDate();
         setAccExpenses(tmpTransactions);
+        if (onFilteredData) {
+            onFilteredData(tmpTransactions);
+        }
     }
 
     useEffect(() => {
@@ -120,7 +126,13 @@ export default function AccountExpenses({ username, profileName }) {
                 <button className=" px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mb-4"
                     onClick={(e) => { setShowFilterCats(!showFilterCats); }}>סינון לפי קטגוריה</button>
                 <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mb-4"
-                    onClick={async (e) => { await setExpenses() }}>בטל סינון</button>
+                    onClick={async (e) => { 
+                        const updatedExpenses = await getAccExpenses();
+                        setAccExpenses(updatedExpenses);
+                        if (onFilteredData) {
+                            onFilteredData(updatedExpenses);
+                        }
+                    }}>בטל סינון</button>
             </div>
         }
         {
@@ -129,7 +141,13 @@ export default function AccountExpenses({ username, profileName }) {
                 <GetCats username={username} profileName={profileName}
                     setExpenses={setExpenses} select={true} onCategorySelect={onCategorySelect} forAccount={true} />
                 <button
-                    onClick={async (e) => { setAccExpenses(await getOneCategory()) }}
+                    onClick={async (e) => { 
+                        const categoryData = await getOneCategory();
+                        setAccExpenses(categoryData);
+                        if (onFilteredData) {
+                            onFilteredData(categoryData);
+                        }
+                    }}
                 >חפש</button>
             </div>
         }
@@ -143,7 +161,11 @@ export default function AccountExpenses({ username, profileName }) {
                     <input type="button" value="אפס סינון" onClick={resetFilter} />
                     <input type="button" value="חפש"
                         onClick={async (e) => {
-                            await setAccExpensesByDate(username, profileName, startDate, endDate);
+                            const filteredData = await getAccExpensesByDate();
+                            setAccExpenses(filteredData);
+                            if (onFilteredData) {
+                                onFilteredData(filteredData);
+                            }
                             setShowFilterDates(false);
                         }} />
                     <input className="col-span-2"
@@ -151,13 +173,16 @@ export default function AccountExpenses({ username, profileName }) {
                 </form>
             </div>
         }
-        <ExpensesTable username={username}
-            profileName={profileName}
-            expenseData={accExpenses}
-            setExpenses={getAccExpenses}
-            showEditBtn={false}
-            showRelation={true}
-            showAddTransactBtn={false} />
+        {!showOnlyFilters && (
+            <ExpensesTable username={username}
+                profileName={profileName}
+                expenseData={accExpenses}
+                setExpenses={getAccExpenses}
+                showEditBtn={false}
+                showRelation={true}
+                showAddTransactBtn={false}
+                onFilteredData={onFilteredData} />
+        )}
     </div>
     )
 }

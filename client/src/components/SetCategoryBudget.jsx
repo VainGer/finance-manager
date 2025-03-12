@@ -1,11 +1,38 @@
 import { useState, useEffect } from 'react';
-import GetCats from './GetCats';
 
-export default function SetCategoryBudget({ username, profileName, category, showConfirm, refreshExpenses }) {
+export default function SetCategoryBudget({ username, profileName, showConfirm, refreshExpenses, category }) {
     const [amount, setAmount] = useState(0);
     const [startDay, setStartDay] = useState(new Date().toISOString().slice(0, 10));
     const [endDay, setEndDay] = useState(new Date().toISOString().slice(0, 10));
     const [error, setError] = useState('');
+    const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
+    const [existingBudget, setExistingBudget] = useState(null);
+
+    useEffect(() => {
+        if (category) {
+            checkExistingBudget();
+        }
+    }, [category]);
+
+    const checkExistingBudget = async () => {
+        try {
+            const response = await fetch('http://localhost:5500/api/profile/get_cat_budget', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, profileName, category })
+            });
+            const data = await response.json();
+            if (response.ok && data.budget && data.budget.length > 0) {
+                setExistingBudget(data.budget[0]);
+            } else {
+                setExistingBudget(null);
+            }
+        } catch (error) {
+            console.error('Error checking existing budget:', error);
+        }
+    };
 
     async function setBudget(e) {
         e.preventDefault();
@@ -17,19 +44,37 @@ export default function SetCategoryBudget({ username, profileName, category, sho
             setError('תאריך ההתחלה חייב להיות לפני תאריך הסיום');
             return;
         }
+
+        if (existingBudget && !showOverwriteConfirm) {
+            setShowOverwriteConfirm(true);
+            return;
+        }
+
         try {
             let response = await fetch('http://localhost:5500/api/profile/set_cat_budget', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, profileName, category, amount, startDay, endDay })
+                body: JSON.stringify({
+                    username,
+                    profileName,
+                    category,
+                    amount: parseFloat(amount),
+                    startDay,
+                    endDay
+                })
             });
             let data = await response.json();
             if (response.ok) {
                 console.log(data.message);
                 showConfirm(false);
                 refreshExpenses();
+                // Dispatch the event with the updated category budget
+                const event = new CustomEvent('budgetUpdated', {
+                    detail: { type: 'profile' }
+                });
+                window.dispatchEvent(event);
                 return true;
             } else {
                 console.log(data.message);
@@ -42,11 +87,48 @@ export default function SetCategoryBudget({ username, profileName, category, sho
         }
     }
 
+    if (showOverwriteConfirm) {
+        return (
+            <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
+                <div className='bg-white p-6 rounded-2xl shadow-2xl border border-blue-600 w-full max-w-md'>
+                    <h2 className='text-2xl font-bold text-blue-600 mb-4 text-center'>קיים כבר תקציב</h2>
+                    <p className='text-center mb-4'>
+                        קיים כבר תקציב של {existingBudget.amount} ₪ לקטגוריה זו
+                        <br />
+                        מתאריך {new Date(existingBudget.startDate).toLocaleDateString('he-IL')}
+                        <br />
+                        עד תאריך {new Date(existingBudget.endDate).toLocaleDateString('he-IL')}
+                    </p>
+                    <p className='text-center mb-6'>האם ברצונך להחליף את התקציב הקיים?</p>
+                    <div className='flex justify-center gap-4'>
+                        <button
+                            onClick={() => {
+                                setShowOverwriteConfirm(false);
+                                setBudget(new Event('submit'));
+                            }}
+                            className='px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition'
+                        >
+                            כן, החלף
+                        </button>
+                        <button
+                            onClick={() => {
+                                setShowOverwriteConfirm(false);
+                                showConfirm(false);
+                            }}
+                            className='px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition'
+                        >
+                            ביטול
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
             <form onSubmit={setBudget} className='bg-white p-6 rounded-2xl shadow-2xl border border-blue-600 w-full max-w-md'>
-                <h2 className='text-2xl font-bold text-blue-600 mb-4 text-center'>הוסף תקציב לקטגוריה</h2>
-                <GetCats username={username} profileName={profileName} select={true} forAccount={false} />
+                <h2 className='text-2xl font-bold text-blue-600 mb-4 text-center'>הוסף תקציב לקטגוריה: {category}</h2>
                 <label className='block text-gray-700 text-sm font-bold mb-2'>הכנס סכום</label>
                 <input 
                     className='w-full p-3 mb-4 border border-gray-300 rounded-md text-center text-gray-900 focus:border-blue-500 focus:ring focus:ring-blue-200' 
@@ -69,7 +151,7 @@ export default function SetCategoryBudget({ username, profileName, category, sho
                 <div className='flex justify-between'>
                     <input 
                         type="submit" 
-                        value="הוסף תקציב לתאריך" 
+                        value="הוסף תקציב" 
                         className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition'
                     />
                     <input 

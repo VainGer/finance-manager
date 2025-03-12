@@ -345,6 +345,9 @@ export async function getAllExpenses(username, profileName) {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
         let expenses = await getProfileExpenses(username, profileName);
+        expenses.forEach(category => {
+            category.profileName = profileName;
+        });
         let profile = data.profiles.find(p => p.pName === profileName);
         if (!profile.parent) {
             return expenses;
@@ -353,6 +356,7 @@ export async function getAllExpenses(username, profileName) {
         profiles.forEach(p => {
             let categories = p.expenses.categories;
             categories.forEach(c => {
+                c.profileName = p.pName;
                 c.items.forEach(i => {
                     i.transactions.forEach(t => { t.related ? true : false });
                 })
@@ -402,12 +406,21 @@ export async function getCategoryItems(username, profileName, categoryName) {
 }
 
 //in use
-export async function setProfileBudget(username, profileName, category, amount, startDate, endDate) {
+export async function setProfileBudget(username, profileName, amount, startDate, endDate) {
     try {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName);
-        profile.expenses.budget.push({ amount: amount, startDate: startDate, endDate: endDate });
+        if (!profile) {
+            return false;
+        }
+        // Replace any existing budget with the new one
+        profile.expenses.budget = [{
+            profileName,
+            amount,
+            startDate,
+            endDate
+        }];
         await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
         return true;
     } catch (error) {
@@ -423,7 +436,11 @@ export async function setCategoryBudget(username, profileName, category, amount,
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName);
         let cat = profile.expenses.categories.find(c => c.categoryName === category);
-        cat.budget.push({ amount: amount, startDate: startDate, endDate: endDate });
+        if (!cat) {
+            return false;
+        }
+        // Replace any existing budget with the new one
+        cat.budget = [{ amount, startDate, endDate }];
         await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
         return true;
     } catch (error) {
@@ -438,7 +455,14 @@ export async function getProfileBudget(username, profileName) {
         let data = await readFile(`./data/users/${username}.json`, 'utf-8');
         data = JSON.parse(data);
         let profile = data.profiles.find(p => p.pName === profileName);
-        return profile.expenses.budget;
+        if (!profile) {
+            return [];
+        }
+        // Add profileName to each budget object if it doesn't exist
+        return profile.expenses.budget.map(budget => ({
+            ...budget,
+            profileName: budget.profileName || profile.pName
+        }));
     } catch (error) {
         console.log(error);
         return [];

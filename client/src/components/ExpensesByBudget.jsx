@@ -16,6 +16,17 @@ export default function ExpensesByBudget({ username, profileName }) {
     const [budgetTarget, setBudgetTarget] = useState(0);
     const [transactionsSum, setTransactionsSum] = useState(0);
     const [sumKey, setSumKey] = useState(0);
+
+    function formatCurrency(amount) {
+        if (!amount || isNaN(amount)) return "₪0.00";
+        return new Intl.NumberFormat('he-IL', {
+            style: 'currency',
+            currency: 'ILS',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
+    }
+
     async function getProfBudgetsDates() {
         try {
             let response = await fetch('http://localhost:5500/api/profile/get_prof_budget', {
@@ -160,13 +171,14 @@ export default function ExpensesByBudget({ username, profileName }) {
     }
 
     return (
-        <div>
-            <div className="grid-cols-2 *:p-2 *:bg-blue-500 *:text-white *:hover:bg-blue-600 *:transition *:rounded-md *:m-2">
+        <div className="p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-2xl mx-auto">
                 <motion.button
                     transition={{ duration: 0 }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className='px-4 py-2 bg-gray-200 text-blue-600 rounded-md hover:bg-gray-300 transition' onClick={(e) => {
+                    className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm md:text-base font-medium"
+                    onClick={() => {
                         setShowProfBudgetSelect(!showProfBudgetSelect);
                         setShowExpenses(() => {
                             if (showExpenses) { return false; }
@@ -178,8 +190,8 @@ export default function ExpensesByBudget({ username, profileName }) {
                     transition={{ duration: 0 }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className='px-4 py-2 bg-gray-200 text-blue-600 rounded-md hover:bg-gray-300 transition'
-                    onClick={(e) => {
+                    className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm md:text-base font-medium"
+                    onClick={() => {
                         setShowCategoryBudgetSelect(!showCategoryBudgetSelect);
                         setShowExpenses(() => {
                             if (showExpenses) { return false; }
@@ -188,75 +200,88 @@ export default function ExpensesByBudget({ username, profileName }) {
                     }}
                 >הצג הוצאות לפי קטגוריה</motion.button>
             </div>
+
             {showProfBudgetSelect && (
-                <div className="flex flex-cols w-max mx-auto my-4 **:w-max **:mx-14 **:text-center">
-                    <select className="border-1 rounded-xl"
+                <div className="flex flex-col items-center justify-center gap-4 my-6 max-w-2xl mx-auto p-4 bg-white rounded-lg shadow-sm">
+                    <select 
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         onChange={(e) => {
                             const option = e.target.selectedOptions[0];
                             setStartDate(option.dataset.start);
                             setEndDate(option.dataset.end);
-                        }}>
+                        }}
+                    >
                         <option selected disabled>בחר תקופת תקציב</option>
-                        {profBudgets.map((budget, index) => {
-                            return (
-                                <option data-start={budget.startDate} data-end={budget.endDate}
-                                    key={index}>{reformatDate(budget.startDate) + " - " + reformatDate(budget.endDate)}</option>
-                            );
-                        })}
+                        {profBudgets.map((budget, index) => (
+                            <option 
+                                key={index}
+                                data-start={budget.startDate}
+                                data-end={budget.endDate}
+                            >
+                                {reformatDate(budget.startDate) + " - " + reformatDate(budget.endDate)}
+                            </option>
+                        ))}
                     </select>
                     <motion.button
                         transition={{ duration: 0 }}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className='px-4 py-2 bg-green-400 text-white rounded-md hover:bg-green-500 transition
-                        disabled:bg-gray-200 disabled:text-gray-400'
-                        onClick={async (e) => {
-                            await removeBlankAndSetExpenses(true);
-                            setShowExpenses(true);
-                            setShowCategoryBudgetSelect(false);
-                            setBudgetTarget(() => {
-                                let target = profBudgets.find(budget => {
-                                    return budget.startDate === startDate && budget.endDate === endDate;
+                        className="w-full px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed text-sm md:text-base font-medium"
+                        onClick={async () => {
+                            if (showExpenses) {
+                                setShowExpenses(false);
+                            } else {
+                                await removeBlankAndSetExpenses(true);
+                                setShowExpenses(true);
+                                setShowCategoryBudgetSelect(false);
+                                setBudgetTarget(() => {
+                                    let target = profBudgets.find(budget => {
+                                        return budget.startDate === startDate && budget.endDate === endDate;
+                                    })
+                                    return target.amount;
                                 })
-                                return target.amount;
-                            })
-                            setSumKey(() => sumKey + 1);
+                                setSumKey(prev => prev + 1);
+                            }
                         }}
                         disabled={!startDate || !endDate}
-                    >הצג</motion.button>
+                    >
+                        {showExpenses ? 'הסתר' : 'הצג'}
+                    </motion.button>
                 </div>
-            )
-            }
-            {
-                showCategoryBudgetSelect && (
-                    <div className="flex flex-cols w-max mx-auto my-4 **:w-max **:mx-6 **:text-center">
-                        <select className="border-1 rounded-xl"
-                            onChange={(e) => {
-                                const option = e.target.selectedOptions[0];
-                                setStartDate(option.dataset.start);
-                                setEndDate(option.dataset.end);
-                                setCategory(option.dataset.category);
-                            }}>
+            )}
+
+            {showCategoryBudgetSelect && (
+                <div className="flex flex-col items-center justify-center gap-4 my-6 max-w-2xl mx-auto p-4 bg-white rounded-lg shadow-sm">
+                    <select 
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onChange={(e) => {
+                            const option = e.target.selectedOptions[0];
+                            setStartDate(option.dataset.start);
+                            setEndDate(option.dataset.end);
+                            setCategory(option.dataset.category);
+                        }}
+                    >
+                        <option selected disabled>בחר תקופת תקציב</option>
+                        {catBudgets.map((budget, index) => (
                             <option
-                                selected disabled>בחר תקופת תקציב</option>
-                            {catBudgets.map((budget, index) => {
-                                return (
-                                    <option
-                                        data-start={budget.startDate}
-                                        data-end={budget.endDate}
-                                        data-category={budget.category}
-                                        key={index}>{budget.category + " - "
-                                            + reformatDate(budget.startDate) + " - " + reformatDate(budget.endDate)}</option>
-                                );
-                            })}
-                        </select>
-                        <motion.button
-                            transition={{ duration: 0 }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className='px-4 py-2 bg-green-400 text-white rounded-md hover:bg-green-500 transition
-                        disabled:bg-gray-200 disabled:text-gray-400'
-                            onClick={async (e) => {
+                                key={index}
+                                data-start={budget.startDate}
+                                data-end={budget.endDate}
+                                data-category={budget.category}
+                            >
+                                {budget.category + " - " + reformatDate(budget.startDate) + " - " + reformatDate(budget.endDate)}
+                            </option>
+                        ))}
+                    </select>
+                    <motion.button
+                        transition={{ duration: 0 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-full px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed text-sm md:text-base font-medium"
+                        onClick={async () => {
+                            if (showExpenses) {
+                                setShowExpenses(false);
+                            } else {
                                 await removeBlankAndSetExpenses(false);
                                 setShowExpenses(true);
                                 setShowProfBudgetSelect(false);
@@ -268,48 +293,57 @@ export default function ExpensesByBudget({ username, profileName }) {
                                     })
                                     return Number(target.amount);
                                 })
-                                setSumKey(() => sumKey + 1);
-                            }}
-                            disabled={!startDate || !endDate || !choosenCategory}
-                        >הצג</motion.button>
-                    </div>
-                )
-            }
-            {showExpenses && (
-                expenses.length > 0 ? (<div key={`summary-${sumKey}}`} className="md:grid md:grid-cols-3">
-                    <div className="md:col-span-2">
-                        <ExpensesTable username={username}
-                            profileName={profileName}
-                            expenseData={expenses}
-                            refreshExpenses={removeBlankAndSetExpenses}
-                            showEditBtn={false}
-                            showRelation={false}
-                        />
-                    </div>
-                    <table className="w-2/3 **:h-12 **:border text-center h-1/3">
-                        <thead className="">
-                            <tr>
-                                <th className="bg-gray-200">יעד</th>
-                                <td className="">{budgetTarget}</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th className="bg-gray-200">סה"כ הוצאות</th>
-                                <td className="">{transactionsSum}</td>
-                            </tr>
-                            <tr >
-                                <th className="bg-gray-200">יתרה</th>
-                                <td className={`font-bold ${budgetTarget - transactionsSum < 0 ? "text-red-600" : "text-green-600"}`}>
-                                    {budgetTarget - transactionsSum}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
+                                setSumKey(prev => prev + 1);
+                            }
+                        }}
+                        disabled={!startDate || !endDate || !choosenCategory}
+                    >
+                        {showExpenses ? 'הסתר' : 'הצג'}
+                    </motion.button>
                 </div>
+            )}
+
+            {showExpenses && (
+                expenses.length > 0 ? (
+                    <div key={`summary-${sumKey}`} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2">
+                            <ExpensesTable
+                                username={username}
+                                profileName={profileName}
+                                expenseData={expenses}
+                                refreshExpenses={removeBlankAndSetExpenses}
+                                showEditBtn={false}
+                                showRelation={false}
+                            />
+                        </div>
+                        <div className="bg-white rounded-lg shadow-sm p-4">
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th className="bg-gray-100 px-4 py-3 text-right font-medium text-gray-700">יעד</th>
+                                        <td className="px-4 py-3 text-right">{formatCurrency(budgetTarget)}</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-t">
+                                        <th className="bg-gray-100 px-4 py-3 text-right font-medium text-gray-700">סה"כ הוצאות</th>
+                                        <td className="px-4 py-3 text-right">{formatCurrency(transactionsSum)}</td>
+                                    </tr>
+                                    <tr className="border-t">
+                                        <th className="bg-gray-100 px-4 py-3 text-right font-medium text-gray-700">יתרה</th>
+                                        <td className={`px-4 py-3 text-right font-bold ${budgetTarget - transactionsSum < 0 ? "text-red-600" : "text-green-600"}`}>
+                                            {formatCurrency(budgetTarget - transactionsSum)}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="text-center text-gray-600 mt-8">
+                        <h3 className="text-lg font-medium">לא נמצאו הוצאות</h3>
+                    </div>
                 )
-                    : (<h3>לא נמצאו הוצאות</h3>)
             )}
         </div>
     );
