@@ -35,23 +35,24 @@ export default function RemoveCategory({ username, profileName, category, refres
             <form onSubmit={removeCat} className='bg-white p-6 rounded-2xl shadow-2xl border border-blue-600 w-full max-w-md'>
                 <h2 className='text-2xl font-bold text-blue-600 mb-4 text-center'>מחיקת קטגוריה</h2>
                 <p className='text-center mb-4'>הפעולה תמחק את הקטגוריה ואת הפריטים שבה. לאישור הפעולה, הכנס את קוד הפרופיל ולחץ אישור.</p>
-                <input 
-                    className='w-full p-3 mb-4 border border-gray-300 rounded-md text-center text-gray-900 focus:border-blue-500 focus:ring focus:ring-blue-200' 
-                    type="text" 
-                    placeholder='הזן קוד פרופיל' 
+                <input
+                    className='w-full p-3 mb-4 border border-gray-300 rounded-md text-center text-gray-900 focus:border-blue-500 focus:ring focus:ring-blue-200'
+                    type="text"
+                    placeholder='הזן קוד פרופיל'
                     value={profileCode}
-                    onChange={(e) => setProfileCode(e.target.value)} 
+                    onChange={(e) => setProfileCode(e.target.value)}
                 />
                 {error && <p className='text-red-500 text-center mb-4'>{error}</p>}
                 <div className='flex justify-between'>
-                    <input 
-                        type="submit" 
-                        value="אישור" 
+                    <input
+                        type="submit"
+                        value="אישור"
                         className='px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition'
+                        data-testid='submit'
                     />
-                    <input 
-                        type="button" 
-                        value="ביטול" 
+                    <input
+                        type="button"
+                        value="ביטול"
                         onClick={() => showConfirm(false)}
                         className='px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition'
                     />

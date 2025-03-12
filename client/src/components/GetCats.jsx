@@ -55,7 +55,7 @@ export default function GetCats({ username, profileName, onCategoryClick, onCate
                             טוען קטגוריות...
                         </div>
                     ) : (
-                        <select 
+                        <select
                             className='w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
                             onChange={handleCategoryChange}
                             value={selectedCategory}
@@ -64,8 +64,8 @@ export default function GetCats({ username, profileName, onCategoryClick, onCate
                                 {categories.length === 0 ? 'לא נמצאו קטגוריות' : 'בחר קטגוריה'}
                             </option>
                             {categories.map((category, index) => (
-                                <option 
-                                    key={index} 
+                                <option
+                                    key={index}
                                     value={category.categoryName}
                                     className="text-gray-900"
                                 >
@@ -81,9 +81,9 @@ export default function GetCats({ username, profileName, onCategoryClick, onCate
                         <div className="text-center text-gray-500">טוען קטגוריות...</div>
                     ) : categories.length > 0 ? (
                         categories.map((category, index) => (
-                            <button 
+                            <button
                                 className='px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mt-4'
-                                key={index} 
+                                key={index}
                                 onClick={() => onCategoryClick(category.categoryName)}
                             >
                                 {category.categoryName}

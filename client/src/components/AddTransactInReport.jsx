@@ -13,13 +13,13 @@ export default function AddTransactInReport({ username, profileName, category, i
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
-                    username, 
-                    profileName, 
-                    category, 
-                    item, 
-                    price: Number(price), 
-                    date 
+                body: JSON.stringify({
+                    username,
+                    profileName,
+                    category,
+                    item,
+                    price: Number(price),
+                    date
                 })
             });
             let data = await response.json();
@@ -37,7 +37,7 @@ export default function AddTransactInReport({ username, profileName, category, i
 
     return (
         <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-black/50 backdrop-blur-md p-4 z-50">
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
@@ -61,6 +61,7 @@ export default function AddTransactInReport({ username, profileName, category, i
                             onChange={(e) => setPrice(Number(e.target.value))}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="הכנס מחיר"
+                            data-testid='price'
                         />
                     </div>
                     <div className="space-y-2">
@@ -78,10 +79,11 @@ export default function AddTransactInReport({ username, profileName, category, i
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className={`w-full px-4 py-2 rounded-lg text-white text-sm font-medium transition
-                                ${price !== "" && date !== "" 
-                                    ? "bg-green-500 hover:bg-green-600" 
+                                ${price !== "" && date !== ""
+                                    ? "bg-green-500 hover:bg-green-600"
                                     : "bg-gray-300 cursor-not-allowed"}`}
                             disabled={price === "" || date === ""}
+                            data-testid="submit"
                         >
                             הוסף עסקה
                         </motion.button>

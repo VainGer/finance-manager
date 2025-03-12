@@ -14,17 +14,9 @@ export async function addCat(req, res) {
     let { username, profileName, category, privacy } = req.body;
     let added = await addCategory(username, profileName, category, privacy);
     if (added) {
-        res.status(200).json(
-            {
-                message: "category added"
-            }
-        );
+        res.status(201).json({ message: "Category added" });
     } else {
-        res.status(401).json(
-            {
-                message: "category wasn't added"
-            }
-        );
+        res.status(400).json({ message: "Category wasn't added" });
     }
 }
 
@@ -39,7 +31,7 @@ export async function removeCat(req, res) {
             }
         );
     } else {
-        res.status(401).json(
+        res.status(404).json(
             {
                 message: "category wasn't removed"
             }
@@ -58,7 +50,7 @@ export async function removeCatSaveItems(req, res) {
             }
         );
     } else {
-        res.status(401).json(
+        res.status(404).json(
             {
                 message: "category wasn't removed"
             }
@@ -77,7 +69,7 @@ export async function renameCat(req, res) {
             }
         );
     } else {
-        res.status(401).json(
+        res.status(404).json(
             {
                 message: "category wasn't renamed"
             }
@@ -94,7 +86,7 @@ export async function setPrivacy(req, res) {
             message: `${category} private :${privacy}`
         });
     } else {
-        res.status(401).json({
+        res.status(404).json({
             message: `${category} privacy change failed`
         });
     }
@@ -111,7 +103,7 @@ export async function addItemToCat(req, res) {
             }
         );
     } else {
-        res.status(401).json(
+        res.status(400).json(
             {
                 message: "item wasn't added to category"
             }
@@ -138,7 +130,7 @@ export async function removeItem(req, res) {
     if (removed) {
         res.status(200).json({ message: "Item removed successfully" });
     } else {
-        res.status(401).json({ message: "Item wasn't removed" });
+        res.status(404).json({ message: "Item wasn't removed" });
     }
 }
 
@@ -149,7 +141,7 @@ export async function moveItem(req, res) {
     if (moved) {
         res.status(200).json({ message: "Item moved successfully" });
     } else {
-        res.status(401).json({ message: "Item wasn't moved" });
+        res.status(404).json({ message: "Item wasn't moved" });
     }
 }
 
@@ -165,7 +157,7 @@ export async function addTransact(req, res) {
             }
         );
     } else {
-        res.status(401).json(
+        res.status(404).json(
             {
                 message: "spend wasn't added to category"
             }
@@ -182,7 +174,7 @@ export async function editTransactionPrice(req, res) {
             message: "transaction price was updated"
         });
     } else {
-        res.status(401).json({
+        res.status(404).json({
             message: "transaction price update failed"
         });
     }
@@ -196,7 +188,7 @@ export async function editTransDate(req, res) {
             message: "transaction date was updated"
         });
     } else {
-        res.status(401).json({
+        res.status(404).json({
             message: "transaction date update failed"
         });
     }
@@ -210,7 +202,7 @@ export async function deleteTransact(req, res) {
             message: "transaction deleted successfully"
         });
     } else {
-        res.status(401).json({
+        res.status(404).json({
             message: "transaction deletion failed"
         });
     }
@@ -220,10 +212,18 @@ export async function deleteTransact(req, res) {
 export async function getCats(req, res) {
     let { username, profileName, forAccount } = req.body;
     let cats = await getCategoriesList(username, profileName, forAccount);
-    res.status(200).json({
-        message: cats.length > 0 ? "Your categories" : "No categories found",
-        categories: cats
-    });
+    if (cats) {
+        res.status(200).json({
+            message: cats.length > 0 ? "Your categories" : "No categories found",
+            categories: cats
+        });
+    }
+    else {
+        res.status(401).json({
+            message: "Error, could not get categories",
+            categories: []
+        })
+    }
 }
 
 
@@ -231,7 +231,7 @@ export async function getProfExpenses(req, res) {
     let { username, profileName } = req.body;
     let expenses = await getProfileExpenses(username, profileName);
     if (expenses === "Error, could not get profile expenses") {
-        res.status(401).json({
+        res.status(404).json({
             message: expenses
         });
     }
@@ -248,7 +248,7 @@ export async function getAccautExpenses(req, res) {
     let { username, profileName } = req.body;
     let expenses = await getAllExpenses(username, profileName);
     if (expenses === "Error, could not get profile expenses") {
-        res.status(401).json({
+        res.status(404).json({
             message: "Expenses not found"
         });
     }

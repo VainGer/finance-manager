@@ -36,7 +36,7 @@ export default function AuthProfile({ username, profileName, parent, backToSelec
         <form className='grid grid-cols-1 gap-4 text-center'
             onSubmit={(e) => authProf(e)}>
             <label className='font-medium'>הזן את הקוד הסודי</label>
-            <input className='p-2 border border-gray-300 rounded-lg shadow-lg text-center'
+            <input className='p-2 border border-gray-300 rounded-lg shadow-lg text-center' data-testid="pin"
                 onChange={(e) => setPin(e.target.value)} type="password" />
             {showError && <p className='text-red-500'>קוד סודי לא נכון</p>}
             <motion.button
@@ -45,6 +45,7 @@ export default function AuthProfile({ username, profileName, parent, backToSelec
                 whileTap={{ scale: 0.95 }}
                 className='p-2 bg-green-500 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-green-600 transition-all'
                 type="submit"
+                data-testid="submit"
             >
                 כניסה לפרופיל
             </motion.button>

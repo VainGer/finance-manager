@@ -59,6 +59,7 @@ export default function AddCategory({ username, profileName, refreshExpenses, on
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="text-lg font-medium text-green-600"
+                        data-testid="success"
                     >
                         הקטגוריה נוספה בהצלחה!
                     </motion.p>
@@ -75,6 +76,7 @@ export default function AddCategory({ username, profileName, refreshExpenses, on
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             className="text-red-500 text-center mb-4"
+                            data-testid="error"
                         >
                             {error}
                         </motion.p>
@@ -89,6 +91,7 @@ export default function AddCategory({ username, profileName, refreshExpenses, on
                                 placeholder="שם קטגוריה"
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
+                                data-testid="category"
                             />
                         </div>
 
@@ -108,6 +111,7 @@ export default function AddCategory({ username, profileName, refreshExpenses, on
                                 whileTap={{ scale: 0.95 }}
                                 className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 transition flex items-center"
                                 type="submit"
+                                data-testid="submit"
                             >
                                 <FaPlus className="inline-block mr-2" /> הוסף קטגוריה
                             </motion.button>

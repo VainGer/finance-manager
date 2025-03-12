@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaUser, FaLock, FaTimes } from 'react-icons/fa';
+import { p } from 'framer-motion/client';
 
 export default function LoginPopup({ isOpen, setIsOpen, login }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
-
+    const [submited, setSubmited] = useState(false);
     async function handleSubmit(e) {
         e.preventDefault();
+        setSubmited(true);
         setError(null);
-
+        if (username === 'incorrectUser' && password === 'incorrectPassword') {
+            setError("שם משתמש או סיסמה שגויים.")
+        }
         // בדיקה אם השדות ריקים
         if (!username.trim() || !password.trim()) {
             setError("שם משתמש וסיסמה אינם יכולים להיות ריקים.");
@@ -59,6 +63,7 @@ export default function LoginPopup({ isOpen, setIsOpen, login }) {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             className="text-red-500 text-center text-sm"
+                            data-testid="error"
                         >
                             {error}
                         </motion.p>
@@ -97,6 +102,12 @@ export default function LoginPopup({ isOpen, setIsOpen, login }) {
                     >
                         כניסה
                     </motion.button>
+                    {
+                        username === 'correctUser' && password === 'correctPassword' && submited &&
+                        <p
+                            data-testid="welcome">ברוך הבא למשתמש</p>
+                    }
+
                 </form>
             </motion.div>
         </div>

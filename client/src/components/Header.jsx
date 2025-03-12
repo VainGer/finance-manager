@@ -138,6 +138,7 @@ export default function Header({ username, profileName, parent }) {
                             whileTap={{ scale: 0.95 }}
                             className='px-4 py-2 bg-white text-blue-600 rounded-md hover:bg-gray-200 transition'
                             onClick={() => setShowLogin(true)}
+                            data-testid="loginBtn"
                         >
                             לכניסה
                         </motion.button>
