@@ -1,1 +1,10 @@
-[{"username":"test","password":"1234"},{"username":"raz","password":"1234"},{"username":"selenium-account","password":"1234"}]
+[
+    {
+        "username": "test",
+        "password": "1234"
+    },
+    {
+        "username": "raz",
+        "password": "1234"
+    }
+]
