@@ -161,6 +161,8 @@ export default function Dashboard() {
 
 
             let budgetAmount = 0;
+            let startD;
+            let endD;
             // עדכון התקציב
             if (budgetResponse.ok && budgetData.budget && budgetData.budget.length > 0) {
                 const currentBudget = budgetData.budget.reduce((latest, current) => {
@@ -173,6 +175,8 @@ export default function Dashboard() {
                     }
                     return latest;
                 }, budgetData.budget[0]);
+                startD = currentBudget.startDate;
+                endD = currentBudget.endDate;
                 setStartBudgetDate(currentBudget.startDate);
                 setEndBudgetDate(currentBudget.endDate);
                 budgetAmount = parseFloat(currentBudget.amount || 0);
@@ -186,15 +190,16 @@ export default function Dashboard() {
                     category.items.forEach(item => {
                         item.transactions.forEach(transaction => {
                             let date = new Date(transaction.date);
-                            if (date >= new Date(startBudgetDate) && date <= new Date(endBudgetDate)) {
+                            if (date >= new Date(startD) && date <= new Date(endD)) {
                                 total += parseFloat(transaction.price || 0);
                             }
                         });
                     });
                 });
+                console.log(total)
+                setTotalExpenses(total);
                 setProfitLoss(budgetAmount - total);
             }
-            setTotalExpenses(total);
         } catch (error) {
             console.error('Error fetching profile budget:', error);
             setProfileBudget(0);
