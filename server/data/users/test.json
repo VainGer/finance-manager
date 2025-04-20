@@ -5,7 +5,7 @@
         {
             "pName": "יוסי כהן",
             "parent": true,
-            "pin": "1234",
+            "pin": 1234,
             "expenses": {
                 "budget": [
                     {
@@ -45,9 +45,9 @@
                                 "endDate": "2025-03-31"
                             }
                         ],
-                        "items": [
+                        "businesses": [
                             {
-                                "iName": "לחם",
+                                "businessName": "לחם",
                                 "transactions": [
                                     {
                                         "id": 1,
@@ -122,7 +122,7 @@
                                 ]
                             },
                             {
-                                "iName": "חלב",
+                                "businessName": "חלב",
                                 "transactions": [
                                     {
                                         "id": 14,
@@ -162,7 +162,7 @@
                                 ]
                             },
                             {
-                                "iName": "ירקות",
+                                "businessName": "ירקות",
                                 "transactions": [
                                     {
                                         "id": 21,
@@ -232,7 +232,7 @@
                                 ]
                             },
                             {
-                                "iName": "רמי לוי",
+                                "businessName": "רמי לוי",
                                 "transactions": []
                             }
                         ]
@@ -257,9 +257,9 @@
                                 "endDate": "2025-03-31"
                             }
                         ],
-                        "items": [
+                        "businesses": [
                             {
-                                "iName": "חשמל",
+                                "businessName": "חשמל",
                                 "transactions": [
                                     {
                                         "id": 34,
@@ -279,7 +279,7 @@
                                 ]
                             },
                             {
-                                "iName": "מים",
+                                "businessName": "מים",
                                 "transactions": [
                                     {
                                         "id": 37,
@@ -299,7 +299,7 @@
                                 ]
                             },
                             {
-                                "iName": "ארנונה",
+                                "businessName": "ארנונה",
                                 "transactions": [
                                     {
                                         "id": 40,
@@ -319,7 +319,7 @@
                                 ]
                             },
                             {
-                                "iName": "אינטרנט",
+                                "businessName": "אינטרנט",
                                 "transactions": [
                                     {
                                         "id": 43,
@@ -360,9 +360,9 @@
                                 "endDate": "2025-03-31"
                             }
                         ],
-                        "items": [
+                        "businesses": [
                             {
-                                "iName": "סרטים",
+                                "businessName": "סרטים",
                                 "transactions": [
                                     {
                                         "id": 46,
@@ -397,7 +397,7 @@
                                 ]
                             },
                             {
-                                "iName": "מסעדות",
+                                "businessName": "מסעדות",
                                 "transactions": [
                                     {
                                         "id": 52,
@@ -432,7 +432,7 @@
                                 ]
                             },
                             {
-                                "iName": "הופעות",
+                                "businessName": "הופעות",
                                 "transactions": [
                                     {
                                         "id": 58,
@@ -499,9 +499,9 @@
                                 "endDate": "2025-03-31"
                             }
                         ],
-                        "items": [
+                        "businesses": [
                             {
-                                "iName": "חולצה",
+                                "businessName": "חולצה",
                                 "transactions": [
                                     {
                                         "id": 37,
@@ -526,7 +526,7 @@
                                 ]
                             },
                             {
-                                "iName": "נעליים",
+                                "businessName": "נעליים",
                                 "transactions": [
                                     {
                                         "id": 41,
@@ -541,7 +541,7 @@
                                 ]
                             },
                             {
-                                "iName": "מכנסיים",
+                                "businessName": "מכנסיים",
                                 "transactions": [
                                     {
                                         "id": 43,
@@ -582,9 +582,9 @@
                                 "endDate": "2025-03-31"
                             }
                         ],
-                        "items": [
+                        "businesses": [
                             {
-                                "iName": "איפור",
+                                "businessName": "איפור",
                                 "transactions": [
                                     {
                                         "id": 46,
@@ -604,7 +604,7 @@
                                 ]
                             },
                             {
-                                "iName": "טיפולים",
+                                "businessName": "טיפולים",
                                 "transactions": [
                                     {
                                         "id": 49,
@@ -640,9 +640,9 @@
                                 "endDate": "2025-03-31"
                             }
                         ],
-                        "items": [
+                        "businesses": [
                             {
-                                "iName": "ספרים",
+                                "businessName": "ספרים",
                                 "transactions": [
                                     {
                                         "id": 51,
@@ -662,7 +662,7 @@
                                 ]
                             },
                             {
-                                "iName": "קורסים",
+                                "businessName": "קורסים",
                                 "transactions": [
                                     {
                                         "id": 54,
@@ -689,7 +689,7 @@
         {
             "pName": "משה ישראל",
             "parent": true,
-            "pin": "1234",
+            "pin": 1234,
             "expenses": {
                 "budget": [
                     {
@@ -729,9 +729,9 @@
                                 "endDate": "2025-03-31"
                             }
                         ],
-                        "items": [
+                        "businesses": [
                             {
-                                "iName": "דלק",
+                                "businessName": "דלק",
                                 "transactions": [
                                     {
                                         "id": 57,
@@ -761,7 +761,7 @@
                                 ]
                             },
                             {
-                                "iName": "תחבורה ציבורית",
+                                "businessName": "תחבורה ציבורית",
                                 "transactions": [
                                     {
                                         "id": 62,
@@ -791,7 +791,7 @@
                                 ]
                             },
                             {
-                                "iName": "טיפול רכב",
+                                "businessName": "טיפול רכב",
                                 "transactions": [
                                     {
                                         "id": 67,
@@ -827,9 +827,9 @@
                                 "endDate": "2025-03-31"
                             }
                         ],
-                        "items": [
+                        "businesses": [
                             {
-                                "iName": "חדר כושר",
+                                "businessName": "חדר כושר",
                                 "transactions": [
                                     {
                                         "id": 69,
@@ -849,7 +849,7 @@
                                 ]
                             },
                             {
-                                "iName": "ציוד ספורט",
+                                "businessName": "ציוד ספורט",
                                 "transactions": [
                                     {
                                         "id": 72,
@@ -890,9 +890,9 @@
                                 "endDate": "2025-03-31"
                             }
                         ],
-                        "items": [
+                        "businesses": [
                             {
-                                "iName": "יום הולדת",
+                                "businessName": "יום הולדת",
                                 "transactions": [
                                     {
                                         "id": 75,
@@ -907,7 +907,7 @@
                                 ]
                             },
                             {
-                                "iName": "מתנות אחרות",
+                                "businessName": "מתנות אחרות",
                                 "transactions": [
                                     {
                                         "id": 77,

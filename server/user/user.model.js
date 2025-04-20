@@ -1,121 +1,101 @@
-import { readFile, writeFile } from "fs/promises";
+import { insertProfile, findProfileByName, renameProfileName, changePinCode, deleteOneProfile, getProfileList } from "./user.db.js";
 
-//in use
 export async function createProfile(username, profileName, pin, parent) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let profiles = data.profiles;
-        if (profiles.length === 0) {
-            parent = true;
-        }
-        if (profiles.find(p => p.pName === profileName)) {
-            console.log("profile name exist");
-            return false;
-        }
-        let profile = {
-            "pName": profileName,
-            "parent": parent,
-            "pin": pin,
-            "expenses": {
-                "budget": [],
-                "categories": []
-            }
-        };
-        data.profiles.push(profile);
-        await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-        console.log(profileName + " was added");
-        return true;
-    } catch (error) {
-        console.log(error);
+    const foundProfile = await findProfileByName(username, profileName);
+    if (foundProfile) {
+        console.log("Profile already exists");
         return false;
     }
+    const newProfile = {
+        profileName: profileName,
+        pin: pin,
+        parent: parent,
+        expenses: {
+            budgets: [],
+            categories: []
+        }
+    };
+    const result = await insertProfile(username, newProfile);
+    console.log("Profile created");
+    return result;
 }
 
-//in use
-export async function renameProfile(username, profileName, newProfileName) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let profile = data.profiles.find(p => p.pName == profileName);
-        profile.pName = newProfileName;
-        await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-        return true;
-    } catch (error) {
-        console.log(error);
+export async function renameProfile(username, profileName, pin, newProfileName) {
+    const foundProfile = await findProfileByName(username, profileName);
+    if (!foundProfile) {
+        console.log("Profile not found");
         return false;
     }
+    if (foundProfile.pin !== pin) {
+        console.log("Wrong pin code");
+        return false;
+    }
+    const result = await renameProfileName(username, profileName, newProfileName);
+    if (result) {
+        console.log("Profile renamed successfully");
+    } else {
+        console.log("Failed to rename profile");
+    }
+    return result;
 }
 
-
-//in use
 export async function changePin(username, profileName, pin, newPin) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let profile = data.profiles.find(p => p.pName === profileName);
-        if (profile.pin === pin) {
-            console.log("hehe")
-            profile.pin = newPin;
-            await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.log(error);
+    const foundProfile = await findProfileByName(username, profileName);
+    if (!foundProfile) {
+        console.log("Profile not found");
         return false;
     }
+    if (foundProfile.pin !== pin) {
+        console.log("Wrong pin code");
+        return false;
+    }
+    const result = await changePinCode(username, profileName, newPin);
+    if (result) {
+        console.log("Pin code changed successfully");
+    } else {
+        console.log("Failed to change pin code");
+    }
+    return result;
 }
 
-//in use
 export async function deleteProfile(username, profileName, pin) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let profile = data.profiles.find(p => p.pName === profileName);
-        if (profile.pin === pin) {
-            data.profiles = data.profiles.filter(p => p.pName !== profileName);
-            await writeFile(`./data/users/${username}.json`, JSON.stringify(data));
-            console.log("Profile deleted");
-            return true;
-        }
-        console.log("Pofile wasn't deleted");
-        return false;
-    } catch (error) {
-        console.log(error);
+    const foundProfile = await findProfileByName(username, profileName);
+    if (!foundProfile) {
+        console.log("Profile not found");
         return false;
     }
+    if (foundProfile.pin !== pin) {
+        console.log("Wrong pin code");
+        return false;
+    }
+    const result = await deleteOneProfile(username, profileName);
+    if (result) {
+        console.log("Profile deleted successfully");
+    } else {
+        console.log("Failed to delete profile");
+    }
+    return result;
 }
 
-//in use
 export async function openProfile(username, profileName, pin) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let profile = data.profiles.find(p => p.pName === profileName && p.pin === pin);
-        if (profile) {
-            return true;
-        }
-        console.log("Incorrect pin");
-        return false;
-    } catch (error) {
-        console.log(error);
+    const foundProfile = await findProfileByName(username, profileName);
+    if (!foundProfile) {
+        console.log("Profile not found");
         return false;
     }
+    if (foundProfile.pin !== pin) {
+        console.log("Wrong pin code");
+        return false;
+    }
+    console.log("Profile opened");
+    return true;
 }
 
-//in use
 export async function getProfiles(username) {
-    try {
-        let data = await readFile(`./data/users/${username}.json`, 'utf-8');
-        data = JSON.parse(data);
-        let profiles = [];
-        data.profiles.forEach(p => {
-            profiles.push({ pName: p.pName, parent: p.parent });
-        });
-        return profiles;
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
+    const allProfiles = await getProfileList(username);
+    let list = [];
+    allProfiles.forEach((profile) => {
+        list.push([profile.profileName, profile.parent]);
+    });
+    return list;
 }

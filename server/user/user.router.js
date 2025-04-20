@@ -1,14 +1,17 @@
 import Router from 'express';
-import { addProfile, rename, deleteP, changePinCode, openProf, getProfs } from './user.controller.js';
+import {
+    createProfileC, renameProfileC, deleteProfileC,
+    changePinC, openProfileC, getProfilesC
+} from './user.controller.js';
 
 const userRouter = Router();
 
 userRouter
-    .post('/create', addProfile)
-    .post('/rename', rename)
-    .post('/delete', deleteP)
-    .post('/change_pin', changePinCode)
-    .post('/enter', openProf)
-    .post('/get-profiles', getProfs)
-    
+    .post('/create', createProfileC)
+    .post('/rename', renameProfileC)
+    .post('/delete', deleteProfileC)
+    .post('/change_pin', changePinC)
+    .post('/open', openProfileC)
+    .post('/get_profiles', getProfilesC)
+
 export default userRouter;
