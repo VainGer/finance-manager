@@ -1,7 +1,6 @@
 import {
-    addBusiness,
-    renameBusinessInCategory,
-    migrateBusiness,
+    addBusiness, renameBusinessInCategory,
+    migrateBusiness, getBusinessNames,
     removeBusinessFromCategory
 } from './business.model.js';
 
@@ -55,6 +54,20 @@ export async function removeBusinessFromCategoryC(req, res) {
             res.status(200).json({ message: 'Business removed successfully', status: 200 });
         } else {
             res.status(400).json({ message: 'Failed to remove business', status: 400 });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error, status: 500 });
+    }
+}
+
+export async function getBusinessNamesC(req, res) {
+    const { username, pName, categoryName } = req.body;
+    try {
+        const businessNames = await getBusinessNames(username, pName, categoryName);
+        if (businessNames) {
+            res.status(200).json({ businessNames, status: 200 });
+        } else {
+            res.status(400).json({ message: 'Failed to get business names', status: 400 });
         }
     } catch (error) {
         res.status(500).json({ message: 'Internal server error', error, status: 500 });

@@ -1,25 +1,29 @@
-import Router from 'express';
+import { Router } from 'express';
 import {
     addCategoryC,
     removeCategoryC,
-    removeCategorySaveItemsC,
+    removeCategoryAndSaveBusinessesC,
     renameCategoryC,
     setCategoryPrivacyC,
-    getCategoriesC,
-    getCategoriesListC
+    getProfileCategoriesC,
+    getAccountCategoriesC,
+    getCategoriesNamesC,
+    getAccountCategoriesNamesC
 } from './category.controller.js';
 
 const categoryRouter = Router();
 
 categoryRouter.post('/add', addCategoryC);
 
-categoryRouter.delete('/remove', removeCategoryC)
-    ('/remove-save-items', removeCategorySaveItemsC);
+categoryRouter.delete('/remove', removeCategoryC);
+categoryRouter.delete('/remove-save-businesses', removeCategoryAndSaveBusinessesC);
 
-    categoryRouter.put('/rename', renameCategoryC)
-    ('/set-privacy', setCategoryPrivacyC);
+categoryRouter.put('/rename', renameCategoryC);
+categoryRouter.put('/set-privacy', setCategoryPrivacyC);
 
-    categoryRouter.get('/get', getCategoriesC)
-    ('/list', getCategoriesListC);
+categoryRouter.get('/names', getCategoriesNamesC);
+categoryRouter.get('/account-names', getAccountCategoriesNamesC);
+categoryRouter.get('/profile', getProfileCategoriesC);
+categoryRouter.get('/account', getAccountCategoriesC);
 
-export default router;
+export default categoryRouter;

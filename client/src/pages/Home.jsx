@@ -3,16 +3,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import { motion } from 'framer-motion';
 import { FaChartLine, FaWallet, FaClipboardList } from 'react-icons/fa';
+import FeatureCard from '../components/home/FeatureCard';
+
 
 export default function Home() {
-    const [isVisible, setIsVisible] = useState(false);
     const location = useLocation();
-    const navigate = useNavigate();
-    const [wasNotLogedIn, setWasNotLogedIn] = useState(location.state?.notLogedIn);
 
-    useEffect(() => {
-        setIsVisible(true);
-    }, []);
+    const [wasNotLogedIn, setWasNotLogedIn] = useState(location.state?.notLogedIn);
 
     return (
         <div key={location.pathname} dir='rtl' className='bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen mb-4'>
@@ -103,24 +100,5 @@ export default function Home() {
                 </div>
             }
         </div>
-    );
-
-
-
-}
-
-function FeatureCard({ icon, title, desc, onClick }) {
-    return (
-        <motion.div
-            transition={{ duration: 0 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className='p-6 bg-white rounded-2xl shadow-lg flex flex-col items-center border border-gray-200 max-w-xs cursor-pointer hover:bg-gray-100 transition-all'
-            onClick={onClick}
-        >
-            <div className='text-blue-600 text-4xl mb-4'>{icon}</div>
-            <h3 className='text-2xl font-semibold mb-2'>{title}</h3>
-            <p className='text-gray-600 text-sm'>{desc}</p>
-        </motion.div>
     );
 }

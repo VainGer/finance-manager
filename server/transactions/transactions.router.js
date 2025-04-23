@@ -9,8 +9,10 @@ import {
 const transactionRouter = Router();
 
 transactionRouter.post('/add', addTransactionC);
+
 transactionRouter.put('/edit-price', editTransPriceC);
 transactionRouter.put('/edit-date', editTransactionDateC);
+
 transactionRouter.delete('/delete', deleteTransactionC);
 
 export default transactionRouter;

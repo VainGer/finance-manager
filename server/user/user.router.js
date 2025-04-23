@@ -9,7 +9,7 @@ const userRouter = Router();
 userRouter
     .post('/create', createProfileC)
     .post('/rename', renameProfileC)
-    .post('/delete', deleteProfileC)
+    .delete('/delete', deleteProfileC)
     .post('/change_pin', changePinC)
     .post('/open', openProfileC)
     .post('/get_profiles', getProfilesC)

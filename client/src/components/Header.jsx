@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import LoginPopup from './LoginPopup';
-import { div } from 'framer-motion/client';
+import Login from '../components/auth/Login';
+import Register from '../components/auth/Register';
 import { TiThMenu } from "react-icons/ti";
 import { RxCross2 } from "react-icons/rx";
 
@@ -10,31 +10,9 @@ export default function Header({ username, profileName, parent }) {
     const navigate = useNavigate();
     const location = useLocation();
     const [showLogin, setShowLogin] = useState(false);
+    const [showRegister, setShowRegister] = useState(false);
     const [inMobile, setInMobile] = useState(window.innerWidth < 768);
     const [showNav, setShowNavAsMenu] = useState(!inMobile);
-    async function login(username, password) {
-        try {
-            let response = await fetch('http://localhost:5500/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            });
-            let data = await response.json();
-
-            if (response.ok) {
-                setShowLogin(false); // סוגר את הפופ-אפ אם ההתחברות הצליחה
-                navigate('/account', { state: { username } });
-            } else {
-                return { ok: false, message: data.message };
-            }
-        }
-        catch (error) {
-            console.log(error);
-            return { ok: false, message: "שגיאה בחיבור, נסה שוב מאוחר יותר." };
-        }
-    }
 
     window.addEventListener('resize', () => {
         setInMobile(window.innerWidth < 768);
@@ -138,24 +116,24 @@ export default function Header({ username, profileName, parent }) {
                             whileTap={{ scale: 0.95 }}
                             className='px-4 py-2 bg-white text-blue-600 rounded-md hover:bg-gray-200 transition'
                             onClick={() => setShowLogin(true)}
-                            data-testid="loginBtn"
                         >
                             לכניסה
                         </motion.button>
-                        <motion.a
+                        <motion.button
                             transition={{ duration: 0 }}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className='px-4 py-2 bg-white text-blue-600 rounded-md hover:bg-gray-200 transition'
-                            href="/register"
+                            onClick={() => setShowRegister(true)}
                         >
                             להרשמה
-                        </motion.a>
+                        </motion.button>
                     </div>
                 )}
             </div>
 
-            {showLogin && <LoginPopup isOpen={showLogin} setIsOpen={setShowLogin} login={login} />}
+            {showLogin && <Login setIsOpen={setShowLogin} />}
+            {showRegister && <Register setIsOpen={setShowRegister} />}
         </header >
 
     );

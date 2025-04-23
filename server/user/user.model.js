@@ -8,7 +8,7 @@ export async function createProfile(username, profileName, pin, parent) {
     }
     const newProfile = {
         profileName: profileName,
-        pin: pin,
+        pin: Number(pin),
         parent: parent,
         expenses: {
             budgets: [],
@@ -26,7 +26,7 @@ export async function renameProfile(username, profileName, pin, newProfileName) 
         console.log("Profile not found");
         return false;
     }
-    if (foundProfile.pin !== pin) {
+    if (foundProfile.pin !== Number(pin)) {
         console.log("Wrong pin code");
         return false;
     }
@@ -45,11 +45,11 @@ export async function changePin(username, profileName, pin, newPin) {
         console.log("Profile not found");
         return false;
     }
-    if (foundProfile.pin !== pin) {
+    if (foundProfile.pin !== Number(pin)) {
         console.log("Wrong pin code");
         return false;
     }
-    const result = await changePinCode(username, profileName, newPin);
+    const result = await changePinCode(username, profileName, Number(newPin));
     if (result) {
         console.log("Pin code changed successfully");
     } else {
@@ -64,7 +64,7 @@ export async function deleteProfile(username, profileName, pin) {
         console.log("Profile not found");
         return false;
     }
-    if (foundProfile.pin !== pin) {
+    if (foundProfile.pin !== Number(pin)) {
         console.log("Wrong pin code");
         return false;
     }
@@ -83,7 +83,7 @@ export async function openProfile(username, profileName, pin) {
         console.log("Profile not found");
         return false;
     }
-    if (foundProfile.pin !== pin) {
+    if (foundProfile.pin !== Number(pin)) {
         console.log("Wrong pin code");
         return false;
     }
@@ -93,9 +93,11 @@ export async function openProfile(username, profileName, pin) {
 
 export async function getProfiles(username) {
     const allProfiles = await getProfileList(username);
-    let list = [];
-    allProfiles.forEach((profile) => {
-        list.push([profile.profileName, profile.parent]);
+    const profiles = allProfiles.map(profile => {
+        return {
+            name: profile.profileName,
+            parent: profile.parent
+        }
     });
-    return list;
+    return profiles;
 }

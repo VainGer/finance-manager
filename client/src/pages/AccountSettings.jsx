@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import RenameProfileName from "../components/RenameProfileName";
+import RenameProfileName from "../components/profiles/RenameProfileName.jsx";
 import Header from "../components/Header";
-import ChangePinCode from "../components/ChangePinCode";
-import DeleteProfile from "../components/DeleteProfile";
+import ChangePinCode from "../components/profiles/ChangePinCode.jsx";
+import DeleteProfile from "../components/profiles/DeleteProfile.jsx";
 import { motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext.jsx";
+
 
 export default function AccountSettings() {
-    const location = useLocation();
     const navigate = useNavigate();
-    const username = location.state?.username;
-    const [profileName, setProfileName] = useState(location.state?.profileName);
-    const parent = location.state?.parent;
+    const username = useAuth().user;
+    const [profileName, setProfileName] = useState(useAuth().profile.profileName);
+    const parent = useAuth().profile.parent;
     const [showRenameProfile, setShowRenameProfile] = useState(false);
     const [showChangePinCode, setShowChangePinCode] = useState(false);
     const [showDeleteProfile, setShowDeleteProfile] = useState(false);

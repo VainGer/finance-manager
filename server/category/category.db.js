@@ -33,7 +33,7 @@ export async function deleteCategoryDB(username, profileName, category) {
 
 export async function deleteCategorySaveBusinessesDB(username, profileName, category, nextCat) {
     try {
-        const accountCollection = db.collection(`${username}_profiles`);
+        //todo
         return true;
     } catch (error) {
         console.error("Error deleting category and saving businesses:", error);

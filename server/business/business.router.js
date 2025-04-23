@@ -1,14 +1,14 @@
 import Router from 'express';
 import {
-    addBusinessC,
-    renameBusinessInCategoryC,
-    migrateBusinessC,
+    addBusinessC, renameBusinessInCategoryC,
+    migrateBusinessC, getBusinessNamesC,
     removeBusinessFromCategoryC
 } from './business.controller.js';
 
 const businessRouter = Router();
 
-businessRouter.post('/add', addBusinessC);
+businessRouter.post('/add', addBusinessC)
+    .post('/names', getBusinessNamesC);
 
 businessRouter.put('/rename', renameBusinessInCategoryC);
 businessRouter.put('/migrate', migrateBusinessC);

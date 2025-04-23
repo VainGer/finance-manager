@@ -1,19 +1,18 @@
 import {
     addCategoryDB, deleteCategoryDB, deleteCategorySaveBusinessesDB, renameCategoryDB
     , setCategoryPrivacyDB, getProfileCategoriesDB, getAccountCategoriesDB
-} from "./category.db"
+} from "./category.db.js"
 
 export async function addCategory(username, profileName, category, privacy) {
-    const category = {
+    const categoryObj = {
         name: category,
         budgets: [],
         businesses: [],
         isPrivate: privacy
     }
-    const result = await addCategoryDB(username, profileName, category);
+    const result = await addCategoryDB(username, profileName, categoryObj);
     if (!result) {
         console.log("Category already exists")
-        return false;
     }
     return result;
 }
@@ -53,7 +52,7 @@ export async function getProfileCategories(username, profileName) {
     const categories = await getProfileCategoriesDB(username, profileName);
     if (!categories || categories.length === 0) {
         console.log("Categories not found")
-        return false;
+        return [];
     }
     return categories;
 }
@@ -62,7 +61,7 @@ export async function getAccountCategories(username, profileName) {
     const categories = await getAccountCategoriesDB(username, profileName);
     if (!categories || categories.length === 0) {
         console.log("Categories not found")
-        return false;
+        return [];
     }
     return categories;
 }
@@ -71,7 +70,7 @@ export async function getCategoriesNames(username, profileName) {
     const categories = await getProfileCategoriesDB(username, profileName);
     if (!categories || categories.length === 0) {
         console.log("Categories not found")
-        return false;
+        return [];
     }
     return categories.map(category => category.name);
 }

@@ -1,80 +1,43 @@
+import { addTransactionDB, removeTransactionDB, editTransactionDateDB, editTransactionPriceDB } from "./transactions.db.js";
 
-
-
-
-export async function addTransaction(username, profileName, category, business, price, date) {
-    try {
-        const data = await getUserData(username);
-        const profile = data.profiles.find(p => p.pName === profileName);
-        const cat = findCategory(profile, category);
-        const businessData = findBusiness(cat, business);
-        const id = data.globalID++;
-        const transaction = { id, price, date };
-        businessData.transactions.push(transaction);
-        await saveUserData(username, data);
-        return true;
-    } catch (error) {
-        console.error(error.message);
-        return false;
+export async function addTransaction(username, profileName, category, business, price, date, description) {
+    const transaction = {
+        price: price,
+        date: date,
+        description: description,
+        id: category + Date.now() + Math.floor(Math.random() * 1000)
     }
+    const transactionAdded = await addTransactionDB(username, profileName, category, business, transaction);
+    if (!transactionAdded) {
+        console.log("Transaction not added");
+    }
+    console.log("Transaction added successfully");
+    return transactionAdded;
 }
 
 export async function editTransPrice(username, profileName, category, business, id, newPrice) {
-    try {
-        const data = await getUserData(username);
-        const profile = data.profiles.find(p => p.pName === profileName);
-        if (!profile) throw new Error("Profile not found");
-
-        const cat = findCategory(profile, category);
-        if (!cat) throw new Error("No such category");
-
-        const businessData = findBusiness(cat, business);
-        if (!businessData) throw new Error("No such business");
-
-        const transaction = businessData.transactions.find(t => t.id == id);
-        if (!transaction) throw new Error("Transaction not found");
-
-        transaction.price = Number(newPrice);
-        await saveUserData(username, data);
-        return true;
-    } catch (error) {
-        console.error(error.message);
-        return false;
+    const transactionEdited = await editTransactionPriceDB(username, profileName, category, business, id, newPrice);
+    if (!transactionEdited) {
+        console.log("Transaction price not edited");
     }
+    console.log("Transaction price edited successfully");
+    return transactionEdited;
 }
 
 export async function editTransactionDate(username, profileName, category, business, id, newDate) {
-    try {
-        const data = await getUserData(username);
-        const profile = data.profiles.find(p => p.pName === profileName);
-        const cat = findCategory(profile, category);
-        const businessData = findBusiness(cat, business);
-        const transaction = businessData.transactions.find(t => t.id == id);
-        transaction.date = newDate;
-        await saveUserData(username, data);
-        return true;
-    } catch (error) {
-        console.error(error.message);
-        return false;
+    const transactionEdited = await editTransactionDateDB(username, profileName, category, business, id, newDate);
+    if (!transactionEdited) {
+        console.log("Transaction date not edited");
     }
+    console.log("Transaction date edited successfully");
+    return transactionEdited;
 }
 
 export async function deleteTransaction(username, profileName, category, business, id) {
-    try {
-        const data = await getUserData(username);
-        const profile = data.profiles.find(p => p.pName === profileName);
-        const cat = findCategory(profile, category);
-        const businessData = findBusiness(cat, business);
-        const initialLength = businessData.transactions.length;
-        businessData.transactions = businessData.transactions.filter(t => t.id != id);
-        if (businessData.transactions.length < initialLength) {
-            data.globalID--;
-            await saveUserData(username, data);
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.error(error.message);
-        return false;
+    const transactionDeleted = await removeTransactionDB(username, profileName, category, business, id);
+    if (!transactionDeleted) {
+        console.log("Transaction not deleted");
     }
+    console.log("Transaction deleted successfully");
+    return transactionDeleted;
 }
