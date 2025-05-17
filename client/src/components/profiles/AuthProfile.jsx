@@ -25,11 +25,11 @@ export default function AuthProfile({ username, profileName, parent, backToSelec
             return;
         }
         if (result.status === 200) {
-            setProfile({ profileName: profileName, parene: parent });
+            setProfile({ profileName: profileName, parent: parent });
             navigate('/dashboard');
         }
     }
-    
+
     return (
         <form className='grid grid-cols-1 gap-4 text-center'
             onSubmit={(e) => authProf(e)}>

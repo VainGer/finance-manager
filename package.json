@@ -6,6 +6,7 @@
   },
   "devDependencies": {
     "@cypress/react": "^9.0.0",
+    "@types/node": "^22.15.18",
     "cypress": "^14.1.0"
   }
 }

@@ -1,19 +1,19 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { FaPlus, FaTrash, FaEdit, FaExchangeAlt, FaPiggyBank, FaTimes } from "react-icons/fa";
-import AddItem from "../business/AddBusiness";
+import AddBusiness from "../business/AddBusiness";
 import AddCategory from "../categories/AddCategory";
 import RenameCategory from "../categories/RenameCategory";
 import RenameBusiness from "../business/RenameBusiness";
 import MoveBusiness from "../business/MoveBusiness";
-import SetProfBudget from "../../todo/components/SetProfBudget";
-import SetCategoryBudget from "../../todo/components/SetCategoryBudget";
+// import SetProfBudget from "./SetProfBudget";
+// import SetCategoryBudget from "./SetCategoryBudget";
 import DeleteCategory from "../categories/DeleteCategory";
 import GetCategories from "../categories/GetCategories";
 
 const buttonBaseClasses = "px-3 md:px-4 py-2 md:py-3 text-white rounded-lg flex items-center gap-2 md:gap-3 justify-center transition text-sm md:text-base";
 
-export default function SidePanel({ username, profileName, refreshExpenses }) {
+export default function SidePanel({ username, profileName }) {
     const [chosenCategory, setChosenCategory] = useState("");
     const [showControlCenter, setShowControlCenter] = useState(false);
     const [showAction, setShowAction] = useState(null);
@@ -45,15 +45,15 @@ export default function SidePanel({ username, profileName, refreshExpenses }) {
     };
 
     const actionComponents = {
-        setCatBudget: <SetCategoryBudget username={username} profileName={profileName} category={chosenCategory} showConfirm={handleActionClose} refreshExpenses={refreshExpenses} />,
-        addItem: <AddItem username={username} profileName={profileName} category={chosenCategory} refreshExpenses={refreshExpenses} showConfirm={handleActionClose} />,
-        renameCategory: <RenameCategory username={username} profileName={profileName} category={chosenCategory} refreshExpenses={refreshExpenses} showConfirm={handleActionClose} />,
-        renameBusiness: <RenameBusiness username={username} profileName={profileName} category={chosenCategory} refreshExpenses={refreshExpenses} showConfirm={handleActionClose} />,
-        moveBusiness: <MoveBusiness username={username} profileName={profileName} category={chosenCategory} refreshExpenses={refreshExpenses} showConfirm={handleActionClose} />
+        // setCatBudget: <SetCategoryBudget username={username} profileName={profileName} category={chosenCategory} showConfirm={handleActionClose}/>,
+        addItem: <AddBusiness username={username} profileName={profileName} category={chosenCategory} showConfirm={handleActionClose} />,
+        renameCategory: <RenameCategory username={username} profileName={profileName} category={chosenCategory} showConfirm={handleActionClose} />,
+        renameBusiness: <RenameBusiness username={username} profileName={profileName} category={chosenCategory} showConfirm={handleActionClose} />,
+        moveBusiness: <MoveBusiness username={username} profileName={profileName} category={chosenCategory} showConfirm={handleActionClose} />
     };
 
     const controlCenterButtons = [
-        { action: "setCatBudget", label: "תקציב לקטגוריה", icon: <FaPiggyBank size={16} />, color: "bg-blue-500 hover:bg-blue-700" },
+        // { action: "setCatBudget", label: "תקציב לקטגוריה", icon: <FaPiggyBank size={16} />, color: "bg-blue-500 hover:bg-blue-700" },
         { action: "addItem", label: "הוסף בעל עסק", icon: <FaPlus size={16} />, color: "bg-green-600 hover:bg-green-700" },
         { action: "renameCategory", label: "שנה שם קטגוריה", icon: <FaEdit size={16} />, color: "bg-blue-500 hover:bg-blue-700" },
         { action: "renameBusiness", label: "שנה שם בעל עסק", icon: <FaEdit size={16} />, color: "bg-blue-500 hover:bg-blue-700" },
@@ -77,14 +77,14 @@ export default function SidePanel({ username, profileName, refreshExpenses }) {
                         <FaPlus size={14} className="md:size-4" /> הוסף קטגוריה
                     </motion.button>
 
-                    <motion.button
+                    {/* <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className={`${buttonBaseClasses} bg-yellow-500 hover:bg-yellow-700`}
                         onClick={() => setShowSetBudget(true)}
                     >
                         <FaPiggyBank size={14} className="md:size-4" /> הגדר תקציב פרופיל
-                    </motion.button>
+                    </motion.button> */}
                 </div>
             </div>
 
@@ -148,14 +148,13 @@ export default function SidePanel({ username, profileName, refreshExpenses }) {
                         <AddCategory
                             username={username}
                             profileName={profileName}
-                            refreshExpenses={refreshExpenses}
                             onClose={handleAddCategoryClose}
                         />
                     </div>
                 </motion.div>
             )}
 
-            {showSetBudget && (
+            {/* {showSetBudget && (
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -164,11 +163,10 @@ export default function SidePanel({ username, profileName, refreshExpenses }) {
                     <SetProfBudget
                         username={username}
                         profileName={profileName}
-                        refreshExpenses={refreshExpenses}
                         showConfirm={setShowSetBudget}
                     />
                 </motion.div>
-            )}
+            )} */}
 
             {showDeleteConfirm && (
                 <DeleteCategory

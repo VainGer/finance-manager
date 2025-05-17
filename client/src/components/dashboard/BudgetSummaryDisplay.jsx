@@ -1,14 +1,17 @@
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { formatCurrency, formatDate } from '../../tools/formating';
 
+//TODO
 export default function BudgetSummaryDisplay({
-    profileBudget,
-    totalExpenses,
-    profitLoss,
-    startBudgetDate,
-    endBudgetDate,
-    formatCurrency,
-    formatDate
-}) {
+    username, profileName }) {
+
+    const [profileBudget, setProfileBudget] = useState(0);
+    const [totalExpenses, setTotalExpenses] = useState(0);
+    const [startBudgetDate, setStartBudgetDate] = useState(new Date());
+    const [endBudgetDate, setEndBudgetDate] = useState(new Date());
+    const [profitLoss, setProfitLoss] = useState(0);
+
     const budgetUtilization = profileBudget > 0 ? Math.min(100, Math.round((totalExpenses / profileBudget) * 100)) : 0;
     const budgetStatusText = profitLoss >= 0 ? 'בתקציב ✓' : 'חריגה מהתקציב ⚠️';
     const budgetStatusDetail = profitLoss >= 0
@@ -16,22 +19,22 @@ export default function BudgetSummaryDisplay({
         : `חריגה של ${formatCurrency(Math.abs(profitLoss))}`;
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 col-span-3 md:w-4/5 mx-auto">
 
             <div key={profitLoss} className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-                    className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-lg p-6 flex flex-col items-center justify-center transform transition-all duration-300 hover:shadow-xl md:col-span-3"
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-lg p-4 flex flex-col items-center justify-center transform transition-all duration-300 hover:shadow-xl md:col-span-3"
                 >
                     <h3 className="text-lg text-blue-800 mb-3 font-semibold">תקופת הגדרת תקציב אחרונה</h3>
                     <motion.p
                         key={`${startBudgetDate}-${endBudgetDate}`} // Use dates for key
                         initial={{ scale: 0.5 }}
                         animate={{ scale: 1 }}
-                        className="text-2xl font-bold text-blue-600"
+                        className="text-xl font-bold text-blue-600"
                     >
                         מתאריך: {formatDate(startBudgetDate)}<br /> עד תאריך: {formatDate(endBudgetDate)}
                     </motion.p>
@@ -41,15 +44,15 @@ export default function BudgetSummaryDisplay({
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-                    className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-lg p-6 flex flex-col items-center justify-center transform transition-all duration-300 hover:shadow-xl"
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-lg p-4 flex flex-col items-center justify-center transform transition-all duration-300 hover:shadow-xl"
                 >
                     <h3 className="text-lg text-blue-800 mb-3 font-semibold">תקציב פרופיל</h3>
                     <motion.p
                         key={profileBudget}
                         initial={{ scale: 0.5 }}
                         animate={{ scale: 1 }}
-                        className="text-2xl font-bold text-blue-600"
+                        className="text-xl font-bold text-blue-600"
                     >
                         {formatCurrency(profileBudget)}
                     </motion.p>
@@ -59,15 +62,15 @@ export default function BudgetSummaryDisplay({
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-                    className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow-lg p-6 flex flex-col items-center justify-center transform transition-all duration-300 hover:shadow-xl"
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow-lg p-4 flex flex-col items-center justify-center transform transition-all duration-300 hover:shadow-xl"
                 >
                     <h3 className="text-lg text-purple-800 mb-3 font-semibold">סך הוצאות</h3>
                     <motion.p
                         key={totalExpenses}
                         initial={{ scale: 0.5 }}
                         animate={{ scale: 1 }}
-                        className="text-2xl font-bold text-purple-600"
+                        className="text-xl font-bold text-purple-600"
                     >
                         {formatCurrency(totalExpenses)}
                     </motion.p>
@@ -77,15 +80,15 @@ export default function BudgetSummaryDisplay({
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-                    className={`bg-gradient-to-br ${profitLoss >= 0 ? 'from-green-50 to-green-100' : 'from-red-50 to-red-100'} rounded-lg shadow-lg p-6 flex flex-col items-center justify-center transform transition-all duration-300 hover:shadow-xl`}
+                    whileHover={{ scale: 1.05 }}
+                    className={`bg-gradient-to-br ${profitLoss >= 0 ? 'from-green-50 to-green-100' : 'from-red-50 to-red-100'} rounded-lg shadow-lg p-4 flex flex-col items-center justify-center transform transition-all duration-300 hover:shadow-xl`}
                 >
                     <h3 className={`text-lg ${profitLoss >= 0 ? 'text-green-800' : 'text-red-800'} mb-3 font-semibold`}>רווח/הפסד</h3>
                     <motion.p
                         key={profitLoss}
                         initial={{ scale: 0.5 }}
                         animate={{ scale: 1 }}
-                        className={`text-2xl font-bold ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        className={`text-xl font-bold ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}
                     >
                         {formatCurrency(profitLoss)}
                     </motion.p>
@@ -93,9 +96,9 @@ export default function BudgetSummaryDisplay({
             </div>
 
 
-            <div className="bg-white rounded-xl p-6 shadow-lg">
+            <div className="bg-white rounded-xl p-4 shadow-lg">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">סטטיסטיקות מהירות</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     <div className="bg-gray-50 rounded-lg p-4">
                         <h4 className="text-lg font-medium text-gray-700 mb-3">ניצול תקציב</h4>

@@ -23,6 +23,7 @@ export default function Login({ setIsOpen }) {
 
         try {
             const response = await login(username, password);
+            console.log(response.status);
             if (response.status === 200) {
                 setUser(username);
                 navigate("/account");

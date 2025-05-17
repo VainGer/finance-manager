@@ -1,8 +1,8 @@
-const API_URL = 'http://localhost:5500/api/auth';
+const API_URL = 'http://localhost:5500/api/user';
 
 export const login = async (username, password) => {
   try {
-    const response = await fetch(`${API_URL}/login`, {
+    const response = await fetch(`${API_URL}/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })

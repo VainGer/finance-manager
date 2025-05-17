@@ -7,7 +7,8 @@ export const addTransaction = async (username, profileName, category, business, 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, profileName, category, business, price, date, description })
     });
-    return await response.json();
+    const result = await response.json();
+    return result;
   } catch (error) {
     console.error('Add transaction error:', error);
     throw error;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { renameCategory } from "../../API/category";
-export default function RenameCategory({ username, profileName, category, refreshExpenses, showConfirm }) {
+export default function RenameCategory({ username, profileName, category, showConfirm }) {
     const [newName, setNewName] = useState('');
     const [error, setError] = useState('');
 
@@ -13,7 +13,6 @@ export default function RenameCategory({ username, profileName, category, refres
         const result = await renameCategory(username, profileName, category, newName);
         
         if (result.status === 200) {
-            refreshExpenses();
             showConfirm(false);
         } else if (result.status === 404) {
             setError('שגיאה: קטגוריה לא נמצאה');

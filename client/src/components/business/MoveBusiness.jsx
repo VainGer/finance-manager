@@ -3,7 +3,7 @@ import GetCategories from '../categories/GetCategories';
 import ItemsToSelcet from './BusinessToSelect';
 import { migrateBusiness } from '../../API/business';
 
-export default function MoveBusiness({ username, profileName, category, refreshExpenses, showConfirm }) {
+export default function MoveBusiness({ username, profileName, category, showConfirm }) {
     const [nextCat, setNextCat] = useState('');
     const [itemName, setItemName] = useState('');
     const [currentCat] = useState(category);
@@ -22,7 +22,6 @@ export default function MoveBusiness({ username, profileName, category, refreshE
 
         const result = await migrateBusiness(username, profileName, currentCat, nextCat, itemName);
         if (result.status === 200) {
-            refreshExpenses();
             showConfirm(false);
         } else if (result.status === 400) {
             setError("שגיאה בהעברת בעל עסק לקטגוריה חדשה");

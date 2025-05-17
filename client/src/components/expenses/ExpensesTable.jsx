@@ -1,233 +1,93 @@
 import { FaCheck, FaEdit, FaPlus } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from "framer-motion";
-import AddTransactInReport from "./AddTransactInReport";
-import TransactionEditor from "./TransactionEditor";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
-export default function ExpensesTable({ username, profileName, expenseData, refreshExpenses, showEditBtn, showRelation,
-    showAddTransactBtn, onFilteredData, onTransactionUpdate }) {
+import AddTransactInReport from "../transactions/AddTransactInReport";
 
-    const [expenses, setExpenses] = useState([]);
+const tableHeaderClass = "px-3 py-2 text-sm font-medium text-gray-700";
+const tableCellClass = "px-3 py-2 text-sm text-gray-700 whitespace-nowrap";
+const buttonClass = "p-2 hover:bg-blue-100 rounded-full transition-colors";
+const addTransactionButtonClass = `w-full py-2 px-4 text-sm text-gray-600 hover:bg-green-50 
+transition-all rounded-md flex items-center justify-center gap-2 border border-gray-200 hover:border-green-300`;
+
+export default function ExpensesTable({ username, profileName, expenses, forAccountView, fetchData }) {
+
     const [showAddTransact, setShowAddTransact] = useState(false);
-    const [choosenCategory, setChoosenCategory] = useState("");
-    const [id, setId] = useState("");
-    const [price, setPrice] = useState("");
-    const [date, setDate] = useState("");
-    const [choosenItem, setChoosenItem] = useState("");
-    const [showTransactionEditor, SetShowTransactionEditor] = useState(false);
+    const [category, setCategory] = useState('');
+    const [business, setBusiness] = useState('');
 
-    useEffect(() => {
-        if (expenseData && expenseData.length > 0) {
-            setExpenses(prevExpenses => {
-                const prevDataString = JSON.stringify(prevExpenses);
-                const newDataString = JSON.stringify(expenseData);
-                if (prevDataString !== newDataString) {
-                    if (onFilteredData) {
-                        onFilteredData(expenseData);
-                    }
-                    return expenseData;
-                }
-                return prevExpenses;
-            });
-        }
-    }, [expenseData, onFilteredData]);
-
-    async function handleTransactionUpdate() {
-        try {
-            console.log("Starting transaction update in ExpensesTable...");
-
-            if (onTransactionUpdate) {
-                console.log("Calling parent onTransactionUpdate");
-                await onTransactionUpdate();
-            }
-
-            const updatedExpenses = await refreshExpenses();
-            console.log("Got updated expenses:", updatedExpenses);
-
-            if (updatedExpenses && updatedExpenses.length > 0) {
-                console.log("Setting new expenses state");
-                setExpenses(updatedExpenses);
-
-                if (onFilteredData) {
-                    console.log("Updating filtered data");
-                    onFilteredData(updatedExpenses);
-                }
-            }
-        } catch (error) {
-            console.error("Error in handleTransactionUpdate:", error);
-        }
-    }
-
-    function closeEditor() {
-        console.log("Closing editor");
-        SetShowTransactionEditor(false);
-        handleTransactionUpdate();
-    }
-
-    function closeAddTransact() {
-        console.log("Closing add transaction");
+    const closeAddTransact = () => {
         setShowAddTransact(false);
-        handleTransactionUpdate();
     }
 
-    function reformatDate(date) {
-        if (!date || typeof date !== 'string') {
-            return date;
-        }
-        try {
-            let year = date.slice(0, 4);
-            let month = date.slice(5, 7);
-            let day = date.slice(8, 10);
-            return day + "/" + month + "/" + year;
-        } catch (error) {
-            return date;
-        }
-    }
-
-    function formatCurrency(amount) {
-        if (!amount || isNaN(amount)) return "₪0.0";
-        return new Intl.NumberFormat('he-IL', {
-            style: 'currency',
-            currency: 'ILS',
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        }).format(amount);
-    }
 
     return (
-        <div className='w-full overflow-x-auto px-2 md:px-4'>
-            {expenses.map((category, index) => {
-                return (
-                    <div key={index} className="mb-6 bg-white rounded-lg shadow-sm p-3 md:p-4">
-                        <h3 className="text-lg font-semibold mb-3">קטגוריה: {category.categoryName}</h3>
-                        <div className="space-y-4">
-                            {category.items.map((item, index) => {
-                                const sortedTransactions = item.transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
-                                return (
-                                    <div key={index} className="bg-gray-50 rounded-lg p-3">
-                                        <h5 className="font-medium mb-2">שם בעל העסק: {item.iName}</h5>
-                                        <h5 className="font-medium mb-2">הוצאות:</h5>
-                                        <div className="overflow-x-auto">
-                                            <table className="min-w-full divide-y divide-gray-200">
-                                                <thead className="bg-gray-100">
-                                                    <tr>
-                                                        <th className="px-3 py-2 text-right text-sm font-medium text-gray-700">תאריך</th>
-                                                        <th className="px-3 py-2 text-right text-sm font-medium text-gray-700">סכום</th>
-                                                        {showEditBtn && <th className="px-3 py-2 text-right text-sm font-medium text-gray-700">עריכה</th>}
-                                                        {showRelation && <th className="px-3 py-2 text-right text-sm font-medium text-gray-700">הוצאה שלי</th>}
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="bg-white divide-y divide-gray-200">
-                                                    {sortedTransactions.map((transactions, index) => (
-                                                        <tr key={index}>
-                                                            <td className="px-3 py-2 text-sm text-gray-700 whitespace-nowrap">{reformatDate(transactions.date)}</td>
-                                                            <td className="px-3 py-2 text-sm text-gray-700 whitespace-nowrap">{formatCurrency(Number(transactions.price))}</td>
-                                                            {showEditBtn &&
-                                                                <td className="px-3 py-2 text-sm text-gray-700">
-                                                                    <motion.button
-                                                                        initial={{ opacity: 0, scale: 0.9 }}
-                                                                        animate={{ opacity: 1, scale: 1 }}
-                                                                        whileHover={{ scale: 1.1 }}
-                                                                        whileTap={{ scale: 0.95 }}
-                                                                        transition={{ duration: 0.2 }}
-                                                                        className="p-2 hover:bg-blue-100 rounded-full transition-colors"
-                                                                        onClick={(e) => {
-                                                                            setId(transactions.id);
-                                                                            setChoosenCategory(category.categoryName);
-                                                                            setChoosenItem(item.iName);
-                                                                            setPrice(transactions.price);
-                                                                            setDate(transactions.date);
-                                                                            SetShowTransactionEditor(true);
-                                                                        }}
-                                                                    >
-                                                                        <FaEdit className="text-blue-600 hover:text-blue-700" />
-                                                                    </motion.button>
-                                                                </td>
-                                                            }
-                                                            {showRelation &&
-                                                                <td className="px-3 py-2 text-sm">
-                                                                    {transactions.related ?
-                                                                        <div className="text-green-500"><FaCheck className="mx-auto" /></div> :
-                                                                        <div className="text-red-500"><RxCross2 className="mx-auto" /></div>
-                                                                    }
-                                                                </td>
-                                                            }
-                                                        </tr>
-                                                    ))}
-                                                    {showAddTransactBtn &&
-                                                        <tr>
-                                                            <td colSpan={showEditBtn ? 3 : 2}>
-                                                                <motion.button
-                                                                    initial={{ opacity: 0, scale: 0.9 }}
-                                                                    animate={{ opacity: 1, scale: 1 }}
-                                                                    whileHover={{ scale: 1.02 }}
-                                                                    whileTap={{ scale: 0.98 }}
-                                                                    transition={{ duration: 0.2 }}
-                                                                    className="w-full py-2 px-4 text-sm text-gray-600 hover:bg-green-50 transition-all rounded-md flex items-center justify-center gap-2 border border-gray-200 hover:border-green-300"
-                                                                    onClick={() => {
-                                                                        setShowAddTransact(true);
-                                                                        setChoosenCategory(category.categoryName);
-                                                                        setChoosenItem(item.iName);
-                                                                    }}
-                                                                >
-                                                                    <span>הוסף עסקה</span>
-                                                                    <FaPlus className="text-green-500" />
-                                                                </motion.button>
-                                                            </td>
-                                                        </tr>
-                                                    }
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+        <div className="w-full px-2 md:px-4 text-center">
+            {expenses.map((category, categoryIndex) => (
+                <div key={categoryIndex} className="mb-6 bg-white rounded-lg shadow-sm p-3 md:p-4">
+                    <h3 className="text-lg font-semibold mb-3">קטגוריה: {category.name}</h3>
+                    {category.businesses.map((business, businessIndex) => (
+                        <div key={businessIndex} className="bg-gray-50 rounded-lg p-3 mb-4">
+                            <h5 className="font-medium mb-2">שם בעל העסק: {business.name}</h5>
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-100">
+                                    <tr>
+                                        <th className={tableHeaderClass}>תאריך</th>
+                                        <th className={tableHeaderClass}>סכום</th>
+                                        <th className={tableHeaderClass}>תיאור</th>
+                                        <th className={tableHeaderClass}>עריכה</th>
+                                        {forAccountView && <th className={tableHeaderClass}>הוצאה שלי</th>}
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {business.transactions.map((transaction, transactionIndex) => (
+                                        <tr key={transactionIndex}>
+                                            <td className={tableCellClass}>{transaction.date}</td>
+                                            <td className={tableCellClass}>{transaction.price}</td>
+                                            <td className={tableCellClass}>{transaction.description ? transaction.description : '-'}</td>
+                                            <td className={tableCellClass}>
+                                                <motion.button className={buttonClass}>
+                                                    <FaEdit className="text-blue-600 hover:text-blue-700" />
+                                                </motion.button>
+                                            </td>
+                                            {forAccountView &&
+                                                <td className="px-3 py-2 text-sm">
+                                                    {transaction.related ? (
+                                                        <FaCheck className="text-green-500 mx-auto" />
+                                                    ) : (
+                                                        <RxCross2 className="text-red-500 mx-auto" />
+                                                    )}
+                                                </td>
+                                            }
+                                        </tr>
+                                    ))}
+                                    <tr>
+                                        <td colSpan={4}>
+                                            <motion.button className={addTransactionButtonClass}
+                                                onClick={() => {
+                                                    setShowAddTransact(true);
+                                                    setCategory(category.name);
+                                                    setBusiness(business.name);
+                                                }}>
+                                                <span>הוסף עסקה</span>
+                                                <FaPlus className="text-green-500" />
+                                            </motion.button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
-                );
-            })}
-            <AnimatePresence>
-                {showAddTransact && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md px-4 z-50"
-                    >
-                        <div className="md:p-6 rounded-lg shadow-2xl w-full max-w-lg text-center relative mx-4">
-                            <AddTransactInReport
-                                username={username}
-                                profileName={profileName}
-                                category={choosenCategory}
-                                item={choosenItem}
-                                onTransactionUpdate={handleTransactionUpdate}
-                                closeAddTransact={closeAddTransact}
-                            />
-                        </div>
-                    </motion.div>
-                )}
-                {showTransactionEditor && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md px-4 z-50"
-                    >
-                        <div className="md:p-6 rounded-lg shadow-2xl w-full max-w-lg text-center relative mx-4">
-                            <TransactionEditor
-                                username={username}
-                                profileName={profileName}
-                                category={choosenCategory}
-                                item={choosenItem}
-                                id={id}
-                                initialPrice={price}
-                                initialDate={date}
-                                onTransactionUpdate={handleTransactionUpdate}
-                                onClose={closeEditor}
-                            />
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
+                    ))}
+                </div>
+            ))
+            }
+            {
+                showAddTransact &&
+                <AddTransactInReport username={username} profileName={profileName}
+                    closeAddTransact={closeAddTransact} fetchData={fetchData}
+                    category={category} business={business} />
+            }
+        </div >
     );
 }

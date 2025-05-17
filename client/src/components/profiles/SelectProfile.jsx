@@ -22,19 +22,20 @@ export default function SelectProfile({ username, showSelectH1 }) {
     const [profiles, setProfiles] = useState([]);
     const [profileName, setProfileName] = useState('');
     const [parent, setParent] = useState(false);
-    
 
-    const [currentView, setCurrentView] = useState('profiles'); 
 
-    useEffect(() => {
-        async function fetchProfiles() {
-            try {
-                const profileList = await getProfiles(username);
-                setProfiles(profileList.profiles);
-            } catch (error) {
-                console.error("Error in fetchProfiles:", error);
-            }
+    const [currentView, setCurrentView] = useState('profiles');
+
+    async function fetchProfiles() {
+        try {
+            const profileList = await getProfiles(username);
+            setProfiles(profileList.profiles);
+        } catch (error) {
+            console.error("Error in fetchProfiles:", error);
         }
+    }
+    
+    useEffect(() => {
         fetchProfiles();
     }, [username]);
 
@@ -42,12 +43,12 @@ export default function SelectProfile({ username, showSelectH1 }) {
         setCurrentView('profiles');
         showSelectH1(true);
     };
-    
+
     const showAddProfile = () => {
         setCurrentView('addProfile');
         showSelectH1(false);
     };
-    
+
     const showAuthProfile = (name, isParent) => {
         setProfileName(name);
         setParent(isParent);
@@ -73,7 +74,7 @@ export default function SelectProfile({ username, showSelectH1 }) {
                     </motion.button>
                 ))}
             </motion.div>
-            
+
             <motion.button
                 {...buttonAnimation}
                 className="mt-4 px-6 py-3 bg-green-600 text-white text-lg font-medium rounded-lg shadow-md hover:bg-green-700 transition"
@@ -105,18 +106,18 @@ export default function SelectProfile({ username, showSelectH1 }) {
             {profiles.length > 0 ? (
                 <div className="flex flex-col items-center gap-4">
                     {currentView === 'profiles' && <ProfilesList />}
-                    
+
                     {currentView === 'authProfile' && (
                         <motion.div {...fadeInAnimation} className="w-full">
-                            <AuthProfile 
-                                username={username} 
-                                profileName={profileName} 
-                                parent={parent} 
-                                backToSelect={showProfilesList} 
+                            <AuthProfile
+                                username={username}
+                                profileName={profileName}
+                                parent={parent}
+                                backToSelect={showProfilesList}
                             />
                         </motion.div>
                     )}
-                    
+
                     {currentView === 'addProfile' && <AddProfileView />}
                 </div>
             ) : (
@@ -125,10 +126,10 @@ export default function SelectProfile({ username, showSelectH1 }) {
                     className="text-center"
                 >
                     <h1 className="text-lg font-semibold text-gray-800">לא נמצאו פרופילים, צור פרופיל חדש</h1>
-                    <AddProfile 
+                    <AddProfile
                         username={username}
-                        showSelectH1={showSelectH1} 
-                        firstProfile={true} 
+                        showSelectH1={showSelectH1}
+                        firstProfile={true}
                     />
                 </motion.div>
             )}

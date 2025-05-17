@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import SidePanel from './SidePanel';
+import SidePanel from '../../todo/components/SidePanel';
 
 
 export default function DashboardSidebar({
     username,
     profileName,
-    refreshExpenses, 
-    onBudgetUpdate, 
 }) {
 
     const [currentTipIndex, setCurrentTipIndex] = useState(0);
@@ -69,8 +67,6 @@ export default function DashboardSidebar({
                 <SidePanel
                     username={username}
                     profileName={profileName}
-                    refreshExpenses={refreshExpenses}
-                    onBudgetUpdate={onBudgetUpdate}
                 />
             </motion.div>
 

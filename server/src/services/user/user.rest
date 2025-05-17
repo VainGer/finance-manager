@@ -1,0 +1,30 @@
+@uri = http://localhost:5500/api/
+
+### Register a new user
+POST {{uri}}user/register
+Content-Type: application/json
+
+{
+    "username": "user3",
+    "password": "1234",
+    "createdAt": "2023-10-01T12:00:00Z",
+    "updatedAt": "2023-10-01T12:00:00Z"
+}
+
+### get user by id
+POST {{uri}}user/get-user-by-id
+Content-Type: application/json
+
+{
+    "id": "68289482f56e9e6a66631dd6"
+}
+
+###validate user
+POST {{uri}}user/validate
+Content-Type: application/json
+
+{
+    "username": "user1",
+    "password": "1234"
+}
+
