@@ -60,6 +60,35 @@ export default class DB {
             throw error;
         }
     }
+
+    async GetDocuments(collection: string, query: any) {
+        try {
+            const documents = await this.client?.db(this.dbName).collection(collection).find(query).toArray();
+            return documents;
+        } catch (error) {
+            console.error("Error getting documents: ", error);
+            throw error;
+        }
+    }
+
+    async UpdateDocument(collection: string, query: any, update: any) {
+        try {
+            const res = await this.client?.db(this.dbName).collection(collection).updateOne(query, { $set: update });
+            return res;
+        } catch (error) {
+            console.error("Error updating document: ", error);
+            throw error;
+        }
+    }
+
+    async DeleteDocument(collection: string, query: any) {
+        try {
+            const res = await this.client?.db(this.dbName).collection(collection).deleteOne(query);
+            return res;
+        } catch (error) {
+            console.error("Error deleting document: ", error);
+            throw error;
+        }
+    }
 }
 
-    

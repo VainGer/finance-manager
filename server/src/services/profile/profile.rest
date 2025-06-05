@@ -1,0 +1,74 @@
+@uri = http://localhost:5500/api/profile
+
+###create profile 1
+POST {{uri}}/create-profile
+Content-Type: application/json
+
+{
+  "username": "user",
+  "profileName": "test_profile",
+  "parent" : true,
+  "pin" : "1234"
+}
+
+###create profile 2
+POST {{uri}}/create-profile
+Content-Type: application/json
+
+{
+  "username": "user",
+  "profileName": "test_profile2",
+  "parent" : false,
+  "pin" : "1234"
+}
+
+###validate profile
+POST {{uri}}/validate-profile
+Content-Type: application/json
+
+{
+  "username": "user",
+  "profileName": "test_profile",
+  "pin" : "1234"
+}
+
+###get profiles
+GET {{uri}}/get-profiles
+Content-Type: application/json
+
+{
+  "username": "user"
+}
+
+###rename profile
+POST {{uri}}/rename-profile
+Content-Type: application/json
+
+{
+  "username": "user",
+  "oldProfileName": "test_profile",
+  "newProfileName": "renamed_profile"
+}
+
+###change pin
+POST {{uri}}/change-pin
+Content-Type: application/json
+
+{
+  "username": "user",
+  "profileName": "renamed_profile",
+  "oldPin" : "1234",
+  "newPin" : "5678"
+}
+
+
+###delete profile
+POST {{uri}}/delete-profile
+Content-Type: application/json
+
+{
+  "username": "user",
+  "profileName": "renamed_profile",
+  "pin" : "5678"
+}
+

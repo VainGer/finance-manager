@@ -5,7 +5,7 @@ POST {{uri}}user/register
 Content-Type: application/json
 
 {
-    "username": "user3",
+    "username": "user",
     "password": "1234",
     "createdAt": "2023-10-01T12:00:00Z",
     "updatedAt": "2023-10-01T12:00:00Z"
@@ -16,7 +16,7 @@ POST {{uri}}user/get-user-by-id
 Content-Type: application/json
 
 {
-    "id": "68289482f56e9e6a66631dd6"
+    "id": "682d8900ecddb08b392789a5"
 }
 
 ###validate user
@@ -24,7 +24,6 @@ POST {{uri}}user/validate
 Content-Type: application/json
 
 {
-    "username": "user1",
+    "username": "user",
     "password": "1234"
 }
-

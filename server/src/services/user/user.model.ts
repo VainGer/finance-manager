@@ -1,8 +1,7 @@
-import { User, UserWithoutPassword } from './user.types';
+import { User } from './user.types';
 import { Response, Request } from 'express';
 import db from '../../server';
 import { ObjectId } from 'mongodb';
-import { stat } from 'fs';
 
 export default class UserModel {
     private static userCollection: string = 'users';
@@ -22,9 +21,9 @@ export default class UserModel {
             }
             let registeredUser = await db.GetDocument("users", { "username": user.username });
             if (registeredUser) {
-                res.status(400).json({
+                res.status(409).json({
                     message: "User already exists",
-                    status: 400
+                    status: 409
                 });
             }
             else {
@@ -67,14 +66,10 @@ export default class UserModel {
                     status: 404
                 });
             } else {
+                const { password, ...userToReturn } = userFound;
                 res.status(200).json({
                     message: "User retrieved successfully",
-                    user: {
-                        username: userFound.username,
-                        createdAt: userFound.createdAt,
-                        updatedAt: userFound.updatedAt,
-                        isActive: userFound.isActive
-                    },
+                    user: userToReturn,
                     status: 200
                 });
             }
@@ -104,14 +99,10 @@ export default class UserModel {
             let userFound = await db.GetDocument(UserModel.userCollection, { "username": User.username });
             if (userFound) {
                 if (userFound.password === User.password) {
+                    const { password, ...userToReturn } = userFound;
                     res.status(200).json({
                         message: "User validated successfully",
-                        user: {
-                            username: userFound.username,
-                            createdAt: userFound.createdAt,
-                            updatedAt: userFound.updatedAt,
-                            isActive: userFound.isActive
-                        },
+                        user: userToReturn,
                         status: 200
                     });
                 }
