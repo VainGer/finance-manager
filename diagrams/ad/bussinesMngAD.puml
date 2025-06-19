@@ -1,0 +1,71 @@
+```plantuml
+@startuml businessCrudAD
+|Front-End|
+start
+:בחר פעולה (צור/ערוך/מחק עסק);
+if (פעולה == "צור") then (יצירה)
+  :שלח בקשה ליצירת עסק;
+  |Server|
+  :בדיקת הרשאות ובעלות;
+  :בדיקת שם תקין ולא ריק;
+  :בדיקת קיום קטגוריה;
+  if (בדיקות נכשלו?) then (כן)
+    :שליחת 400 Bad Request;
+    ->|Front-End|
+    :הצג "שגיאה ביצירת עסק";
+    stop
+  endif
+  |MongoDB|
+  :שמירת עסק חדש;
+  -->|Server|
+  |Server|
+  :שליחת 201 Created;
+  ->|Front-End|
+  :הצג "עסק נוצר";
+elseif (פעולה == "ערוך") then (עדכון)
+  :שלח בקשה לעדכון עסק;
+  |Server|
+  :בדיקת הרשאות ובעלות;
+  :בדיקת קיום העסק;
+  if (עסק לא קיים?) then (כן)
+    :שליחת 404 Not Found;
+    ->|Front-End|
+    :הצג "עסק לא נמצא";
+    stop
+  endif
+  :בדיקת שם חדש תקין ולא ריק;
+  if (שם לא תקין?) then (כן)
+    :שליחת 400 Bad Request;
+    ->|Front-End|
+    :הצג "שגיאה בעדכון שם";
+    stop
+  endif
+  |MongoDB|
+  :עדכון שם העסק;
+  -->|Server|
+  |Server|
+  :שליחת 200 OK;
+  ->|Front-End|
+  :הצג "עסק עודכן";
+elseif (פעולה == "מחק") then (מחיקה)
+  :שלח בקשה למחיקת עסק;
+  |Server|
+  :בדיקת הרשאות ובעלות;
+  :בדיקת קיום העסק;
+  if (עסק לא קיים?) then (כן)
+    :שליחת 404 Not Found;
+    ->|Front-End|
+    :הצג "עסק לא נמצא";
+    stop
+  endif
+  |MongoDB|
+  :מחיקת העסק;
+  -->|Server|
+  |Server|
+  :שליחת 200 OK;
+  ->|Front-End|
+  :הצג "עסק נמחק";
+endif
+stop
+@enduml
+```

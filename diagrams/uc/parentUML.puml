@@ -1,0 +1,27 @@
+@startuml
+left to right direction
+
+actor "פרופיל הורה" as Parent
+
+rectangle "SmartFinance - פרופיל הורה" {
+    usecase "הרשמת משתמש ואימות סיסמה" as UC_Auth
+    usecase "צפייה בפרופילי ילדים והוצאות משפחתיות" as UC_ViewChildren
+    usecase "יצירת/עריכת/מחיקת קטגוריה" as UC_ManageCategory
+    usecase "יצירת/עריכת/מחיקת עסק" as UC_ManageBusiness
+    usecase "הוספת/עריכת/מחיקת הוצאה" as UC_ManageExpense
+    usecase "קביעת תקציב כללי לתקופה" as UC_SetGeneralBudget
+    usecase "קביעת תקציב לקטגוריה לתקופה" as UC_SetCategoryBudget
+    usecase "קבלת התראות על חריגות תקציב" as UC_ReceiveAlerts
+    usecase "ניתוח הוצאות בגרפים ודוחות" as UC_AnalyzeExpenses
+}
+
+Parent --> UC_Auth
+Parent --> UC_ViewChildren
+Parent --> UC_ManageCategory
+Parent --> UC_ManageBusiness
+Parent --> UC_ManageExpense
+Parent --> UC_SetGeneralBudget
+Parent --> UC_SetCategoryBudget
+Parent --> UC_ReceiveAlerts
+Parent --> UC_AnalyzeExpenses
+@enduml

@@ -1,0 +1,31 @@
+@startuml budgetCategorySeq
+actor "פרופיל (הורה/ילד)" as Profile
+participant "Front-End\n(Mobile/Web)" as FE
+participant "Server" as S
+database "MongoDB" as DB
+
+activate FE
+Profile -> FE : הגדרת תקציב קטגוריה
+FE -> S : שליחת בקשה להגדרת תקציב קטגוריה
+activate S
+
+S -> DB : בדיקת קיום תקציב בטווח הנתון
+activate DB
+DB --> S : existingBudget | null
+deactivate DB
+
+alt existingBudget
+    S --> FE : קבלת תגובה 400 Bad Request\n{ error: "תקציב קטגוריה בטווח זה כבר קיים" }
+else
+    S -> DB : שמירת תקציב קטגוריה
+    activate DB
+    DB --> S : insertedId
+    deactivate DB
+
+    S --> FE : קבלת תגובה 201 Created
+end
+deactivate S
+
+FE --> Profile : הצגת הודעה מתאימה
+deactivate FE
+@enduml

@@ -1,0 +1,25 @@
+@startuml
+left to right direction
+
+actor "פרופיל ילד" as Child
+
+rectangle "SmartFinance - פרופיל ילד" {
+    usecase "צפייה בנתונים הפרטיים" as UC_ViewOwnData
+    usecase "יצירת/עריכת/מחיקת קטגוריה" as UC_ManageCategory
+    usecase "יצירת/עריכת/מחיקת עסק" as UC_ManageBusiness
+    usecase "הוספת/עריכת/מחיקת הוצאה" as UC_ManageExpense
+    usecase "קביעת תקציב כללי לתקופה" as UC_SetGeneralBudget
+    usecase "קביעת תקציב לקטגוריה לתקופה" as UC_SetCategoryBudget
+    usecase "קבלת התראות על חריגות תקציב" as UC_ReceiveAlerts
+    usecase "ניתוח הוצאות בגרפים ודוחות" as UC_AnalyzeExpenses
+}
+
+Child --> UC_ViewOwnData
+Child --> UC_ManageCategory
+Child --> UC_ManageBusiness
+Child --> UC_ManageExpense
+Child --> UC_SetGeneralBudget
+Child --> UC_SetCategoryBudget
+Child --> UC_ReceiveAlerts
+Child --> UC_AnalyzeExpenses
+@enduml

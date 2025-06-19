@@ -1,0 +1,33 @@
+@startuml familyOverviewSeq
+actor "פרופיל הורה" as Parent
+participant "Front-End" as FE
+participant "Server" as S
+database "MongoDB" as DB
+
+activate FE
+Parent -> FE : בחירת הוצאות משפחתיות
+FE -> S : שליחת בקשה לקבלת פרופילים
+activate S
+
+S -> DB : שליחת שאילתה לפרופילים משפחתיים
+activate DB
+DB --> S : החזרת רשימת פרופילים
+deactivate DB
+
+S --> FE : קבלת תגובה 200 OK עם הפרופילים
+deactivate S
+
+FE -> S : שליחת בקשה לקבלת הוצאות משותפות
+activate S
+
+S -> DB : שליחת שאילתה להוצאות משותפות
+activate DB
+DB --> S : החזרת רשימת הוצאות
+deactivate DB
+
+S --> FE : קבלת תגובה 200 OK עם ההוצאות
+deactivate S
+
+FE --> Parent : הצגת פרופילים והוצאות
+deactivate FE
+@enduml

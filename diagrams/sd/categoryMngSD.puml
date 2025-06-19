@@ -1,0 +1,91 @@
+@startuml categoryCrudWithChecks
+actor "פרופיל (הורה/ילד)" as Profile
+participant "Front-End" as FE
+participant "Server" as S
+database "MongoDB" as DB
+
+activate FE
+
+== Read Categories ==
+Profile -> FE : בקשה לרשימת קטגוריות
+FE -> S : שליחת בקשה להצגת קטגוריות
+activate S
+S -> S : בדיקת הרשאות ובעלות
+alt לא מורשה
+    S --> FE : 403 Forbidden
+    deactivate S
+else מורשה
+    S -> DB : שאילתת רשימת קטגוריות
+    activate DB
+    DB --> S : רשימת קטגוריות
+    deactivate DB
+    S --> FE : תגובה 200 OK
+    deactivate S
+    FE --> Profile : הצגת רשימת קטגוריות
+end
+
+== Create Category ==
+Profile -> FE : יצירת קטגוריה חדשה
+FE -> S : שליחת בקשה ליצירת קטגוריה
+activate S
+S -> S : בדיקת הרשאות ובעלות
+S -> S : בדיקת שם תקין ולא ריק
+alt כישלון בדיקה
+    S --> FE : 400 Bad Request
+    deactivate S
+else בדיקות עברו
+    S -> DB : שמירת קטגוריה חדשה
+    activate DB
+    DB --> S : insertedId
+    deactivate DB
+    S --> FE : תגובה 201 Created
+    deactivate S
+    FE --> Profile : הצגת הודעה "קטגוריה נוצרה"
+end
+
+== Update Category ==
+Profile -> FE : עריכת קטגוריה קיימת
+FE -> S : שליחת בקשה לעדכון קטגוריה
+activate S
+S -> S : בדיקת הרשאות ובעלות
+S -> S : בדיקת קיום קטגוריה
+alt קטגוריה לא קיימת
+    S --> FE : 404 Not Found
+    deactivate S
+else
+    S -> S : בדיקת שם חדש תקין
+    alt שם לא תקין
+        S --> FE : 400 Bad Request
+        deactivate S
+    else
+        S -> DB : עדכון קטגוריה
+        activate DB
+        DB --> S : modifiedCount
+        deactivate DB
+        S --> FE : תגובה 200 OK
+        deactivate S
+        FE --> Profile : הצגת הודעה "קטגוריה עודכנה"
+    end
+end
+
+== Delete Category ==
+Profile -> FE : מחיקת קטגוריה
+FE -> S : שליחת בקשה למחיקת קטגוריה
+activate S
+S -> S : בדיקת הרשאות ובעלות
+S -> S : בדיקת קיום קטגוריה
+alt קטגוריה לא קיימת
+    S --> FE : 404 Not Found
+    deactivate S
+else
+    S -> DB : מחיקת קטגוריה
+    activate DB
+    DB --> S : deletedCount
+    deactivate DB
+    S --> FE : תגובה 200 OK
+    deactivate S
+    FE --> Profile : הצגת הודעה "קטגוריה נמחקה"
+end
+
+deactivate FE
+@enduml
