@@ -1,9 +1,7 @@
-export type User = {
+export type Account = {
     username: string;
     password: string;
     createdAt: Date;
     updatedAt: Date;
     isActive?: boolean;
 }
-
-export type UserWithoutPassword = Omit<User, 'password'>;

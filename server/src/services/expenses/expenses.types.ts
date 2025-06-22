@@ -14,7 +14,8 @@ export type Business = {
 export type CategoryBudget = {
     startDate: Date;
     endDate: Date;
-    budget: number;
+    amount: number;
+    spent: number;
 }
 
 export type Transaction = {
@@ -23,3 +24,5 @@ export type Transaction = {
     date: Date;
     description: string;
 }
+
+export type TransactionWithoutId = Omit<Transaction, '_id'>;

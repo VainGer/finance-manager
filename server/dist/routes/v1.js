@@ -4,8 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const user_router_1 = __importDefault(require("../services/user/user.router"));
+const account_router_1 = __importDefault(require("../services/account/account.router"));
+const profile_router_1 = __importDefault(require("../services/profile/profile.router"));
+const expenses_router_1 = __importDefault(require("../services/expenses/expenses.router"));
 const routerV1 = (0, express_1.default)();
-routerV1.use('/user', user_router_1.default);
+routerV1.use('/account', account_router_1.default);
+routerV1.use('/profile', profile_router_1.default);
+routerV1.use('/expenses', expenses_router_1.default);
 exports.default = routerV1;
 //# sourceMappingURL=v1.js.map

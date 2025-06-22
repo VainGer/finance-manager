@@ -51,9 +51,9 @@ export default class DB {
         }
     }
 
-    async GetDocument(collection: string, query: any) {
+    async GetDocument(collection: string, query: any, options?: any) {
         try {
-            const document = await this.client?.db(this.dbName).collection(collection).findOne(query);
+            const document = await this.client?.db(this.dbName).collection(collection).findOne(query, options);
             return document;
         } catch (error) {
             console.error("Error getting document: ", error);
@@ -71,9 +71,9 @@ export default class DB {
         }
     }
 
-    async UpdateDocument(collection: string, query: any, update: any) {
+    async UpdateDocument(collection: string, query: any, update: any, options?: any) {
         try {
-            const res = await this.client?.db(this.dbName).collection(collection).updateOne(query, { $set: update });
+            const res = await this.client?.db(this.dbName).collection(collection).updateOne(query, update, options);
             return res;
         } catch (error) {
             console.error("Error updating document: ", error);

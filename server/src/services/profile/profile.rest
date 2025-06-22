@@ -33,12 +33,7 @@ Content-Type: application/json
 }
 
 ###get profiles
-GET {{uri}}/get-profiles
-Content-Type: application/json
-
-{
-  "username": "user"
-}
+GET {{uri}}/get-profiles?username=user
 
 ###rename profile
 POST {{uri}}/rename-profile
@@ -61,6 +56,42 @@ Content-Type: application/json
   "newPin" : "5678"
 }
 
+###set avatar
+POST {{uri}}/set-avatar
+Content-Type: application/json
+
+{
+  "username": "user",
+  "profileName": "renamed_profile",
+  "avatar" : "https://example.com/avatar.png"
+}
+
+###set color
+POST {{uri}}/set-color
+Content-Type: application/json
+
+{
+  "username": "user",
+  "profileName": "renamed_profile",
+  "color" : "#FF5733"
+}
+
+###create profile budget
+POST {{uri}}/create-budget
+Content-Type: application/json
+
+{
+  "username": "user",
+  "profileName": "renamed_profile",
+  "budget":{
+  "amount": 1000,
+  "startDate": "2023-01-01",
+  "endDate": "2023-12-31"
+  }
+}
+
+####get profile budget
+GET {{uri}}/get-budgets?username=user&profileName=renamed_profile
 
 ###delete profile
 POST {{uri}}/delete-profile
