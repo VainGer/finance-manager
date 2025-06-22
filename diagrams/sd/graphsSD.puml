@@ -1,0 +1,26 @@
+@startuml analyzeExpensesSeq
+actor "פרופיל (הורה/ילד)" as Parent
+participant "Front-End" as FE
+participant "Server" as S
+database "MongoDB" as DB
+
+activate FE
+Parent -> FE : בקשה לניתוח הוצאות
+FE -> S : שליחת בקשה לניתוח הוצאות
+activate S
+
+S -> DB : שאילתת הוצאות למסד
+activate DB
+DB --> S : תוצאת שאילתה
+deactivate DB
+
+alt תוצאות קיימות
+    S --> FE : קבלת תגובה 200 OK
+else אין נתונים
+    S --> FE : קבלת תגובה 404 Not Found
+end
+deactivate S
+
+FE --> Parent : הצגת גרפים ודוחות
+deactivate FE
+@enduml

@@ -1,0 +1,74 @@
+@startuml businessCrudWithChecks
+actor "פרופיל (הורה/ילד)" as Profile
+participant "Front-End" as FE
+participant "Server" as S
+database "MongoDB" as DB
+
+activate FE
+
+== Create Business ==
+Profile -> FE : יצירת עסק חדש
+FE -> S : שליחת בקשה ליצירת עסק
+activate S
+S -> S : בדיקת הרשאות ובעלות
+S -> S : בדיקת שם תקין ולא ריק
+S -> S : בדיקת קיום קטגוריה
+alt בדיקות נכשלו
+    S --> FE : 400 Bad Request
+    deactivate S
+else
+    S -> DB : שמירת עסק חדש
+    activate DB
+    DB --> S : insertedId
+    deactivate DB
+    S --> FE : 201 Created
+    deactivate S
+    FE --> Profile : הצגת הודעה "עסק נוצר"
+end
+
+== Update Business ==
+Profile -> FE : עריכת עסק קיים
+FE -> S : שליחת בקשה לעדכון עסק
+activate S
+S -> S : בדיקת הרשאות ובעלות
+S -> S : בדיקת קיום עסק
+alt עסק לא קיים
+    S --> FE : 404 Not Found
+    deactivate S
+else
+    S -> S : בדיקת שם חדש תקין
+    alt שם לא תקין
+        S --> FE : 400 Bad Request
+        deactivate S
+    else
+        S -> DB : עדכון שם העסק
+        activate DB
+        DB --> S : modifiedCount
+        deactivate DB
+        S --> FE : 200 OK
+        deactivate S
+        FE --> Profile : הצגת הודעה "עסק עודכן"
+    end
+end
+
+== Delete Business ==
+Profile -> FE : מחיקת עסק
+FE -> S : שליחת בקשה למחיקת עסק
+activate S
+S -> S : בדיקת הרשאות ובעלות
+S -> S : בדיקת קיום עסק
+alt עסק לא קיים
+    S --> FE : 404 Not Found
+    deactivate S
+else
+    S -> DB : מחיקת העסק מהמסד
+    activate DB
+    DB --> S : deletedCount
+    deactivate DB
+    S --> FE : 200 OK
+    deactivate S
+    FE --> Profile : הצגת הודעה "עסק נמחק"
+end
+
+deactivate FE
+@enduml

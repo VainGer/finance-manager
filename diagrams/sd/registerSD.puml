@@ -1,0 +1,28 @@
+@startuml userRegistrationSeq
+actor "משתמש" as U
+participant "Front-End" as FE
+participant "Server" as S
+database "MongoDB" as DB
+
+U -> FE : לוחץ "הרשמה"
+activate FE
+
+FE -> S : שליחת בקשת הרשמה
+activate S
+
+S -> S : בדיקת תקינות הקלט
+alt קלט תקין
+    S -> S : Hash לסיסמה
+    S -> DB : שמירת משתמש חדש
+    activate DB
+    DB --> S : insertedId
+    deactivate DB
+    S --> FE : קבלת תגובה 201 Created
+else קלט לא תקין
+    S --> FE : קבלת תגובה 400 Bad Request
+end
+deactivate S
+
+FE --> U : הצגת הודעה מתאימה
+deactivate FE
+@enduml

@@ -1,0 +1,41 @@
+@startuml registerAD
+|Front-End|
+start
+:המשתמש מזין פרטי הרשמה (שם, אימייל, סיסמה);
+:לוחץ על "הרשמה";
+->|Server|
+
+|Server|
+:קבלת בקשת הרשמה;
+:בדיקת תקינות קלט (אימייל חוקי, סיסמה חזקה);
+if (קלט לא תקין?) then (כן)
+  :שליחת 400 Bad Request;
+  ->|Front-End|
+  :הצגת הודעת שגיאה מתאימה;
+  stop
+endif
+:בדיקה אם משתמש עם אימייל זה כבר קיים;
+-->|MongoDB|
+|MongoDB|
+:חיפוש משתמש לפי אימייל;
+-->|Server|
+|Server|
+if (משתמש קיים?) then (כן)
+  :שליחת 400 Bad Request;
+  ->|Front-End|
+  :הצגת הודעה "אימייל זה כבר רשום";
+  stop
+endif
+:ביצוע Hash לסיסמה;
+:שמירת משתמש חדש;
+-->|MongoDB|
+|MongoDB|
+:הכנסת מסמך משתמש חדש;
+-->|Server|
+|Server|
+:שליחת 201 Created;
+->|Front-End|
+|Front-End|
+:הצגת הודעת "הרשמה הושלמה בהצלחה";
+stop
+@enduml

@@ -1,0 +1,31 @@
+@startuml budgetCategorySeq
+actor "פרופיל (הורה)" as Profile
+participant "Front-End" as FE
+participant "Server" as S
+database "MongoDB" as DB
+
+activate FE
+Profile -> FE : הגדרת תקציב קטגוריה
+FE -> S : שליחת בקשה להגדרת תקציב קטגוריה
+activate S
+
+S -> DB : בדיקה אם קיים תקציב בטווח הנתון
+activate DB
+DB --> S : existingBudget | null
+deactivate DB
+
+alt existingBudget
+    S --> FE : קבלת תגובה 400 Bad Request
+else
+    S -> DB : שמירת תקציב קטגוריה במסד
+    activate DB
+    DB --> S : insertedId
+    deactivate DB
+
+    S --> FE : קבלת תגובה 201 Created
+end
+deactivate S
+
+FE --> Profile : הצגת הודעה מתאימה
+deactivate FE
+@enduml

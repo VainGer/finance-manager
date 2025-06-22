@@ -1,0 +1,55 @@
+@startuml addExpenseAD
+|Front-End|
+start
+:המשתמש מזין פרטי ההוצאה;
+->|Server|
+
+|Server|
+:קבלת בקשה להוספת הוצאה;
+:שמירת ההוצאה;
+-->|MongoDB|
+
+|MongoDB|
+:הכנסת מסמך הוצאה;
+-->|Server|
+
+|Server|
+:בדיקת קיומו של תקציב כללי;
+-->|MongoDB|
+
+|MongoDB|
+:שאילתת תקציב כללי;
+-->|Server|
+
+|Server|
+:בדיקת קיומו של תקציב קטגוריה;
+-->|MongoDB|
+
+|MongoDB|
+:שאילתת תקציב קטגוריה;
+-->|Server|
+
+|Server|
+:חישוב סכום ההוצאות הנוכחי;
+-->|MongoDB|
+
+|MongoDB|
+:אגרגציה לחישוב סכום;
+-->|Server|
+
+|Server|
+if (אין תקציב?) then (כן)
+  :שליחת 201 Created;
+else (לא)
+  if (currentSum + amount > budget.amount?) then (כן)
+    :שליחת 400 Bad Request;
+  else (לא)
+    :שליחת 201 Created;
+  endif
+endif
+->|Front-End|
+
+|Front-End|
+:הצגת הודעה למשתמש;
+stop
+@enduml

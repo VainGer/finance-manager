@@ -1,0 +1,46 @@
+@startuml expenseSeqWithChecks
+actor "פרופיל (הורה/ילד)" as Profile
+participant "Front-End" as FE
+participant "Server" as S
+database "MongoDB" as DB
+
+activate FE
+Profile -> FE : הוספת הוצאה
+FE -> S : שליחת בקשה להוספת הוצאה
+activate S
+
+S -> DB : שמירת הוצאה
+activate DB
+DB --> S : insertedId
+deactivate DB
+
+S -> DB : בדיקת תקציב כללי
+activate DB
+DB --> S : existingGeneralBudget | null
+deactivate DB
+
+S -> DB : בדיקת תקציב קטגוריה
+activate DB
+DB --> S : existingCategoryBudget | null
+deactivate DB
+
+S -> DB : חישוב סכום הוצאות נוכחי
+activate DB
+DB --> S : currentSum
+deactivate DB
+
+alt אין תקציב בכלל
+    S --> FE : קבלת תגובה 201 Created
+else
+    S -> S : currentSum + amount > budget.amount?
+    alt חריגה מהתקציב
+        S --> FE : קבלת תגובה 400 Bad Request
+    else בתוך התקציב
+        S --> FE : קבלת תגובה 201 Created
+    end
+end
+deactivate S
+
+FE --> Profile : הצגת הודעה מתאימה
+deactivate FE
+@enduml

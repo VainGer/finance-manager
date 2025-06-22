@@ -1,0 +1,39 @@
+@startuml
+left to right direction
+
+actor ChildCU as CU
+actor ParentCU as PU
+
+PU --|> CU
+
+rectangle "System" {
+  usecase "Login" 
+  usecase "Authenticate to Profile" as AuthProfile
+  usecase "CRUD Profile"
+  usecase "CRUD Account"
+  usecase "CRUD Category"
+  usecase "CRUD Business"
+  usecase "CRUD Transaction"
+  usecase "CRUD Profile Budget"
+  usecase "CRUD Category Budget"
+  usecase "Receive Budget Alerts" as BudgetAlerts
+  usecase "Analyze Expenses with Graphs and Reports" as AnalyzeExpenses
+  usecase "View child's expenses" as ViewChildExpenses
+  usecase "create Child Profile" as CreateChildProfile
+}
+
+CU -- "Login"
+CU -- "AuthProfile"
+CU -- "CRUD Profile"
+CU -- "CRUD Account"
+CU -- "CRUD Category"
+CU -- "CRUD Business"
+CU -- "CRUD Transaction"
+CU -- "CRUD Category Budget"
+CU -- BudgetAlerts
+CU -- AnalyzeExpenses
+
+PU -- "CRUD Profile Budget"
+PU -- ViewChildExpenses
+PU -- CreateChildProfile
+@enduml
