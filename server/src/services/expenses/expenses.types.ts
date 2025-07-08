@@ -9,6 +9,7 @@ export type Category = {
 export type Business = {
     name: string;
     transactions: Transaction[];
+    
 }
 
 export type CategoryBudget = {

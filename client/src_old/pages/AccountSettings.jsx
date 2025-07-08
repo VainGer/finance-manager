@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import RenameProfileName from "../components/profiles/RenameProfileName.jsx";
-import Header from "../components/Header";
+import Header from "../components/Header.jsx";
 import ChangePinCode from "../components/profiles/ChangePinCode.jsx";
 import DeleteProfile from "../components/profiles/DeleteProfile.jsx";
 import { motion } from "framer-motion";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../../src/context/AuthContext.jsx";
 
 
 export default function AccountSettings() {

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaLock, FaTrash, FaTimes } from 'react-icons/fa';
-import { deleteProfile } from '../../API/user';
-import { useAuth } from '../../context/AuthContext.jsx';
+import { deleteProfile } from '../../API/user.js';
+import { useAuth } from '../../../src/context/AuthContext.jsx';
 
 export default function DeleteProfile({ username, profileName, setShowBtns, setShowDeleteProfile }) {
     const [pin, setPin] = useState('');

@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import SelectProfile from '../components/profiles/SelectProfile.jsx';
-import Header from '../components/Header';
+import Header from '../components/Header.jsx';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useAuth } from '../../src/context/AuthContext.jsx';
 export default function Account() {
     
     const [showSelectH1, setShowSelectH1] = useState(true);

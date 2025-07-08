@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { createProfile } from "../../API/user.js";
-import { useAuth } from "../../context/AuthContext.jsx";
+import { useAuth } from "../../../src/context/AuthContext.jsx";
 
 export default function AddProfile({ username, showSelectH1, firstProfile }) {
     const [profileName, setProfileName] = useState("");

@@ -7,7 +7,7 @@ profileRouter.post<{}, {}, { username: string, profileName: string, parent: bool
     ("/create-profile", ProfileModel.createProfile);
 profileRouter.post<{}, {}, { username: string, profileName: string, pin: string }>
     ("/validate-profile", ProfileModel.validateProfile);
-profileRouter.post<{}, {}, { username: string, profileName: string, oldPin: string, mewPin: string }>
+profileRouter.post<{}, {}, { username: string, profileName: string, oldPin: string, newPin: string }>
     ("/change-pin", ProfileModel.changeProfilePin);
 profileRouter.post<{}, {}, { username: string, oldProfileName: string, newProfileName: string }>
     ("/rename-profile", ProfileModel.renameProfile);

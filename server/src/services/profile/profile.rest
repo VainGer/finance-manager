@@ -28,7 +28,7 @@ Content-Type: application/json
 
 {
   "username": "user",
-  "profileName": "test_profile",
+  "profileName": "renamed_profile",
   "pin" : "1234"
 }
 

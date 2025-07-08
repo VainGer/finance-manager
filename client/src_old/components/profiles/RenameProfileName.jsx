@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { renameProfile } from '../../API/user.js';
-import { useAuth } from '../../context/AuthContext.jsx';
+import { useAuth } from '../../../src/context/AuthContext.jsx';
 
 export default function RenameProfileName({ username, profileName, setProfileName, setShowBtns, setShowRenameProfile }) {
     const [newProfileName, setNewProfileName] = useState('');

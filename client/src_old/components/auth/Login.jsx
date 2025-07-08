@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaUser, FaLock, FaEnvelope, FaTimes } from 'react-icons/fa';
-import { register } from '../../API/auth.js';
-import { useAuth } from '../../context/AuthContext.jsx';
+import { FaUser, FaLock, FaTimes } from 'react-icons/fa';
+import { login } from '../../API/auth.js';
+import { useAuth } from '../../../src/context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 
-export default function Register({ setIsOpen }) {
+export default function Login({ setIsOpen }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const { setUser } = useAuth();
@@ -22,18 +21,14 @@ export default function Register({ setIsOpen }) {
             return;
         }
 
-        if (password !== confirmPassword) {
-            setError("הסיסמאות אינן תואמות.");
-            return;
-        }
-
         try {
-            const response = await register(username, password);
-            if (response.status === 201) {
+            const response = await login(username, password);
+            console.log(response.status);
+            if (response.status === 200) {
                 setUser(username);
                 navigate("/account");
             } else {
-                setError("שגיאה בהרשמה. ייתכן ששם המשתמש כבר קיים במערכת.");
+                setError("שם משתמש או סיסמה שגויים.");
             }
         } catch (error) {
             console.error(error);
@@ -57,7 +52,8 @@ export default function Register({ setIsOpen }) {
                 </button>
 
                 <form className='grid grid-cols-1 gap-6 text-center' onSubmit={handleSubmit}>
-                    <h2 className='text-3xl font-bold text-blue-600'>הרשמה</h2>
+                    <h2 className='text-3xl font-bold text-blue-600'>התחברות</h2>
+
 
                     {error && (
                         <motion.p
@@ -77,7 +73,7 @@ export default function Register({ setIsOpen }) {
                             type="text"
                             placeholder="שם משתמש"
                             value={username}
-                            data-testid="username"
+                            data-testid="login"
                             onChange={(e) => setUsername(e.target.value)}
                         />
                     </div>
@@ -94,18 +90,6 @@ export default function Register({ setIsOpen }) {
                         />
                     </div>
 
-                    <div className='relative'>
-                        <FaLock className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500' />
-                        <input
-                            className='w-full p-3 pl-10 border border-gray-300 rounded-md text-center text-gray-900 focus:border-blue-500 focus:ring focus:ring-blue-200'
-                            type="password"
-                            placeholder="אימות סיסמה"
-                            value={confirmPassword}
-                            data-testid="confirm-password"
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
-                    </div>
-
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -113,8 +97,9 @@ export default function Register({ setIsOpen }) {
                         type="submit"
                         data-testid="submit"
                     >
-                        הרשמה
+                        כניסה
                     </motion.button>
+
                 </form>
             </motion.div>
         </div>

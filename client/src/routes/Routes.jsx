@@ -1,9 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
 
-import Home from "../pages/Home";
-import Account from "../pages/Account";
-import Dashboard from "../pages/Dashboard";
-import AccountSettings from "../pages/AccountSettings";
+import Home from "../../src_old/pages/Home";
+// import Account from "../../src_old/pages/Account";
+// import Dashboard from "../../src_old/pages/Dashboard";
+// import AccountSettings from "../../src_old/pages/AccountSettings";
 
 export const router = createBrowserRouter([
     {

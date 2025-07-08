@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { openProfile } from '../../API/user';
-import { useAuth } from '../../context/AuthContext.jsx';
+import { openProfile } from '../../API/user.js';
+import { useAuth } from '../../../src/context/AuthContext.jsx';
 
 export default function AuthProfile({ username, profileName, parent, backToSelect }) {
     const [pin, setPin] = useState('');

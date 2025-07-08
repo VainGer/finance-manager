@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import Login from '../components/auth/Login';
-import Register from '../components/auth/Register';
+import Login from './auth/Login';
+import Register from './auth/Register';
 import { TiThMenu } from "react-icons/ti";
 import { RxCross2 } from "react-icons/rx";
 
