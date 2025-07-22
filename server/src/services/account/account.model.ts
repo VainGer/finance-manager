@@ -6,120 +6,159 @@ import { ObjectId } from 'mongodb';
 export default class AccountModel {
     private static accountCollection: string = 'accounts';
 
+    // Helper methods for validation and response formatting
+    private static validateRequiredFields(fields: Record<string, any>): string | null {
+        for (const [key, value] of Object.entries(fields)) {
+            if (value === undefined || value === null || value === '') {
+                return `${key} is required`;
+            }
+        }
+        return null;
+    }
+
+    private static formatResponse(res: Response, result: any, dataField?: string, statusCode: number = 200) {
+        const response: any = {
+            message: result.message || result.error
+        };
+        
+        if (dataField && result[dataField] !== undefined) {
+            response[dataField] = result[dataField];
+        }
+        
+        res.status(statusCode).json(response);
+    }
+
     static async createAccount(req: Request, res: Response) {
         try {
             const account = req.body as Account;
-            if (!account || !account.username || !account.password) {
-                let errorMsg = !account ? "Account data is required" :
-                    !account.username ? "Username is required" : "Password is required";
-                res.status(400).json({
-                    message: errorMsg,
-                    status: 400
-                }
-                );
-                return;
+            
+            if (!account) {
+                return AccountModel.formatResponse(res, {
+                    message: "Account data is required"
+                }, undefined, 400);
+            }
+            
+            const errorMsg = AccountModel.validateRequiredFields({ 
+                username: account.username, 
+                password: account.password 
+            });
+            
+            if (errorMsg) {
+                return AccountModel.formatResponse(res, {
+                    message: errorMsg
+                }, undefined, 400);
             }
             let registeredAccount = await db.GetDocument(AccountModel.accountCollection, { "username": account.username });
+            
             if (registeredAccount) {
-                res.status(409).json({
-                    message: "Account already exists",
-                    status: 409
-                });
+                return AccountModel.formatResponse(res, {
+                    message: "Account already exists"
+                }, undefined, 409);
             }
-            else {
-                await db.AddDocument(AccountModel.accountCollection, account as Account);
-                res.status(201).json({
-                    message: "Account registered successfully: " + registeredAccount,
-                    account: {
-                        username: account.username,
-                        createdAt: account.createdAt,
-                        updatedAt: account.updatedAt,
-                        isActive: account.isActive
-                    },
-                    status: 201
-                });
+            
+            const result = await db.AddDocument(AccountModel.accountCollection, account as Account);
+            
+            if (result?.insertedId) {
+                const accountToReturn = {
+                    username: account.username,
+                    createdAt: account.createdAt,
+                    updatedAt: account.updatedAt,
+                    isActive: account.isActive
+                };
+                
+                return AccountModel.formatResponse(res, {
+                    message: "Account registered successfully",
+                    account: accountToReturn
+                }, "account", 201);
+            } else {
+                return AccountModel.formatResponse(res, {
+                    message: "Failed to create account"
+                }, undefined, 500);
             }
         } catch (error) {
             console.log("Error creating account: ", error);
-            res.status(500).json({
-                message: "Internal server error",
-                status: 500
-            });
-            throw error;
+            return AccountModel.formatResponse(res, {
+                message: "Internal server error"
+            }, undefined, 500);
         }
     }
 
     static async getAccountById(req: Request, res: Response) {
         try {
             let accountId = req.body.id as string;
+            
+            if (!accountId) {
+                return AccountModel.formatResponse(res, {
+                    message: "Account ID is required"
+                }, undefined, 400);
+            }
+            
             if (accountId.length !== 24) {
-                res.status(400).json({
-                    message: "Invalid account ID",
-                    status: 400
-                });
-                return;
+                return AccountModel.formatResponse(res, {
+                    message: "Invalid account ID"
+                }, undefined, 400);
             }
+            
             let accountFound = await db.GetDocument(AccountModel.accountCollection, { "_id": ObjectId.createFromHexString(accountId) });
+            
             if (!accountFound) {
-                res.status(404).json({
-                    message: "Account not found",
-                    status: 404
-                });
-            } else {
-                const { password, ...accountToReturn } = accountFound;
-                res.status(200).json({
-                    message: "Account retrieved successfully",
-                    account: accountToReturn,
-                    status: 200
-                });
+                return AccountModel.formatResponse(res, {
+                    message: "Account not found"
+                }, undefined, 404);
             }
+            
+            const { password, ...accountToReturn } = accountFound;
+            return AccountModel.formatResponse(res, {
+                message: "Account retrieved successfully",
+                account: accountToReturn
+            }, "account", 200);
 
         } catch (error) {
             console.log("Error getting account: ", error);
-            res.status(500).json({
-                error: "Internal server error",
-                status: 500
-            });
-            throw error;
+            return AccountModel.formatResponse(res, {
+                message: "Internal server error"
+            }, undefined, 500);
         }
     }
     static async ValidateAccount(req: Request, res: Response) {
         try {
             const account = req.body as Account;
-            if (!account || !account.username || !account.password) {
-                let errorMsg = !account ? "Account data is required" :
-                    !account.username ? "Username is required" : "Password is required";
-                res.status(400).json({
-                    message: errorMsg,
-                    status: 400
-                }
-                );
-                return;
+            
+            if (!account) {
+                return AccountModel.formatResponse(res, {
+                    message: "Account data is required"
+                }, undefined, 400);
             }
+            
+            const errorMsg = AccountModel.validateRequiredFields({ 
+                username: account.username, 
+                password: account.password 
+            });
+            
+            if (errorMsg) {
+                return AccountModel.formatResponse(res, {
+                    message: errorMsg
+                }, undefined, 400);
+            }
+            
             let accountFound = await db.GetDocument(AccountModel.accountCollection, { "username": account.username });
-            if (accountFound) {
-                if (accountFound.password === account.password) {
-                    const { password, ...accountToReturn } = accountFound;
-                    res.status(200).json({
-                        message: "Account validated successfully",
-                        account: accountToReturn,
-                        status: 200
-                    });
-                }
+            
+            if (accountFound && accountFound.password === account.password) {
+                const { password, ...accountToReturn } = accountFound;
+                return AccountModel.formatResponse(res, {
+                    message: "Account validated successfully",
+                    account: accountToReturn
+                }, "account", 200);
             } else {
-                res.status(404).json(
-                    {
-                        message: "Account not found",
-                        status: 404
-                    });
+                return AccountModel.formatResponse(res, {
+                    message: "Invalid username or password"
+                }, undefined, 401);
             }
         } catch (error) {
             console.log("Error validating account: ", error);
-            res.status(500).json({
-                error: "Internal server error",
-                status: 500
-            });
-            throw error;
+            return AccountModel.formatResponse(res, {
+                message: "Internal server error"
+            }, undefined, 500);
         }
     }
 }

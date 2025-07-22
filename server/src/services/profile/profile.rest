@@ -33,7 +33,7 @@ Content-Type: application/json
 }
 
 ###get profiles
-GET {{uri}}/get-profiles?username=user
+GET {{uri}}/get-profiles?username=test
 
 ###rename profile
 POST {{uri}}/rename-profile

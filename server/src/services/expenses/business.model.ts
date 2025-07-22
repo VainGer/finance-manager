@@ -1,4 +1,3 @@
-import { Response, Request } from "express";
 import db from "../../server";
 import { ObjectId } from "mongodb";
 import { Business, Category } from "./expenses.types";

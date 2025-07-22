@@ -1,9 +1,9 @@
 import ProfileModel from "./profile.model";
 import { Router } from "express";
-import { ProfileBudget } from "./profile.types";
+import { ProfileBudget, Profile } from "./profile.types";
 const profileRouter = Router();
-
-profileRouter.post<{}, {}, { username: string, profileName: string, parent: boolean, pin: string }>
+    
+profileRouter.post<{}, {}, { reqProfile: Profile }>
     ("/create-profile", ProfileModel.createProfile);
 profileRouter.post<{}, {}, { username: string, profileName: string, pin: string }>
     ("/validate-profile", ProfileModel.validateProfile);

@@ -3,8 +3,8 @@ import { ObjectId } from "mongodb";
 export type Profile = {
   username: string;
   profileName: string;
-  avatar?: string;//base64 string
-  color?: string;
+  avatar?: string;// cloudinary
+  color: string;
   pin: string;
   parentProfile: boolean;
   createdAt: Date;

@@ -1,7 +1,7 @@
 import ExpensesModel from "./expenses.model";
 import { Router } from "express";
 import { TransactionWithoutId, CategoryBudget, Transaction } from "./expenses.types";
-import { ObjectId } from "mongodb";
+
 const expensesRouter = Router();
 
 // Category Routes
