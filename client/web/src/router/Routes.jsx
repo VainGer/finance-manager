@@ -4,6 +4,7 @@ import Home from "../pages/Home.jsx";
 import Login from "../pages/auth/Login.jsx";
 import Register from "../pages/auth/Register.jsx";
 import ProfileAuth from "../pages/profile/ProfileAuth.jsx";
+import Dashboard from "../pages/Dashboard.jsx";
 
 const router = createBrowserRouter([
     {
@@ -17,6 +18,9 @@ const router = createBrowserRouter([
     },
     {
         path: "/profiles", element: <ProfileAuth />,
+    },
+    {
+        path: '/dashboard', element: <Dashboard />,
     }
 ]);
 
