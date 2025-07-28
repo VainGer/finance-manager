@@ -77,7 +77,7 @@ export default class ExpensesModel {
     }
 
     static async deleteCategory(req: Request, res: Response) {
-        const { refId, catName } = req.body as { refId: ObjectId, catName: string };
+        const { refId, catName } = req.query as { refId: string, catName: string };
         if (validateRequiredFields(res, { refId, catName })) {
             return;
         }
@@ -117,7 +117,7 @@ export default class ExpensesModel {
     }
 
     static async deleteBusiness(req: Request, res: Response) {
-        const { refId, catName, busName } = req.body as { refId: ObjectId, catName: string, busName: string };
+        const { refId, catName, busName } = req.query as { refId: string, catName: string, busName: string };
         if (validateRequiredFields(res, { refId, catName, busName })) {
             return;
         }
@@ -177,8 +177,8 @@ export default class ExpensesModel {
     }
 
     static async deleteTransaction(req: Request, res: Response) {
-        const { refId, catName, busName, transactionId } = req.body as {
-            refId: ObjectId, catName: string, busName: string, transactionId: ObjectId
+        const { refId, catName, busName, transactionId } = req.query as {
+            refId: string, catName: string, busName: string, transactionId: string
         };
         if (validateRequiredFields(res, { refId, catName, busName, transactionId })) {
             return;

@@ -17,7 +17,7 @@ export default class BusinessModel {
                 { $addToSet: { "categories.$.Businesses": newBusiness } });
 
             if (!result || result.modifiedCount === 0) {
-                return { status: 404, error: "Expense or category not found, or business already exists" };
+                return { status: 409, error: "Business already exists" };
             } else {
                 return { status: 201, message: "Business added to category successfully" };
             }
@@ -38,7 +38,7 @@ export default class BusinessModel {
                 });
 
             if (!result || result.modifiedCount === 0) {
-                return { status: 404, error: "Expense, category, or business not found" };
+                return { status: 409, error: "Business already exists" };
             } else {
                 return { status: 200, message: "Business renamed successfully" };
             }

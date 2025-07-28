@@ -104,9 +104,10 @@ export default class ProfileModel {
             }
 
             const validatedProfile = {
-                username: profile.username,
                 profileName: profile.profileName,
-                parentProfile: profile.parentProfile
+                parentProfile: profile.parentProfile,
+                avatar: profile.avatar,
+                expenses: profile.expenses,
             };
 
             return ProfileModel.formatResponse(res, {

@@ -4,10 +4,12 @@ import { useAuth } from '../../context/AuthContext';
 import { get, post } from '../../utils/api';
 import CreateProfile from '../../components/profile/CreateProfile';
 import ProfileList from '../../components/profile/ProfileList';
+import Navbar from '../../components/Navbar';
 
 export default function ProfileAuth() {
     const navigate = useNavigate();
     const { account } = useAuth();
+    const { setProfile } = useAuth();
 
     const [profiles, setProfiles] = useState([]);
     const [selectedProfile, setSelectedProfile] = useState(null);
@@ -41,7 +43,9 @@ export default function ProfileAuth() {
             { username: account.username, profileName: selectedProfile.profileName, pin: pinInput });
 
         if (response.ok) {
+            setProfile(response.profile);
             navigate('/dashboard');
+            console.log(response);
         } else if (response.status === 401) {
             setError('הקוד הסודי שגוי, אנא נסה שוב');
         } else {

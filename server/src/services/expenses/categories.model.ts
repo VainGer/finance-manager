@@ -67,7 +67,7 @@ export default class CategoriesModel {
             { $set: { "categories.$.name": newName } });
 
         if (!result || result.modifiedCount === 0) {
-            return { status: 404, error: "Category not found" };
+            return { status: 400, error: "Failed to rename category" };
         } else {
             return { status: 200, message: "Category renamed successfully" };
         }

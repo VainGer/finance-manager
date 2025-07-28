@@ -17,7 +17,7 @@ expensesRouter.get<{ refId: string }, {}, {}>(
 expensesRouter.put<{}, {}, { refId: string, oldName: string, newName: string }>(
     '/rename-category', ExpensesModel.renameCategory);
 
-expensesRouter.delete<{}, {}, { refId: string, catName: string }>(
+expensesRouter.delete<{}, {}, {}, { refId: string, catName: string }>(
     '/delete-category', ExpensesModel.deleteCategory);
 
 // Business Routes
@@ -30,7 +30,7 @@ expensesRouter.put<{}, {}, { refId: string, catName: string, oldName: string, ne
 expensesRouter.get<{ refId: string, catName: string }, {}, {}>(
     '/businesses/:refId/:catName', ExpensesModel.getBusinessNamesByCategory);
 
-expensesRouter.delete<{}, {}, { refId: string, catName: string, busName: string }>(
+expensesRouter.delete<{}, {}, {}, { refId: string, catName: string, busName: string }>(
     '/delete-business', ExpensesModel.deleteBusiness);
 
 // Transaction Routes
@@ -65,7 +65,7 @@ expensesRouter.get<{ refId: string, catName: string, busName: string, transactio
     ExpensesModel.getTransactionById
 );
 
-expensesRouter.delete<{}, {}, { 
+expensesRouter.delete<{}, {}, {}, { 
     refId: string, 
     catName: string, 
     busName: string, 
