@@ -95,7 +95,6 @@ export default function RenameCategory({ goBack }) {
                         type="text" 
                         id="newCategoryName"
                         placeholder="הזן שם חדש לקטגוריה" 
-                        value={newCategoryName} 
                         onChange={(e) => setNewCategoryName(e.target.value)}
                         className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />

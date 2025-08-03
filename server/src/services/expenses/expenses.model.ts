@@ -25,11 +25,11 @@ function formatResponse(res: Response, result: any, dataField?: string, statusCo
     const response: any = {
         message: result.message || result.error
     };
-    
+
     if (dataField && result[dataField] !== undefined) {
         response[dataField] = result[dataField];
     }
-    
+
     res.status(statusCode).json(response);
 }
 
@@ -46,15 +46,19 @@ export default class ExpensesModel {
         formatResponse(res, responseData, undefined, status);
     }
 
-    static async createBudget(req: Request, res: Response) {
+    static async createCategoryBudget(req: Request, res: Response) {
         const { refId, catName, budget } = req.body as {
             refId: ObjectId, catName: string, budget: CategoryBudget
         };
         if (validateRequiredFields(res, { refId, catName, budget })) {
             return;
         }
-        const { status, ...responseData } = await CategoriesModel.createBudget(new ObjectId(refId), catName, budget);
-        formatResponse(res, responseData, undefined, status);
+        const result = await CategoriesModel.createCategoryBudget(new ObjectId(refId), budget, catName);
+        if (result.success) {
+            formatResponse(res, { message: "Category budget created successfully" }, undefined, 201);
+        } else {
+            formatResponse(res, { message: "Failed to create category budget" }, undefined, 500);
+        }
     }
 
     static async getCategoriesNames(req: Request, res: Response) {
@@ -208,7 +212,7 @@ export default class ExpensesModel {
         formatResponse(res, responseData, 'transaction', status);
     }
 
-    
+
     // Data Retrieval method
     static async getProfileExpenses(req: Request, res: Response) {
         const { refId } = req.params as { refId: string };
@@ -225,9 +229,9 @@ export default class ExpensesModel {
             }
 
             const expenses = rawExpenses.categories;
-            formatResponse(res, { 
+            formatResponse(res, {
                 message: "Expenses retrieved successfully",
-                expenses 
+                expenses
             }, undefined, 200);
         } catch (error) {
             console.error("Error fetching expenses:", error);

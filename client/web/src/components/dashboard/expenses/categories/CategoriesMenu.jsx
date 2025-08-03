@@ -103,10 +103,7 @@
                             </li>
                             <li className="mt-4">
                                 <button
-                                    onClick={() => {
-                                        console.log('Back button clicked in CategoriesMenu');
-                                        goBack();
-                                    }}
+                                    onClick={goBack}
                                     className="w-full py-2 px-4 font-semibold text-white bg-gray-500 rounded-md shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
                                 >
                                     חזרה

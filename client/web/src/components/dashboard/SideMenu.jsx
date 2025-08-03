@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import BusinessMenu from './expenses/businesses/BusinessMenu';
 import CategoriesMenu from './expenses/categories/CategoriesMenu';
 import AddTransaction from './expenses/transactions/AddTransaction';
+import CreateProfileBudget from '../profile/CreateProfileBudget';
 
-// A helper component for menu items to reduce repetition
+
 const MenuItem = ({ onClick, children }) => (
     <li>
         <button
@@ -23,6 +24,7 @@ export default function SideMenu() {
         addExpense: false,
         businesses: false,
         categories: false,
+        createBudget: false,
     });
 
     const closeAllPanels = () => {
@@ -30,6 +32,7 @@ export default function SideMenu() {
             addExpense: false,
             businesses: false,
             categories: false,
+            createBudget: false,
         });
     };
 
@@ -38,12 +41,13 @@ export default function SideMenu() {
             addExpense: false,
             businesses: false,
             categories: false,
+            createBudget: false,
             [menuItem]: !prevState[menuItem],
         }));
     };
 
     // Check if any panel is currently open
-    const isPanelOpen = menuToggler.addExpense || menuToggler.transactions || menuToggler.businesses || menuToggler.categories;
+    const isPanelOpen = menuToggler.addExpense || menuToggler.businesses || menuToggler.categories || menuToggler.createBudget;
 
     return (
         <div className="w-full max-w-xs p-4 bg-white rounded-lg shadow-md">
@@ -51,6 +55,8 @@ export default function SideMenu() {
                 <div>
                     {menuToggler.businesses && <BusinessMenu goBack={closeAllPanels} />}
                     {menuToggler.categories && <CategoriesMenu goBack={closeAllPanels} />}
+                    {menuToggler.addExpense && <AddTransaction goBack={closeAllPanels} />}
+                    {menuToggler.createBudget && <CreateProfileBudget goBack={closeAllPanels} />}
                 </div>
             ) : (
                 <>
@@ -59,13 +65,16 @@ export default function SideMenu() {
                         <MenuItem onClick={() => handleMenuClick('addExpense')}>
                             <span className="ml-2">➕</span> הוספת הוצאה
                         </MenuItem>
+                        <MenuItem onClick={() => handleMenuClick('createBudget')}>
+                            <span className="ml-2">💰</span> יצירת תקציב
+                        </MenuItem>
                         <MenuItem onClick={() => handleMenuClick('businesses')}>
                             <span className="ml-2">🏢</span> בעלי עסקים
                         </MenuItem>
                         <MenuItem onClick={() => handleMenuClick('categories')}>
                             <span className="ml-2">📂</span> קטגוריות
                         </MenuItem>
-                        <MenuItem onClick={() => navigate('/settings')}>
+                        <MenuItem onClick={() => navigate('/profile-settings')}>
                             <span className="ml-2">⚙️</span> הגדרות
                         </MenuItem>
                     </ul>

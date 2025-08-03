@@ -14,7 +14,20 @@ export type Profile = {
 }
 
 export type ProfileBudget = {
+  _id: ObjectId;
   startDate: Date;
   endDate: Date;
   amount: number;
+  spent: number;
 };
+
+export type BudgetCreationData = {
+  username: string,
+  profileName: string;
+  refId: ObjectId;
+  profileBudget: Omit<ProfileBudget, '_id'>;
+  categoriesBudgets: {
+    categoryName: string;
+    amount: number;
+  }[];
+}

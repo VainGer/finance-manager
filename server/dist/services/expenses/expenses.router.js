@@ -8,7 +8,6 @@ const express_1 = require("express");
 const expensesRouter = (0, express_1.Router)();
 // Category Routes
 expensesRouter.post('/create-category', expenses_model_1.default.createCategory);
-expensesRouter.post('/create-budget', expenses_model_1.default.createBudget);
 expensesRouter.get('/categories/:refId', expenses_model_1.default.getCategoriesNames);
 expensesRouter.put('/rename-category', expenses_model_1.default.renameCategory);
 expensesRouter.delete('/delete-category', expenses_model_1.default.deleteCategory);

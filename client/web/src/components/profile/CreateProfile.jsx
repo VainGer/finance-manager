@@ -10,7 +10,7 @@ const toBase64 = async (file) => {
     });
 }
 
-export default function CreateProfile({ username, firstProfile, onProfileCreated }) {
+export default function CreateProfile({ username, firstProfile }) {
 
     const [profileName, setProfileName] = useState('');
     const [avatar, setAvatar] = useState(null);
@@ -35,7 +35,6 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
                 return;
             }
         }
-        console.log(avatarBase64);
         const response = await post('profile/create-profile', {
             username,
             profileName,
@@ -46,8 +45,8 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
         });
 
         if (response.ok) {
-            if (onProfileCreated) {
-                onProfileCreated(response.profile);
+            if (firstProfile) {
+                window.location.reload();
             }
         } else {
             setError(response.message || 'Failed to create profile.');
@@ -66,7 +65,6 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
                             type="text"
                             className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="הכנס שם פרופיל"
-                            value={profileName}
                             onChange={(e) => setProfileName(e.target.value)}
                         />
                     </div>
@@ -76,7 +74,6 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
                             type="password"
                             className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="הכנס קוד סודי (4 ספרות)"
-                            value={pin}
                             onChange={(e) => setPin(e.target.value)}
                             maxLength="4"
                         />
@@ -105,7 +102,6 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
                         <input
                             type="color"
                             className="w-full h-10 p-1 border border-gray-300 rounded-md"
-                            value={color}
                             onChange={(e) => setColor(e.target.value)}
                         />
                     </div>

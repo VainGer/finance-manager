@@ -15,7 +15,7 @@ class BusinessModel {
             };
             const result = await server_1.default.UpdateDocument(BusinessModel.expenseCollection, { _id: new mongodb_1.ObjectId(refId), "categories.name": catName }, { $addToSet: { "categories.$.Businesses": newBusiness } });
             if (!result || result.modifiedCount === 0) {
-                return { status: 404, error: "Expense or category not found, or business already exists" };
+                return { status: 409, error: "Business already exists" };
             }
             else {
                 return { status: 201, message: "Business added to category successfully" };
@@ -32,7 +32,7 @@ class BusinessModel {
                 arrayFilters: [{ "bizFilter.name": oldName }]
             });
             if (!result || result.modifiedCount === 0) {
-                return { status: 404, error: "Expense, category, or business not found" };
+                return { status: 409, error: "Business already exists" };
             }
             else {
                 return { status: 200, message: "Business renamed successfully" };

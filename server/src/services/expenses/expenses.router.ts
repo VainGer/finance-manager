@@ -8,9 +8,6 @@ const expensesRouter = Router();
 expensesRouter.post<{}, {}, { refId: string, name: string }>(
     '/create-category', ExpensesModel.createCategory);
 
-expensesRouter.post<{}, {}, { refId: string, catName: string, budget: CategoryBudget }>(
-    '/create-budget', ExpensesModel.createBudget);
-
 expensesRouter.get<{ refId: string }, {}, {}>(
     '/categories/:refId', ExpensesModel.getCategoriesNames);
 
@@ -19,6 +16,13 @@ expensesRouter.put<{}, {}, { refId: string, oldName: string, newName: string }>(
 
 expensesRouter.delete<{}, {}, {}, { refId: string, catName: string }>(
     '/delete-category', ExpensesModel.deleteCategory);
+
+
+// Category Budget Routes
+
+expensesRouter.post<{}, {}, { refId: string, catName: string, budget: CategoryBudget }>(
+    '/add-category-budget', ExpensesModel.createCategoryBudget);
+
 
 // Business Routes
 expensesRouter.post<{}, {}, { refId: string, catName: string, name: string }>(

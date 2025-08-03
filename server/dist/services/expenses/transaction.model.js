@@ -9,9 +9,10 @@ class TransactionModel {
     static expenseCollection = "expenses";
     static async createTransaction(refId, catName, busName, transaction) {
         try {
+            const amount = Number(transaction.amount);
             const newTransaction = {
                 _id: new mongodb_1.ObjectId(),
-                amount: transaction.amount,
+                amount,
                 date: transaction.date,
                 description: transaction.description
             };

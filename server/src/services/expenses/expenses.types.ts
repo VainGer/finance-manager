@@ -2,22 +2,25 @@ import { ObjectId } from "mongodb";
 
 export type Category = {
     name: string;
-    budgets?: CategoryBudget[];
-    Businesses?: Business[];
+    budgets: CategoryBudget[];
+    Businesses: Business[];
 }
 
 export type Business = {
     name: string;
     transactions: Transaction[];
-    
+
 }
 
 export type CategoryBudget = {
+    _id: ObjectId;
     startDate: Date;
     endDate: Date;
     amount: number;
     spent: number;
 }
+
+export type CategoryBudgetWithoutId = Omit<CategoryBudget, '_id'>;
 
 export type Transaction = {
     _id: ObjectId;

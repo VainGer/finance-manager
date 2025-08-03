@@ -1,7 +1,10 @@
-import { Profile, ProfileBudget } from "./profile.types";
+import { Profile, ProfileBudget, BudgetCreationData } from "./profile.types";
+import { CategoryBudget } from "../expenses/expenses.types";
+import CategoriesModel from "../expenses/categories.model";
 import { Response, Request } from "express";
 import { v2 as cloudinary } from "cloudinary";
 import db from "../../server";
+import { ObjectId } from "mongodb";
 
 export default class ProfileModel {
     private static profileCollection: string = 'profiles';
@@ -350,34 +353,72 @@ export default class ProfileModel {
         }
     }
 
+    // public static async checkBudgetDates(req:Request, res:Response){
+    //     try{
+    //         const {username, profileName, startDate, endDate} = req.body;
+    //         const profile = await db.GetDocument(ProfileModel.profileCollection, { username, profileName });
+    //         if(!profile){
+    //             return ProfileModel.formatResponse()
+    //         }
+    //         const overlapingBudgets = profile.budgets.filter((budget: ProfileBudget) => {
+    //             return (new Date(startDate) <= new Date(budget.endDate)
+    //                 && new Date(endDate) >= new Date(budget.startDate));
+    //         });
+            
+    //         if (overlapingBudgets.length > 0) {
+    //             return ProfileModel.formatResponse(res, {
+    //                 message: "Overlapping budgets found"
+    //             }, undefined, 400);
+    //         }
+    //     }catch(error){
+    //         console.error()
+    //     }
+    // }
+
+
     public static async createProfileBudget(req: Request, res: Response) {
         try {
-            const { username, profileName, budget } = req.body as { username: string, profileName: string, budget: ProfileBudget };
-
-            const errorMsg = ProfileModel.validateRequiredFields({ username, profileName, budget });
+            const data = req.body as BudgetCreationData;
+            const errorMsg = ProfileModel.validateRequiredFields(data);
             if (errorMsg) {
                 return ProfileModel.formatResponse(res, { message: errorMsg }, undefined, 400);
             }
-
+            const { username, profileName, refId, profileBudget, categoriesBudgets } = data;
+            const budgetId = new ObjectId();
             const profile = await db.GetDocument(ProfileModel.profileCollection, { username, profileName });
+
             if (!profile) {
                 return ProfileModel.formatResponse(res, {
                     message: "Profile not found"
                 }, undefined, 404);
             }
 
-            const result = await db.UpdateDocument(ProfileModel.profileCollection,
-                { username, profileName }, { $push: { budgets: budget } });
+            const createdBudgets = await ProfileModel.createCategoryBudgets
+                (categoriesBudgets, refId, budgetId, profileBudget.startDate, profileBudget.endDate);
 
+            if (!createdBudgets.success) {
+                return ProfileModel.formatResponse(res, { message: "Failed to create category budgets" }, undefined, 500);
+            }
+
+            const newProfileBudget: ProfileBudget = {
+                _id: budgetId,
+                startDate: profileBudget.startDate,
+                endDate: profileBudget.endDate,
+                amount: profileBudget.amount,
+                spent: createdBudgets.spent
+            };
+
+            const result = await db.UpdateDocument(ProfileModel.profileCollection,
+                { username, profileName }, { $push: { budgets: newProfileBudget } });
             if (!result || result.modifiedCount === 0) {
                 return ProfileModel.formatResponse(res, {
                     message: "Failed to create profile budget"
                 }, undefined, 500);
             }
-
             return ProfileModel.formatResponse(res, {
-                message: "Profile budget created successfully"
+                message: "Profile budget created successfully",
             }, undefined, 201);
+
         } catch (error) {
             console.error("Error creating profile budget: ", error);
             return ProfileModel.formatResponse(res, {
@@ -419,6 +460,41 @@ export default class ProfileModel {
     private static async profileExists(username: string, profileName: string) {
         const existingProfile = await db.GetDocument(ProfileModel.profileCollection, { username, profileName });
         return !!existingProfile;
+    }
+
+    private static async createCategoryBudgets(
+        categoriesBudgets: any[],
+        refId: ObjectId,
+        budgetId: ObjectId,
+        startDate: Date,
+        endDate: Date
+    ) {
+        let totalSpent = 0;
+
+        for (const data of categoriesBudgets) {
+            const categoryBudget: CategoryBudget = {
+                _id: budgetId,
+                startDate,
+                endDate,
+                amount: data.amount,
+                spent: 0
+            };
+
+            const addedCategoryBudget = await CategoriesModel.createCategoryBudget(
+                refId,
+                categoryBudget,
+                data.categoryName
+            );
+
+            if (!addedCategoryBudget.success) {
+                console.error("Failed to create category budget for", data.categoryName);
+                return { success: false, spent: totalSpent };
+            }
+
+            totalSpent += addedCategoryBudget.spent ?? 0;
+        }
+
+        return { success: true, spent: totalSpent };
     }
 
     private static async createExpensesAndGetId(username: string, profileName: string) {

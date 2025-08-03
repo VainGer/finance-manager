@@ -27,21 +27,6 @@ class CategoriesModel {
             return { status: 500, error: "Internal server error" };
         }
     }
-    static async createBudget(refId, catName, budget) {
-        try {
-            const result = await server_1.default.UpdateDocument(CategoriesModel.expenseCollection, { _id: new mongodb_1.ObjectId(refId), "categories.name": catName }, { $push: { "categories.$.budgets": budget } });
-            if (!result || result.modifiedCount === 0) {
-                return { status: 400, error: "Failed to create budget" };
-            }
-            else {
-                return { status: 201, message: "Budget created successfully" };
-            }
-        }
-        catch (error) {
-            console.error("Error creating budget:", error);
-            return { status: 500, error: "Internal server error" };
-        }
-    }
     static async getCategoriesNames(refId) {
         try {
             const rawExpenses = await server_1.default.GetDocument(CategoriesModel.expenseCollection, { _id: new mongodb_1.ObjectId(refId) });
@@ -60,7 +45,7 @@ class CategoriesModel {
         try {
             const result = await server_1.default.UpdateDocument(CategoriesModel.expenseCollection, { _id: new mongodb_1.ObjectId(refId), "categories.name": oldName }, { $set: { "categories.$.name": newName } });
             if (!result || result.modifiedCount === 0) {
-                return { status: 404, error: "Category not found" };
+                return { status: 400, error: "Failed to rename category" };
             }
             else {
                 return { status: 200, message: "Category renamed successfully" };

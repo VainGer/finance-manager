@@ -45,13 +45,13 @@ export default function ProfileAuth() {
         if (response.ok) {
             setProfile(response.profile);
             navigate('/dashboard');
-            console.log(response);
         } else if (response.status === 401) {
             setError('הקוד הסודי שגוי, אנא נסה שוב');
         } else {
             setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
         }
     }
+
 
     return (
         <>
@@ -68,7 +68,7 @@ export default function ProfileAuth() {
                     ) : (
                         <div>
                             <h2 className="text-2xl font-semibold mb-4">לא נמצאו פרופילים, צור פרופיל ראשון</h2>
-                            <CreateProfile username={account.username} firstProfile={true} onProfileCreated={(newProfile) => setProfiles([newProfile])} />
+                            <CreateProfile username={account.username} firstProfile={true} />
                         </div>
                     )}
                 </div>
@@ -84,7 +84,6 @@ export default function ProfileAuth() {
                                 <input
                                     type="password"
                                     placeholder="הזן את הקוד הסודי"
-                                    value={pinInput}
                                     onChange={(e) => setPinInput(e.target.value)}
                                     className="w-full px-4 py-2 text-center border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     maxLength="4"
