@@ -13,10 +13,10 @@ export default function CreateBusiness({ goBack }) {
     const createBusiness = async (e) => {
         e.preventDefault();
 
-        const response = await post('expenses/add-business', {
+        const response = await post('expenses/business/add', {
             refId: profile.expenses,
-            name,
-            catName: category
+            catName: category,
+            name
         });
         if (response.ok) {
             goBack();

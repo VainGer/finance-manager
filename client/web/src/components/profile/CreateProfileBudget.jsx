@@ -32,7 +32,6 @@ export default function CreateProfileBudget() {
                 },
                 categoriesBudgets: []
             });
-        console.log(response)
         if (response.ok) {
             // Budget created successfully
             // Optionally, you can update the UI or state to reflect the new budget

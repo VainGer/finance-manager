@@ -30,20 +30,20 @@ export default function RenameBusiness({ goBack }) {
             return;
         }
 
-        const response = await put('expenses/rename-business', {
+        const response = await put('expenses/business/rename', {
             refId: profile.expenses,
             catName: selectedCategory,
             oldName: selectedBusiness,
             newName: newBusinessName.trim()
         });
-        if(response.ok){
+        if (response.ok) {
             setSuccess('העסק שונה בהצלחה');
             setTimeout(() => {
                 goBack();
             }, 1500);
-        }else if(response.status === 409){
+        } else if (response.status === 409) {
             setError('שם העסק כבר קיים בקטגוריה זו');
-        }else{
+        } else {
             setError('אירעה שגיאה');
             console.error('Error renaming business:', response.error);
         }

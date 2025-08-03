@@ -21,7 +21,7 @@ export default function CreateProfile({ username, firstProfile }) {
 
     const createProfile = async (e) => {
         e.preventDefault();
-        if (!profileName || !pin) {
+        if (!profileName || !pin || profileName.trim() === '' || pin.trim() === '') {
             setError('Profile name and PIN are required.');
             return;
         }
@@ -35,14 +35,15 @@ export default function CreateProfile({ username, firstProfile }) {
                 return;
             }
         }
-        const response = await post('profile/create-profile', {
+        const newProfile = {
             username,
             profileName,
             pin,
             avatar: avatar ? avatarBase64 : null,
             color,
             parentProfile: firstProfile || parentProfile,
-        });
+        }
+        const response = await post('profile/create-profile', newProfile);
 
         if (response.ok) {
             if (firstProfile) {

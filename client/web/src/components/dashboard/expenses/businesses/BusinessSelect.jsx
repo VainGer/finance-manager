@@ -9,11 +9,9 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness })
     useEffect(() => {
         const fetchBusinesses = async () => {
 
-            const response = await get(`expenses/businesses/${refId}/${category}`);
+            const response = await get(`expenses/business/get-businesses/${refId}/${category}`);
             if (response.ok) {
-                setBusinesses(response.businessNames || []);
-            } else if (response.status === 404) {
-                setError('לא נמצאו עסקים בקטגוריה זו');
+                setBusinesses(response.businesses || []);
             } else {
                 setError('אירעה שגיאה בעת טעינת העסקים');
             }
@@ -28,9 +26,11 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness })
             {error && <p>{error}</p>}
             <select onChange={e => setSelectedBusiness(e.target.value)}>
                 <option value="">בחר עסק</option>
-                {businesses.map((business, index) => (
+                {businesses.length > 0 ? businesses.map((business, index) => (
                     <option key={index} value={business}>{business}</option>
-                ))}
+                )) : (
+                    <option disabled>לא נמצאו עסקים</option>
+                )}
             </select>
         </div>
     );

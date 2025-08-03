@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 export default class CategoriesModel {
     private static expenseCollection: string = "expenses";
 
-    static async createCategory(refId: ObjectId, category: Category) {
+    static async createCategory(refId: string, category: Category) {
         try {
             const result = await db.UpdateDocument(this.expenseCollection, { _id: new ObjectId(refId) },
                 { $addToSet: { categories: category } });
@@ -19,7 +19,7 @@ export default class CategoriesModel {
         }
     }
 
-    static async getCategories(refId: ObjectId) {
+    static async getCategories(refId: string) {
         try {
             const categories = await db.GetDocument(this.expenseCollection,
                 { _id: new ObjectId(refId) });
@@ -33,7 +33,7 @@ export default class CategoriesModel {
         }
     }
 
-    static async renameCategory(refId: ObjectId, oldName: string, newName: string) {
+    static async renameCategory(refId: string, oldName: string, newName: string) {
         try {
             const result = await db.UpdateDocument(
                 CategoriesModel.expenseCollection,
@@ -49,7 +49,7 @@ export default class CategoriesModel {
         }
     }
 
-    static async deleteCategory(refId: ObjectId, catName: string) {
+    static async deleteCategory(refId: string, catName: string) {
         try {
             const result = await db.UpdateDocument(
                 CategoriesModel.expenseCollection,
@@ -65,7 +65,7 @@ export default class CategoriesModel {
         }
     }
 
-    static async createCategoriesBudgets(refId: ObjectId, budget: CategoryBudget, categoryName: string) {
+    static async createCategoriesBudgets(refId: string, budget: CategoryBudget, categoryName: string) {
         try {
             const result = await db.UpdateDocument(
                 CategoriesModel.expenseCollection,

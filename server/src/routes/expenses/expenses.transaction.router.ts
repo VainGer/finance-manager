@@ -1,16 +1,17 @@
 import { Router } from "express";
-
+import ExpensesController from "../../controllers/expenses.controller";
+import { TransactionWithoutId } from "../../types/expenses.types";
 const transactionRouter = Router();
 
-// transactionRouter.post<{}, {}, {
-//     refId: string,
-//     catName: string,
-//     busName: string,
-//     transaction: TransactionWithoutId
-// }>(
-//     '/create-transaction',
-//     ExpensesModel.createTransaction
-// );
+transactionRouter.post<{}, {}, {
+    refId: string,
+    catName: string,
+    busName: string,
+    transaction: TransactionWithoutId
+}>(
+    '/create',
+    ExpensesController.createTransaction
+);
 
 // transactionRouter.put<{}, {}, {
 //     refId: string,

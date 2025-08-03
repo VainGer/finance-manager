@@ -19,7 +19,7 @@ export default function AddCategory({ goBack }) {
 
         setLoading(true);
         try {
-            const response = await post('expenses/create-category', {
+            const response = await post('expenses/category/create', {
                 refId: profile.expenses,
                 name: categoryName.trim()
             });

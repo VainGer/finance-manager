@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 export default class BusinessModel {
     private static expensesCollection: string = "expenses";
 
-    static async createBusiness(refId: ObjectId, categoryName: string, business: Business) {
+    static async createBusiness(refId: string, categoryName: string, business: Business) {
         try {
             const result = await db.UpdateDocument(BusinessModel.expensesCollection,
                 { _id: new ObjectId(refId), "categories.name": categoryName },
@@ -20,7 +20,7 @@ export default class BusinessModel {
         }
     }
 
-    static async renameBusiness(refId: ObjectId, categoryName: string, oldName: string, newName: string) {
+    static async renameBusiness(refId: string, categoryName: string, oldName: string, newName: string) {
         try {
             const result = await db.UpdateDocument(
                 BusinessModel.expensesCollection,
@@ -40,7 +40,7 @@ export default class BusinessModel {
         }
     }
 
-    static async deleteBusiness(refId: ObjectId, categoryName: string, businessName: string) {
+    static async deleteBusiness(refId: string, categoryName: string, businessName: string) {
         try {
             const result = await db.UpdateDocument(
                 BusinessModel.expensesCollection,

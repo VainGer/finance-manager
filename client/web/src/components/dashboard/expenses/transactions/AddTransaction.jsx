@@ -26,13 +26,12 @@ export default function AddTransaction({ goBack }) {
             description: description
         }
 
-        const response = await post('expenses/create-transaction', {
+        const response = await post('expenses/transaction/create', {
             refId: profile.expenses,
             catName: selectedCategory,
             busName: selectedBusiness,
             transaction
         });
-        
     }
 
     return (

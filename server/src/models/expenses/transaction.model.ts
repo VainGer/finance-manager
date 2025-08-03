@@ -1,16 +1,17 @@
 import db from "../../server";
 import { ObjectId } from "mongodb";
 import { Transaction, TransactionWithoutId } from "../../types/expenses.types";
+import { ref } from "process";
 
 
 export default class TransactionModel {
     private static expenseCollection: string = "expenses";
 
-    static async createTransaction(refId: ObjectId, catName: string, busName: string, transaction: Transaction) {
+    static async createTransaction(refId: string, catName: string, busName: string, transaction: Transaction) {
         try {
             const result = await db.UpdateDocument(
-                TransactionModel.expenseCollection,
-                { _id: refId },
+                this.expenseCollection,
+                { _id: new ObjectId(refId) },
                 { $push: { "categories.$[catFilter].Businesses.$[bizFilter].transactions": transaction } },
                 {
                     arrayFilters: [
@@ -29,11 +30,11 @@ export default class TransactionModel {
     }
 
     static async changeTransactionAmount
-        (refId: ObjectId, catName: string, busName: string, transactionId: ObjectId, newAmount: number) {
+        (refId: string, catName: string, busName: string, transactionId: ObjectId, newAmount: number) {
         try {
             const result = await db.UpdateDocument(
-                TransactionModel.expenseCollection,
-                { _id: refId },
+                this.expenseCollection,
+                { _id: new ObjectId(refId) },
                 { $set: { "categories.$[catFilter].Businesses.$[bizFilter].transactions.$[transFilter].amount": newAmount } },
                 {
                     arrayFilters: [
@@ -52,11 +53,11 @@ export default class TransactionModel {
         }
     }
 
-    static async deleteTransaction(refId: ObjectId, catName: string, busName: string, transactionId: ObjectId) {
+    static async deleteTransaction(refId: string, catName: string, busName: string, transactionId: ObjectId) {
         try {
             const result = await db.UpdateDocument(
-                TransactionModel.expenseCollection,
-                { _id: refId },
+                this.expenseCollection,
+                { _id: new ObjectId(refId) },
                 { $pull: { "categories.$[catFilter].Businesses.$[bizFilter].transactions": { _id: transactionId } } },
                 {
                     arrayFilters: [

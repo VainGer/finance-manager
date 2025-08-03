@@ -8,8 +8,8 @@ import { ObjectId } from "mongodb";
 export default class BusinessService {
 
 
-    static async createBusiness(refId: ObjectId, categoryName: string, business: Business) {
-        if (!refId || !categoryName || !business) {
+    static async createBusiness(refId: string, categoryName: string, businessName: string) {
+        if (!refId || !categoryName || !businessName) {
             throw new AppErrors.BadRequestError("Reference ID, category name and business data are required");
         }
         const existingCategories = await CategoriesModel.getCategories(refId);
@@ -20,17 +20,18 @@ export default class BusinessService {
             throw new AppErrors.NotFoundError("Category not found");
         }
         const existingBusinesses = await this.getBusinessNamesByCategory(refId, categoryName);
-        if (existingBusinesses.includes(business.name)) {
+        if (existingBusinesses.includes(businessName)) {
             throw new AppErrors.ConflictError("Business already exists");
         }
-        const result = await BusinessModel.createBusiness(refId, categoryName, business);
+        const newBusiness: Business = { name: businessName, transactions: [] };
+        const result = await BusinessModel.createBusiness(refId, categoryName, newBusiness);
         if (!result?.success) {
             throw new AppErrors.AppError("Failed to create business", 500);
         }
         return result;
     }
 
-    static async renameBusiness(refId: ObjectId, categoryName: string, oldName: string, newName: string) {
+    static async renameBusiness(refId: string, categoryName: string, oldName: string, newName: string) {
         if (!refId || !categoryName || !oldName || !newName) {
             throw new AppErrors.BadRequestError("Reference ID, category name, old name and new name are required");
         }
@@ -50,7 +51,7 @@ export default class BusinessService {
         return result;
     }
 
-    static async deleteBusiness(refId: ObjectId, categoryName: string, businessName: string) {
+    static async deleteBusiness(refId: string, categoryName: string, businessName: string) {
         if (!refId || !categoryName || !businessName) {
             throw new AppErrors.BadRequestError("Reference ID, category name and business name are required");
         }
@@ -65,7 +66,7 @@ export default class BusinessService {
         return result;
     }
 
-    static async getBusinessNamesByCategory(refId: ObjectId, catName: string) {
+    static async getBusinessNamesByCategory(refId: string, catName: string) {
         if (!refId || !catName) {
             throw new AppErrors.BadRequestError("Reference ID and category name are required");
         }
@@ -73,10 +74,11 @@ export default class BusinessService {
         if (!categories) {
             throw new AppErrors.NotFoundError("Categories not found");
         }
-        const category = categories.find((cat: Category) => cat.name === catName);
+        const category = categories.categories.find((cat: Category) => cat.name === catName);
         if (!category) {
             throw new AppErrors.NotFoundError("Category not found");
         }
-        return category.businesses.map((business: Business) => business.name);
+        const businesses = category.Businesses.map((business: Business) => business.name);
+        return businesses;
     }
 }

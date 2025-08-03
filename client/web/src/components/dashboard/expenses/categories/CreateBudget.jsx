@@ -52,7 +52,7 @@ export default function CreateBudget({ goBack }) {
                 spent: 0
             };
 
-            const response = await post('expenses/create-budget', { 
+            const response = await post('expenses/category/create-budget', { 
                 refId: profile.expenses, 
                 catName: selectedCategory, 
                 budget 

@@ -3,7 +3,6 @@ import ProfileService from "../services/profile/profile.service";
 import ProfileModel from "../models/profile/profile.model";
 import db from "../server";
 import { AppError, BadRequestError, ConflictError, NotFoundError } from "../errors/AppError";
-import { ObjectId } from "mongodb";
 import { BudgetCreationData } from "../types/profile.types";
 
 export default class ProfileController {

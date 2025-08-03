@@ -25,8 +25,8 @@ export default function DeleteBusiness({ goBack }) {
             return;
         }
 
-        const response = await del(`expenses/delete-business?refId=${profile.expenses}&catName=${selectedCategory}&busName=${selectedBusiness}`);
-        if(response.ok){
+        const response = await del(`expenses/business/delete/${profile.expenses}/${selectedCategory}/${selectedBusiness}`);
+        if (response.ok) {
             setSuccess('העסק נמחק בהצלחה');
             setTimeout(() => {
                 goBack();

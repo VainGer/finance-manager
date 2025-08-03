@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import AccountService from "../services/account/account.service";
 import { AppError } from "../errors/AppError";
-import { a } from "framer-motion/dist/types.d-6pKw1mTI";
 
 export default class AccountController {
 
@@ -25,10 +24,10 @@ export default class AccountController {
     static async validateAccount(req: Request, res: Response) {
         try {
             const { username, password } = req.body;
-            const account = await AccountService.validate(username, password);
+            const result = await AccountService.validate(username, password);
             res.status(200).json({
-                account: account,
-                message: "Account validated successfully"
+                account: result.safeAccount,
+                message: result.message
             });
         } catch (error) {
             console.error(error);

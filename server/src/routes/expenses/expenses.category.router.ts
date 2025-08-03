@@ -1,20 +1,22 @@
 import { Router } from "express";
+import { CategoryBudget } from "../../types/expenses.types";
+import ExpensesController from "../../controllers/expenses.controller";
 
 const categoryRouter = Router();
 
-// categoryRouter.post<{}, {}, { refId: string, name: string }>(
-//     '/create-category', ExpensesModel.createCategory);
+categoryRouter.post<{}, {}, { refId: string, name: string }>(
+    '/create', ExpensesController.createCategory);
 
-// categoryRouter.get<{ refId: string }, {}, {}>(
-//     '/categories/:refId', ExpensesModel.getCategoriesNames);
+categoryRouter.get<{ refId: string }, {}, {}>(
+    '/get-names/:refId', ExpensesController.getCategoriesNames);
 
-// categoryRouter.put<{}, {}, { refId: string, oldName: string, newName: string }>(
-//     '/rename-category', ExpensesModel.renameCategory);
+categoryRouter.put<{}, {}, { refId: string, oldName: string, newName: string }>(
+    '/rename', ExpensesController.renameCategory);
 
-// categoryRouter.delete<{}, {}, {}, { refId: string, catName: string }>(
-//     '/delete-category', ExpensesModel.deleteCategory);
+categoryRouter.delete<{ refId: string, catName: string }, {}, {}, {}>(
+    '/delete/:refId/:catName', ExpensesController.deleteCategory);
 
-// categoryRouter.post<{}, {}, { refId: string, catName: string, budget: CategoryBudget }>(
-//     '/add-category-budget', ExpensesModel.createCategoryBudget);
+categoryRouter.post<{}, {}, { refId: string, catName: string, budget: CategoryBudget }>(
+    '/create-budget', ExpensesController.createCategoryBudget);
 
 export default categoryRouter;

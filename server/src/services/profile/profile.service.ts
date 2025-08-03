@@ -6,7 +6,6 @@ import { ProfileCreationData, Profile, SafeProfile } from "../../types/profile.t
 export default class ProfileService {
 
     static async createProfile(profileData: ProfileCreationData) {
-
         if (!profileData.username || !profileData.profileName || !profileData.pin) {
             throw new BadRequestError("Username, profile name and pin are required");
         }

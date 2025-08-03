@@ -8,7 +8,7 @@ import CategoriesModel from "../../models/expenses/categories.model";
 export default class TransactionService {
 
     static async createTransaction
-        (refId: ObjectId, catName: string, busName: string, transactionData: TransactionWithoutId) {
+        (refId: string, catName: string, busName: string, transactionData: TransactionWithoutId) {
         if (!refId || !catName || !busName || !transactionData) {
             throw new appErrors.BadRequestError("Reference ID, category name, business name and transaction data are required");
         }
@@ -21,7 +21,7 @@ export default class TransactionService {
     }
 
     static async changeTransactionAmount
-        (refId: ObjectId, catName: string, busName: string, transactionId: ObjectId, newAmount: number) {
+        (refId: string, catName: string, busName: string, transactionId: ObjectId, newAmount: number) {
         if (!refId || !catName || !busName || !transactionId || newAmount === undefined) {
             throw new appErrors.BadRequestError("Reference ID, category name, business name, transaction ID and new amount are required");
         }
@@ -33,7 +33,7 @@ export default class TransactionService {
     }
 
     static async deleteTransaction
-        (refId: ObjectId, catName: string, busName: string, transactionId: ObjectId) {
+        (refId: string, catName: string, busName: string, transactionId: ObjectId) {
         if (!refId || !catName || !busName || !transactionId) {
             throw new appErrors.BadRequestError
                 ("Reference ID, category name, business name and transaction ID are required");
@@ -46,7 +46,7 @@ export default class TransactionService {
     }
 
     static async getTransactionById
-        (refId: ObjectId, catName: string, busName: string, transactionId: ObjectId) {
+        (refId: string, catName: string, busName: string, transactionId: ObjectId) {
         if (!refId || !catName || !busName || !transactionId) {
             throw new appErrors.BadRequestError("Reference ID, category name, business name and transaction ID are required");
         }

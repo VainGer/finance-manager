@@ -2,10 +2,11 @@ import { Category, CategoryBudget, CategoryBudgetWithoutId } from "../../types/e
 import { AppError, NotFoundError, BadRequestError, ConflictError } from "../../errors/AppError";
 import CategoriesModel from "../../models/expenses/categories.model";
 import { ObjectId } from "mongodb";
+import { ref } from "process";
 
 export default class CategoryService {
 
-    static async createCategory(refId: ObjectId, name: string) {
+    static async createCategory(refId: string, name: string) {
         if (!refId || !name) {
             throw new BadRequestError("Reference ID and category name are required");
         }
@@ -24,7 +25,7 @@ export default class CategoryService {
         return result;
     }
 
-    static async getCategoriesNames(refId: ObjectId) {
+    static async getCategoriesNames(refId: string) {
         if (!refId) {
             throw new BadRequestError("Reference ID is required");
         }
@@ -36,7 +37,7 @@ export default class CategoryService {
         return { success: true, categoriesNames };
     }
 
-    static async renameCategory(refId: ObjectId, oldName: string, newName: string) {
+    static async renameCategory(refId: string, oldName: string, newName: string) {
         if (!refId || !oldName || !newName) {
             throw new BadRequestError("Reference ID, old name and new name are required");
         }
@@ -54,7 +55,7 @@ export default class CategoryService {
         return result;
     }
 
-    static async deleteCategory(refId: ObjectId, catName: string) {
+    static async deleteCategory(refId: string, catName: string) {
         if (!refId || !catName) {
             throw new BadRequestError("Reference ID and category name are required");
         }
@@ -65,7 +66,7 @@ export default class CategoryService {
         return result;
     }
 
-    static async getCategoriesBudgets(refId: ObjectId) {
+    static async getCategoriesBudgets(refId: string) {
         if (!refId) {
             throw new BadRequestError("Reference ID is required");
         }
@@ -80,7 +81,7 @@ export default class CategoryService {
         return { success: true, categoriesBudgets };
     }
 
-    static async createCategoryBudget(refId: ObjectId, budget: CategoryBudgetWithoutId, categoryName: string) {
+    static async createCategoryBudget(refId: string, budget: CategoryBudgetWithoutId, categoryName: string) {
         if (!refId || !budget || !categoryName) {
             throw new BadRequestError("Reference ID, budget and category name are required");
         }

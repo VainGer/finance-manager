@@ -10,7 +10,7 @@ export default function CategorySelect({ refId, setSelectedCategory }) {
     useEffect(() => {
         const fetchCategories = async () => {
             setLoading(true);
-            const response = await get(`expenses/categories/${refId}`);
+            const response = await get(`expenses/category/get-names/${refId}`);
             
             if (response.ok) {
             setCategories(response.categoriesNames || []);

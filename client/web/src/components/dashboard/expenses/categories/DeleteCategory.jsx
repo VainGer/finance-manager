@@ -25,7 +25,7 @@ export default function DeleteCategory({ goBack }) {
     const deleteCategory = async () => {
         setLoading(true);
         try {
-            const response = await del(`expenses/delete-category?refId=${profile.expenses}&catName=${selectedCategory}`);
+            const response = await del(`expenses/category/delete/${profile.expenses}/${selectedCategory}`);
             if (response.ok) {
                 setError(null);
                 setSuccess('הקטגוריה נמחקה בהצלחה');

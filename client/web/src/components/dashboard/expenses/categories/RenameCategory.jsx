@@ -31,7 +31,7 @@ export default function RenameCategory({ goBack }) {
         
         setLoading(true);
         try {
-            const response = await put('expenses/rename-category', { 
+            const response = await put('expenses/category/rename', { 
                 refId: profile.expenses, 
                 oldName: selectedCategory,
                 newName: newCategoryName.trim() 
