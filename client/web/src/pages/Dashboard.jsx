@@ -9,16 +9,17 @@ export default function Dashboard() {
     const { profile } = useAuth();
     const { account } = useAuth();
 
+    const [display, setDisplay] = useState(<ProfileBudgetDisplay profile={profile} />);
 
     return (
         <>
             <Navbar />
             <div>
-                <DisplaySelector />
+                <DisplaySelector setDisplay={setDisplay} />
             </div>
             <div className='grid grid-cols-2'>
                 <SideMenu />
-                <ProfileBudgetDisplay profile={profile} />
+                {display}
             </div>
         </>
     );
