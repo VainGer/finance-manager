@@ -53,12 +53,12 @@ export default class TransactionModel {
         }
     }
 
-    static async deleteTransaction(refId: string, catName: string, busName: string, transactionId: ObjectId) {
+    static async deleteTransaction(refId: string, catName: string, busName: string, transactionId: string) {
         try {
             const result = await db.UpdateDocument(
                 this.expenseCollection,
                 { _id: new ObjectId(refId) },
-                { $pull: { "categories.$[catFilter].Businesses.$[bizFilter].transactions": { _id: transactionId } } },
+                { $pull: { "categories.$[catFilter].Businesses.$[bizFilter].transactions": { _id: new ObjectId(transactionId) } } },
                 {
                     arrayFilters: [
                         { "catFilter.name": catName },

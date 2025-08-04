@@ -33,7 +33,7 @@ export default class TransactionService {
     }
 
     static async deleteTransaction
-        (refId: string, catName: string, busName: string, transactionId: ObjectId) {
+        (refId: string, catName: string, busName: string, transactionId: string) {
         if (!refId || !catName || !busName || !transactionId) {
             throw new appErrors.BadRequestError
                 ("Reference ID, category name, business name and transaction ID are required");
@@ -46,7 +46,7 @@ export default class TransactionService {
     }
 
     static async getTransactionById
-        (refId: string, catName: string, busName: string, transactionId: ObjectId) {
+        (refId: string, catName: string, busName: string, transactionId: string) {
         if (!refId || !catName || !busName || !transactionId) {
             throw new appErrors.BadRequestError("Reference ID, category name, business name and transaction ID are required");
         }
@@ -56,7 +56,7 @@ export default class TransactionService {
         }
         const transaction = categories.categories.find((cat: Category) =>
             cat.name === catName && cat.Businesses.some(biz => biz.name === busName &&
-                biz.transactions.some(trans => trans._id === transactionId))
+                biz.transactions.some(trans => trans._id === new ObjectId(transactionId)))
         );
         if (!transaction) {
             throw new appErrors.NotFoundError("Transaction not found");

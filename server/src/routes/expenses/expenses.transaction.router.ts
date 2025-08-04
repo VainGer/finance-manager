@@ -4,44 +4,21 @@ import { TransactionWithoutId } from "../../types/expenses.types";
 const transactionRouter = Router();
 
 transactionRouter.post<{}, {}, {
-    refId: string,
-    catName: string,
-    busName: string,
-    transaction: TransactionWithoutId
-}>(
-    '/create',
-    ExpensesController.createTransaction
+    refId: string, catName: string, busName: string, transaction: TransactionWithoutId
+}>('/create', ExpensesController.createTransaction
 );
 
-// transactionRouter.put<{}, {}, {
-//     refId: string,
-//     catName: string,
-//     busName: string,
-//     transactionId: string,
-//     newAmount: number
-// }>(
-//     '/change-transaction-amount',
-//     ExpensesModel.changeTransactionAmount
-// );
+transactionRouter.put<{}, {}, {
+    refId: string, catName: string, busName: string, transactionId: string, newAmount: number
+}>
+    ('/change-amount', ExpensesController.changeTransactionAmount);
 
-// transactionRouter.get<{ refId: string, catName: string, busName: string }, {}, {}>(
-//     '/transactions/:refId/:catName/:busName',
-//     ExpensesModel.getTransactionsByBusiness
-// );
+transactionRouter.get<
+    { refId: string, catName: string, busName: string, transactionId: string }, {}, {}>
+    ('/transaction/:refId/:catName/:busName/:transactionId', ExpensesController.getTransactionById);
 
-// transactionRouter.get<{ refId: string, catName: string, busName: string, transactionId: string }, {}, {}>(
-//     '/transaction/:refId/:catName/:busName/:transactionId',
-//     ExpensesModel.getTransactionById
-// );
-
-// transactionRouter.delete<{}, {}, {}, {
-//     refId: string,
-//     catName: string,
-//     busName: string,
-//     transactionId: string
-// }>(
-//     '/delete-transaction',
-//     ExpensesModel.deleteTransaction
-// );
+transactionRouter.delete<
+    { refId: string, catName: string, busName: string, transactionId: string }, {}, {}, {}>
+    ('/delete-transaction', ExpensesController.deleteTransaction);
 
 export default transactionRouter;

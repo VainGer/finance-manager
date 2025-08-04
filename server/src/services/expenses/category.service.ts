@@ -66,6 +66,17 @@ export default class CategoryService {
         return result;
     }
 
+    static async getProfileExpenses(refId: string) {
+        if (!refId) {
+            throw new BadRequestError("Reference ID is required");
+        }
+        const categories = await CategoriesModel.getCategories(refId);
+        if (!categories) {
+            throw new NotFoundError("Categories not found");
+        }
+        return { success: true, categories: categories.categories };
+    }
+
     static async getCategoriesBudgets(refId: string) {
         if (!refId) {
             throw new BadRequestError("Reference ID is required");
@@ -80,6 +91,8 @@ export default class CategoryService {
         }));
         return { success: true, categoriesBudgets };
     }
+
+
 
     static async createCategoryBudget(refId: string, budget: CategoryBudgetWithoutId, categoryName: string) {
         if (!refId || !budget || !categoryName) {

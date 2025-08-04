@@ -113,6 +113,48 @@ export default class ExpensesController {
         }
     }
 
+    static async changeTransactionAmount(req: Request, res: Response) {
+        try {
+            const { refId, catName, busName, transactionId, newAmount } = req.body;
+            const result = await TransactionService.changeTransactionAmount(refId, catName, busName, transactionId, newAmount);
+            res.status(200).json({ message: result.message });
+        } catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
+
+    static async getTransactionById(req: Request, res: Response) {
+        try {
+            const { refId, catName, busName, transactionId } = req.params;
+            const transaction = await TransactionService.getTransactionById(refId, catName, busName, transactionId);
+            res.status(200).json({ transaction, message: "Transaction fetched successfully" });
+        } catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
+
+    static async deleteTransaction(req: Request, res: Response) {
+        try {
+            const { refId, catName, busName, transactionId } = req.params;
+            const result = await TransactionService.deleteTransaction(refId, catName, busName, transactionId);
+            res.status(200).json({ message: result.message });
+        } catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
+
+    static async getProfileExpenses(req: Request, res: Response) {
+        try {
+            const { refId } = req.params;
+            const expenses = await CategoryService.getProfileExpenses(refId);
+            res.status(200).json({ expenses, message: "Profile expenses fetched successfully" });
+        } catch (error) {
+            this.handleError(error, res);
+        }
+    }
+
+    //private methods
+
     private static handleError(error: any, res: Response) {
         if (error instanceof appErrors.AppError) {
             return res.status(error.statusCode).json({ message: error.message });
