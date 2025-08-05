@@ -1,6 +1,7 @@
 import ProfileBudgetDisplay from "./budget/ProfileBudgetDisplay";
 import ExpensesDisplay from "./expenses/ExpensesDisplay";
 import ExpenseSummary from "./summary/ExpenseSummary";
+import InteractiveCharts from "./charts/InteractiveCharts";
 import { useAuth } from '../../context/AuthContext';
 
 export default function DisplaySelector({ setDisplay, setCurrentDisplayType, profile, refreshTrigger }) {
@@ -18,6 +19,11 @@ export default function DisplaySelector({ setDisplay, setCurrentDisplayType, pro
     const showSummary = () => {
         setCurrentDisplayType('summary');
         setDisplay(<ExpenseSummary profile={profile} key={`summary-${refreshTrigger}`} />);
+    };
+
+    const showCharts = () => {
+        setCurrentDisplayType('charts');
+        setDisplay(<InteractiveCharts profile={profile} key={`charts-${refreshTrigger}`} />);
     };
 
     return (
@@ -39,6 +45,12 @@ export default function DisplaySelector({ setDisplay, setCurrentDisplayType, pro
                 onClick={showSummary}
             >
                 סיכום הוצאות
+            </button>
+            <button 
+                className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors" 
+                onClick={showCharts}
+            >
+                גרפים
             </button>
         </div>
     );

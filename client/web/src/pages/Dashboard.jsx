@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import ProfileBudgetDisplay from '../components/dashboard/budget/ProfileBudgetDisplay';
 import ExpensesDisplay from '../components/dashboard/expenses/ExpensesDisplay';
 import ExpenseSummary from '../components/dashboard/summary/ExpenseSummary';
+import InteractiveCharts from '../components/dashboard/charts/InteractiveCharts';
 import SideMenu from '../components/dashboard/menu/SideMenu';
 import DisplaySelector from '../components/dashboard/DisplaySelector';
 import Navbar from '../components/Navbar';
@@ -27,6 +28,9 @@ export default function Dashboard() {
                 break;
             case 'summary':
                 setDisplay(<ExpenseSummary profile={profile} key={`summary-${refreshTrigger + 1}`} />);
+                break;
+            case 'charts':
+                setDisplay(<InteractiveCharts profile={profile} refreshTrigger={refreshTrigger} key={`charts-${refreshTrigger + 1}`} />);
                 break;
         }
     }, [profile, refreshTrigger, currentDisplayType]);
