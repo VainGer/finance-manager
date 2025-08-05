@@ -89,7 +89,7 @@ export default class ProfileModel {
         try {
             const result = await db.UpdateDocument(this.profileCollection, {
                 username, profileName: oldProfileName
-            }, { profileName: newProfileName });
+            }, { $set: { profileName: newProfileName } });
             if (!result || result.modifiedCount === 0) {
                 return { success: false, message: "Profile not found or name is the same" };
             }
@@ -105,7 +105,7 @@ export default class ProfileModel {
             const hashedPin = await bcrypt.hash(newPin, this.SALT_ROUNDS);
             const result = await db.UpdateDocument(this.profileCollection, {
                 username, profileName
-            }, { pin: hashedPin });
+            }, { $set: { pin: hashedPin } });
             if (!result || result.modifiedCount === 0) {
                 return { success: false, message: "Profile not found or pin is the same" };
             }
@@ -131,8 +131,7 @@ export default class ProfileModel {
 
     static async setAvatar(username: string, profileName: string, avatar: string) {
         try {
-            const uploadedAvatar = await this.uploadAvatar(avatar);
-            const result = await db.UpdateDocument(this.profileCollection, { username, profileName }, { avatar: uploadedAvatar });
+            const result = await db.UpdateDocument(this.profileCollection, { username, profileName }, { $set: { avatar } });
             if (!result || result.modifiedCount === 0) {
                 return { success: false, message: "Profile not found or avatar is the same" };
             }
@@ -147,7 +146,7 @@ export default class ProfileModel {
         try {
             const publicId = this.extractPublicId(avatarUrl);
             const deleteResponse = await cloudinary.uploader.destroy(publicId, { invalidate: true });
-            const resultDB = await db.UpdateDocument(this.profileCollection, { username, profileName }, { avatar: null });
+            const resultDB = await db.UpdateDocument(this.profileCollection, { username, profileName }, { $set: { avatar: null } });
             if (!resultDB || resultDB.modifiedCount === 0 || deleteResponse.result !== 'ok') {
                 return { success: false, message: "Profile not found or avatar is already removed" };
             }

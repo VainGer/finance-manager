@@ -29,8 +29,7 @@ export default function Login() {
                 setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
             } else {
                 setError('שם משתמש או סיסמא שגויים');
-                setUsername('');
-                setPassword('');
+                setPassword(''); // Only clear password, keep username
             }
         } catch (error) {
             setError('תקשורת עם השרת נכשלה');
@@ -49,7 +48,11 @@ export default function Login() {
                         <input
                             type="text"
                             placeholder="שם משתמש"
-                            onChange={(e) => setUsername(e.target.value)}
+                            value={username}
+                            onChange={(e) => {
+                                setUsername(e.target.value);
+                                if (error) setError(''); // Clear error when user types
+                            }}
                             className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
@@ -57,7 +60,11 @@ export default function Login() {
                         <input
                             type="password"
                             placeholder="סיסמא"
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={password}
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                if (error) setError(''); // Clear error when user types
+                            }}
                             className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>

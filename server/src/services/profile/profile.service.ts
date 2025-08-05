@@ -105,6 +105,12 @@ export default class ProfileService {
         if (!username || !profileName || !oldPin || !newPin) {
             throw new BadRequestError("Username, profile name, old pin and new pin are required");
         }
+        
+        // Validate PIN length
+        if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+            throw new BadRequestError("PIN must be exactly 4 digits");
+        }
+        
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
             throw new NotFoundError("Profile not found");
