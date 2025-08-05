@@ -24,7 +24,7 @@ export type ProfileBudget = {
 export type BudgetCreationData = {
   username: string,
   profileName: string;
-  refId: ObjectId;
+  refId: string;
   profileBudget: Omit<ProfileBudget, '_id'>;
   categoriesBudgets: {
     categoryName: string;

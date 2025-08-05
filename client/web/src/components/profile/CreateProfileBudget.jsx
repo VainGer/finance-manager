@@ -16,22 +16,25 @@ export default function CreateProfileBudget() {
         //validation logic
         //navigate to category budget component creation if needed
         // if (categoryBudgets.length > 0) {
-            //create category budgets array[name, amount] only if total amount of the array <= amount
+        //create category budgets array[name, amount] only if total amount of the array <= amount
         //}
         //procceed to response
         const response = await post('profile/add-budget',
             {
-                username: account.username,
-                profileName: profile.profileName,
-                refId: profile.expenses,
-                profileBudget: {
-                    startDate,
-                    endDate,
-                    amount: parseFloat(amount),
-                    spent: 0
-                },
-                categoriesBudgets: []
+                budgetData: {
+                    username: account.username,
+                    profileName: profile.profileName,
+                    refId: profile.expenses,
+                    profileBudget: {
+                        startDate,
+                        endDate,
+                        amount: parseFloat(amount),
+                        spent: 0
+                    },
+                    categoriesBudgets: []
+                }
             });
+        console.log(response);
         if (response.ok) {
             // Budget created successfully
             // Optionally, you can update the UI or state to reflect the new budget

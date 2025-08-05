@@ -1,13 +1,12 @@
 import db from "../../server";
 import { ObjectId } from "mongodb";
 import { Transaction, TransactionWithoutId } from "../../types/expenses.types";
-import { ref } from "process";
 
 
 export default class TransactionModel {
     private static expenseCollection: string = "expenses";
 
-    static async createTransaction(refId: string, catName: string, busName: string, transaction: Transaction) {
+    static async create(refId: string, catName: string, busName: string, transaction: Transaction) {
         try {
             const result = await db.UpdateDocument(
                 this.expenseCollection,
@@ -24,12 +23,12 @@ export default class TransactionModel {
             }
             return { success: true, message: "Transaction created successfully" };
         } catch (error) {
-            console.error("Error in TransactionModel.createTransaction", error);
+            console.error("Error in TransactionModel.create", error);
             throw new Error("Failed to create transaction");
         }
     }
 
-    static async changeTransactionAmount
+    static async changeAmount
         (refId: string, catName: string, busName: string, transactionId: ObjectId, newAmount: number) {
         try {
             const result = await db.UpdateDocument(
@@ -48,12 +47,35 @@ export default class TransactionModel {
             }
             return { success: true, message: "Transaction amount changed successfully" };
         } catch (error) {
-            console.error("Error in TransactionModel.changeTransactionAmount", error);
+            console.error("Error in TransactionModel.changeAmount", error);
             throw new Error("Failed to change transaction amount");
         }
     }
 
-    static async deleteTransaction(refId: string, catName: string, busName: string, transactionId: string) {
+    static async changeDescription(refId: string, catName: string, busName: string, transactionId: string, newDescription: string) {
+        try {
+            const result = await db.UpdateDocument(
+                this.expenseCollection,
+                { _id: new ObjectId(refId) },
+                { $set: { "categories.$[catFilter].Businesses.$[bizFilter].transactions.$[transFilter].description": newDescription } },
+                {
+                    arrayFilters: [
+                        { "catFilter.name": catName },
+                        { "bizFilter.name": busName },
+                        { "transFilter._id": transactionId }
+                    ]
+                });
+            if (!result || result.modifiedCount === 0) {
+                return { success: false, message: "Failed to change transaction description" };
+            }
+            return { success: true, message: "Transaction description changed successfully" };
+        } catch (error) {
+            console.error("Error in TransactionModel.changeDescription", error);
+            throw new Error("Failed to change transaction description");
+        }
+    }
+
+    static async delete(refId: string, catName: string, busName: string, transactionId: string) {
         try {
             const result = await db.UpdateDocument(
                 this.expenseCollection,
@@ -70,9 +92,8 @@ export default class TransactionModel {
             }
             return { success: true, message: "Transaction deleted successfully" };
         } catch (error) {
-            console.error("Error in TransactionModel.deleteTransaction", error);
+            console.error("Error in TransactionModel.delete", error);
             throw new Error("Failed to delete transaction");
         }
     }
-
 }

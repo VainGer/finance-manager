@@ -32,6 +32,7 @@ export default function AddTransaction({ goBack }) {
             busName: selectedBusiness,
             transaction
         });
+        console.log(response);
     }
 
     return (

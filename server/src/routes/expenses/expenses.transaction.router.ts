@@ -13,9 +13,13 @@ transactionRouter.put<{}, {}, {
 }>
     ('/change-amount', ExpensesController.changeTransactionAmount);
 
-transactionRouter.get<
-    { refId: string, catName: string, busName: string, transactionId: string }, {}, {}>
-    ('/transaction/:refId/:catName/:busName/:transactionId', ExpensesController.getTransactionById);
+transactionRouter.put<{}, {}, {
+    refId: string, catName: string, busName: string, transactionId: string, newDate: Date
+}>('/change-date', ExpensesController.changeTransactionDate);
+
+transactionRouter.put<{}, {}, {
+    refId: string, catName: string, busName: string, transactionId: string, newDescription: string
+}>('/change-description', ExpensesController.changeTransactionDescription);
 
 transactionRouter.delete<
     { refId: string, catName: string, busName: string, transactionId: string }, {}, {}, {}>

@@ -1,8 +1,8 @@
-import { Profile, ProfileBudget, BudgetCreationData } from "../../types/profile.types"
+import { Profile, ProfileBudget } from "../../types/profile.types"
 import db from "../../server"
 import { v2 as cloudinary } from 'cloudinary';
 import bcrypt from 'bcrypt';
-import { profile } from "console";
+import { ObjectId } from "mongodb";
 export default class ProfileModel {
 
     private static profileCollection: string = 'profiles';
@@ -172,6 +172,44 @@ export default class ProfileModel {
         }
     }
 
+
+    static async createBudget(username: string, profileName: string, budgetData: ProfileBudget) {
+        try {
+            const result = await db.UpdateDocument(this.profileCollection,
+                { username, profileName }, { $push: { budgets: budgetData } });
+            if (!result || result.modifiedCount === 0) {
+                return { success: false, message: "Profile not found or budget is the same" };
+            }
+            return { success: true, message: "Budget created successfully" };
+        } catch (error) {
+            console.error("Error in ProfileModel.createBudget", error);
+            throw new Error("Failed to create budget");
+        }
+    }
+
+    static async updateBudgetSpentOnTransaction(username: string, profileName: string, budgetId: string, tAmount: number) {
+        try {
+            const result = await db.UpdateDocument(ProfileModel.profileCollection,
+                { username, profileName },
+                {
+                    $inc: { "budgets.$[budget].spent": tAmount }
+                },
+                {
+                    arrayFilters: [
+                        { "budget._id": new ObjectId(budgetId) }
+                    ]
+                }
+            );
+
+            if (!result || result.modifiedCount === 0) {
+                return { success: false, message: "Profile or budget not found, or amount was zero" };
+            }
+            return { success: true, message: "Budget spent updated successfully" };
+        } catch (error) {
+            console.error("Error in ProfileModel.updateBudgetSpentOnTransaction", error);
+            throw new Error("Failed to update budget spent");
+        }
+    }
 
     private static extractPublicId(avatarUrl: string) {
         const urlParts = avatarUrl.split('/');

@@ -1,4 +1,4 @@
-import { Category, CategoryBudget, CategoryBudgetWithoutId } from "../../types/expenses.types";
+import { Business, Category, CategoryBudget, CategoryBudgetWithoutId } from "../../types/expenses.types";
 import { AppError, NotFoundError, BadRequestError, ConflictError } from "../../errors/AppError";
 import CategoriesModel from "../../models/expenses/categories.model";
 import { ObjectId } from "mongodb";
@@ -94,7 +94,7 @@ export default class CategoryService {
 
 
 
-    static async createCategoryBudget(refId: string, budget: CategoryBudgetWithoutId, categoryName: string) {
+    static async createCategoryBudget(refId: string, budget: CategoryBudget, categoryName: string) {
         if (!refId || !budget || !categoryName) {
             throw new BadRequestError("Reference ID, budget and category name are required");
         }
@@ -106,24 +106,57 @@ export default class CategoryService {
         if (!category) {
             throw new NotFoundError("Category not found");
         }
-        /*
-        TODO after completing transactions model
-        add logic to calculate total spent in the category based on the budget dates
-        and update the budget with the spent amount before saving it to the database 
-        ***********************************************************************************
-                        newBudget._id should be given by profile budget
-                        newBudget dates should be given by profile budget
-        ***********************************************************************************
-        */
-        const newBudget: CategoryBudget = {
-            _id: new ObjectId(),
-            ...budget,
-        }
-        const result = await CategoriesModel.createCategoriesBudgets(refId, newBudget, categoryName);
+        budget.spent = await this.transactionsSumInCategoryInDateRange(refId, categoryName, new Date(budget.startDate), new Date(budget.endDate));
+        const result = await CategoriesModel.createCategoriesBudgets(refId, budget, categoryName);
         if (!result || !result.success) {
             throw new AppError(result?.message || "Failed to create category budget", 500);
         }
         return result;
     }
 
+
+    static async updateCategoryBudgetSpent(refId: string, categoryName: string, budgetId: string, diff: number) {
+        if (!refId || !categoryName || !budgetId || !diff) {
+            throw new BadRequestError("Reference ID, category name, budget ID and difference amount are required");
+        }
+        const existingCategories = await CategoriesModel.getCategories(refId);
+        if (!existingCategories) {
+            throw new NotFoundError("Expenses document not found");
+        }
+        const category = existingCategories.categories.find((cat: Category) => cat.name === categoryName);
+        if (!category) {
+            throw new NotFoundError("Category not found");
+        }
+        const budget = category.budgets.find((b: CategoryBudget) => b._id.toString() === budgetId);
+        if (!budget) {
+            return { success: true, message: "No budget to update" };
+        }
+        const result = await CategoriesModel.updateCategoryBudgetSpent(refId, categoryName, budgetId, diff);
+        if (!result || !result.success) {
+            throw new AppError(result?.message || "Failed to update category budget spent", 500);
+        }
+        return result;
+    }
+
+    private static async transactionsSumInCategoryInDateRange
+        (refId: string, categoryName: string, startDate: Date, endDate: Date) {
+        const categories = await CategoriesModel.getCategories(refId);
+        if (!categories) {
+            throw new NotFoundError("Categories not found");
+        }
+        const category = categories.categories.find((cat: Category) => cat.name === categoryName);
+        if (!category) {
+            throw new NotFoundError("Category not found");
+        }
+        let sum = 0;
+        category.Businesses.forEach((business: Business) => {
+            business.transactions.forEach((transaction) => {
+                const transactionDate = new Date(transaction.date);
+                if (transactionDate >= startDate && transactionDate <= endDate) {
+                    sum += transaction.amount;
+                }
+            });
+        });
+        return sum;
+    }
 }

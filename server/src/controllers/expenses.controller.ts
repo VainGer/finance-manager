@@ -106,7 +106,7 @@ export default class ExpensesController {
     static async createTransaction(req: Request, res: Response) {
         try {
             const { refId, catName, busName, transaction } = req.body;
-            const result = await TransactionService.createTransaction(refId, catName, busName, transaction);
+            const result = await TransactionService.create(refId, catName, busName, transaction);
             res.status(201).json({ message: result.message });
         } catch (error) {
             ExpensesController.handleError(error, res);
@@ -116,27 +116,38 @@ export default class ExpensesController {
     static async changeTransactionAmount(req: Request, res: Response) {
         try {
             const { refId, catName, busName, transactionId, newAmount } = req.body;
-            const result = await TransactionService.changeTransactionAmount(refId, catName, busName, transactionId, newAmount);
+            const result = await TransactionService.changeAmount(refId, catName, busName, transactionId, newAmount);
             res.status(200).json({ message: result.message });
         } catch (error) {
             ExpensesController.handleError(error, res);
         }
     }
 
-    static async getTransactionById(req: Request, res: Response) {
+    static async changeTransactionDate(req: Request, res: Response) {
         try {
-            const { refId, catName, busName, transactionId } = req.params;
-            const transaction = await TransactionService.getTransactionById(refId, catName, busName, transactionId);
-            res.status(200).json({ transaction, message: "Transaction fetched successfully" });
+            const { refId, catName, busName, transactionId, newDate } = req.body;
+            const result = await TransactionService.changeDate(refId, catName, busName, transactionId, newDate);
+            res.status(200).json({ message: result.message });
         } catch (error) {
             ExpensesController.handleError(error, res);
         }
     }
 
+    static async changeTransactionDescription(req: Request, res: Response) {
+        try {
+            const { refId, catName, busName, transactionId, newDescription } = req.body;
+            const result = await TransactionService.changeDescription(refId, catName, busName, transactionId, newDescription);
+            res.status(200).json({ message: result.message });
+        } catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
+
+
     static async deleteTransaction(req: Request, res: Response) {
         try {
             const { refId, catName, busName, transactionId } = req.params;
-            const result = await TransactionService.deleteTransaction(refId, catName, busName, transactionId);
+            const result = await TransactionService.delete(refId, catName, busName, transactionId);
             res.status(200).json({ message: result.message });
         } catch (error) {
             ExpensesController.handleError(error, res);

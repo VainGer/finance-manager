@@ -80,4 +80,28 @@ export default class CategoriesModel {
             throw new Error("Failed to create category budget");
         }
     }
+
+    static async updateCategoryBudgetSpent(refId: string, catName: string, budgetId: string, amount: number) {
+        try {
+            const result = await db.UpdateDocument(
+                CategoriesModel.expenseCollection,
+                { _id: new ObjectId(refId) },
+                { $inc: { "categories.$[cat].budgets.$[budget].spent": amount } },
+                {
+                    arrayFilters: [
+                        { "cat.name": catName },
+                        { "budget._id": new ObjectId(budgetId) }
+                    ]
+                }
+            );
+            if (!result || result.modifiedCount === 0) {
+                return { success: false, message: "Failed to update category budget spent" };
+            }
+            return { success: true, message: "Category budget spent updated successfully" };
+        } catch (error) {
+            console.error("Error in CategoriesModel.updateCategoryBudgetSpent", error);
+            throw new Error("Failed to update category budget spent");
+        }
+    }
+
 }

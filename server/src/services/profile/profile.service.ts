@@ -1,7 +1,10 @@
 import { BadRequestError, ConflictError, AppError, NotFoundError } from "../../errors/AppError";
 import ProfileModel from "../../models/profile/profile.model";
 import AccountModel from "../../models/account/account.model";
-import { ProfileCreationData, Profile, SafeProfile } from "../../types/profile.types";
+import CategoryService from "../expenses/category.service";
+import { ProfileCreationData, Profile, SafeProfile, ProfileBudget, BudgetCreationData } from "../../types/profile.types";
+import { CategoryBudget } from "../../types/expenses.types";
+import { ObjectId } from "mongodb";
 
 export default class ProfileService {
 
@@ -190,6 +193,135 @@ export default class ProfileService {
             throw new AppError(result.message, 500);
         }
         return { success: true, message: "Profile color set successfully" };
+    }
+
+    static async createBudget(budgetData: BudgetCreationData) {
+        const { username, profileName, profileBudget, categoriesBudgets } = budgetData;
+        if (!username || !profileName || !profileBudget || !categoriesBudgets) {
+            throw new BadRequestError("Username, profile name, profileBudget and categoriesBudgets are required");
+        }
+
+        const profile = await ProfileModel.findProfile(username, profileName);
+        if (!profile) {
+            throw new NotFoundError("Profile not found");
+        }
+        const refId = profile.expenses;
+
+        const newSpent = await this.transactionsSumInDateRange(
+            refId,
+            new Date(profileBudget.startDate),
+            new Date(profileBudget.endDate)
+        );
+        const id = new ObjectId();
+        const newProfileBudget: ProfileBudget = {
+            _id: id,
+            startDate: new Date(profileBudget.startDate),
+            endDate: new Date(profileBudget.endDate),
+            amount: profileBudget.amount,
+            spent: newSpent
+        };
+
+        const profileBudgetCreated = await ProfileModel.createBudget(username, profileName, newProfileBudget);
+        if (!profileBudgetCreated || !profileBudgetCreated.success) {
+            throw new AppError(profileBudgetCreated?.message || "Failed to create budget", 500);
+        }
+
+        const categoriesBudgetsCreated = await this.createCategoryBudgets(
+            refId,
+            categoriesBudgets,
+            id,
+            new Date(profileBudget.startDate),
+            new Date(profileBudget.endDate)
+        );
+
+        if (!categoriesBudgetsCreated || !categoriesBudgetsCreated.success) {
+            throw new AppError(categoriesBudgetsCreated?.message || "Failed to create categories budgets", 500);
+        }
+
+        return { success: true, message: "Budget created successfully" };
+    }
+
+    static async getBudgets(username: string, profileName: string) {
+        const profile = await ProfileModel.findProfile(username, profileName);
+        if (!profile) {
+            throw new NotFoundError("Profile not found");
+        }
+        const budgets = profile.budgets;
+        if (!budgets) {
+            throw new NotFoundError("No budgets found for this profile");
+        }
+        return { success: true, budgets };
+    }
+
+    static async validateBudgetDates(username: string, profileName: string, startDate: Date, endDate: Date) {
+        if (!username || !profileName || !startDate || !endDate) {
+            throw new BadRequestError("Username, profile name, start date and end date are required");
+        }
+        const profile = await ProfileModel.findProfile(username, profileName);
+        if (!profile) {
+            throw new NotFoundError("Profile not found");
+        }
+        const budgets = profile.budgets || [];
+        if (budgets.length === 0) {
+            return { success: true, message: "No budgets found for validation" };
+        }
+        const overlapingDates = budgets.some((budget: ProfileBudget) => {
+            const budgetStart = new Date(budget.startDate);
+            const budgetEnd = new Date(budget.endDate);
+            return (startDate >= budgetStart && startDate <= budgetEnd) ||
+                (endDate >= budgetStart && endDate <= budgetEnd) ||
+                (startDate <= budgetStart && endDate >= budgetEnd);
+        });
+        if (overlapingDates) {
+            throw new ConflictError("Budget dates overlap with existing budgets");
+        }
+        return { success: true, message: "Budget dates are valid" };
+    }
+
+    private static async transactionsSumInDateRange(refId: string, startDate: Date, endDate: Date) {
+        try {
+            const expenses = await CategoryService.getProfileExpenses(refId);
+            const categories = expenses.categories || [];
+            let totalSum = 0;
+            for (const category of categories) {
+                for (const business of category.Businesses) {
+                    for (const transaction of business.transactions) {
+                        const transactionDate = new Date(transaction.date);
+                        if (transactionDate >= startDate && transactionDate <= endDate) {
+                            totalSum += parseFloat(transaction.amount.toString());
+                        }
+                    }
+                }
+            }
+            return totalSum;
+        } catch (error) {
+            console.error("Error calculating transactions sum:", error);
+            throw new AppError("Failed to calculate transactions sum", 500);
+        }
+    }
+
+    private static async createCategoryBudgets
+        (refId: string, categeriesBudgets: { categoryName: string; amount: number }[], budgetId: ObjectId, startDate: Date, endDate: Date) {
+        if (!refId || !categeriesBudgets || !budgetId || !startDate || !endDate) {
+            throw new BadRequestError("Reference ID, categories budgets, budget ID, start date and end date are required");
+        }
+        for (const categoryBudget of categeriesBudgets) {
+            if (!categoryBudget.categoryName || !categoryBudget.amount) {
+                throw new BadRequestError("Category name and amount are required for each category budget");
+            }
+            const budget: CategoryBudget = {
+                _id: budgetId,
+                startDate: startDate,
+                endDate: endDate,
+                amount: categoryBudget.amount,
+                spent: 0
+            };
+            const result = await CategoryService.createCategoryBudget(refId, budget, categoryBudget.categoryName);
+            if (!result || !result.success) {
+                throw new AppError(result?.message || "Failed to create category budget", 500);
+            }
+        }
+        return { success: true, message: "Category budgets created successfully" };
     }
 }
 
