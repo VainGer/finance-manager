@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BusinessMenu from './expenses/businesses/BusinessMenu';
-import CategoriesMenu from './expenses/categories/CategoriesMenu';
-import AddTransaction from './expenses/transactions/AddTransaction';
-import CreateProfileBudget from '../profile/CreateProfileBudget';
+import BusinessMenu from '../expenses/businesses/BusinessMenu';
+import CategoriesMenu from '../expenses/categories/CategoriesMenu';
+import AddTransaction from '../expenses/transactions/AddTransaction';
+import CreateProfileBudget from '../../profile/CreateProfileBudget';
 
 
 const MenuItem = ({ onClick, children }) => (
