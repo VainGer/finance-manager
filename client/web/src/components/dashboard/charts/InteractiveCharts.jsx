@@ -446,10 +446,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                             הכל
                         </button>
                     </div>
-                    
-                    <div className="text-xs text-gray-500 mb-3">
-                        💡 הפילטרים כוללים רק הוצאות עד היום (לא הוצאות עתידיות)
-                    </div>
+
                     
                     {/* Specific Month Selector */}
                     {availableMonths.length > 0 && (
@@ -500,10 +497,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
             </div>
 
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-blue-800 text-sm">
-                    📊 <strong>גרפים מקצועיים עם Recharts!</strong> 
-                    בחר סוג גרף ומסנן תאריך כדי לנתח את ההוצאות שלך בצורה חכמה ואינטואיטיבית.
-                </p>
+               
             </div>
         </div>
     );
