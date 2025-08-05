@@ -106,6 +106,7 @@ export default class CategoryService {
         if (!category) {
             throw new NotFoundError("Category not found");
         }
+
         /*
         TODO after completing transactions model
         add logic to calculate total spent in the category based on the budget dates

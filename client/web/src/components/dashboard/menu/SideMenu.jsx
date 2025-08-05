@@ -17,7 +17,7 @@ const MenuItem = ({ onClick, children }) => (
     </li>
 );
 
-export default function SideMenu() {
+export default function SideMenu({ onTransactionAdded }) {
     const navigate = useNavigate();
 
     const [menuToggler, setMenuToggler] = useState({
@@ -55,7 +55,7 @@ export default function SideMenu() {
                 <div>
                     {menuToggler.businesses && <BusinessMenu goBack={closeAllPanels} />}
                     {menuToggler.categories && <CategoriesMenu goBack={closeAllPanels} />}
-                    {menuToggler.addExpense && <AddTransaction goBack={closeAllPanels} />}
+                    {menuToggler.addExpense && <AddTransaction goBack={closeAllPanels} onTransactionAdded={onTransactionAdded} />}
                     {menuToggler.createBudget && <CreateProfileBudget goBack={closeAllPanels} />}
                 </div>
             ) : (

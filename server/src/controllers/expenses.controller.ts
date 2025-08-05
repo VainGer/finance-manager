@@ -1,4 +1,3 @@
-import { Business } from "../types/expenses.types";
 import { Request, Response } from "express";
 import * as appErrors from "../errors/AppError";
 import CategoryService from "../services/expenses/category.service";

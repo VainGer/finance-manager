@@ -3,19 +3,21 @@ import ExpensesDisplay from "./expenses/ExpensesDisplay";
 import ExpenseSummary from "./summary/ExpenseSummary";
 import { useAuth } from '../../context/AuthContext';
 
-export default function DisplaySelector({ setDisplay }) {
-    const { profile } = useAuth();
+export default function DisplaySelector({ setDisplay, setCurrentDisplayType, profile, refreshTrigger }) {
 
     const showBudgetOverview = () => {
-        setDisplay(<ProfileBudgetDisplay profile={profile} />);
+        setCurrentDisplayType('budget');
+        setDisplay(<ProfileBudgetDisplay profile={profile} key={`budget-${refreshTrigger}`} />);
     };
 
     const showExpenses = () => {
-        setDisplay(<ExpensesDisplay profile={profile} />);
+        setCurrentDisplayType('expenses');
+        setDisplay(<ExpensesDisplay profile={profile} key={`expenses-${refreshTrigger}`} />);
     };
 
     const showSummary = () => {
-        setDisplay(<ExpenseSummary profile={profile} />);
+        setCurrentDisplayType('summary');
+        setDisplay(<ExpenseSummary profile={profile} key={`summary-${refreshTrigger}`} />);
     };
 
     return (
