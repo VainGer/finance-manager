@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { get } from '../../../utils/api';
 import LoadingSpinner from '../../common/LoadingSpinner';
 import ErrorMessage from '../../common/ErrorMessage';
+import DeleteTransaction from './transactions/DeleteTransaction';
 
 export default function ExpensesDisplay({ profile }) {
     const [expenses, setExpenses] = useState([]);
@@ -128,6 +129,11 @@ export default function ExpensesDisplay({ profile }) {
 
     const getUniqueBusinesses = () => {
         return [...new Set(expenses.map(expense => expense.business))];
+    };
+
+    const handleTransactionDeleted = (deletedTransactionId) => {
+        // Remove the deleted transaction from the expenses list
+        setExpenses(expenses.filter(expense => expense._id !== deletedTransactionId));
     };
 
     if (loading) {
@@ -283,6 +289,7 @@ export default function ExpensesDisplay({ profile }) {
                             <th className="text-right p-3 font-semibold">קטגוריה</th>
                             <th className="text-right p-3 font-semibold">עסק</th>
                             <th className="text-right p-3 font-semibold">סכום</th>
+                            <th className="text-center p-3 font-semibold">פעולות</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -298,11 +305,18 @@ export default function ExpensesDisplay({ profile }) {
                                     </td>
                                     <td className="p-3">{expense.business}</td>
                                     <td className="p-3 font-bold text-red-600">{formatAmount(expense.amount)}</td>
+                                    <td className="p-3 text-center">
+                                        <DeleteTransaction 
+                                            transaction={expense} 
+                                            refId={profile?.expenses || profile?.profileId || '6888fada86dcf136e4141d5d'}
+                                            onTransactionDeleted={handleTransactionDeleted}
+                                        />
+                                    </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="5" className="p-8 text-center text-gray-500">
+                                <td colSpan="6" className="p-8 text-center text-gray-500">
                                     אין עסקאות להצגה עם הסינון הנוכחי
                                 </td>
                             </tr>

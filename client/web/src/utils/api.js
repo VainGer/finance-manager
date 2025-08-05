@@ -58,11 +58,20 @@ export async function put(endpoint, data) {
     }
 }
 
-export async function del(endpoint) {
+export async function del(endpoint, data = null) {
     try {
-        const response = await fetch(`${baseUrl}/${endpoint}`, {
+        const options = {
             method: 'DELETE',
-        });
+        };
+        
+        if (data) {
+            options.headers = {
+                'Content-Type': 'application/json',
+            };
+            options.body = JSON.stringify(data);
+        }
+        
+        const response = await fetch(`${baseUrl}/${endpoint}`, options);
         const result = await response.json();
         return {
             status: response.status,

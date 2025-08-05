@@ -24,6 +24,16 @@ export default function Settings() {
         color: profile?.color || '#3B82F6'
     });
     
+    const [avatarForm, setAvatarForm] = useState({
+        file: null,
+        preview: null
+    });
+    
+    const [deleteConfirmation, setDeleteConfirmation] = useState({
+        isOpen: false,
+        pin: ''
+    });
+
     const [passwordForm, setPasswordForm] = useState({
         currentPassword: '',
         newPassword: '',
@@ -220,6 +230,136 @@ export default function Settings() {
         }
     };
 
+    // Avatar management functions
+    const handleAvatarSelect = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                setMessage('גודל התמונה חייב להיות קטן מ-5MB');
+                setTimeout(() => setMessage(''), 3000);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setAvatarForm({
+                    file: file,
+                    preview: e.target.result
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleAvatarUpload = async () => {
+        if (!avatarForm.file) {
+            setMessage('אנא בחר תמונה להעלאה');
+            setTimeout(() => setMessage(''), 3000);
+            return;
+        }
+
+        try {
+            // Convert file to base64
+            const reader = new FileReader();
+            reader.onload = async () => {
+                try {
+                    const response = await post('profile/set-avatar', {
+                        username: account.username,
+                        profileName: profile.profileName,
+                        avatar: reader.result
+                    });
+
+                    if (response.success || response.message?.includes('successfully')) {
+                        setProfile(prev => ({ ...prev, avatar: reader.result }));
+                        setMessage('התמונה הועלתה בהצלחה!');
+                        setAvatarForm({ file: null, preview: null });
+                    } else {
+                        setMessage(`שגיאה בהעלאת התמונה: ${response?.message || 'לא ידוע'}`);
+                    }
+                } catch (error) {
+                    console.error('Avatar upload error:', error);
+                    setMessage('שגיאה בהעלאת התמונה');
+                }
+                setTimeout(() => setMessage(''), 3000);
+            };
+            reader.readAsDataURL(avatarForm.file);
+        } catch (error) {
+            console.error('Avatar upload error:', error);
+            setMessage('שגיאה בהעלאת התמונה');
+            setTimeout(() => setMessage(''), 3000);
+        }
+    };
+
+    const handleRemoveAvatar = async () => {
+        try {
+            const response = await post('profile/set-avatar', {
+                username: account.username,
+                profileName: profile.profileName,
+                avatar: null
+            });
+
+            if (response.success || response.message?.includes('successfully')) {
+                setProfile(prev => ({ ...prev, avatar: null }));
+                setMessage('התמונה הוסרה בהצלחה!');
+            } else {
+                setMessage(`שגיאה בהסרת התמונה: ${response?.message || 'לא ידוע'}`);
+            }
+        } catch (error) {
+            console.error('Remove avatar error:', error);
+            setMessage('שגיאה בהסרת התמונה');
+        }
+        setTimeout(() => setMessage(''), 3000);
+    };
+
+    // Profile deletion functions
+    const handleDeleteProfile = () => {
+        setDeleteConfirmation({ isOpen: true, pin: '' });
+    };
+
+    const confirmDeleteProfile = async () => {
+        if (!deleteConfirmation.pin) {
+            setMessage('אנא הזן את הקוד לאישור המחיקה');
+            setTimeout(() => setMessage(''), 3000);
+            return;
+        }
+
+        if (deleteConfirmation.pin.length !== 4 || !/^\d{4}$/.test(deleteConfirmation.pin)) {
+            setMessage('הקוד חייב להיות 4 ספרות בדיוק');
+            setTimeout(() => setMessage(''), 3000);
+            return;
+        }
+
+        try {
+            const response = await post('profile/delete-profile', {
+                username: account.username,
+                profileName: profile.profileName,
+                pin: deleteConfirmation.pin
+            });
+
+            if (response.success || response.message?.includes('successfully')) {
+                setMessage('הפרופיל נמחק בהצלחה!');
+                setTimeout(() => {
+                    setProfile(null);
+                    navigate('/profile-auth');
+                }, 2000);
+            } else if (response?.message?.includes('Invalid PIN') || response?.status === 400) {
+                setMessage('הקוד שגוי - נסה שוב');
+            } else {
+                setMessage(`שגיאה במחיקת הפרופיל: ${response?.message || 'לא ידוע'}`);
+            }
+        } catch (error) {
+            console.error('Delete profile error:', error);
+            setMessage('שגיאה במחיקת הפרופיל');
+        }
+        
+        setDeleteConfirmation({ isOpen: false, pin: '' });
+        setTimeout(() => setMessage(''), 3000);
+    };
+
+    const cancelDeleteProfile = () => {
+        setDeleteConfirmation({ isOpen: false, pin: '' });
+    };
+
     const sections = [
         { id: 'profile', name: 'פרופיל', icon: '👤' },
         { id: 'account', name: 'חשבון', icon: '⚙️' },
@@ -389,6 +529,147 @@ export default function Settings() {
                         >
                             שנה קוד פרופיל
                         </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Avatar Management Section */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">תמונת פרופיל</h3>
+                
+                <div className="space-y-4">
+                    {/* Current Avatar Display */}
+                    <div className="flex items-center gap-4">
+                        <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                            {profile?.avatar ? (
+                                <img 
+                                    src={profile.avatar} 
+                                    alt="תמונת פרופיל" 
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <span className="text-2xl">👤</span>
+                            )}
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-600">
+                                {profile?.avatar ? 'תמונת פרופיל נוכחית' : 'אין תמונת פרופיל'}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Avatar Preview (if file selected) */}
+                    {avatarForm.preview && (
+                        <div className="flex items-center gap-4">
+                            <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200">
+                                <img 
+                                    src={avatarForm.preview} 
+                                    alt="תצוגה מקדימה" 
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div>
+                                <p className="text-sm text-green-600">תצוגה מקדימה</p>
+                                <p className="text-xs text-gray-500">{avatarForm.file?.name}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Avatar Actions */}
+                    <div className="flex gap-3 flex-wrap">
+                        <label className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors cursor-pointer">
+                            {avatarForm.preview ? 'בחר תמונה אחרת' : 'בחר תמונה'}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleAvatarSelect}
+                                className="hidden"
+                            />
+                        </label>
+
+                        {avatarForm.preview && (
+                            <button
+                                onClick={handleAvatarUpload}
+                                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                            >
+                                העלה תמונה
+                            </button>
+                        )}
+
+                        {profile?.avatar && (
+                            <button
+                                onClick={handleRemoveAvatar}
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                            >
+                                הסר תמונה
+                            </button>
+                        )}
+                    </div>
+
+                    <p className="text-xs text-gray-500">
+                        גודל מקסימלי: 5MB. פורמטים נתמכים: JPG, PNG, GIF
+                    </p>
+                </div>
+            </div>
+
+            {/* Profile Deletion Section */}
+            <div className="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+                <h3 className="text-lg font-semibold mb-4 text-red-600">מחיקת פרופיל</h3>
+                
+                {!deleteConfirmation.isOpen ? (
+                    <div>
+                        <p className="text-gray-600 mb-4">
+                            מחיקת הפרופיל תמחק את כל הנתונים הקשורים אליו כולל הוצאות וקטגוריות.
+                            <br />
+                            <strong className="text-red-600">פעולה זו אינה ניתנת לביטול!</strong>
+                        </p>
+                        <button 
+                            onClick={handleDeleteProfile}
+                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                        >
+                            מחק פרופיל
+                        </button>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="bg-red-50 border border-red-200 rounded p-4">
+                            <p className="text-red-800 mb-2">
+                                <strong>אזהרה:</strong> אתה עומד למחוק את הפרופיל "{profile?.profileName}"
+                            </p>
+                            <p className="text-red-700 text-sm">
+                                כל הנתונים יימחקו לצמיתות ולא ניתן יהיה לשחזר אותם.
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                הזן את קוד הפרופיל לאישור המחיקה
+                            </label>
+                            <input
+                                type="password"
+                                value={deleteConfirmation.pin}
+                                onChange={(e) => setDeleteConfirmation(prev => ({ ...prev, pin: e.target.value }))}
+                                className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                placeholder="הזן קוד פרופיל (4 ספרות)"
+                                maxLength="4"
+                                pattern="\d{4}"
+                            />
+                        </div>
+                        
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={confirmDeleteProfile}
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                            >
+                                אשר מחיקה
+                            </button>
+                            <button 
+                                onClick={cancelDeleteProfile}
+                                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                            >
+                                בטל
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

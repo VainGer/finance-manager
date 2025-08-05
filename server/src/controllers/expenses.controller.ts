@@ -135,7 +135,7 @@ export default class ExpensesController {
 
     static async deleteTransaction(req: Request, res: Response) {
         try {
-            const { refId, catName, busName, transactionId } = req.params;
+            const { refId, catName, busName, transactionId } = req.body;
             const result = await TransactionService.deleteTransaction(refId, catName, busName, transactionId);
             res.status(200).json({ message: result.message });
         } catch (error) {
