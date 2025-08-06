@@ -107,6 +107,7 @@ export default class CategoryService {
             throw new NotFoundError("Category not found");
         }
         budget.spent = await this.transactionsSumInCategoryInDateRange(refId, categoryName, new Date(budget.startDate), new Date(budget.endDate));
+        budget.amount = parseFloat(budget.amount.toString());
         const result = await CategoriesModel.createCategoriesBudgets(refId, budget, categoryName);
         if (!result || !result.success) {
             throw new AppError(result?.message || "Failed to create category budget", 500);

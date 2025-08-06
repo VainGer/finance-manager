@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import { get } from '../../../utils/api';
 import LoadingSpinner from '../../common/LoadingSpinner';
@@ -9,9 +7,39 @@ export default function ProfileBudgetDisplay({ profile }) {
     const [budgetData, setBudgetData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedPeriod, setSelectedPeriod] = useState(null);
+    const [availablePeriods, setAvailablePeriods] = useState([]);
 
     useEffect(() => {
         fetchBudgetData();
+    }, [profile]);
+
+    useEffect(() => {
+        if (profile && profile.budgets) {
+            const uniquePeriods = [];
+            const periodSet = new Set();
+
+            profile.budgets.forEach(budget => {
+                const periodKey = `${budget.startDate}-${budget.endDate}`;
+                if (!periodSet.has(periodKey)) {
+                    periodSet.add(periodKey);
+                    uniquePeriods.push({ startDate: budget.startDate, endDate: budget.endDate });
+                }
+            });
+
+            uniquePeriods.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+            setAvailablePeriods(uniquePeriods);
+
+            if (uniquePeriods.length > 0) {
+                const now = new Date();
+                const activePeriod = uniquePeriods.find(p => {
+                    const startDate = new Date(p.startDate);
+                    const endDate = new Date(p.endDate);
+                    return now >= startDate && now <= endDate;
+                });
+                setSelectedPeriod(activePeriod || uniquePeriods[0]);
+            }
+        }
     }, [profile]);
 
     const fetchBudgetData = async () => {
@@ -35,27 +63,19 @@ export default function ProfileBudgetDisplay({ profile }) {
         }
     };
 
-    const calculateCategorySpent = (category) => {
-        let totalSpent = 0;
-        if (category.Businesses) {
-            category.Businesses.forEach(business => {
-                if (business.transactions) {
-                    business.transactions.forEach(transaction => {
-                        totalSpent += Number(transaction.amount);
-                    });
-                }
-            });
-        }
-        return totalSpent;
+    const calculateCategorySpent = (budget) => {
+        return Number(budget?.spent) || 0;
     };
 
-    const getCurrentBudget = (budgets) => {
-        const now = new Date();
-        return budgets.find(budget => {
-            const startDate = new Date(budget.startDate);
-            const endDate = new Date(budget.endDate);
-            return now >= startDate && now <= endDate;
-        });
+    const getDisplayBudget = (budgets) => {
+        if (!budgets || budgets.length === 0 || !selectedPeriod) {
+            return null;
+        }
+        
+        return budgets.find(budget => 
+            budget.startDate === selectedPeriod.startDate && 
+            budget.endDate === selectedPeriod.endDate
+        );
     };
 
     const getBudgetAmount = (budget) => {
@@ -114,19 +134,49 @@ export default function ProfileBudgetDisplay({ profile }) {
     );
 
     const totalBudget = categoriesWithBudgets.reduce((sum, category) => {
-        const currentBudget = getCurrentBudget(category.budgets);
-        return sum + (currentBudget ? Number(getBudgetAmount(currentBudget)) : 0);
+        const displayBudget = getDisplayBudget(category.budgets);
+        return sum + (displayBudget ? Number(getBudgetAmount(displayBudget)) : 0);
     }, 0);
 
     const totalSpent = categoriesWithBudgets.reduce((sum, category) => {
-        return sum + calculateCategorySpent(category);
+        const displayBudget = getDisplayBudget(category.budgets);
+        return sum + calculateCategorySpent(displayBudget);
     }, 0);
+
+    const isBudgetActive = (budget) => {
+        if (!budget) return false;
+        const now = new Date();
+        const startDate = new Date(budget.startDate);
+        const endDate = new Date(budget.endDate);
+        return now >= startDate && now <= endDate;
+    };
 
     return (
         <div className="bg-white rounded-lg shadow-lg p-6">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">💰 תקציב מול הוצאות - {profile.profileName}</h2>
+                {availablePeriods.length > 1 && (
+                    <div className="relative">
+                        <select
+                            value={selectedPeriod ? `${selectedPeriod.startDate}|${selectedPeriod.endDate}` : ''}
+                            onChange={(e) => {
+                                const [startDate, endDate] = e.target.value.split('|');
+                                setSelectedPeriod({ startDate, endDate });
+                            }}
+                            className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                        >
+                            {availablePeriods.map((period, index) => (
+                                <option key={index} value={`${period.startDate}|${period.endDate}`}>
+                                    תקופה: {formatDate(period.startDate)} - {formatDate(period.endDate)}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center px-2 text-gray-700">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Overall Summary */}
@@ -175,9 +225,9 @@ export default function ProfileBudgetDisplay({ profile }) {
                 ) : (
                     <div className="space-y-4">
                         {categoriesWithBudgets.map((category, index) => {
-                            const categorySpent = calculateCategorySpent(category);
-                            const currentBudget = getCurrentBudget(category.budgets);
-                            const budgetAmount = currentBudget ? Number(getBudgetAmount(currentBudget)) : 0;
+                            const displayBudget = getDisplayBudget(category.budgets);
+                            const categorySpent = calculateCategorySpent(displayBudget);
+                            const budgetAmount = displayBudget ? Number(getBudgetAmount(displayBudget)) : 0;
                             const progressPercentage = getProgressPercentage(categorySpent, budgetAmount);
                             const progressBarPercentage = getProgressBarPercentage(categorySpent, budgetAmount);
                             
@@ -186,13 +236,20 @@ export default function ProfileBudgetDisplay({ profile }) {
                                     <div className="flex justify-between items-center mb-3">
                                         <h4 className="text-lg font-semibold text-gray-800">{category.name}</h4>
                                         <div className="text-sm text-gray-500">
-                                            {currentBudget && (
+                                            {displayBudget && (
                                                 <>
-                                                    {formatDate(currentBudget.startDate)} - {formatDate(currentBudget.endDate)}
+                                                    {formatDate(displayBudget.startDate)} - {formatDate(displayBudget.endDate)}
                                                 </>
                                             )}
                                         </div>
                                     </div>
+
+                                    {!isBudgetActive(displayBudget) && (
+                                        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 mb-3" role="alert">
+                                            <p className="font-bold">לתשומת לבך:</p>
+                                            <p>התקציב המוצג אינו פעיל לתקופה הנוכחית.</p>
+                                        </div>
+                                    )}
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
                                         <div className="text-center">

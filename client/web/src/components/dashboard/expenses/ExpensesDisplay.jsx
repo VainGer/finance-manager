@@ -29,7 +29,7 @@ export default function ExpensesDisplay({ profile }) {
             setLoading(true);
             setError(null);
             
-            const expensesId = profile?.expenses || profile?.profileId || '6888fada86dcf136e4141d5d';
+            const expensesId = profile?.expenses;
             const response = await get(`expenses/profile-expenses/${expensesId}`);
             
             if (response.ok && response.expenses) {

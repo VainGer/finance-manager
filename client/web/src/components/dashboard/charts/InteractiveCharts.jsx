@@ -33,14 +33,14 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
         try {
             setLoading(true);
             setError(null);
-            
+
             const expensesId = profile?.expenses || profile?.profileId || '6888fada86dcf136e4141d5d';
             const response = await get(`expenses/profile-expenses/${expensesId}`);
-            
+
             if (response.ok && response.expenses) {
                 const expensesData = response.expenses;
                 const parsedExpenses = [];
-                
+
                 if (expensesData.categories) {
                     expensesData.categories.forEach(category => {
                         if (category.Businesses) {
@@ -61,14 +61,8 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                         }
                     });
                 }
-                
+
                 setExpenses(parsedExpenses);
-                // console.log('Loaded expenses with dates:', parsedExpenses.map(e => ({
-                //     date: e.date,
-                //     parsedDate: new Date(e.date),
-                //     amount: e.amount,
-                //     category: e.category
-                // })).slice(0, 5)); // Show first 5 for debugging
             } else {
                 setError(response.message || 'שגיאה בטעינת הנתונים');
             }
@@ -82,21 +76,21 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
 
     const filterExpensesByDate = (expenses, filter) => {
         if (filter === 'all') return expenses;
-        
+
         const now = new Date();
-        
+
         if (filter === 'specific' && selectedMonth) {
             const [year, month] = selectedMonth.split('-');
             const filtered = expenses.filter(expense => {
                 const expenseDate = new Date(expense.date);
-                return expenseDate.getFullYear() === parseInt(year) && 
-                       expenseDate.getMonth() === parseInt(month) - 1;
+                return expenseDate.getFullYear() === parseInt(year) &&
+                    expenseDate.getMonth() === parseInt(month) - 1;
             });
             return filtered;
         }
-        
+
         const cutoffDate = new Date();
-        
+
         switch (filter) {
             case 'week':
                 cutoffDate.setDate(now.getDate() - 7);
@@ -110,7 +104,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
             default:
                 return expenses;
         }
-        
+
         const filtered = expenses.filter(expense => {
             const expenseDate = new Date(expense.date);
             // Filter expenses that are between cutoff date and now (no future expenses)
@@ -118,7 +112,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
             const isBeforeNow = expenseDate <= now;
             return isAfterCutoff && isBeforeNow;
         });
-        
+
         return filtered;
     };
 
@@ -134,7 +128,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
 
     const renderChart = () => {
         const filteredExpenses = filterExpensesByDate(expenses, dateFilter);
-        
+
         if (filteredExpenses.length === 0) {
             return (
                 <div className="flex items-center justify-center h-full">
@@ -188,7 +182,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}
                             </Pie>
-                            <Tooltip 
+                            <Tooltip
                                 formatter={(value, name) => [`₪${value.toLocaleString()}`, name]}
                                 contentStyle={{
                                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -197,7 +191,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                                     direction: 'rtl'
                                 }}
                             />
-                            <Legend 
+                            <Legend
                                 wrapperStyle={{ direction: 'rtl' }}
                                 formatter={(value) => `${value}`}
                             />
@@ -206,7 +200,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                 </div>
             );
         }
-        
+
         if (chartType === 'bar') {
             // Group by category for bar chart
             const categoryData = {};
@@ -233,18 +227,18 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis 
-                                dataKey="name" 
+                            <XAxis
+                                dataKey="name"
                                 angle={-45}
                                 textAnchor="end"
                                 height={80}
                                 fontSize={12}
                             />
-                            <YAxis 
+                            <YAxis
                                 tickFormatter={(value) => `₪${value.toLocaleString()}`}
                                 fontSize={12}
                             />
-                            <Tooltip 
+                            <Tooltip
                                 formatter={(value, name) => [`₪${value.toLocaleString()}`, 'סכום']}
                                 labelFormatter={(label) => `קטגוריה: ${label}`}
                                 contentStyle={{
@@ -254,8 +248,8 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                                     direction: 'rtl'
                                 }}
                             />
-                            <Bar 
-                                dataKey="value" 
+                            <Bar
+                                dataKey="value"
                                 fill="#36A2EB"
                                 animationDuration={800}
                                 animationBegin={0}
@@ -269,17 +263,17 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                 </div>
             );
         }
-        
+
         if (chartType === 'monthly') {
             // For monthly comparison, always show all months but highlight filtered period
             const monthlyData = {};
-            
+
             // First, get all months from all expenses to show complete timeline
             expenses.forEach(expense => {
                 const date = new Date(expense.date);
                 const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
                 const monthLabel = `${date.getMonth() + 1}/${date.getFullYear()}`;
-                
+
                 if (!monthlyData[monthKey]) {
                     monthlyData[monthKey] = { month: monthLabel, amount: 0 };
                 }
@@ -303,7 +297,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                     </div>
                 );
             }
-            
+
             return (
                 <div className="w-full h-96">
                     <h3 className="text-lg font-semibold text-center mb-4">
@@ -317,18 +311,18 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis 
-                                dataKey="month" 
+                            <XAxis
+                                dataKey="month"
                                 angle={-45}
                                 textAnchor="end"
                                 height={80}
                                 fontSize={12}
                             />
-                            <YAxis 
+                            <YAxis
                                 tickFormatter={(value) => `₪${value.toLocaleString()}`}
                                 fontSize={12}
                             />
-                            <Tooltip 
+                            <Tooltip
                                 formatter={(value, name) => [`₪${value.toLocaleString()}`, 'סכום']}
                                 labelFormatter={(label) => `חודש: ${label}`}
                                 contentStyle={{
@@ -338,8 +332,8 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                                     direction: 'rtl'
                                 }}
                             />
-                            <Bar 
-                                dataKey="amount" 
+                            <Bar
+                                dataKey="amount"
                                 fill="#4BC0C0"
                                 animationDuration={800}
                                 animationBegin={0}
@@ -365,38 +359,35 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
         <div className="bg-white rounded-lg shadow-lg p-6" dir="rtl">
             <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">📊 גרפים אינטראקטיביים</h2>
-                
+
                 {/* Chart Type Selector */}
                 <div className="mb-4">
                     <h3 className="text-sm font-medium text-gray-700 mb-2">סוג גרף:</h3>
                     <div className="flex flex-wrap gap-2">
                         <button
                             onClick={() => setChartType('pie')}
-                            className={`px-4 py-2 rounded-lg transition-colors ${
-                                chartType === 'pie' ? 'bg-indigo-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                            }`}
+                            className={`px-4 py-2 rounded-lg transition-colors ${chartType === 'pie' ? 'bg-indigo-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                }`}
                         >
                             🥧 עוגה
                         </button>
                         <button
                             onClick={() => setChartType('bar')}
-                            className={`px-4 py-2 rounded-lg transition-colors ${
-                                chartType === 'bar' ? 'bg-indigo-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                            }`}
+                            className={`px-4 py-2 rounded-lg transition-colors ${chartType === 'bar' ? 'bg-indigo-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                }`}
                         >
                             📊 עמודות
                         </button>
                         <button
                             onClick={() => setChartType('monthly')}
-                            className={`px-4 py-2 rounded-lg transition-colors ${
-                                chartType === 'monthly' ? 'bg-indigo-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                            }`}
+                            className={`px-4 py-2 rounded-lg transition-colors ${chartType === 'monthly' ? 'bg-indigo-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                }`}
                         >
                             📈 השוואה חודשית
                         </button>
                     </div>
                 </div>
-                
+
                 {/* Date Filter */}
                 <div className="mb-4">
                     <h3 className="text-sm font-medium text-gray-700 mb-2">מסנן תאריך:</h3>
@@ -406,9 +397,8 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                                 setDateFilter('week');
                                 setSelectedMonth('');
                             }}
-                            className={`px-4 py-2 rounded-lg transition-colors ${
-                                dateFilter === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                            }`}
+                            className={`px-4 py-2 rounded-lg transition-colors ${dateFilter === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                }`}
                         >
                             שבוע אחרון
                         </button>
@@ -417,9 +407,8 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                                 setDateFilter('month');
                                 setSelectedMonth('');
                             }}
-                            className={`px-4 py-2 rounded-lg transition-colors ${
-                                dateFilter === 'month' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                            }`}
+                            className={`px-4 py-2 rounded-lg transition-colors ${dateFilter === 'month' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                }`}
                         >
                             חודש אחרון
                         </button>
@@ -428,9 +417,8 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                                 setDateFilter('year');
                                 setSelectedMonth('');
                             }}
-                            className={`px-4 py-2 rounded-lg transition-colors ${
-                                dateFilter === 'year' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                            }`}
+                            className={`px-4 py-2 rounded-lg transition-colors ${dateFilter === 'year' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                }`}
                         >
                             שנה אחרונה
                         </button>
@@ -439,15 +427,14 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                                 setDateFilter('all');
                                 setSelectedMonth('');
                             }}
-                            className={`px-4 py-2 rounded-lg transition-colors ${
-                                dateFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                            }`}
+                            className={`px-4 py-2 rounded-lg transition-colors ${dateFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                }`}
                         >
                             הכל
                         </button>
                     </div>
 
-                    
+
                     {/* Specific Month Selector */}
                     {availableMonths.length > 0 && (
                         <div className="flex items-center gap-2">
@@ -465,9 +452,9 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                                 <option value="">בחר חודש...</option>
                                 {availableMonths.map(month => {
                                     const [year, monthNum] = month.split('-');
-                                    const monthName = new Date(year, monthNum - 1).toLocaleDateString('he-IL', { 
-                                        year: 'numeric', 
-                                        month: 'long' 
+                                    const monthName = new Date(year, monthNum - 1).toLocaleDateString('he-IL', {
+                                        year: 'numeric',
+                                        month: 'long'
                                     });
                                     return (
                                         <option key={month} value={month}>
@@ -497,7 +484,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
             </div>
 
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-               
+
             </div>
         </div>
     );

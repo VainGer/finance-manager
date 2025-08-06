@@ -131,6 +131,19 @@ export default class ProfileController {
         }
     }
 
+    static async validateBudgetDates(req: Request, res: Response) {
+        try {
+            const { username, profileName, startDate, endDate } = req.body as { username: string, profileName: string, startDate: Date, endDate: Date };
+            const isValid = await ProfileService.validateBudgetDates(username, profileName, startDate, endDate);
+            res.status(200).json({
+                message: "Dates validated successfully",
+                isValid: isValid.success
+            });
+        } catch (error) {
+            ProfileController.handleError(error, res);
+        }
+    }
+
     private static handleError(error: any, res: Response) {
         console.error("Controller error:", error);
         if (error instanceof AppErrors.AppError) {

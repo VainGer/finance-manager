@@ -106,7 +106,6 @@ export default class ProfileService {
             throw new BadRequestError("Username, profile name, old pin and new pin are required");
         }
         
-        // Validate PIN length
         if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
             throw new BadRequestError("PIN must be exactly 4 digits");
         }

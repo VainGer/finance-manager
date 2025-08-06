@@ -23,4 +23,6 @@ profileRouter.get<{}, {}, { username: string, profileName: string }>
     ("/get-budgets", ProfileController.getBudgets);
 profileRouter.post<{}, {}, { budgetData: BudgetCreationData }>
     ("/add-budget", ProfileController.createBudget);
+profileRouter.post<{}, {}, { username: string, profileName: string, startDate: Date, endDate: Date }>
+    ("/check-budget-dates", ProfileController.validateBudgetDates);
 export default profileRouter;

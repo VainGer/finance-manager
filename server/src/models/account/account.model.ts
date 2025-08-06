@@ -46,11 +46,10 @@ export default class AccountModel {
     static async findByUsername(username: string) {
         try {
 
-            const result = await db.GetDocument(AccountModel.accountCollection, { "username": username });
-            if (!result) {
+            const account = await db.GetDocument(this.accountCollection, { "username": username });
+            if (!account) {
                 return null;
             }
-            const { password, account } = result;
             return account;
         } catch (error) {
             console.error("Error in AccountModel.findByUsername", error);
