@@ -10,7 +10,7 @@ const toBase64 = async (file) => {
     });
 }
 
-export default function CreateProfile({ username, firstProfile }) {
+export default function CreateProfile({ username, firstProfile, onProfileCreated }) {
 
     const [profileName, setProfileName] = useState('');
     const [avatar, setAvatar] = useState(null);
@@ -48,6 +48,18 @@ export default function CreateProfile({ username, firstProfile }) {
         if (response.ok) {
             if (firstProfile) {
                 window.location.reload();
+            } else if (onProfileCreated) {
+                // Reset form
+                setProfileName('');
+                setPin('');
+                setAvatar(null);
+                setColor('#000000');
+                setParentProfile(false);
+                // Call callback to refresh profiles list
+                onProfileCreated();
+            } else {
+                alert('הפרופיל נוצר בהצלחה!');
+                window.location.reload();
             }
         } else {
             setError(response.message || 'Failed to create profile.');
@@ -55,8 +67,8 @@ export default function CreateProfile({ username, firstProfile }) {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <div className="w-full max-w-md mx-auto" dir="rtl">
+            <div className="p-8 space-y-6 bg-white rounded-lg shadow-md">
                 <h2 className="text-2xl font-bold text-center text-gray-900">הוספת פרופיל</h2>
                 {error && <p className="text-sm text-center text-red-600 bg-red-100 border border-red-400 rounded-md py-2 px-4">{error}</p>}
                 <form onSubmit={createProfile} className="space-y-6">

@@ -21,7 +21,13 @@ const router = createBrowserRouter([
         path: "/profiles", element: <ProfileAuth />,
     },
     {
+        path: "/profile-auth", element: <ProfileAuth />,
+    },
+    {
         path: '/dashboard', element: <Dashboard />,
+    },
+    {
+        path: '/settings', element: <Settings />,
     },
     {
         path: '/profile-settings', element: <Settings />,

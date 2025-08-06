@@ -132,7 +132,7 @@ export default function ExpenseSummary({ profile }) {
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
-                        📈 פילוח לפי קטגוריות
+                        📈 הצגה לפי קטגוריות
                     </button>
                     <button
                         onClick={() => setBreakdownView('business')}
@@ -142,7 +142,7 @@ export default function ExpenseSummary({ profile }) {
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
-                        🏪 פילוח לפי עסקים
+                        🏪 הצגה לפי עסקים
                     </button>
                 </div>
             </div>

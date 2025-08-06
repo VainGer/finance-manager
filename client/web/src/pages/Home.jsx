@@ -1,21 +1,54 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 
 export default function Home() {
-
     const navigate = useNavigate();
+    
     return (
-        <>
-            <title>דף הבית</title>
-            <div className='flex flex-col items-center justify-center h-screen bg-gray-100'>
-                <button onClick={() => navigate('/login')}>
-                    התחברות
-                </button>
-                <button onClick={() => navigate('/register')}>
-                    הרשמה
-                </button>
+        <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center justify-center' dir="rtl">
+            <div className="text-center space-y-8">
+                {/* Logo/Header */}
+                <div className="space-y-4">
+                    <h1 className="text-5xl font-bold text-gray-800">💰 מנהל כספים</h1>
+                    <p className="text-xl text-gray-600">נהל את הכספים שלך בצורה חכמה ויעילה</p>
+                </div>
+
+                {/* Buttons */}
+                <div className="space-y-4">
+                    <button 
+                        onClick={() => navigate('/login')}
+                        className="w-64 py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-colors duration-200"
+                    >
+                        התחברות
+                    </button>
+                    <br />
+                    <button 
+                        onClick={() => navigate('/register')}
+                        className="w-64 py-3 px-6 bg-green-600 text-white font-semibold rounded-lg shadow-lg hover:bg-green-700 transition-colors duration-200"
+                    >
+                        הרשמה
+                    </button>
+                </div>
+
+                {/* Features */}
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <div className="text-3xl mb-3">📊</div>
+                        <h3 className="font-semibold text-gray-800 mb-2">גרפים ודוחות</h3>
+                        <p className="text-gray-600 text-sm">עקוב אחר ההוצאות שלך עם גרפים מתקדמים</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <div className="text-3xl mb-3">💳</div>
+                        <h3 className="font-semibold text-gray-800 mb-2">ניהול תקציב</h3>
+                        <p className="text-gray-600 text-sm">הגדר תקציבים וקבל התרעות</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <div className="text-3xl mb-3">🔒</div>
+                        <h3 className="font-semibold text-gray-800 mb-2">אבטחה מלאה</h3>
+                        <p className="text-gray-600 text-sm">הנתונים שלך מוגנים בצורה מלאה</p>
+                    </div>
+                </div>
             </div>
-        </>
+        </div>
     );
 }

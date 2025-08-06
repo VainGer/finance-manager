@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { post } from '../../utils/api';
-import Navbar from '../../components/Navbar';
 
 export default function Login() {
 

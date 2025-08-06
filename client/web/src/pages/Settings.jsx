@@ -57,7 +57,7 @@ export default function Settings() {
 
     const handleSwitchProfile = () => {
         setProfile(null);
-        navigate('/profile-auth');
+        navigate('/profiles');
     };
     
     // Profile edit functions
@@ -319,13 +319,13 @@ export default function Settings() {
     const confirmDeleteProfile = async () => {
         if (!deleteConfirmation.pin) {
             setMessage('אנא הזן את הקוד לאישור המחיקה');
-            setTimeout(() => setMessage(''), 3000);
+            setTimeout(() => setMessage(''), 2000);
             return;
         }
 
         if (deleteConfirmation.pin.length !== 4 || !/^\d{4}$/.test(deleteConfirmation.pin)) {
             setMessage('הקוד חייב להיות 4 ספרות בדיוק');
-            setTimeout(() => setMessage(''), 3000);
+            setTimeout(() => setMessage(''), 2000);
             return;
         }
 
@@ -339,21 +339,25 @@ export default function Settings() {
             if (response.success || response.message?.includes('successfully')) {
                 setMessage('הפרופיל נמחק בהצלחה!');
                 setTimeout(() => {
+                    // Clear all data
                     setProfile(null);
-                    navigate('/profile-auth');
-                }, 2000);
+                    sessionStorage.removeItem('profile');
+                    navigate('/profiles');
+                }, 2000); // Show success message for 2 seconds before navigating
             } else if (response?.message?.includes('Invalid PIN') || response?.status === 400) {
                 setMessage('הקוד שגוי - נסה שוב');
+                setTimeout(() => setMessage(''), 2000); // Clear error message after 2 seconds
             } else {
                 setMessage(`שגיאה במחיקת הפרופיל: ${response?.message || 'לא ידוע'}`);
+                setTimeout(() => setMessage(''), 2000); // Clear error message after 2 seconds
             }
         } catch (error) {
             console.error('Delete profile error:', error);
             setMessage('שגיאה במחיקת הפרופיל');
+            setTimeout(() => setMessage(''), 2000); // Clear error message after 2 seconds
         }
         
         setDeleteConfirmation({ isOpen: false, pin: '' });
-        setTimeout(() => setMessage(''), 3000);
     };
 
     const cancelDeleteProfile = () => {
@@ -371,16 +375,6 @@ export default function Settings() {
             {/* Profile Information */}
             <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4">פרטי פרופיל</h3>
-                
-                {message && (
-                    <div className={`mb-4 p-3 rounded ${
-                        message.includes('בהצלחה') 
-                            ? 'bg-green-100 text-green-700 border border-green-300'
-                            : 'bg-red-100 text-red-700 border border-red-300'
-                    }`}>
-                        {message}
-                    </div>
-                )}
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -682,16 +676,6 @@ export default function Settings() {
             <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4">פרטי חשבון</h3>
                 
-                {message && (
-                    <div className={`mb-4 p-3 rounded ${
-                        message.includes('בהצלחה') 
-                            ? 'bg-green-100 text-green-700 border border-green-300'
-                            : 'bg-red-100 text-red-700 border border-red-300'
-                    }`}>
-                        {message}
-                    </div>
-                )}
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">שם משתמש</label>
@@ -785,7 +769,41 @@ export default function Settings() {
 
     return (
         <div className="min-h-screen bg-gray-100">
+            {/* Add CSS for slideDown animation */}
+            <style>{`
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-100px) translateX(-50%);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) translateX(-50%);
+                    }
+                }
+            `}</style>
+            
             <Navbar />
+            
+            {/* Fixed Message Overlay - Always visible */}
+            {message && (
+                <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4">
+                    <div className={`p-4 rounded-lg shadow-lg border-2 text-center font-medium ${
+                        message.includes('בהצלחה') 
+                            ? 'bg-green-100 text-green-800 border-green-400'
+                            : 'bg-red-100 text-red-800 border-red-400'
+                    }`} style={{
+                        animation: 'slideDown 0.3s ease-out'
+                    }}>
+                        <div className="flex items-center justify-center gap-2">
+                            <span className="text-xl">
+                                {message.includes('בהצלחה') ? '✅' : '❌'}
+                            </span>
+                            <span>{message}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
             
             <div className="container mx-auto px-4 py-6">
                 {/* Header */}

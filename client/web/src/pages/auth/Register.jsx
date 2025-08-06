@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { post } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../../components/Navbar";
 
 export default function Register() {
     const [username, setUsername] = useState('');
