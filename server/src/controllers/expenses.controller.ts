@@ -145,7 +145,7 @@ export default class ExpensesController {
 
     static async deleteTransaction(req: Request, res: Response) {
         try {
-            const { refId, catName, busName, transactionId } = req.params;
+            const { refId, catName, busName, transactionId } = req.body;
             const result = await TransactionService.delete(refId, catName, busName, transactionId);
             res.status(200).json({ message: result.message });
         } catch (error) {
@@ -159,7 +159,7 @@ export default class ExpensesController {
             const expenses = await CategoryService.getProfileExpenses(refId);
             res.status(200).json({ expenses, message: "Profile expenses fetched successfully" });
         } catch (error) {
-            this.handleError(error, res);
+            ExpensesController.handleError(error, res);
         }
     }
 
