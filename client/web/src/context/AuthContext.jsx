@@ -3,6 +3,8 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+
+
     const [account, setAccount] = useState(() => {
         const savedAccount = sessionStorage.getItem('account');
         return savedAccount ? JSON.parse(savedAccount) : null;
@@ -12,6 +14,22 @@ export const AuthProvider = ({ children }) => {
         const savedProfile = sessionStorage.getItem('profile');
         return savedProfile ? JSON.parse(savedProfile) : null;
     });
+
+    const pagesWithAccountOnly = ['/profiles', '/profile-auth'];
+    const pagesWithProfilesAndAccount = ['/dashboard', '/settings'];
+    const validateAccess = (path) => {
+        if (pagesWithAccountOnly.includes(path) && !account) {
+            window.location.href = '/';
+        }
+        if (pagesWithProfilesAndAccount.includes(path) && !profile && !account) {
+            window.location.href = '/profile-auth';
+        }
+        if (pagesWithProfilesAndAccount.includes(path) && !profile) {
+            window.location.href = '/profiles';
+        }
+    };
+
+    validateAccess(window.location.pathname);
 
     useEffect(() => {
         if (account) {
@@ -32,6 +50,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ account, setAccount, profile, setProfile }}>
+            { }
             {children}
         </AuthContext.Provider>
     );

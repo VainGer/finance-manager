@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { post, get } from '../../../utils/api';
 import { useAuth } from '../../../context/AuthContext';
 
-export default function CreateProfileBudget() {
+export default function CreateProfileBudget({ goBack }) {
     const { account, profile } = useAuth();
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -82,7 +82,6 @@ export default function CreateProfileBudget() {
                     categoriesBudgets: finalCategoryBudgets
                 }
             });
-        console.log(response)
         if (response.ok) {
             setSuccess('Budget created successfully!');
         } else {
@@ -147,6 +146,8 @@ export default function CreateProfileBudget() {
                     </button>
                 </form>
             )}
+            <button onClick={goBack} className="mt-4 bg-gray-300 text-gray-800 px-4 py-2 rounded">
+                חזור    </button>
         </div>
     )
 }

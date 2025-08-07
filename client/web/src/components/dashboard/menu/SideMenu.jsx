@@ -46,7 +46,6 @@ export default function SideMenu({ onTransactionAdded }) {
         }));
     };
 
-    // Check if any panel is currently open
     const isPanelOpen = menuToggler.addExpense || menuToggler.businesses || menuToggler.categories || menuToggler.createBudget;
 
     return (

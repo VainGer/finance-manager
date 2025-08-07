@@ -19,6 +19,7 @@ export default class TransactionService {
         const transaction: Transaction = { ...transactionData, _id: id };
         transaction.amount = parseFloat(transaction.amount.toString());
         const result = await TransactionModel.create(refId, catName, busName, transaction);
+        await this.updateBudgetOnTransaction(refId, catName, busName, id.toString(), transaction.amount, true);
         if (!result?.success) {
             throw new appErrors.AppError(result?.message || "Failed to create transaction", 500);
         }
@@ -31,6 +32,7 @@ export default class TransactionService {
             throw new appErrors.BadRequestError("Reference ID, category name, business name, transaction ID and new amount are required");
         }
         newAmount = parseFloat(newAmount.toString());
+        await this.updateBudgetOnTransaction(refId, catName, busName, transactionId.toString(), newAmount);
         const result = await TransactionModel.changeAmount(refId, catName, busName, transactionId, newAmount);
         if (!result?.success) {
             throw new appErrors.AppError(result?.message || "Failed to change transaction amount", 500);
@@ -77,6 +79,7 @@ export default class TransactionService {
             throw new appErrors.BadRequestError
                 ("Reference ID, category name, business name and transaction ID are required");
         }
+        await this.updateBudgetOnTransaction(refId, catName, busName, transactionId, 0);
         const result = await TransactionModel.delete(refId, catName, busName, transactionId);
         if (!result?.success) {
             throw new appErrors.AppError(result?.message || "Failed to delete transaction", 500);

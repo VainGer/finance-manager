@@ -1,4 +1,4 @@
-export default function ProfileList({ profiles, onSelect, onAddProfile }) {
+export default function ProfileList({ profiles, onSelect}) {
     return (
         <div className="p-4" dir="rtl">
             <ul className="grid gap-6 w-1/2 mx-auto">
@@ -21,23 +21,6 @@ export default function ProfileList({ profiles, onSelect, onAddProfile }) {
                         </div>
                     </li>
                 ))}
-                
-                {/* Add Profile Button */}
-                {onAddProfile && (
-                    <li
-                        onClick={onAddProfile}
-                        className="rounded-lg shadow-md cursor-pointer transition-transform transform hover:scale-105 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-                    >
-                        <div className="flex items-center justify-center p-8">
-                            <div className="text-center text-white">
-                                <div className="text-4xl mb-2">➕</div>
-                                <span className="text-lg font-semibold" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.5)' }}>
-                                    הוסף פרופיל חדש
-                                </span>
-                            </div>
-                        </div>
-                    </li>
-                )}
             </ul>
         </div>
     );

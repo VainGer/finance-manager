@@ -34,7 +34,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
             setLoading(true);
             setError(null);
 
-            const expensesId = profile?.expenses || profile?.profileId || '6888fada86dcf136e4141d5d';
+            const expensesId = profile.expenses;
             const response = await get(`expenses/profile-expenses/${expensesId}`);
 
             if (response.ok && response.expenses) {
@@ -107,7 +107,6 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
 
         const filtered = expenses.filter(expense => {
             const expenseDate = new Date(expense.date);
-            // Filter expenses that are between cutoff date and now (no future expenses)
             const isAfterCutoff = expenseDate >= cutoffDate;
             const isBeforeNow = expenseDate <= now;
             return isAfterCutoff && isBeforeNow;
@@ -202,7 +201,6 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
         }
 
         if (chartType === 'bar') {
-            // Group by category for bar chart
             const categoryData = {};
             filteredExpenses.forEach(expense => {
                 const category = expense.category || 'ללא קטגוריה';

@@ -49,13 +49,11 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
             if (firstProfile) {
                 window.location.reload();
             } else if (onProfileCreated) {
-                // Reset form
                 setProfileName('');
                 setPin('');
                 setAvatar(null);
                 setColor('#000000');
                 setParentProfile(false);
-                // Call callback to refresh profiles list
                 onProfileCreated();
             } else {
                 alert('הפרופיל נוצר בהצלחה!');

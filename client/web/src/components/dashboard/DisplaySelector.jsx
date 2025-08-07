@@ -2,7 +2,6 @@ import ProfileBudgetDisplay from "./budget/ProfileBudgetDisplay";
 import ExpensesDisplay from "./expenses/ExpensesDisplay";
 import ExpenseSummary from "./summary/ExpenseSummary";
 import InteractiveCharts from "./charts/InteractiveCharts";
-import { useAuth } from '../../context/AuthContext';
 
 export default function DisplaySelector({ setDisplay, setCurrentDisplayType, profile, refreshTrigger }) {
 

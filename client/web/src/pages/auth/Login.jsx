@@ -28,7 +28,7 @@ export default function Login() {
                 setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
             } else {
                 setError('שם משתמש או סיסמא שגויים');
-                setPassword(''); // Only clear password, keep username
+                setPassword('');
             }
         } catch (error) {
             setError('תקשורת עם השרת נכשלה');

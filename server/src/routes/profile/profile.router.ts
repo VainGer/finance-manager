@@ -19,7 +19,7 @@ profileRouter.post<{}, {}, { username: string, profileName: string, avatar: stri
     ("/set-avatar", ProfileController.setAvatar);
 profileRouter.post<{}, {}, { username: string, profileName: string, color: string }>
     ("/set-color", ProfileController.setColor);
-profileRouter.get<{}, {}, { username: string, profileName: string }>
+profileRouter.get<{}, {}, {}, { username: string, profileName: string }>
     ("/get-budgets", ProfileController.getBudgets);
 profileRouter.post<{}, {}, { budgetData: BudgetCreationData }>
     ("/add-budget", ProfileController.createBudget);

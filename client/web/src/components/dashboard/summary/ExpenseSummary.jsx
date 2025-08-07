@@ -6,7 +6,7 @@ export default function ExpenseSummary({ profile }) {
     const [expenses, setExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [breakdownView, setBreakdownView] = useState('category'); 
+    const [breakdownView, setBreakdownView] = useState('category');
 
     useEffect(() => {
         fetchExpenses();
@@ -16,15 +16,14 @@ export default function ExpenseSummary({ profile }) {
         try {
             setLoading(true);
             setError(null);
-            
-            const expensesId = profile?.expenses || profile?.profileId || '6888fada86dcf136e4141d5d';
+
+            const expensesId = profile.expenses;
             const response = await get(`expenses/profile-expenses/${expensesId}`);
-            
+
             if (response.ok && response.expenses) {
-                // Parse the real data from your API
                 const realExpenses = [];
                 const expensesData = response.expenses;
-                
+
                 if (expensesData.categories) {
                     expensesData.categories.forEach(category => {
                         if (category.Businesses) {
@@ -43,7 +42,7 @@ export default function ExpenseSummary({ profile }) {
                         }
                     });
                 }
-                
+
                 setExpenses(realExpenses);
             } else {
                 setError(response.message || 'שגיאה בטעינת הנתונים');
@@ -58,7 +57,7 @@ export default function ExpenseSummary({ profile }) {
 
     const calculateSummary = () => {
         const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-        
+
         // Group by category
         const categoryTotals = expenses.reduce((acc, expense) => {
             if (!acc[expense.category]) {
@@ -121,26 +120,24 @@ export default function ExpenseSummary({ profile }) {
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">📊 סיכום הוצאות</h2>
-                
+
                 {/* Breakdown Toggle Buttons */}
                 <div className="flex gap-2">
                     <button
                         onClick={() => setBreakdownView('category')}
-                        className={`px-4 py-2 rounded transition-colors ${
-                            breakdownView === 'category'
+                        className={`px-4 py-2 rounded transition-colors ${breakdownView === 'category'
                                 ? 'bg-blue-500 text-white'
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
+                            }`}
                     >
                         📈 הצגה לפי קטגוריות
                     </button>
                     <button
                         onClick={() => setBreakdownView('business')}
-                        className={`px-4 py-2 rounded transition-colors ${
-                            breakdownView === 'business'
+                        className={`px-4 py-2 rounded transition-colors ${breakdownView === 'business'
                                 ? 'bg-green-500 text-white'
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
+                            }`}
                     >
                         🏪 הצגה לפי עסקים
                     </button>
@@ -179,7 +176,7 @@ export default function ExpenseSummary({ profile }) {
                         <h3 className="text-xl font-bold mb-4">📈 הצגה לפי קטגוריות</h3>
                         <div className="space-y-3">
                             {Object.entries(summary.categoryTotals)
-                                .sort(([,a], [,b]) => b - a)
+                                .sort(([, a], [, b]) => b - a)
                                 .map(([category, amount]) => {
                                     const percentage = (amount / summary.totalAmount * 100).toFixed(1);
                                     return (
@@ -191,8 +188,8 @@ export default function ExpenseSummary({ profile }) {
                                                 </span>
                                             </div>
                                             <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div 
-                                                    className="bg-blue-500 h-2 rounded-full" 
+                                                <div
+                                                    className="bg-blue-500 h-2 rounded-full"
                                                     style={{ width: `${percentage}%` }}
                                                 ></div>
                                             </div>
@@ -208,7 +205,7 @@ export default function ExpenseSummary({ profile }) {
                         <h3 className="text-xl font-bold mb-4">🏪 הצגה לפי עסקים</h3>
                         <div className="space-y-3">
                             {Object.entries(summary.businessTotals)
-                                .sort(([,a], [,b]) => b - a)
+                                .sort(([, a], [, b]) => b - a)
                                 .map(([business, amount]) => {
                                     const percentage = (amount / summary.totalAmount * 100).toFixed(1);
                                     return (
@@ -220,8 +217,8 @@ export default function ExpenseSummary({ profile }) {
                                                 </span>
                                             </div>
                                             <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div 
-                                                    className="bg-green-500 h-2 rounded-full" 
+                                                <div
+                                                    className="bg-green-500 h-2 rounded-full"
                                                     style={{ width: `${percentage}%` }}
                                                 ></div>
                                             </div>
