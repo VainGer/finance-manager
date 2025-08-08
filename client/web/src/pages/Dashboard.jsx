@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ProfileBudgetDisplay from '../components/dashboard/budget/ProfileBudgetDisplay';
-import ExpensesDisplay from '../components/dashboard/expenses/ExpensesDisplay';
+import ExpensesDisplay from '../components/dashboard/expenses/expenses_display/ExpensesDisplay';
 import ExpenseSummary from '../components/dashboard/summary/ExpenseSummary';
 import InteractiveCharts from '../components/dashboard/charts/InteractiveCharts';
 import SideMenu from '../components/dashboard/menu/SideMenu';

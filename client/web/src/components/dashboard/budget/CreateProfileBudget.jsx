@@ -111,7 +111,7 @@ export default function CreateProfileBudget({ goBack }) {
                 onChange={(e) => setAmount(e.target.value)}
             />
             <button onClick={setDatesAndSum} className="mt-2 bg-blue-500 text-white px-4 py-2 rounded">
-                בדוק תאריכים
+                המשך
             </button>
         </form>)
 
@@ -140,8 +140,8 @@ export default function CreateProfileBudget({ goBack }) {
                     {remainingAmount >= 0 ? (<p>סכום פנוי: {remainingAmount}</p>)
                         : (<p>הסכום חורג ב - {Math.abs(remainingAmount)}</p>)}
                     {categories}
-                    <button disabled={remainingAmount < 0} type="submit"
-                        className={`mt-2 ${remainingAmount < 0 ? 'bg-gray-500' : 'bg-green-500'} text-white px-4 py-2 rounded`}>
+                    <button disabled={remainingAmount !== 0} type="submit"
+                        className={`mt-2 ${remainingAmount !== 0 ? 'bg-gray-500' : 'bg-green-500'} text-white px-4 py-2 rounded`}>
                         צור תקציב
                     </button>
                 </form>

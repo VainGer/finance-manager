@@ -20,7 +20,6 @@ export default function DeleteTransaction({ transaction, refId, onTransactionDel
             const response = await del('expenses/transaction/delete-transaction', deleteData);
 
             if (response.ok || response.success || response.message?.includes('successfully')) {
-                // Notify parent component that transaction was deleted
                 if (onTransactionDeleted) {
                     onTransactionDeleted(transaction._id);
                 }

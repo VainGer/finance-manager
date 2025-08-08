@@ -105,11 +105,11 @@ export default class ProfileService {
         if (!username || !profileName || !oldPin || !newPin) {
             throw new BadRequestError("Username, profile name, old pin and new pin are required");
         }
-        
+
         if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
             throw new BadRequestError("PIN must be exactly 4 digits");
         }
-        
+
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
             throw new NotFoundError("Profile not found");
@@ -270,12 +270,24 @@ export default class ProfileService {
         if (budgets.length === 0) {
             return { success: true, message: "No budgets found for validation" };
         }
+
+        // Convert input dates to proper Date objects
+        const newStart = new Date(startDate);
+        const newEnd = new Date(endDate);
+
         const overlapingDates = budgets.some((budget: ProfileBudget) => {
             const budgetStart = new Date(budget.startDate);
             const budgetEnd = new Date(budget.endDate);
-            return (startDate >= budgetStart && startDate <= budgetEnd) ||
-                (endDate >= budgetStart && endDate <= budgetEnd) ||
-                (startDate <= budgetStart && endDate >= budgetEnd);
+
+            return (
+                (newStart >= budgetStart && newStart <= budgetEnd) ||
+
+                (newEnd >= budgetStart && newEnd <= budgetEnd) ||
+
+                (newStart <= budgetStart && newEnd >= budgetEnd) ||
+
+                (newStart >= budgetStart && newEnd <= budgetEnd)
+            );
         });
         if (overlapingDates) {
             throw new ConflictError("Budget dates overlap with existing budgets");

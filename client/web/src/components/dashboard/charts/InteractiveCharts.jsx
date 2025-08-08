@@ -1,7 +1,4 @@
-import { useState, useEffect } from "react";
-import LoadingSpinner from "../../common/LoadingSpinner";
-import ErrorMessage from "../../common/ErrorMessage";
-import { get } from "../../../utils/api";
+import { useState, useMemo, useEffect } from 'react';
 import {
     PieChart,
     Pie,
@@ -15,83 +12,52 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
+import LoadingSpinner from "../../common/LoadingSpinner";
+import ErrorMessage from "../../common/ErrorMessage";
+import useExpensesDisplay from '../../../hooks/useExpensesDisplay';
 
-// Recharts Implementation - Clean and Simple
+
+
 export default function InteractiveCharts({ profile, refreshTrigger }) {
-    const [expenses, setExpenses] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [dateFilter, setDateFilter] = useState('all');
     const [chartType, setChartType] = useState('pie');
     const [selectedMonth, setSelectedMonth] = useState('');
 
+
+    const {
+        expenses,
+        filteredExpenses,
+        loading,
+        error,
+        refetchExpenses
+    } = useExpensesDisplay(profile);
+    
+
     useEffect(() => {
-        fetchExpenses();
-    }, [profile, refreshTrigger]);
-
-    const fetchExpenses = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            const expensesId = profile.expenses;
-            const response = await get(`expenses/profile-expenses/${expensesId}`);
-
-            if (response.ok && response.expenses) {
-                const expensesData = response.expenses;
-                const parsedExpenses = [];
-
-                if (expensesData.categories) {
-                    expensesData.categories.forEach(category => {
-                        if (category.Businesses) {
-                            category.Businesses.forEach(business => {
-                                if (business.transactions) {
-                                    business.transactions.forEach(transaction => {
-                                        parsedExpenses.push({
-                                            _id: transaction._id,
-                                            amount: Number(transaction.amount),
-                                            date: transaction.date,
-                                            description: transaction.description,
-                                            category: category.name,
-                                            business: business.name
-                                        });
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-
-                setExpenses(parsedExpenses);
-            } else {
-                setError(response.message || 'שגיאה בטעינת הנתונים');
-            }
-        } catch (err) {
-            console.error('Error fetching expenses:', err);
-            setError('שגיאה בחיבור למסד הנתונים');
-        } finally {
-            setLoading(false);
+        if (refreshTrigger) {
+            refetchExpenses();
         }
-    };
+    }, [refreshTrigger, refetchExpenses]);
 
-    const filterExpensesByDate = (expenses, filter) => {
-        if (filter === 'all') return expenses;
+
+    const filteredByDateExpenses = useMemo(() => {
+        if (!filteredExpenses) return [];
+        if (dateFilter === 'all') return filteredExpenses;
 
         const now = new Date();
 
-        if (filter === 'specific' && selectedMonth) {
+        if (dateFilter === 'specific' && selectedMonth) {
             const [year, month] = selectedMonth.split('-');
-            const filtered = expenses.filter(expense => {
+            return filteredExpenses.filter(expense => {
                 const expenseDate = new Date(expense.date);
                 return expenseDate.getFullYear() === parseInt(year) &&
                     expenseDate.getMonth() === parseInt(month) - 1;
             });
-            return filtered;
         }
 
         const cutoffDate = new Date();
 
-        switch (filter) {
+        switch (dateFilter) {
             case 'week':
                 cutoffDate.setDate(now.getDate() - 7);
                 break;
@@ -102,33 +68,17 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                 cutoffDate.setFullYear(now.getFullYear() - 1);
                 break;
             default:
-                return expenses;
+                return filteredExpenses;
         }
 
-        const filtered = expenses.filter(expense => {
+        return filteredExpenses.filter(expense => {
             const expenseDate = new Date(expense.date);
-            const isAfterCutoff = expenseDate >= cutoffDate;
-            const isBeforeNow = expenseDate <= now;
-            return isAfterCutoff && isBeforeNow;
+            return expenseDate >= cutoffDate && expenseDate <= now;
         });
-
-        return filtered;
-    };
-
-    const getAvailableMonths = () => {
-        const months = new Set();
-        expenses.forEach(expense => {
-            const date = new Date(expense.date);
-            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            months.add(monthKey);
-        });
-        return Array.from(months).sort().reverse(); // Most recent first
-    };
+    }, [filteredExpenses, dateFilter, selectedMonth]);
 
     const renderChart = () => {
-        const filteredExpenses = filterExpensesByDate(expenses, dateFilter);
-
-        if (filteredExpenses.length === 0) {
+        if (!filteredByDateExpenses || filteredByDateExpenses.length === 0) {
             return (
                 <div className="flex items-center justify-center h-full">
                     <div className="text-center">
@@ -140,35 +90,17 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
             );
         }
 
-        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
-
         if (chartType === 'pie') {
-            // Group by category
-            const categoryData = {};
-            filteredExpenses.forEach(expense => {
-                const category = expense.category || 'ללא קטגוריה';
-                if (!categoryData[category]) {
-                    categoryData[category] = 0;
-                }
-                categoryData[category] += expense.amount;
-            });
-
-            const chartData = Object.entries(categoryData).map(([name, value], index) => ({
-                name,
-                value,
-                color: colors[index % colors.length]
-            }));
-
             return (
                 <div className="w-full h-96">
                     <h3 className="text-lg font-semibold text-center mb-2">התפלגות הוצאות לפי קטגוריה</h3>
                     <p className="text-center text-sm text-gray-600 mb-4">
-                        מציג {filteredExpenses.length} מתוך {expenses.length} הוצאות
+                        מציג {filteredByDateExpenses.length} מתוך {expenses?.length || 0} הוצאות
                     </p>
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                             <Pie
-                                data={chartData}
+                                data={pieChartData}
                                 cx="50%"
                                 cy="50%"
                                 outerRadius={120}
@@ -177,7 +109,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                                 animationBegin={0}
                                 animationDuration={800}
                             >
-                                {chartData.map((entry, index) => (
+                                {pieChartData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}
                             </Pie>
@@ -201,29 +133,14 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
         }
 
         if (chartType === 'bar') {
-            const categoryData = {};
-            filteredExpenses.forEach(expense => {
-                const category = expense.category || 'ללא קטגוריה';
-                if (!categoryData[category]) {
-                    categoryData[category] = 0;
-                }
-                categoryData[category] += expense.amount;
-            });
-
-            const chartData = Object.entries(categoryData).map(([name, value], index) => ({
-                name,
-                value,
-                color: colors[index % colors.length]
-            }));
-
             return (
                 <div className="w-full h-96">
                     <h3 className="text-lg font-semibold text-center mb-2">התפלגות הוצאות לפי קטגוריה</h3>
                     <p className="text-center text-sm text-gray-600 mb-4">
-                        מציג {filteredExpenses.length} מתוך {expenses.length} הוצאות
+                        מציג {filteredByDateExpenses.length} מתוך {expenses?.length || 0} הוצאות
                     </p>
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                        <BarChart data={pieChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis
                                 dataKey="name"
@@ -252,7 +169,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                                 animationDuration={800}
                                 animationBegin={0}
                             >
-                                {chartData.map((entry, index) => (
+                                {pieChartData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}
                             </Bar>
@@ -263,28 +180,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
         }
 
         if (chartType === 'monthly') {
-            // For monthly comparison, always show all months but highlight filtered period
-            const monthlyData = {};
-
-            // First, get all months from all expenses to show complete timeline
-            expenses.forEach(expense => {
-                const date = new Date(expense.date);
-                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                const monthLabel = `${date.getMonth() + 1}/${date.getFullYear()}`;
-
-                if (!monthlyData[monthKey]) {
-                    monthlyData[monthKey] = { month: monthLabel, amount: 0 };
-                }
-                monthlyData[monthKey].amount += expense.amount;
-            });
-
-            const chartData = Object.values(monthlyData).sort((a, b) => {
-                const [monthA, yearA] = a.month.split('/');
-                const [monthB, yearB] = b.month.split('/');
-                return new Date(yearA, monthA - 1) - new Date(yearB, monthB - 1);
-            });
-
-            if (chartData.length === 0) {
+            if (monthlyChartData.length === 0) {
                 return (
                     <div className="flex items-center justify-center h-full">
                         <div className="text-center">
@@ -307,7 +203,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                         )}
                     </h3>
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                        <BarChart data={monthlyChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis
                                 dataKey="month"
@@ -341,8 +237,64 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                 </div>
             );
         }
+        
+        return null;
     };
 
+    const availableMonths = useMemo(() => {
+        if (!expenses || expenses.length === 0) return [];
+        const months = new Set();
+        expenses.forEach(expense => {
+            const date = new Date(expense.date);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            months.add(monthKey);
+        });
+        return Array.from(months).sort().reverse();
+    }, [expenses]);
+    
+    const pieChartData = useMemo(() => {
+        if (!filteredByDateExpenses || filteredByDateExpenses.length === 0) return [];
+        
+        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+        const categoryData = {};
+        filteredByDateExpenses.forEach(expense => {
+            const category = expense.category || 'ללא קטגוריה';
+            if (!categoryData[category]) {
+                categoryData[category] = 0;
+            }
+            categoryData[category] += expense.amount;
+        });
+
+        return Object.entries(categoryData).map(([name, value], index) => ({
+            name,
+            value,
+            color: colors[index % colors.length]
+        }));
+    }, [filteredByDateExpenses]);
+    
+
+    const monthlyChartData = useMemo(() => {
+        if (!expenses || expenses.length === 0) return [];
+        
+        const monthlyData = {};
+        expenses.forEach(expense => {
+            const date = new Date(expense.date);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            const monthLabel = `${date.getMonth() + 1}/${date.getFullYear()}`;
+
+            if (!monthlyData[monthKey]) {
+                monthlyData[monthKey] = { month: monthLabel, amount: 0 };
+            }
+            monthlyData[monthKey].amount += expense.amount;
+        });
+
+        return Object.values(monthlyData).sort((a, b) => {
+            const [monthA, yearA] = a.month.split('/');
+            const [monthB, yearB] = b.month.split('/');
+            return new Date(yearA, monthA - 1) - new Date(yearB, monthB - 1);
+        });
+    }, [expenses]);
+    
     if (loading) {
         return <LoadingSpinner />;
     }
@@ -350,8 +302,6 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
     if (error) {
         return <ErrorMessage message={error} />;
     }
-
-    const availableMonths = getAvailableMonths();
 
     return (
         <div className="bg-white rounded-lg shadow-lg p-6" dir="rtl">
@@ -469,15 +419,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
             {/* Chart Display */}
             <div className="mb-6">
                 <div className="bg-gray-50 p-4 rounded-lg border" style={{ minHeight: '450px' }}>
-                    {expenses.length > 0 ? renderChart() : (
-                        <div className="flex items-center justify-center h-full">
-                            <div className="text-center">
-                                <div className="text-gray-400 text-6xl mb-4">📈</div>
-                                <div className="text-xl font-semibold text-gray-600 mb-2">אין נתונים להצגה</div>
-                                <div className="text-gray-500">הוסף הוצאות כדי לראות גרפים</div>
-                            </div>
-                        </div>
-                    )}
+                    {renderChart()}
                 </div>
             </div>
 

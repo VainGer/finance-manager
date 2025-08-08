@@ -5,7 +5,7 @@ export default function BudgetPeriodSelector({ periods, selectedPeriod, onSelect
     if (!periods || periods.length <= 1) return null;
 
     return (
-        <div className="relative">
+        <div className="relative w-1/3 mb-4">
             <select
                 value={selectedPeriod ? `${selectedPeriod.startDate}|${selectedPeriod.endDate}` : ''}
                 onChange={(e) => {

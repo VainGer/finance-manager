@@ -1,5 +1,5 @@
 import ProfileBudgetDisplay from "./budget/ProfileBudgetDisplay";
-import ExpensesDisplay from "./expenses/ExpensesDisplay";
+import ExpensesDisplay from "./expenses/expenses_display/ExpensesDisplay";
 import ExpenseSummary from "./summary/ExpenseSummary";
 import InteractiveCharts from "./charts/InteractiveCharts";
 
