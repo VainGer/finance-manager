@@ -41,4 +41,24 @@ export default class AccountService {
         return { success: true, safeAccount, message: "Account validated successfully" };
     }
 
+    static async changePassword(username: string, currentPassword: string, newPassword: string) {
+        if (!username?.trim() || !currentPassword?.trim() || !newPassword?.trim()) {
+            throw new BadRequestError('Username, current and new password are required');
+        }
+        if (newPassword.trim().length < 6) {
+            throw new BadRequestError('New password must be at least 6 characters');
+        }
+        if (newPassword.trim() === currentPassword.trim()) {
+            throw new BadRequestError('New password must be different from current password');
+        }
+        const validatedAccount = await AccountModel.validate(username, currentPassword);
+        if (!validatedAccount) {
+            throw new BadRequestError('Invalid current password');
+        }
+        const result = await AccountModel.updatePassword(username, newPassword);
+        if (!result.success) {
+            throw new AppError(result.message, 500);
+        }
+        return { success: true, message: 'Password changed successfully' };
+    }
 }
