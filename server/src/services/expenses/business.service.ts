@@ -23,7 +23,7 @@ export default class BusinessService {
         if (existingBusinesses.includes(businessName)) {
             throw new AppErrors.ConflictError("Business already exists");
         }
-        const newBusiness: Business = { name: businessName, transactions: [] };
+        const newBusiness: Business = { name: businessName, bankName: "-", transactions: [] };
         const result = await BusinessModel.createBusiness(refId, categoryName, newBusiness);
         if (!result?.success) {
             throw new AppErrors.AppError("Failed to create business", 500);
@@ -62,6 +62,17 @@ export default class BusinessService {
         const result = await BusinessModel.deleteBusiness(refId, categoryName, businessName);
         if (!result?.success) {
             throw new AppErrors.AppError(result?.message || "Failed to delete business", 500);
+        }
+        return result;
+    }
+
+    static async updateBusinessBankName(refId: string, categoryName: string, businessName: string, bankName: string) {
+        if (!refId || !categoryName || !businessName || !bankName) {
+            throw new AppErrors.BadRequestError("Reference ID, category name, business name and bank name are required");
+        }
+        const result = await BusinessModel.updateBusinessBankName(refId, categoryName, businessName, bankName);
+        if (!result?.success) {
+            throw new AppErrors.AppError(result?.message || "Failed to update business bank name", 500);
         }
         return result;
     }

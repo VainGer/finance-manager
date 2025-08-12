@@ -3,7 +3,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import { post } from '../../../../utils/api';
 import CategorySelect from '../categories/CategorySelect';
 
-export default function CreateBusiness({ goBack }) {
+export default function CreateBusiness({ goBack, onBusinessAdded }) {
 
     const { profile } = useAuth();
     const [name, setName] = useState('');
@@ -19,6 +19,7 @@ export default function CreateBusiness({ goBack }) {
             name
         });
         if (response.ok) {
+            if (onBusinessAdded) { onBusinessAdded(); }
             goBack();
         } else if (response.status === 409) {
             setError('שם בעל העסק כבר קיים');

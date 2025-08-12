@@ -37,7 +37,7 @@ export default function ChartWrapper({ type, data, options }) {
                 try {
                     chartRef.current.destroy();
                 } catch (e) {
-                    console.log('Chart cleanup:', e);
+
                 }
                 chartRef.current = null;
             }

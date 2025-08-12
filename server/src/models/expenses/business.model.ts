@@ -57,4 +57,24 @@ export default class BusinessModel {
         }
     }
 
+    static async updateBusinessBankName(refId: string, categoryName: string, businessName: string, bankName: string) {
+        try {
+            const result = await db.UpdateDocument(
+                BusinessModel.expensesCollection,
+                { _id: new ObjectId(refId), "categories.name": categoryName, "categories.Businesses.name": businessName },
+                { $set: { "categories.$.Businesses.$[bizFilter].bankName": bankName } },
+                {
+                    arrayFilters: [{ "bizFilter.name": businessName }]
+                });
+
+            if (!result || result.modifiedCount === 0) {
+                return { success: false, message: "Business not found or bank name is the same" };
+            }
+            return { success: true, message: "Business bank name updated successfully" };
+        } catch (error) {
+            console.error("Error in BusinessModel.updateBusinessBankName", error);
+            throw new Error("Failed to update business bank name");
+        }
+    }
+
 }

@@ -26,7 +26,7 @@ profileRouter.post<{}, {}, { budgetData: BudgetCreationData }>
 profileRouter.post<{}, {}, { username: string, profileName: string, startDate: Date, endDate: Date }>
     ("/check-budget-dates", ProfileController.validateBudgetDates);
 
-// profileRouter.post<{}, {}, { refId: string, transactionsData: string }>
-//     ("/categorize-transactions", ProfileController.categorizeTransactions);--> disabled for now token limitation
+profileRouter.post<{}, {}, { refId: string, transactionsData: string }>
+    ("/categorize-transactions", ProfileController.categorizeTransactions);
 
 export default profileRouter;

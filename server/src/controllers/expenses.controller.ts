@@ -90,6 +90,16 @@ export default class ExpensesController {
         }
     }
 
+    static async updateBusinessBankName(req: Request, res: Response) {
+        try {
+            const { refId, catName, busName, bankName } = req.body;
+            const result = await BusinessService.updateBusinessBankName(refId, catName, busName, bankName);
+            res.status(200).json({ message: result.message });
+        } catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
+
     static async deleteBusiness(req: Request, res: Response) {
         try {
             const { refId, catName, busName } = req.params;
@@ -168,7 +178,7 @@ export default class ExpensesController {
 
     static async deleteTransaction(req: Request, res: Response) {
         try {
-            const { refId, catName, busName, transactionId } = req.body; 
+            const { refId, catName, busName, transactionId } = req.body;
             const result = await TransactionService.delete(refId, catName, busName, transactionId);
             res.status(200).json({ message: result.message });
         } catch (error) {

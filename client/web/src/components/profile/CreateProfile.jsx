@@ -55,9 +55,6 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
                 setColor('#000000');
                 setParentProfile(false);
                 onProfileCreated();
-            } else {
-                alert('הפרופיל נוצר בהצלחה!');
-                window.location.reload();
             }
         } else {
             setError(response.message || 'Failed to create profile.');

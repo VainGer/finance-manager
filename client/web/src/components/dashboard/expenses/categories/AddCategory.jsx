@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import { post } from '../../../../utils/api';
 
-export default function AddCategory({ goBack }) {
+export default function AddCategory({ goBack, onCategoryAdded }) {
 
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
@@ -28,6 +28,8 @@ export default function AddCategory({ goBack }) {
                 setError(null);
                 setSuccess('הקטגוריה נוספה בהצלחה');
                 setCategoryName('');
+                if (onCategoryAdded) { onCategoryAdded(); }
+                goBack();
                 // Auto-hide success message after 3 seconds
                 setTimeout(() => setSuccess(false), 3000);
             } else if (response.status === 400) {

@@ -14,6 +14,10 @@ export default function Settings() {
     const { account, profile, setAccount, setProfile } = useAuth();
     const navigate = useNavigate();
 
+
+    //TODO create child profile
+    //TODO create child profile budget
+    
     const {
         state: {
             activeSection,

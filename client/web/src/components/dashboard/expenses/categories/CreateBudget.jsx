@@ -15,7 +15,7 @@ export default function CreateBudget({ goBack }) {
     const [conflictingBudget, setConflictingBudget] = useState(null);
     const [pendingBudget, setPendingBudget] = useState(null);
     const { profile } = useAuth();
-
+    //TODO create child profile budget distribution based on profile budget
     const createBudget = async (e) => {
         e.preventDefault();
 
