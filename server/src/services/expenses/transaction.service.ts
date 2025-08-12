@@ -18,21 +18,29 @@ export default class TransactionService {
         const transaction: Transaction = { ...transactionData, _id: id };
         transaction.amount = parseFloat(transaction.amount.toString());
         const result = await TransactionModel.create(refId, catName, busName, transaction);
-        await this.updateBudgetOnTransaction(refId, catName, busName, id.toString(), transaction.amount, true);
+        const updateBudgetOnTransaction = await this.updateBudgetOnTransaction
+            (refId, catName, busName, id.toString(), transaction.amount, true);
         if (!result?.success) {
             throw new appErrors.AppError(result?.message || "Failed to create transaction", 500);
+        }
+        if (!updateBudgetOnTransaction?.success) {
+            throw new appErrors.AppError(updateBudgetOnTransaction?.message || "Failed to update budget on transaction", 500);
         }
         return result;
     }
 
     static async changeAmount
-        (refId: string, catName: string, busName: string, transactionId: ObjectId, newAmount: number) {
+        (refId: string, catName: string, busName: string, transactionId: any, newAmount: number) {
         if (!refId || !catName || !busName || !transactionId || newAmount === undefined) {
             throw new appErrors.BadRequestError("Reference ID, category name, business name, transaction ID and new amount are required");
         }
         newAmount = parseFloat(newAmount.toString());
-        await this.updateBudgetOnTransaction(refId, catName, busName, transactionId.toString(), newAmount);
-        const result = await TransactionModel.changeAmount(refId, catName, busName, transactionId, newAmount);
+        const txId = typeof transactionId === 'string' ? new ObjectId(transactionId) : transactionId;
+        const updatedBudgetResult = await this.updateBudgetOnTransaction(refId, catName, busName, txId.toString(), newAmount);
+        if (!updatedBudgetResult?.success) {
+            throw new appErrors.AppError(updatedBudgetResult?.message || "Failed to update budget on transaction", 500);
+        }
+        const result = await TransactionModel.changeAmount(refId, catName, busName, txId, newAmount);
         if (!result?.success) {
             throw new appErrors.AppError(result?.message || "Failed to change transaction amount", 500);
         }
@@ -44,12 +52,12 @@ export default class TransactionService {
         if (!refId || !catName || !busName || !transactionId || !newDate) {
             throw new appErrors.BadRequestError("Reference ID, category name, business name, transaction ID and new date are required");
         }
-        const transaction = await TransactionService.getById(refId, catName, busName, transactionId);
+        const transaction = await this.getById(refId, catName, busName, transactionId);
         if (!transaction) {
             throw new appErrors.NotFoundError("Transaction not found");
         }
-        const newCreated = await TransactionService.create(refId, catName, busName, { amount: transaction.amount, date: newDate, description: transaction.description });
-        const oldDeleted = await TransactionService.delete(refId, catName, busName, transactionId);
+        const newCreated = await this.create(refId, catName, busName, { amount: transaction.amount, date: newDate, description: transaction.description });
+        const oldDeleted = await this.delete(refId, catName, busName, transactionId);
         if (!newCreated?.success || !oldDeleted?.success) {
             throw new appErrors.AppError("Failed to change transaction date", 500);
         }
@@ -78,7 +86,10 @@ export default class TransactionService {
             throw new appErrors.BadRequestError
                 ("Reference ID, category name, business name and transaction ID are required");
         }
-        await this.updateBudgetOnTransaction(refId, catName, busName, transactionId, 0);
+        const updatedBudgetResult = await this.updateBudgetOnTransaction(refId, catName, busName, transactionId, 0);
+        if (!updatedBudgetResult?.success) {
+            throw new appErrors.AppError(updatedBudgetResult?.message || "Failed to update budget on transaction", 500);
+        }
         const result = await TransactionModel.delete(refId, catName, busName, transactionId);
         if (!result?.success) {
             throw new appErrors.AppError(result?.message || "Failed to delete transaction", 500);
@@ -120,7 +131,7 @@ export default class TransactionService {
         if (!profile) {
             throw new appErrors.NotFoundError("Profile not found");
         }
-        const transaction = await TransactionService.getById(refId, catName, busName, transactionId);
+        const transaction = await this.getById(refId, catName, busName, transactionId);
         const budget = profile.budgets.find((b: ProfileBudget) => {
             const startDate = new Date(b.startDate);
             const endDate = new Date(b.endDate);

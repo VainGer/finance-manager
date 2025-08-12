@@ -1,6 +1,7 @@
 import { formatAmount, formatDate } from "../../../../utils/expensesUtils";
 import DeleteTransaction from "../transactions/DeleteTransaction";
-export default function ExpensesTable({ filteredExpenses, expensesId, onTransactionDeleted }) {
+import EditTransaction from "../transactions/EditTransaction";
+export default function ExpensesTable({ filteredExpenses, expensesId, onTransactionDeleted, onTransactionUpdated }) {
     return (
         <div className="overflow-y-auto h-50">
             <table className="w-full">
@@ -28,11 +29,18 @@ export default function ExpensesTable({ filteredExpenses, expensesId, onTransact
                                 <td className="p-3">{expense.business}</td>
                                 <td className="p-3 font-bold text-red-600">{formatAmount(expense.amount)}</td>
                                 <td className="p-3 text-center">
-                                    <DeleteTransaction
-                                        transaction={expense}
-                                        refId={expensesId}
-                                        onTransactionDeleted={onTransactionDeleted}
-                                    />
+                                    <div className="flex items-center justify-center gap-2">
+                                        <EditTransaction
+                                            transaction={expense}
+                                            refId={expensesId}
+                                            onTransactionUpdated={onTransactionUpdated}
+                                        />
+                                        <DeleteTransaction
+                                            transaction={expense}
+                                            refId={expensesId}
+                                            onTransactionDeleted={onTransactionDeleted}
+                                        />
+                                    </div>
                                 </td>
                             </tr>
                         ))

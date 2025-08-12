@@ -57,4 +57,17 @@ export default class AccountModel {
         }
     }
 
+    static async updatePassword(username: string, newPassword: string) {
+        try {
+            const hashed = await bcrypt.hash(newPassword, this.SALT_ROUNDS);
+            const result = await db.UpdateDocument(this.accountCollection, { username }, { $set: { password: hashed, updatedAt: new Date() } });
+            if (!result || result.modifiedCount === 0) {
+                return { success: false, message: 'Account not found or password unchanged' };
+            }
+            return { success: true, message: 'Password updated successfully' };
+        } catch (error) {
+            console.error('Error in AccountModel.updatePassword', error);
+            throw new Error('Failed to update password');
+        }
+    }
 }

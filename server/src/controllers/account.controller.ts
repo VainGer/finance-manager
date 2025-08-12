@@ -38,4 +38,19 @@ export default class AccountController {
             }
         }
     }
+
+    static async changePassword(req: Request, res: Response) {
+        try {
+            const { username, currentPassword, newPassword } = req.body as { username: string, currentPassword: string, newPassword: string };
+            const result = await AccountService.changePassword(username, currentPassword, newPassword);
+            res.status(200).json({ message: result.message || 'Password changed successfully' });
+        } catch (error) {
+            console.error(error);
+            if (error instanceof (AppError)) {
+                res.status(error.statusCode).json({ message: error.message });
+            } else {
+                res.status(500).json({ message: "Internal server error" });
+            }
+        }
+    }
 }
