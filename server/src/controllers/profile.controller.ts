@@ -144,6 +144,20 @@ export default class ProfileController {
         }
     }
 
+    static async categorizeTransactions(req: Request, res: Response) {
+        try {
+            const { refId, transactionsData } = req.body;
+            console.log('hi')
+            const result = await ProfileService.categorizeTransactions(refId, transactionsData);
+            res.status(200).json({
+                message: "Transactions categorized successfully",
+                categories: result
+            });
+        } catch (error) {
+            ProfileController.handleError(error, res);
+        }
+    }
+
     private static handleError(error: any, res: Response) {
         console.error("Controller error:", error);
         if (error instanceof AppErrors.AppError) {

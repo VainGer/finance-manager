@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@huggingface/inference": "^4.6.1",
     "@types/cors": "^2.8.18",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",

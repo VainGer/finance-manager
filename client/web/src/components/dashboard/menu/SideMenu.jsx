@@ -76,6 +76,9 @@ export default function SideMenu({ onTransactionAdded }) {
                         <MenuItem onClick={() => navigate('/profile-settings')}>
                             <span className="ml-2">⚙️</span> הגדרות
                         </MenuItem>
+                        <MenuItem onClick={() => navigate('/u')}>
+                            <span className="ml-2">📤</span> העלאת עסקאות מקובץ
+                        </MenuItem>
                     </ul>
                 </>
             )}

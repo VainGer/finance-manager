@@ -6,6 +6,7 @@ import Register from "../pages/auth/Register.jsx";
 import ProfileAuth from "../pages/profile/ProfileAuth.jsx";
 import Dashboard from "../pages/Dashboard.jsx";
 import Settings from "../pages/Settings.jsx";
+import UploadFromFileTransactions from "../pages/UploadFromFileTransactions.jsx";
 
 const router = createBrowserRouter([
     {
@@ -31,6 +32,9 @@ const router = createBrowserRouter([
     },
     {
         path: '/profile-settings', element: <Settings />,
+    },
+    {
+        path: '/u', element: <UploadFromFileTransactions />,
     }
 ]);
 

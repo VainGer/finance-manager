@@ -5,6 +5,7 @@ import CategoryService from "../expenses/category.service";
 import { ProfileCreationData, Profile, SafeProfile, ProfileBudget, BudgetCreationData } from "../../types/profile.types";
 import { CategoryBudget } from "../../types/expenses.types";
 import { ObjectId } from "mongodb";
+import LLM from "../../utils/LLM";
 
 export default class ProfileService {
 
@@ -141,6 +142,7 @@ export default class ProfileService {
         if (!isValidPin) {
             throw new BadRequestError("Invalid PIN");
         }
+        await this.deleteAvatar(username, profileName);
         const result = await ProfileModel.deleteProfile(username, profileName);
         if (!result.success) {
             throw new AppError(result.message, 500);
@@ -200,6 +202,7 @@ export default class ProfileService {
         return { success: true, message: "Profile color set successfully" };
     }
 
+
     static async createBudget(budgetData: BudgetCreationData) {
         const { username, profileName, profileBudget, categoriesBudgets } = budgetData;
         if (!username || !profileName || !profileBudget || !categoriesBudgets) {
@@ -226,11 +229,6 @@ export default class ProfileService {
             spent: newSpent
         };
 
-        const profileBudgetCreated = await ProfileModel.createBudget(username, profileName, newProfileBudget);
-        if (!profileBudgetCreated || !profileBudgetCreated.success) {
-            throw new AppError(profileBudgetCreated?.message || "Failed to create budget", 500);
-        }
-
         const categoriesBudgetsCreated = await this.createCategoryBudgets(
             refId,
             categoriesBudgets,
@@ -242,6 +240,13 @@ export default class ProfileService {
         if (!categoriesBudgetsCreated || !categoriesBudgetsCreated.success) {
             throw new AppError(categoriesBudgetsCreated?.message || "Failed to create categories budgets", 500);
         }
+
+        const profileBudgetCreated = await ProfileModel.createBudget(username, profileName, newProfileBudget);
+
+        if (!profileBudgetCreated || !profileBudgetCreated.success) {
+            throw new AppError(profileBudgetCreated?.message || "Failed to create budget", 500);
+        }
+
 
         return { success: true, message: "Budget created successfully" };
     }
@@ -271,7 +276,6 @@ export default class ProfileService {
             return { success: true, message: "No budgets found for validation" };
         }
 
-        // Convert input dates to proper Date objects
         const newStart = new Date(startDate);
         const newEnd = new Date(endDate);
 
@@ -293,6 +297,21 @@ export default class ProfileService {
             throw new ConflictError("Budget dates overlap with existing budgets");
         }
         return { success: true, message: "Budget dates are valid" };
+    }
+
+    static async categorizeTransactions(refId: string, transactionsData: string) {
+        if (!refId || !transactionsData) {
+            throw new BadRequestError("Reference ID and transactions data are required");
+        }
+        const categories = await CategoryService.getProfileExpenses(refId);
+        const categoriesAndBusinesses = categories.categories.map((category: any) => {
+            return {
+                categoryName: category.name,
+                businesses: category.Businesses.map((business: any) => business.name)
+            };
+        });
+        const categorizedData = await LLM.categorizeTransactions(JSON.stringify(categoriesAndBusinesses), transactionsData);
+        return categorizedData;
     }
 
     private static async transactionsSumInDateRange(refId: string, startDate: Date, endDate: Date) {
@@ -321,6 +340,12 @@ export default class ProfileService {
         (refId: string, categeriesBudgets: { categoryName: string; amount: number }[], budgetId: ObjectId, startDate: Date, endDate: Date) {
         if (!refId || !categeriesBudgets || !budgetId || !startDate || !endDate) {
             throw new BadRequestError("Reference ID, categories budgets, budget ID, start date and end date are required");
+        }
+        const categories = await CategoryService.getCategoriesNames(refId);
+        for (const category of categeriesBudgets) {
+            if (!categories.categoriesNames.includes(category.categoryName)) {
+                throw new BadRequestError(`Category '${category.categoryName}' does not exist`);
+            }
         }
         for (const categoryBudget of categeriesBudgets) {
             if (!categoryBudget.categoryName || !categoryBudget.amount) {

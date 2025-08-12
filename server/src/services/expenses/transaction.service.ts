@@ -2,10 +2,9 @@ import * as appErrors from "../../errors/AppError";
 import TransactionModel from "../../models/expenses/transaction.model";
 import { ObjectId } from "mongodb";
 import { Business, Category, Transaction, TransactionWithoutId } from "../../types/expenses.types";
-import { Profile, ProfileBudget } from "../../types/profile.types";
+import { ProfileBudget } from "../../types/profile.types";
 import CategoryService from "./category.service";
 import CategoriesModel from "../../models/expenses/categories.model";
-import ProfileService from "../profile/profile.service";
 import ProfileModel from "../../models/profile/profile.model";
 
 export default class TransactionService {
@@ -86,6 +85,8 @@ export default class TransactionService {
         }
         return result;
     }
+
+
 
     private static async getById
         (refId: string, catName: string, busName: string, transactionId: string) {
