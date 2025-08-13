@@ -1,4 +1,4 @@
-import { Profile, ProfileBudget } from "../../types/profile.types"
+import { Profile, ProfileBudget, ChildProfile } from "../../types/profile.types"
 import db from "../../server"
 import { v2 as cloudinary } from 'cloudinary';
 import bcrypt from 'bcrypt';
@@ -9,7 +9,7 @@ export default class ProfileModel {
     private static expensesCollection: string = 'expenses';
     private static SALT_ROUNDS = 10;
 
-    static async create(profile: Profile) {
+    static async create(profile: Profile | ChildProfile) {
         try {
             const hashedPin = await bcrypt.hash(profile.pin, this.SALT_ROUNDS);
             const newProfile = await db.AddDocument(this.profileCollection, {
@@ -26,6 +26,20 @@ export default class ProfileModel {
         }
     }
 
+    static async addChildToProfile(username: string, profileName: string, children: { name: string, id: ObjectId }) {
+        try {
+            const result = await db.UpdateDocument(this.profileCollection, {
+                username, profileName
+            }, { $addToSet: { children } });
+            if (!result) {
+                return { success: false, message: "Profile not found or child already exists" };
+            }
+            return { success: true, message: "Child added successfully" };
+        } catch (error) {
+            console.error("Error in ProfileModel.addChildToProfile", error);
+            throw new Error("Failed to add child to profile");
+        }
+    }
 
     static async findProfile(username: string, profileName: string) {
         try {
@@ -168,6 +182,34 @@ export default class ProfileModel {
         } catch (error) {
             console.error("Error in ProfileModel.setColor", error);
             throw new Error("Failed to set profile color");
+        }
+    }
+
+    static async addBudgetToChild(childId: string, budgetData: { startDate: Date, endDate: Date, amount: number }) {
+        try {
+            const result = await db.UpdateDocument(this.profileCollection,
+                { _id: new ObjectId(childId) }, { $push: { budgets: budgetData } });
+            if (!result || result.modifiedCount === 0) {
+                return { success: false, message: "Child profile not found or budget is the same" };
+            }
+            return { success: true, message: "Budget added to child profile successfully" };
+        } catch (error) {
+            console.error("Error in ProfileModel.addBudgetToChild", error);
+            throw new Error("Failed to add budget to child profile");
+        }
+    }
+
+    static async clearChildBudget(username: string, profileName: string) {
+        try {
+            const result = await db.UpdateDocument(this.profileCollection,
+                { username, profileName }, { $set: { budgets: [] } });
+            if (!result || result.modifiedCount === 0) {
+                return { success: false, message: "Profile not found or budgets are already empty" };
+            }
+            return { success: true, message: "Child budgets cleared successfully" };
+        } catch (error) {
+            console.error("Error in ProfileModel.clearChildBudget", error);
+            throw new Error("Failed to clear child budget");
         }
     }
 

@@ -272,7 +272,8 @@ export default function useSettingsState({ account, profile, setAccount, setProf
   const sections = [
     { id: 'profile', name: 'פרופיל', icon: '👤' },
     { id: 'account', name: 'חשבון', icon: '⚙️' },
-    { id: 'about', name: 'אודות', icon: 'ℹ️' }
+    { id: 'about', name: 'אודות', icon: 'ℹ️' },
+    { id: 'newProfile', name: 'פרופיל חדש', icon: '➕' }
   ];
 
   return {

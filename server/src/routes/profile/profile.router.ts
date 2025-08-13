@@ -5,6 +5,8 @@ const profileRouter = Router();
 
 profileRouter.post<{}, {}, { reqProfile: ProfileCreationData }>
     ("/create-profile", ProfileController.createProfile);
+profileRouter.post<{}, {}, { username: string, profileName: string, childProfile: Profile }>
+    ("/create-child-profile", ProfileController.createChildProfile);
 profileRouter.post<{}, {}, { username: string, profileName: string, pin: string }>
     ("/validate-profile", ProfileController.validateProfile);
 profileRouter.post<{}, {}, { username: string, profileName: string, oldPin: string, newPin: string }>
@@ -19,6 +21,10 @@ profileRouter.post<{}, {}, { username: string, profileName: string, avatar: stri
     ("/set-avatar", ProfileController.setAvatar);
 profileRouter.post<{}, {}, { username: string, profileName: string, color: string }>
     ("/set-color", ProfileController.setColor);
+profileRouter.post<{}, {}, { childId: string, budget: { startDate: Date; endDate: Date; amount: number } }>
+    ("/add-child-budget", ProfileController.addChildBudgets);
+profileRouter.get<{}, {}, {}, { username: string, profileName: string }>
+    ("/get-child-budgets", ProfileController.getChildBudgets);
 profileRouter.get<{}, {}, {}, { username: string, profileName: string }>
     ("/get-budgets", ProfileController.getBudgets);
 profileRouter.post<{}, {}, { budgetData: BudgetCreationData }>

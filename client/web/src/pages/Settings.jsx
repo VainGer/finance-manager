@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import CreateProfile from '../components/profile/CreateProfile';
 import useSettingsState from '../hooks/useSettingsState';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/settings/Sidebar';
@@ -17,7 +18,7 @@ export default function Settings() {
 
     //TODO create child profile
     //TODO create child profile budget
-    
+
     const {
         state: {
             activeSection,
@@ -57,40 +58,40 @@ export default function Settings() {
     const renderProfileSection = () => (
         <div className="space-y-6">
             <ProfileInfo
-              profile={profile}
-              account={account}
-              editMode={editMode.profile}
-              profileForm={profileForm}
-              setProfileForm={setProfileForm}
-              onSave={handleProfileEdit}
-              onCancel={() => handleCancel('profile')}
-              onSwitchProfile={handleSwitchProfile}
+                profile={profile}
+                account={account}
+                editMode={editMode.profile}
+                profileForm={profileForm}
+                setProfileForm={setProfileForm}
+                onSave={handleProfileEdit}
+                onCancel={() => handleCancel('profile')}
+                onSwitchProfile={handleSwitchProfile}
             />
 
             <PinChange
-              editMode={editMode.pin}
-              pinForm={pinForm}
-              setPinForm={setPinForm}
-              onSave={handlePinChange}
-              onCancel={() => handleCancel('pin')}
+                editMode={editMode.pin}
+                pinForm={pinForm}
+                setPinForm={setPinForm}
+                onSave={handlePinChange}
+                onCancel={() => handleCancel('pin')}
             />
 
             <AvatarManager
-              profile={profile}
-              avatarForm={avatarForm}
-              onSelect={handleAvatarSelect}
-              onUpload={handleAvatarUpload}
-              onRemove={handleRemoveAvatar}
+                profile={profile}
+                avatarForm={avatarForm}
+                onSelect={handleAvatarSelect}
+                onUpload={handleAvatarUpload}
+                onRemove={handleRemoveAvatar}
             />
 
             <DeleteProfile
-              profileName={profile?.profileName}
-              isOpen={deleteConfirmation.isOpen}
-              pin={deleteConfirmation.pin}
-              setPin={(val) => setDeleteConfirmation(prev => ({ ...prev, pin: val }))}
-              onOpen={handleDeleteProfile}
-              onConfirm={confirmDeleteProfile}
-              onCancel={cancelDeleteProfile}
+                profileName={profile?.profileName}
+                isOpen={deleteConfirmation.isOpen}
+                pin={deleteConfirmation.pin}
+                setPin={(val) => setDeleteConfirmation(prev => ({ ...prev, pin: val }))}
+                onOpen={handleDeleteProfile}
+                onConfirm={confirmDeleteProfile}
+                onCancel={cancelDeleteProfile}
             />
         </div>
     );
@@ -99,7 +100,7 @@ export default function Settings() {
         <div className="space-y-6">
             <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4">פרטי חשבון</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">שם משתמש</label>
@@ -114,9 +115,9 @@ export default function Settings() {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="mt-6">
-                    <button 
+                    <button
                         onClick={handleLogout}
                         className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
                     >
@@ -124,13 +125,13 @@ export default function Settings() {
                     </button>
                 </div>
             </div>
-            
+
             <PasswordChange
-              editMode={editMode.password}
-              passwordForm={passwordForm}
-              setPasswordForm={setPasswordForm}
-              onSave={handlePasswordChange}
-              onCancel={() => handleCancel('password')}
+                editMode={editMode.password}
+                passwordForm={passwordForm}
+                setPasswordForm={setPasswordForm}
+                onSave={handlePasswordChange}
+                onCancel={() => handleCancel('password')}
             />
         </div>
     );
@@ -144,12 +145,12 @@ export default function Settings() {
                         <h4 className="font-medium text-gray-800">Finance Manager</h4>
                         <p className="text-sm text-gray-600">מערכת ניהול כספים משפחתית</p>
                     </div>
-                    
+
                     <div>
                         <h4 className="font-medium text-gray-800">גרסה</h4>
                         <p className="text-sm text-gray-600">1.0.0</p>
                     </div>
-                    
+
                     <div>
                         <h4 className="font-medium text-gray-800">מפתח</h4>
                         <p className="text-sm text-gray-600">צוות Finance Manager</p>
@@ -157,6 +158,10 @@ export default function Settings() {
                 </div>
             </div>
         </div>
+    );
+
+    const renderNewProfileSection = () => (
+        <CreateProfile username={account.username} />
     );
 
     const renderContent = () => {
@@ -167,6 +172,8 @@ export default function Settings() {
                 return renderAccountSection();
             case 'about':
                 return renderAboutSection();
+            case 'newProfile':
+                return renderNewProfileSection();
             default:
                 return renderProfileSection();
         }
@@ -187,12 +194,12 @@ export default function Settings() {
                     }
                 }
             `}</style>
-            
+
             <Navbar />
-            
+
             {/* Fixed Message Overlay - Always visible */}
             <MessageBanner message={message} />
-            
+
             <div className="container mx-auto px-4 py-6">
                 {/* Header */}
                 <div className="mb-6 flex items-center justify-between">
@@ -200,7 +207,7 @@ export default function Settings() {
                         <h1 className="text-3xl font-bold text-gray-800 mb-2">⚙️ הגדרות</h1>
                         <p className="text-gray-600">נהל את החשבון והפרופיל שלך</p>
                     </div>
-                    <button 
+                    <button
                         onClick={() => navigate('/dashboard')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
                     >

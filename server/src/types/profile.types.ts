@@ -11,6 +11,10 @@ export type Profile = {
   updatedAt: Date;
   budgets: ProfileBudget[];
   expenses: ObjectId;
+  children?: {
+    profileName: string;
+    id: ObjectId;
+  }[];
 }
 
 export type ChildProfile = Profile & {
@@ -18,7 +22,6 @@ export type ChildProfile = Profile & {
     startDate: Date;
     endDate: Date;
     amount: number;
-    distributed: boolean;
   }[]
 }
 
@@ -53,3 +56,4 @@ export type CategorizedFile = {
 export type SafeProfile = Pick<Profile, 'profileName' | 'avatar' | 'color' | 'parentProfile'>;
 
 export type ProfileCreationData = Omit<Profile, 'expenses'>
+export type ChildProfileCreationData = Omit<ChildProfile, 'newBudgets' | 'expenses'>

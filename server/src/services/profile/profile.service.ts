@@ -2,7 +2,7 @@ import { BadRequestError, ConflictError, AppError, NotFoundError } from "../../e
 import ProfileModel from "../../models/profile/profile.model";
 import AccountModel from "../../models/account/account.model";
 import CategoryService from "../expenses/category.service";
-import { ProfileCreationData, Profile, SafeProfile, ProfileBudget, BudgetCreationData, CategorizedFile } from "../../types/profile.types";
+import { ProfileCreationData, Profile, SafeProfile, ProfileBudget, BudgetCreationData, CategorizedFile, ChildProfile, ChildProfileCreationData } from "../../types/profile.types";
 import { CategoryBudget, Transaction, TransactionWithoutId } from "../../types/expenses.types";
 import { ObjectId } from "mongodb";
 import LLM from "../../utils/LLM";
@@ -30,6 +30,15 @@ export default class ProfileService {
                 throw new AppError("Failed to upload avatar", 500);
             }
         }
+        let allProfiles = await ProfileModel.getAllProfiles(profileData.username);
+        let childrenArr: { profileName: string; id: ObjectId }[] = [];
+        if (allProfiles && allProfiles.length > 1) {
+            allProfiles = allProfiles.filter(p => profileData.profileName !== p.profileName && !p.parentProfile);
+            childrenArr = allProfiles.map(p => ({
+                profileName: p.profileName,
+                id: p._id
+            }));
+        }
         const profile: Profile = {
             username: profileData.username,
             profileName: profileData.profileName,
@@ -40,13 +49,88 @@ export default class ProfileService {
             createdAt: new Date(),
             updatedAt: new Date(),
             budgets: [],
-            expenses: expensesId
+            expenses: expensesId,
+            children: childrenArr
         }
         const result = await ProfileModel.create(profile);
         if (!result.insertedId || !result.success) {
             throw new AppError("Failed to create profile", 500);
         }
         return { success: true, profileId: result.insertedId, message: "Profile created successfully" };
+    }
+
+    static async createChildProfile(childProfileCreation: ChildProfileCreationData) {
+        if (!childProfileCreation.username || !childProfileCreation.profileName || !childProfileCreation.pin) {
+            throw new BadRequestError("Username, profile name and pin are required");
+        }
+        const profileExist = await ProfileModel.findProfile(childProfileCreation.username, childProfileCreation.profileName);
+        if (profileExist) {
+            throw new ConflictError("Profile already exists");
+        }
+        const expensesId = await ProfileModel.createExpensesDocument(childProfileCreation.username, childProfileCreation.profileName);
+        if (!expensesId) {
+            throw new AppError("Failed to create expenses for the profile", 500);
+        }
+        const profile: ChildProfile = {
+            username: childProfileCreation.username,
+            profileName: childProfileCreation.profileName,
+            avatar: childProfileCreation.avatar,
+            color: childProfileCreation.color,
+            pin: childProfileCreation.pin,
+            parentProfile: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            budgets: [],
+            expenses: expensesId,
+            newBudgets: []
+        }
+
+        const createdProfile = await ProfileModel.create(profile);
+        if (!createdProfile.insertedId || !createdProfile.success) {
+            throw new AppError("Failed to create child profile", 500);
+        }
+        const allProfiles = await ProfileModel.getAllProfiles(childProfileCreation.username);
+        if (!allProfiles || allProfiles.length === 0) {
+            throw new NotFoundError("No profiles found");
+        }
+        const promises = await Promise.all(allProfiles.map(async (profile) => {
+            if (profile.parentProfile) {
+                return ProfileModel.addChildToProfile(profile.username, profile.profileName, {
+                    name: childProfileCreation.profileName,
+                    id: createdProfile.insertedId
+                });
+            } else {
+                return { success: true };
+            }
+        }));
+        if (promises.some(result => !result.success)) {
+            throw new AppError("Failed to add child to parent profiles", 500);
+        }
+        return { success: true, profileId: createdProfile.insertedId, message: "Child profile created successfully" };
+    }
+
+    static async addChildBudgets(childId: string, budget: { startDate: Date; endDate: Date; amount: number }) {
+        if (!childId || !budget || !budget.startDate || !budget.endDate || !budget.amount) {
+            throw new BadRequestError("Child ID and budget data are required");
+        }
+        const result = await ProfileModel.addBudgetToChild(childId, budget);
+        if (!result || !result.success) {
+            throw new AppError("Failed to add budget to child profile", 500);
+        }
+        return result;
+    }
+
+
+    static async getChildBudgets(username: string, profileName: string) {
+        if (!username || !profileName) {
+            throw new BadRequestError("Username and profile name are required");
+        }
+        const profile = await ProfileModel.findProfile(username, profileName);
+        if (!profile) {
+            throw new NotFoundError("Profile not found");
+        }
+        const budgetsToDistribute = profile.newBudgets;
+        return { success: true, budgets: budgetsToDistribute || [] };
     }
 
     static async validateProfile(username: string, profileName: string, pin: string) {
@@ -61,7 +145,7 @@ export default class ProfileService {
         if (!isValidPin) {
             throw new BadRequestError("Invalid PIN");
         }
-        const { pin: _, ...safeProfile } = profile;
+        const { pin: _, budgets: __, ...safeProfile } = profile;
         return { success: true, safeProfile, message: "Profile validated successfully" };
     }
 
@@ -271,7 +355,12 @@ export default class ProfileService {
             throw new AppError(profileBudgetCreated?.message || "Failed to create budget", 500);
         }
 
-
+        if (!profile.parentProfile) {
+            const clearResult = await ProfileModel.clearChildBudget(username, profileName);
+            if (!clearResult || !clearResult.success) {
+                throw new AppError(clearResult?.message || "Failed to clear child budget", 500);
+            }
+        }
         return { success: true, message: "Budget created successfully" };
     }
 

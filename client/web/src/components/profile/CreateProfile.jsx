@@ -43,7 +43,10 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
             color,
             parentProfile: firstProfile || parentProfile,
         }
-        const response = await post('profile/create-profile', newProfile);
+
+        const uri = parentProfile ? "create-profile" : "create-child-profile";
+
+        const response = await post(`profile/${uri}`, newProfile);
 
         if (response.ok) {
             if (firstProfile) {

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import ProfileService from "../services/profile/profile.service";
 import * as AppErrors from "../errors/AppError";
-import { BudgetCreationData } from "../types/profile.types";
+import { BudgetCreationData, ChildProfileCreationData } from "../types/profile.types";
 
 export default class ProfileController {
 
@@ -17,6 +17,18 @@ export default class ProfileController {
         }
     }
 
+    static async createChildProfile(req: Request, res: Response) {
+        try {
+            const childProfileCreation = req.body as ChildProfileCreationData;
+            const result = await ProfileService.createChildProfile(childProfileCreation);
+            res.status(201).json({
+                message: result.message || "Child profile created successfully",
+                profileId: result.profileId
+            });
+        } catch (error) {
+            ProfileController.handleError(error, res);
+        }
+    }
 
     static async validateProfile(req: Request, res: Response) {
         try {
@@ -100,6 +112,31 @@ export default class ProfileController {
             const result = await ProfileService.setColor(username, profileName, color);
             res.status(200).json({
                 message: result.message || "Profile color set successfully"
+            });
+        } catch (error) {
+            ProfileController.handleError(error, res);
+        }
+    }
+
+    static async addChildBudgets(req: Request, res: Response) {
+        try {
+            const { childId, budget } = req.body;
+            const result = await ProfileService.addChildBudgets(childId, budget);
+            res.status(200).json({
+                message: result.message || "Child budget added successfully"
+            });
+        } catch (error) {
+            ProfileController.handleError(error, res);
+        }
+    }
+
+    static async getChildBudgets(req: Request, res: Response) {
+        try {
+            const { username, profileName } = req.query as { username: string, profileName: string };
+            const result = await ProfileService.getChildBudgets(username, profileName);
+            res.status(200).json({
+                message: "Child budgets retrieved successfully",
+                budgets: result.budgets || []
             });
         } catch (error) {
             ProfileController.handleError(error, res);
