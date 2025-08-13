@@ -4,7 +4,6 @@ import Button from '../../../common/Button';
 import AddCategory from './AddCategory';
 import RenameCategory from './RenameCategory';
 import DeleteCategory from './DeleteCategory';
-import CreateBudget from './CreateBudget';
 
 export default function CategoriesMenu({ goBack }) {
     const { profile } = useAuth();
@@ -12,7 +11,6 @@ export default function CategoriesMenu({ goBack }) {
         addCategory: false,
         renameCategory: false,
         deleteCategory: false,
-        createBudget: false,
     });
 
     // Close all open panels
@@ -21,19 +19,18 @@ export default function CategoriesMenu({ goBack }) {
             addCategory: false,
             renameCategory: false,
             deleteCategory: false,
-            createBudget: false,
         });
     };
 
     const handleMenuClick = (menuItem) => {
         setMenuToggler(prevState => ({
-            ...{ addCategory: false, renameCategory: false, deleteCategory: false, createBudget: false }, // Reset all
+            ...{ addCategory: false, renameCategory: false, deleteCategory: false}, // Reset all
             [menuItem]: !prevState[menuItem] // Toggle the clicked one
         }));
     };
 
     // Check if any panel is currently open
-    const isPanelOpen = menuToggler.addCategory || menuToggler.renameCategory || menuToggler.deleteCategory || menuToggler.createBudget;
+    const isPanelOpen = menuToggler.addCategory || menuToggler.renameCategory || menuToggler.deleteCategory;
 
     return (
         <div className="w-max">
@@ -53,7 +50,6 @@ export default function CategoriesMenu({ goBack }) {
                     {menuToggler.addCategory && <AddCategory goBack={closeAllPanels} />}
                     {menuToggler.renameCategory && <RenameCategory goBack={closeAllPanels} />}
                     {menuToggler.deleteCategory && <DeleteCategory goBack={closeAllPanels} />}
-                    {menuToggler.createBudget && <CreateBudget goBack={closeAllPanels} />}
                 </div>
             ) : (
                 <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-sm mx-auto">
@@ -92,17 +88,6 @@ export default function CategoriesMenu({ goBack }) {
                                 מחיקת קטגוריה
                             </Button>
                         </li>
-                        {!profile.parentProfile && <li>
-                            <Button
-                                onClick={() => handleMenuClick('createBudget')}
-                                style="side-menu"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                                </svg>
-                                יצירת תקציב
-                            </Button>
-                        </li>}
                         <li className="mt-4">
                             <Button
                                 onClick={goBack}

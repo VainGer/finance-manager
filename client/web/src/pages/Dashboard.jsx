@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import ChildrenBudgetUpdate from '../components/dashboard/budget/ChildrenBudgetUpdate';
 import ProfileBudgetDisplay from '../components/dashboard/budget/ProfileBudgetDisplay';
 import ExpensesDisplay from '../components/dashboard/expenses/expenses_display/ExpensesDisplay';
 import ExpenseSummary from '../components/dashboard/summary/ExpenseSummary';
@@ -17,8 +18,6 @@ export default function Dashboard() {
     // Function to trigger refresh of current display
     const triggerRefresh = useCallback(() => {
         setRefreshTrigger(prev => prev + 1);
-
-        // Re-render the current display with new key to force refresh
         switch (currentDisplayType) {
             case 'budget':
                 setDisplay(<ProfileBudgetDisplay profile={profile} key={`budget-${refreshTrigger + 1}`} />);
@@ -38,7 +37,7 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-gray-100">
             <Navbar />
-
+            <ChildrenBudgetUpdate username={account.username} profileName={profile.profileName} />
             <div className="container mx-auto px-4 py-6">
                 {/* Welcome Section */}
                 <div className="mb-6">
