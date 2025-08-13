@@ -23,7 +23,7 @@ export default class BusinessService {
         if (existingBusinesses.includes(businessName)) {
             throw new AppErrors.ConflictError("Business already exists");
         }
-        const newBusiness: Business = { name: businessName, bankName: "-", transactions: [] };
+        const newBusiness: Business = { name: businessName, bankNames: [], transactions: [] };
         const result = await BusinessModel.createBusiness(refId, categoryName, newBusiness);
         if (!result?.success) {
             throw new AppErrors.AppError("Failed to create business", 500);

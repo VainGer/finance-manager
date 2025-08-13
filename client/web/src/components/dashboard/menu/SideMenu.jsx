@@ -18,6 +18,7 @@ const MenuItem = ({ onClick, children }) => (
 );
 
 export default function SideMenu({ onTransactionAdded }) {
+
     const navigate = useNavigate();
 
     const [menuToggler, setMenuToggler] = useState({
@@ -51,7 +52,7 @@ export default function SideMenu({ onTransactionAdded }) {
     return (
         <div className="w-full max-w-xs p-4 bg-white rounded-lg shadow-md">
             {isPanelOpen ? (
-                <div>
+                <div className="fixed inset-0 bg-gray-600/80 overflow-y-auto h-full w-full flex justify-center items-center">
                     {menuToggler.businesses && <BusinessMenu goBack={closeAllPanels} />}
                     {menuToggler.categories && <CategoriesMenu goBack={closeAllPanels} />}
                     {menuToggler.addExpense && <AddTransaction goBack={closeAllPanels} onTransactionAdded={onTransactionAdded} />}

@@ -17,7 +17,7 @@ export default function Dashboard() {
     // Function to trigger refresh of current display
     const triggerRefresh = useCallback(() => {
         setRefreshTrigger(prev => prev + 1);
-        
+
         // Re-render the current display with new key to force refresh
         switch (currentDisplayType) {
             case 'budget':
@@ -38,7 +38,7 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-gray-100">
             <Navbar />
-            
+
             <div className="container mx-auto px-4 py-6">
                 {/* Welcome Section */}
                 <div className="mb-6">
@@ -51,8 +51,8 @@ export default function Dashboard() {
                 </div>
 
                 {/* Display Selector */}
-                <DisplaySelector 
-                    setDisplay={setDisplay} 
+                <DisplaySelector
+                    setDisplay={setDisplay}
                     setCurrentDisplayType={setCurrentDisplayType}
                     profile={profile}
                     refreshTrigger={refreshTrigger}

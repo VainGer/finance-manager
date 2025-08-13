@@ -56,21 +56,31 @@ export default function UploadFromFileTransactions() {
         setSubmitSuccess(false);
 
         try {
-            const transactionsToSubmit = dataToUpload.map(t => ({
-                date: t.date,
-                amount: t.amount,
-                categoryName: t.category,
-                businessName: t.business,
-                description: `העלאה מקובץ: ${t.bank}`
-            }));
-
-            const response = await post(`expenses/transactions/bulk?profileId=${profile._id}`, {
-                transactions: transactionsToSubmit
+            const t = dataToUpload.map(t => {
+                if (t.toUpload) {
+                    return {
+                        date: t.date,
+                        amount: t.amount,
+                        categoryName: t.category,
+                        businessName: t.business,
+                        description: `הועלה מקובץ: ${t.bank}`
+                    };
+                }
             });
 
+            const transactionsToSubmit = dataToUpload.filter(t => t.toUpload);
+
+
+            const response = await post(`profile/upload-transactions`, {
+                username: profile.username,
+                profileName: profile.profileName,
+                refId: profile.expenses,
+                transactionsToUpload: transactionsToSubmit
+            });
+            console.log("Response from upload:", response);
             if (response.ok) {
-                setSubmitSuccess(true);
-                setDataToUpload([]);
+                // setSubmitSuccess(true);
+                // setDataToUpload([]);
             } else {
                 console.error("Failed to submit transactions");
                 // You can add error handling UI here

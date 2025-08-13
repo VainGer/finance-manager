@@ -157,6 +157,18 @@ export default class ProfileController {
         }
     }
 
+    static async uploadTransactions(req: Request, res: Response) {
+        try {
+            const { username, profileName, refId, transactionsToUpload } = req.body;
+            const result = await ProfileService.uploadTransactions(username, profileName, refId, transactionsToUpload);
+            res.status(200).json({
+                message: "Transactions uploaded successfully",
+            });
+        } catch (error) {
+            ProfileController.handleError(error, res);
+        }
+    }
+
     private static handleError(error: any, res: Response) {
         console.error("Controller error:", error);
         if (error instanceof AppErrors.AppError) {

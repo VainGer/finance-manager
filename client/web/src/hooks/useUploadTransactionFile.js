@@ -12,16 +12,13 @@ export default function useUploadTransactionFile() {
     const [refreshCounter, setRefreshCounter] = useState(0);
 
     const processTransactions = async () => {
-        if (localStorage.getItem('categorizedTransactions')) {
-            setCategorizedTransactions(JSON.parse(localStorage.getItem('categorizedTransactions')));
-            return;
-        }
         if (!transactionsData) return;
         try {
             const response = await post("profile/categorize-transactions", {
                 refId: profile.expenses,
                 transactionsData
             });
+            console.log(response);
             setCategorizedTransactions(response.categories.transactions);
             localStorage.setItem('categorizedTransactions', JSON.stringify(response.categories.transactions));
         } catch (error) {
@@ -31,7 +28,7 @@ export default function useUploadTransactionFile() {
 
     const getCategories = async () => {
         if (!profile?.expenses) return;
-        
+
         try {
             const response = await get(`expenses/category/get-names/${profile.expenses}`);
             if (response.ok) {
@@ -46,11 +43,11 @@ export default function useUploadTransactionFile() {
 
     const getSelects = async () => {
         if (!profile?.expenses) return;
-        
+
         try {
             // First refresh categories
             await getCategories();
-            
+
             // Now fetch businesses for each category
             const fetchedSelects = [];
             for (const category of categories) {
@@ -66,9 +63,9 @@ export default function useUploadTransactionFile() {
                     fetchedSelects.push({ category, businesses: [] });
                 }
             }
-            
+
             setSelects(fetchedSelects);
-            
+
             // Increment counter to signal data refresh to components
             setRefreshCounter(prev => prev + 1);
         } catch (error) {
@@ -88,7 +85,7 @@ export default function useUploadTransactionFile() {
         if (categories.length > 0) {
             const fetchBusinesses = async () => {
                 const fetchedSelects = [];
-                
+
                 for (const category of categories) {
                     try {
                         const response = await get(`expenses/business/get-businesses/${profile.expenses}/${category}`);
@@ -102,10 +99,10 @@ export default function useUploadTransactionFile() {
                         fetchedSelects.push({ category, businesses: [] });
                     }
                 }
-                
+
                 setSelects(fetchedSelects);
             };
-            
+
             fetchBusinesses();
         }
     }, [categories, profile?.expenses]);

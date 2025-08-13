@@ -2,10 +2,12 @@ import { BadRequestError, ConflictError, AppError, NotFoundError } from "../../e
 import ProfileModel from "../../models/profile/profile.model";
 import AccountModel from "../../models/account/account.model";
 import CategoryService from "../expenses/category.service";
-import { ProfileCreationData, Profile, SafeProfile, ProfileBudget, BudgetCreationData } from "../../types/profile.types";
-import { CategoryBudget } from "../../types/expenses.types";
+import { ProfileCreationData, Profile, SafeProfile, ProfileBudget, BudgetCreationData, CategorizedFile } from "../../types/profile.types";
+import { CategoryBudget, Transaction, TransactionWithoutId } from "../../types/expenses.types";
 import { ObjectId } from "mongodb";
 import LLM from "../../utils/LLM";
+import BusinessModel from "../../models/expenses/business.model";
+import TransactionService from "../expenses/transaction.service";
 
 export default class ProfileService {
 
@@ -202,6 +204,28 @@ export default class ProfileService {
         return { success: true, message: "Profile color set successfully" };
     }
 
+    static async uploadTransactions(username: string, profileName: string, refId: string, transactionsToUpload: CategorizedFile[]) {
+        if (!username || !profileName || !refId || !transactionsToUpload) {
+            throw new BadRequestError("Username, profile name, refId and transactionsToUpload are required");
+        }
+        const profile = await ProfileModel.findProfile(username, profileName);
+        if (!profile) {
+            throw new NotFoundError("Profile not found");
+        }
+        await this.updateBankNames(refId, transactionsToUpload);
+        for (const item of transactionsToUpload) {
+            const transaction: TransactionWithoutId = {
+                amount: item.amount,
+                date: new Date(item.date),
+                description: item.description
+            }
+            const result = await TransactionService.create(refId, item.category, item.business, transaction);
+            if (!result || !result.success) {
+                throw new AppError(result?.message || "Failed to create transaction", 500);
+            }
+        }
+        return { success: true, message: "Transactions uploaded successfully" };
+    }
 
     static async createBudget(budgetData: BudgetCreationData) {
         const { username, profileName, profileBudget, categoriesBudgets } = budgetData;
@@ -307,11 +331,26 @@ export default class ProfileService {
         const categoriesAndBusinesses = categories.categories.map((category: any) => {
             return {
                 categoryName: category.name,
-                businesses: category.Businesses.map((business: any) => business.name)
+                businesses: category.Businesses.map((business: any) => ({ name: business.name, bankNames: business.bankNames }))
             };
         });
         const categorizedData = await LLM.categorizeTransactions(JSON.stringify(categoriesAndBusinesses), transactionsData);
         return categorizedData;
+    }
+
+    private static async updateBankNames(refId: string, transactionFile: CategorizedFile[]) {
+        const uniqueSet = new Set<{ business: string; bank: string; category: string }>();
+        transactionFile.forEach(transaction => {
+            uniqueSet.add({ business: transaction.business, bank: transaction.bank, category: transaction.category });
+        });
+        const uniqueToArr = Array.from(uniqueSet);
+        const results = await Promise.all(uniqueToArr.map(async (item) => {
+            return await BusinessModel.updateBusinessBankName(refId, item.category, item.business, item.bank);
+        }));
+        if (results.some(result => !result.success)) {
+            throw new AppError("Failed to update some business bank names", 500);
+        }
+        return true;
     }
 
     private static async transactionsSumInDateRange(refId: string, startDate: Date, endDate: Date) {

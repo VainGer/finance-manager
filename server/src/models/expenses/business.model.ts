@@ -62,13 +62,13 @@ export default class BusinessModel {
             const result = await db.UpdateDocument(
                 BusinessModel.expensesCollection,
                 { _id: new ObjectId(refId), "categories.name": categoryName, "categories.Businesses.name": businessName },
-                { $set: { "categories.$.Businesses.$[bizFilter].bankName": bankName } },
+                { $addToSet: { "categories.$.Businesses.$[bizFilter].bankNames": bankName } },
                 {
                     arrayFilters: [{ "bizFilter.name": businessName }]
                 });
 
-            if (!result || result.modifiedCount === 0) {
-                return { success: false, message: "Business not found or bank name is the same" };
+            if (!result) {
+                return { success: false, message: "Business not found" };
             }
             return { success: true, message: "Business bank name updated successfully" };
         } catch (error) {

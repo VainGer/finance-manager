@@ -1,9 +1,9 @@
-import React from 'react';
+import Button from '../components/common/Button';
 import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
     const navigate = useNavigate();
-    
+
     return (
         <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center justify-center' dir="rtl">
             <div className="text-center space-y-8">
@@ -14,20 +14,20 @@ export default function Home() {
                 </div>
 
                 {/* Buttons */}
-                <div className="space-y-4">
-                    <button 
+                <div className="space-y-4 w-1/4 mx-auto">
+                    <Button
                         onClick={() => navigate('/login')}
-                        className="w-64 py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-colors duration-200"
+                        style="success"
                     >
                         התחברות
-                    </button>
+                    </Button>
                     <br />
-                    <button 
+                    <Button
                         onClick={() => navigate('/register')}
-                        className="w-64 py-3 px-6 bg-green-600 text-white font-semibold rounded-lg shadow-lg hover:bg-green-700 transition-colors duration-200"
+                        style="primary"
                     >
                         הרשמה
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Features */}

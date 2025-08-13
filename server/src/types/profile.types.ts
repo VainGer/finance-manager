@@ -13,6 +13,15 @@ export type Profile = {
   expenses: ObjectId;
 }
 
+export type ChildProfile = Profile & {
+  newBudgets: {
+    startDate: Date;
+    endDate: Date;
+    amount: number;
+    distributed: boolean;
+  }[]
+}
+
 export type ProfileBudget = {
   _id: ObjectId;
   startDate: Date;
@@ -30,6 +39,15 @@ export type BudgetCreationData = {
     categoryName: string;
     amount: number;
   }[];
+}
+
+export type CategorizedFile = {
+  date: Date;
+  category: string;
+  amount: number;
+  business: string;
+  bank: string;
+  description: string;
 }
 
 export type SafeProfile = Pick<Profile, 'profileName' | 'avatar' | 'color' | 'parentProfile'>;

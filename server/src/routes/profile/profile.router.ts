@@ -1,6 +1,6 @@
 import { Router } from "express";
 import ProfileController from "../../controllers/profile.controller";
-import { ProfileBudget, Profile, BudgetCreationData, ProfileCreationData } from "../../types/profile.types";
+import { ProfileBudget, Profile, BudgetCreationData, ProfileCreationData, CategorizedFile } from "../../types/profile.types";
 const profileRouter = Router();
 
 profileRouter.post<{}, {}, { reqProfile: ProfileCreationData }>
@@ -28,5 +28,8 @@ profileRouter.post<{}, {}, { username: string, profileName: string, startDate: D
 
 profileRouter.post<{}, {}, { refId: string, transactionsData: string }>
     ("/categorize-transactions", ProfileController.categorizeTransactions);
+
+profileRouter.post<{}, {}, { username: string, profileName: string, refId: string, transactionsToUpload: CategorizedFile[] }>
+    ("/upload-transactions", ProfileController.uploadTransactions);
 
 export default profileRouter;
