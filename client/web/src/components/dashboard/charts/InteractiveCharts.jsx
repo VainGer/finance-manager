@@ -15,6 +15,7 @@ import {
 import LoadingSpinner from "../../common/LoadingSpinner";
 import ErrorMessage from "../../common/ErrorMessage";
 import useExpensesDisplay from '../../../hooks/useExpensesDisplay';
+import Button from "../../common/Button";
 
 
 
@@ -312,27 +313,27 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                 <div className="mb-4">
                     <h3 className="text-sm font-medium text-gray-700 mb-2">סוג גרף:</h3>
                     <div className="flex flex-wrap gap-2">
-                        <button
+                        <Button
                             onClick={() => setChartType('pie')}
-                            className={`px-4 py-2 rounded-lg transition-colors ${chartType === 'pie' ? 'bg-indigo-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                                }`}
+                            style={chartType === 'pie' ? 'info' : 'secondary'}
+                            size="auto"
                         >
                             🥧 עוגה
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() => setChartType('bar')}
-                            className={`px-4 py-2 rounded-lg transition-colors ${chartType === 'bar' ? 'bg-indigo-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                                }`}
+                            style={chartType === 'bar' ? 'info' : 'secondary'}
+                            size="auto"
                         >
                             📊 עמודות
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() => setChartType('monthly')}
-                            className={`px-4 py-2 rounded-lg transition-colors ${chartType === 'monthly' ? 'bg-indigo-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                                }`}
+                            style={chartType === 'monthly' ? 'info' : 'secondary'}
+                            size="auto"
                         >
                             📈 השוואה חודשית
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
@@ -340,46 +341,46 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                 <div className="mb-4">
                     <h3 className="text-sm font-medium text-gray-700 mb-2">מסנן תאריך:</h3>
                     <div className="flex flex-wrap gap-2 mb-3">
-                        <button
+                        <Button
                             onClick={() => {
                                 setDateFilter('week');
                                 setSelectedMonth('');
                             }}
-                            className={`px-4 py-2 rounded-lg transition-colors ${dateFilter === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                                }`}
+                            style={dateFilter === 'week' ? 'primary' : 'secondary'}
+                            size="auto"
                         >
                             שבוע אחרון
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() => {
                                 setDateFilter('month');
                                 setSelectedMonth('');
                             }}
-                            className={`px-4 py-2 rounded-lg transition-colors ${dateFilter === 'month' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                                }`}
+                            style={dateFilter === 'month' ? 'primary' : 'secondary'}
+                            size="auto"
                         >
                             חודש אחרון
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() => {
                                 setDateFilter('year');
                                 setSelectedMonth('');
                             }}
-                            className={`px-4 py-2 rounded-lg transition-colors ${dateFilter === 'year' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                                }`}
+                            style={dateFilter === 'year' ? 'primary' : 'secondary'}
+                            size="auto"
                         >
                             שנה אחרונה
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() => {
                                 setDateFilter('all');
                                 setSelectedMonth('');
                             }}
-                            className={`px-4 py-2 rounded-lg transition-colors ${dateFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                                }`}
+                            style={dateFilter === 'all' ? 'primary' : 'secondary'}
+                            size="auto"
                         >
                             הכל
-                        </button>
+                        </Button>
                     </div>
 
 

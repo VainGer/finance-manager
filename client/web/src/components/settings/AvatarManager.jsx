@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '../common/Button';
 
 export default function AvatarManager({ profile, avatarForm, onSelect, onUpload, onRemove }) {
   return (
@@ -34,21 +35,33 @@ export default function AvatarManager({ profile, avatarForm, onSelect, onUpload,
         )}
 
         <div className="flex gap-3 flex-wrap">
-          <label className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors cursor-pointer">
-            {avatarForm.preview ? 'בחר תמונה אחרת' : 'בחר תמונה'}
-            <input type="file" accept="image/*" onChange={onSelect} className="hidden" />
-          </label>
+          <div className="relative">
+            <Button 
+              onClick={() => document.getElementById('avatar-file-input').click()}
+              style="primary" 
+              size="auto"
+            >
+              {avatarForm.preview ? 'בחר תמונה אחרת' : 'בחר תמונה'}
+            </Button>
+            <input 
+              id="avatar-file-input"
+              type="file" 
+              accept="image/*" 
+              onChange={onSelect} 
+              className="hidden" 
+            />
+          </div>
 
           {avatarForm.preview && (
-            <button onClick={onUpload} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+            <Button onClick={onUpload} style="success" size="auto">
               העלה תמונה
-            </button>
+            </Button>
           )}
 
           {profile?.avatar && (
-            <button onClick={onRemove} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+            <Button onClick={onRemove} style="danger" size="auto">
               הסר תמונה
-            </button>
+            </Button>
           )}
         </div>
 

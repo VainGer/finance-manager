@@ -7,6 +7,7 @@ import ProfileList from '../../components/profile/ProfileList';
 import Navbar from '../../components/Navbar';
 import AuthForm from '../../components/profile/AuthForm';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import Footer from '../../components/common/Footer';
 
 export default function ProfileAuth() {
     const navigate = useNavigate();
@@ -86,6 +87,9 @@ export default function ProfileAuth() {
                         onCancel={() => setSelectedProfile(null)}
                         loading={loading} />}
                 </>)}
+                
+            {/* Footer */}
+            <Footer />
         </div>
     );
 }

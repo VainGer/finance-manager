@@ -4,6 +4,8 @@ import AddCategory from "../components/dashboard/expenses/categories/AddCategory
 import CreateBusiness from "../components/dashboard/expenses/businesses/CreateBusiness";
 import { post } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import Button from "../components/common/Button";
+import Footer from "../components/common/Footer";
 
 export default function UploadFromFileTransactions() {
     const { profile } = useAuth();
@@ -124,12 +126,14 @@ export default function UploadFromFileTransactions() {
                         onChange={handleFileUpload}
                         className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
-                    <button
+                    <Button
                         onClick={processTransactions}
-                        className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+                        style="primary"
+                        size="auto"
+                        className="font-semibold shadow-md"
                     >
                         עבד נתונים
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -176,7 +180,7 @@ export default function UploadFromFileTransactions() {
         const [showCreate, setShowCreate] = useState(false);
         return (
             <>
-                <button onClick={() => setShowCreate(true)} className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 shadow-sm">הוסף קטגוריה</button>
+                <Button onClick={() => setShowCreate(true)} style="success" size="small" className="shadow-sm">הוסף קטגוריה</Button>
                 {showCreate && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                         <AddCategory
@@ -193,7 +197,7 @@ export default function UploadFromFileTransactions() {
         const [showCreate, setShowCreate] = useState(false);
         return (
             <>
-                <button onClick={() => setShowCreate(true)} className="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 shadow-sm">הוסף עסק</button>
+                <Button onClick={() => setShowCreate(true)} style="info" size="small" className="shadow-sm">הוסף עסק</Button>
                 {showCreate && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                         <CreateBusiness
@@ -248,16 +252,21 @@ export default function UploadFromFileTransactions() {
                         </table>
                     </div>
                     <div className="mt-6 flex justify-end">
-                        <button
+                        <Button
                             onClick={handleSubmitTransactions}
                             disabled={isSubmitting}
-                            className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-lg hover:bg-indigo-700 disabled:bg-gray-400"
+                            style="primary"
+                            size="large"
+                            className="font-bold shadow-lg"
                         >
                             {isSubmitting ? 'מעלה נתונים...' : 'שמור והעלה תנועות'}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}
+            
+            {/* Footer */}
+            <Footer />
         </div>
     );
 }

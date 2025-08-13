@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '../common/Button';
 
 export default function DeleteProfile({ profileName, isOpen, pin, setPin, onOpen, onConfirm, onCancel }) {
   return (
@@ -12,9 +13,9 @@ export default function DeleteProfile({ profileName, isOpen, pin, setPin, onOpen
             <br />
             <strong className="text-red-600">פעולה זו אינה ניתנת לביטול!</strong>
           </p>
-          <button onClick={onOpen} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+          <Button onClick={onOpen} style="danger" size="auto">
             מחק פרופיל
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="space-y-4">
@@ -39,12 +40,12 @@ export default function DeleteProfile({ profileName, isOpen, pin, setPin, onOpen
           </div>
 
           <div className="flex gap-3">
-            <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+            <Button onClick={onConfirm} style="danger" size="auto">
               אשר מחיקה
-            </button>
-            <button onClick={onCancel} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">
+            </Button>
+            <Button onClick={onCancel} style="secondary" size="auto">
               בטל
-            </button>
+            </Button>
           </div>
         </div>
       )}

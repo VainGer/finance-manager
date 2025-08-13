@@ -4,6 +4,7 @@ export default function Button({
     onClick,
     children,
     style = 'primary',
+    size = 'medium',
     disabled = false,
     type = 'button',
     className = '',
@@ -24,6 +25,21 @@ export default function Button({
         }
 
         return '';
+    };
+
+    const getSizeClasses = (size) => {
+        switch (size) {
+            case 'small':
+                return 'px-3 py-1.5 text-sm rounded-md';
+            case 'medium':
+                return 'px-6 py-2 text-base rounded-lg';
+            case 'large':
+                return 'px-8 py-3 text-lg rounded-lg';
+            case 'auto':
+                return 'px-4 py-2 text-base rounded-md';
+            default:
+                return 'px-6 py-2 text-base rounded-lg';
+        }
     };
 
     const getButtonStyle = (style) => {
@@ -78,8 +94,9 @@ export default function Button({
 
     const buttonClass = `
         ${getButtonStyle(style)} 
-        ${style !== 'link' ? 'px-6 py-2 rounded-lg shadow-sm' : ''}
-        w-full
+        ${style !== 'link' ? getSizeClasses(size) : ''}
+        ${style !== 'link' ? 'shadow-sm' : ''}
+        ${size !== 'auto' ? 'w-full' : ''}
         font-medium focus:outline-none focus:ring-2 focus:ring-opacity-50
         transition-colors duration-200
         disabled:opacity-50 disabled:cursor-not-allowed

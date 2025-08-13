@@ -65,8 +65,48 @@ export default function Navbar() {
         return name.charAt(0).toUpperCase();
     };
 
+    // Get navbar color based on profile color
+    const getNavbarColor = () => {
+        if (profile?.color) {
+            return profile.color;
+        }
+        return '#2563EB'; // Default blue-600
+    };
+
+    // Convert hex to RGB for gradient
+    const hexToRgb = (hex) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    };
+
+    const getDarkerShade = (hex) => {
+        const rgb = hexToRgb(hex);
+        if (!rgb) return hex;
+        
+        // Make it 20% darker
+        const factor = 0.8;
+        const r = Math.round(rgb.r * factor);
+        const g = Math.round(rgb.g * factor);
+        const b = Math.round(rgb.b * factor);
+        
+        return `rgb(${r}, ${g}, ${b})`;
+    };
+
+    const navbarColor = getNavbarColor();
+    const darkerNavbarColor = getDarkerShade(navbarColor);
+
     return (
-        <nav className="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg" dir="rtl">
+        <nav 
+            className="shadow-lg transition-all duration-500 ease-in-out" 
+            dir="rtl"
+            style={{
+                background: `linear-gradient(to right, ${navbarColor}, ${darkerNavbarColor})`
+            }}
+        >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo/Brand */}
@@ -92,10 +132,34 @@ export default function Navbar() {
                         <div className="relative">
                             <button
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                className="flex items-center space-x-2 space-x-reverse text-white hover:text-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-blue-800 rounded-lg p-2"
+                                className="flex items-center space-x-2 space-x-reverse text-white hover:text-blue-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 rounded-lg p-2"
+                                style={{
+                                    focusRingOffsetColor: navbarColor
+                                }}
                             >
-                                <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                                    {getDisplayInitial()}
+                                <div 
+                                    className="h-10 w-10 rounded-full flex items-center justify-center text-white font-semibold border-2 border-white/20 transition-all duration-500 ease-in-out overflow-hidden"
+                                    style={{ 
+                                        backgroundColor: profile?.color ? getDarkerShade(profile.color) : 'rgba(255, 255, 255, 0.2)'
+                                    }}
+                                >
+                                    {profile?.avatar ? (
+                                        <img 
+                                            src={profile.avatar} 
+                                            alt={getDisplayName()}
+                                            className="h-full w-full object-cover rounded-full"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                e.target.nextSibling.style.display = 'block';
+                                            }}
+                                        />
+                                    ) : null}
+                                    <span 
+                                        className={profile?.avatar ? 'hidden' : 'block'}
+                                        style={{ display: profile?.avatar ? 'none' : 'block' }}
+                                    >
+                                        {getDisplayInitial()}
+                                    </span>
                                 </div>
                                 <svg
                                     className={`h-4 w-4 transition-transform duration-200 ${

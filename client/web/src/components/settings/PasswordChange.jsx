@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '../common/Button';
 
 export default function PasswordChange({ editMode, passwordForm, setPasswordForm, onSave, onCancel }) {
   return (
@@ -38,14 +39,14 @@ export default function PasswordChange({ editMode, passwordForm, setPasswordForm
             />
           </div>
           <div className="flex gap-3">
-            <button onClick={onSave} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">שמור סיסמה</button>
-            <button onClick={onCancel} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">בטל</button>
+            <Button onClick={onSave} style="success" size="auto">שמור סיסמה</Button>
+            <Button onClick={onCancel} style="secondary" size="auto">בטל</Button>
           </div>
         </div>
       ) : (
         <div>
           <p className="text-gray-600 mb-4">שנה את סיסמת החשבון שלך</p>
-          <button onClick={onSave} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">שנה סיסמה</button>
+          <Button onClick={onSave} style="primary" size="auto">שנה סיסמה</Button>
         </div>
       )}
     </div>

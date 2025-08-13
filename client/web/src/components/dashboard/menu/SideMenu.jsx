@@ -4,16 +4,19 @@ import BusinessMenu from '../expenses/businesses/BusinessMenu';
 import CategoriesMenu from '../expenses/categories/CategoriesMenu';
 import AddTransaction from '../expenses/transactions/AddTransaction';
 import CreateProfileBudget from '../budget/CreateProfileBudget';
+import Button from '../../common/Button';
 
 
 const MenuItem = ({ onClick, children }) => (
     <li>
-        <button
+        <Button
             onClick={onClick}
-            className="w-full flex items-center text-right py-2 px-4 rounded-md text-gray-700 bg-gray-100 hover:bg-indigo-100 hover:text-indigo-700 transition-colors"
+            style="side-menu"
+            size="auto"
+            className="w-full text-right"
         >
             {children}
-        </button>
+        </Button>
     </li>
 );
 

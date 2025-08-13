@@ -11,15 +11,12 @@ import AvatarManager from '../components/settings/AvatarManager';
 import DeleteProfile from '../components/settings/DeleteProfile';
 import MessageBanner from '../components/settings/MessageBanner';
 import PasswordChange from '../components/settings/PasswordChange';
+import Button from '../components/common/Button';
+import Footer from '../components/common/Footer';
 
 export default function Settings() {
     const { account, profile, setAccount, setProfile } = useAuth();
     const navigate = useNavigate();
-
-
-    //TODO create child profile
-    //TODO create child profile budget
-
     const {
         state: {
             activeSection,
@@ -118,12 +115,13 @@ export default function Settings() {
                 </div>
 
                 <div className="mt-6">
-                    <button
+                    <Button
                         onClick={handleLogout}
-                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                        style="danger"
+                        size="auto"
                     >
                         התנתק
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -210,13 +208,15 @@ export default function Settings() {
                         <h1 className="text-3xl font-bold text-gray-800 mb-2">⚙️ הגדרות</h1>
                         <p className="text-gray-600">נהל את החשבון והפרופיל שלך</p>
                     </div>
-                    <button
+                    <Button
                         onClick={() => navigate('/dashboard')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                        style="primary"
+                        size="auto"
+                        className="flex items-center gap-2"
                     >
                         <span>←</span>
                         <span>חזור לדשבורד</span>
-                    </button>
+                    </Button>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -231,6 +231,9 @@ export default function Settings() {
                     </div>
                 </div>
             </div>
+            
+            {/* Footer */}
+            <Footer />
         </div>
     );
 }

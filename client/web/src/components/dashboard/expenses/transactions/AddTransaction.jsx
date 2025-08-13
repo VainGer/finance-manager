@@ -3,6 +3,7 @@ import { useAuth } from "../../../../context/AuthContext";
 import CategorySelect from "../categories/CategorySelect";
 import BusinessSelect from "../businesses/BusinessSelect";
 import { post } from "../../../../utils/api";
+import Button from "../../../common/Button";
 
 export default function AddTransaction({ goBack, onTransactionAdded }) {
     const { profile } = useAuth();
@@ -71,22 +72,31 @@ export default function AddTransaction({ goBack, onTransactionAdded }) {
     }
 
     return (
-        <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">➕ הוספת הוצאה חדשה</h3>
-            
-            {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                    {error}
+        <div className="w-full h-full flex items-center justify-center p-4">
+            <div className="p-6 bg-white rounded-xl shadow-lg w-full max-w-md mx-auto border border-gray-100">
+                <div className="text-center mb-6">
+                    <div className="mx-auto w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800">הוספת הוצאה חדשה</h3>
+                    <p className="text-sm text-gray-600 mt-1">הוסף הוצאה חדשה למערכת</p>
                 </div>
-            )}
-            
-            {success && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                    {success}
-                </div>
-            )}
+                
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+                        {error}
+                    </div>
+                )}
+                
+                {success && (
+                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+                        {success}
+                    </div>
+                )}
 
-            <form onSubmit={addTransaction} className="space-y-4">
+                <form onSubmit={addTransaction} className="space-y-4">
                 <CategorySelect refId={profile.expenses} setSelectedCategory={setSelectedCategory} />
                 
                 {selectedCategory && (
@@ -100,68 +110,76 @@ export default function AddTransaction({ goBack, onTransactionAdded }) {
                 {selectedBusiness && (
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">סכום</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">סכום</label>
                             <input 
                                 type="number" 
                                 value={amount || ''}
                                 placeholder="הכנס סכום" 
                                 onChange={(e) => setAmount(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                 required
                             />
                         </div>
                         
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">תאריך</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">תאריך</label>
                             <input 
                                 type="date" 
                                 value={date || ''}
                                 onChange={(e) => setDate(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                 required
                             />
                         </div>
                         
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">תיאור</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">תיאור</label>
                             <input 
                                 type="text" 
                                 value={description}
-                                placeholder="תיאור ההוצאה" 
+                                placeholder="תיאור ההוצאה (אופציונלי)" 
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                             />
                         </div>
                         
-                        <div className="flex gap-2">
-                            <button 
+                        <div className="flex gap-3 mt-6">
+                            <Button 
                                 type="submit" 
                                 disabled={isSubmitting}
-                                className="flex-1 py-2 px-4 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed transition-colors"
+                                style="success"
+                                size="medium"
+                                className="flex-1"
                             >
                                 {isSubmitting ? 'מוסיף...' : 'הוסף הוצאה'}
-                            </button>
-                            <button 
+                            </Button>
+                            <Button 
                                 type="button" 
                                 onClick={goBack}
-                                className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                                style="secondary"
+                                size="medium"
                             >
                                 חזור
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 )}
                 
                 {!selectedBusiness && (
-                    <button 
-                        type="button" 
-                        onClick={goBack}
-                        className="w-full py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
-                    >
-                        חזור
-                    </button>
+                    <div className="border-t border-gray-200 pt-4 mt-6">
+                        <Button 
+                            type="button" 
+                            onClick={goBack}
+                            style="secondary"
+                            size="medium"
+                            className="w-full"
+                        >
+                            חזור
+                        </Button>
+                    </div>
                 )}
             </form>
         </div>
+    </div>
     );
 }

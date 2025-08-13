@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import { post } from '../../../../utils/api';
 import CategorySelect from './CategorySelect';
+import Button from '../../../common/Button';
 
 export default function CreateBudget({ goBack }) {
     const [selectedCategory, setSelectedCategory] = useState('');
@@ -15,7 +16,7 @@ export default function CreateBudget({ goBack }) {
     const [conflictingBudget, setConflictingBudget] = useState(null);
     const [pendingBudget, setPendingBudget] = useState(null);
     const { profile } = useAuth();
-    //TODO create child profile budget distribution based on profile budget
+
     const createBudget = async (e) => {
         e.preventDefault();
 
@@ -138,19 +139,27 @@ export default function CreateBudget({ goBack }) {
     };
 
     return (
-        <div className="p-4 border rounded-lg shadow-sm bg-white">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">יצירת תקציב חדש</h2>
+        <div className="space-y-6">
+            <div className="text-center mb-6">
+                <div className="mx-auto w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                    </svg>
+                </div>
+                <h2 className="text-xl font-bold text-gray-800">🎯 יצירת תקציב חדש</h2>
+                <p className="text-sm text-gray-600 mt-1">הגדר תקציב לקטגוריה נבחרת</p>
+            </div>
             
             {error && (
-                <p className="text-sm text-center text-red-600 bg-red-100 border border-red-400 rounded-md py-2 px-4 mb-4">
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
                     {error}
-                </p>
+                </div>
             )}
             
             {success && (
-                <p className="text-sm text-center text-green-600 bg-green-100 border border-green-400 rounded-md py-2 px-4 mb-4">
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
                     {success}
-                </p>
+                </div>
             )}
 
             {/* Confirmation Dialog */}
@@ -169,22 +178,24 @@ export default function CreateBudget({ goBack }) {
                                 </div>
                                 <p className="mt-2">האם ברצונך להחליף את התקציב הקיים?</p>
                             </div>
-                            <div className="mt-4 flex gap-2">
-                                <button
-                                    type="button"
+                            <div className="mt-4 flex gap-3">
+                                <Button
                                     onClick={handleReplaceConfirm}
                                     disabled={loading}
-                                    className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                    style="danger"
+                                    size="medium"
+                                    className="flex-1"
                                 >
                                     {loading ? 'מחליף...' : 'כן, החלף'}
-                                </button>
-                                <button
-                                    type="button"
+                                </Button>
+                                <Button
                                     onClick={handleReplaceCancel}
-                                    className="px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-400"
+                                    style="secondary"
+                                    size="medium"
+                                    className="flex-1"
                                 >
                                     ביטול
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -193,42 +204,42 @@ export default function CreateBudget({ goBack }) {
             
             {!showConfirmation && (
                 <form onSubmit={createBudget} className="space-y-4">
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">קטגוריה</label>
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">קטגוריה</label>
                         <CategorySelect refId={profile.expenses} setSelectedCategory={setSelectedCategory} />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">תאריך התחלה</label>
+                            <label htmlFor="startDate" className="block text-sm font-semibold text-gray-700 mb-2">תאריך התחלה</label>
                             <input 
                                 type="date" 
                                 name="startDate" 
                                 id="startDate" 
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
-                                className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full px-4 py-3 text-right border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                             />
                         </div>
                         
                         <div>
-                            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">תאריך סיום</label>
+                            <label htmlFor="endDate" className="block text-sm font-semibold text-gray-700 mb-2">תאריך סיום</label>
                             <input 
                                 type="date" 
                                 name="endDate" 
                                 id="endDate"
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
-                                className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full px-4 py-3 text-right border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                             />
                         </div>
                     </div>
                     
                     <div>
-                        <label htmlFor="budgetAmount" className="block text-sm font-medium text-gray-700 mb-1">סכום התקציב</label>
-                        <div className="relative mt-1 rounded-md shadow-sm">
-                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                <span className="text-gray-500 sm:text-sm">₪</span>
+                        <label htmlFor="budgetAmount" className="block text-sm font-semibold text-gray-700 mb-2">סכום התקציב</label>
+                        <div className="relative">
+                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                <span className="text-gray-500 text-sm">₪</span>
                             </div>
                             <input 
                                 type="number" 
@@ -239,27 +250,30 @@ export default function CreateBudget({ goBack }) {
                                 placeholder="0.00"
                                 value={budgetAmount}
                                 onChange={(e) => setBudgetAmount(e.target.value)}
-                                className="w-full pl-8 px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full pl-10 px-4 py-3 text-right border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                             />
                         </div>
                     </div>
                     
-                    <div className="flex items-center gap-4 pt-2">
-                        <button
-                            type="button"
+                    <div className="flex gap-3 pt-4">
+                        <Button
                             onClick={goBack}
-                            className="w-full py-2 px-4 font-semibold text-gray-700 bg-gray-200 rounded-md shadow-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                            style="secondary"
+                            size="medium"
+                            className="flex-1"
                         >
                             ביטול
-                        </button>
+                        </Button>
                         
-                        <button
+                        <Button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-2 px-4 font-semibold text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            style="warning"
+                            size="medium"
+                            className="flex-1"
                         >
                             {loading ? 'יוצר תקציב...' : 'צור תקציב'}
-                        </button>
+                        </Button>
                     </div>
                 </form>
             )}
