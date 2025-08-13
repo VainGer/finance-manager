@@ -37,7 +37,7 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-gray-100">
             <Navbar />
-            <ChildrenBudgetUpdate username={account.username} profileName={profile.profileName} />
+            {!profile.parentProfile && <ChildrenBudgetUpdate username={account.username} profileName={profile.profileName} />}
             <div className="container mx-auto px-4 py-6">
                 {/* Welcome Section */}
                 <div className="mb-6">
