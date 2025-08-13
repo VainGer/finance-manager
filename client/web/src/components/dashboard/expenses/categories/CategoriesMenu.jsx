@@ -111,8 +111,8 @@ export default function CategoriesMenu({ goBack }) {
                                 </svg>
                                 חזרה
                             </Button>
-                        </div>
-                    </div>
+                        </li>
+                    </ul>
                 </div>
             )}
         </div>
