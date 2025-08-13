@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { post, get } from '../../../utils/api';
 import { useAuth } from '../../../context/AuthContext';
-import Button from '../../common/Button';
 
 export default function CreateProfileBudget({ goBack }) {
     const { account, profile } = useAuth();
@@ -10,6 +9,7 @@ export default function CreateProfileBudget({ goBack }) {
     const [amount, setAmount] = useState(0);
     const [categoryBudgets, setCategoryBudgets] = useState([]);
     const [remainingAmount, setRemainingAmount] = useState(0);
+    const [childrenBudgets, setChildrenBudgets] = useState([]);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const [validDates, setValidDates] = useState(false);
@@ -33,6 +33,22 @@ export default function CreateProfileBudget({ goBack }) {
         const totalAmount = parseFloat(amount) || 0;
         setRemainingAmount(totalAmount - totalSpent);
     }, [amount, categoryBudgets]);
+
+    const fetchBudgetsForChildren = async () => {
+        try {
+            const response = await get(`profile/get-child-budgets?username=${account.username}&profileName=${profile.profileName}`);
+            if (response.ok) {
+                setChildrenBudgets(response.budgets);
+            }
+        } catch (error) {
+            console.error('Error fetching budgets:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (!profile.parentProfile)
+            fetchBudgetsForChildren();
+    }, [account, profile]);
 
     const setDatesAndSum = async (e) => {
         e.preventDefault();
@@ -111,159 +127,47 @@ export default function CreateProfileBudget({ goBack }) {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
             />
-            <Button onClick={setDatesAndSum} style="primary" size="auto" className="mt-2">
+            <button onClick={setDatesAndSum} className="mt-2 bg-blue-500 text-white px-4 py-2 rounded">
                 המשך
-            </Button>
+            </button>
         </form>)
 
-    const categories = (<>
-        {categoryBudgets.map((category, index) => (
-            <div key={category.name} className="mb-2">
-                <label htmlFor={`category-${category.name}`}>{category.name}</label>
-                <input
-                    type="number"
-                    id={`category-${category.name}`}
-                    value={category.budget}
-                    placeholder="0"
-                    onChange={(e) => handleCategoryBudgetChange(index, e.target.value)}
-                />
-            </div>
-        ))}
-    </>)
+    const categories = (
+        <div className="space-y-4">
+            {categoryBudgets.map((category, index) => (
+                <div key={category.name} className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm">
+                    <label htmlFor={`category-${category.name}`} className="font-medium text-gray-800">{category.name}</label>
+                    <input
+                        type="number"
+                        id={`category-${category.name}`}
+                        value={category.budget}
+                        placeholder="0"
+                        onChange={(e) => handleCategoryBudgetChange(index, e.target.value)}
+                        className="w-32 p-2 border border-gray-300 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                </div>
+            ))}
+        </div>
+    );
 
     return (
-        <div className="w-full h-full flex items-center justify-center p-4">
-            <div className="p-6 bg-white rounded-xl shadow-lg w-full max-w-md mx-auto border border-gray-100">
-                <div className="text-center mb-6">
-                    <div className="mx-auto w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                        </svg>
-                    </div>
-                    <h2 className="text-xl font-bold text-gray-800">יצירת תקציב פרופיל</h2>
-                    <p className="text-sm text-gray-600 mt-1">הגדר תקציב כללי ופילוג לקטגוריות</p>
-                </div>
-
-                {success && (
-                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
-                        {success}
-                    </div>
-                )}
-
-                {!validDates ? (
-                    <form className="space-y-4">
-                        {error && (
-                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
-                                {error}
-                            </div>
-                        )}
-                        
-                        <div>
-                            <label htmlFor="start-date" className="block text-sm font-semibold text-gray-700 mb-2">תאריך התחלה</label>
-                            <input
-                                type="date"
-                                id="start-date"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                className="w-full px-4 py-3 text-right border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label htmlFor="end-date" className="block text-sm font-semibold text-gray-700 mb-2">תאריך סיום</label>
-                            <input
-                                type="date"
-                                id="end-date"
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                className="w-full px-4 py-3 text-right border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label htmlFor="amount" className="block text-sm font-semibold text-gray-700 mb-2">סכום התקציב הכולל</label>
-                            <div className="relative">
-                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                    <span className="text-gray-500 text-sm">₪</span>
-                                </div>
-                                <input 
-                                    type="number" 
-                                    name="amount" 
-                                    id="amount" 
-                                    placeholder='הזן את סכום התקציב הכולל'
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    className="w-full pl-10 px-4 py-3 text-right border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                />
-                            </div>
-                        </div>
-                        
-                        <div className="flex gap-3 pt-4">
-                            <Button onClick={goBack} style="secondary" size="medium" className="flex-1">
-                                חזור
-                            </Button>
-                            <Button onClick={setDatesAndSum} style="primary" size="medium" className="flex-1">
-                                המשך
-                            </Button>
-                        </div>
-                    </form>
-                ) : (
-                    <form onSubmit={create} className="space-y-4">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                            <p className="text-sm font-medium text-blue-800">תקופת התקציב: {startDate} - {endDate}</p>
-                            {remainingAmount >= 0 ? (
-                                <p className="text-sm text-blue-700 mt-1">💰 סכום פנוי: ₪{remainingAmount.toLocaleString()}</p>
-                            ) : (
-                                <p className="text-sm text-red-700 mt-1">⚠️ הסכום חורג ב-₪{Math.abs(remainingAmount).toLocaleString()}</p>
-                            )}
-                        </div>
-                        
-                        <div className="space-y-3">
-                            <h4 className="text-lg font-semibold text-gray-800 mb-3">פילוג לקטגוריות</h4>
-                            {categoryBudgets.map((category, index) => (
-                                <div key={category.name} className="space-y-2">
-                                    <label htmlFor={`category-${category.name}`} className="block text-sm font-semibold text-gray-700">
-                                        {category.name}
-                                    </label>
-                                    <div className="relative">
-                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                            <span className="text-gray-500 text-sm">₪</span>
-                                        </div>
-                                        <input
-                                            type="number"
-                                            id={`category-${category.name}`}
-                                            value={category.budget}
-                                            placeholder="0"
-                                            onChange={(e) => handleCategoryBudgetChange(index, e.target.value)}
-                                            className="w-full pl-10 px-4 py-3 text-right border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        
-                        <div className="flex gap-3 pt-4">
-                            <Button 
-                                onClick={goBack} 
-                                style="secondary" 
-                                size="medium" 
-                                className="flex-1"
-                            >
-                                חזור
-                            </Button>
-                            <Button 
-                                type="submit"
-                                disabled={remainingAmount !== 0}
-                                style={remainingAmount !== 0 ? "secondary" : "primary"}
-                                size="medium"
-                                className="flex-1"
-                            >
-                                צור תקציב
-                            </Button>
-                        </div>
-                    </form>
-                )}
-            </div>
+        <div>
+            {success && <p className="text-green-500">{success}</p>}
+            {!validDates && dateSelect}
+            {validDates && (
+                <form onSubmit={create}>
+                    <p>הגדרת תקציב לתאריכים: {startDate} - {endDate}</p>
+                    {remainingAmount >= 0 ? (<p>סכום פנוי: {remainingAmount}</p>)
+                        : (<p>הסכום חורג ב - {Math.abs(remainingAmount)}</p>)}
+                    {categories}
+                    <button disabled={remainingAmount !== 0} type="submit"
+                        className={`mt-2 ${remainingAmount !== 0 ? 'bg-gray-500' : 'bg-green-500'} text-white px-4 py-2 rounded`}>
+                        צור תקציב
+                    </button>
+                </form>
+            )}
+            <button onClick={goBack} className="mt-4 bg-gray-300 text-gray-800 px-4 py-2 rounded">
+                חזור    </button>
         </div>
     )
 }
