@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import AddChildrenBudget from '../components/profile/AddChildrenBudget';
 import CreateProfile from '../components/profile/CreateProfile';
 import useSettingsState from '../hooks/useSettingsState';
 import Navbar from '../components/Navbar';
@@ -174,6 +175,8 @@ export default function Settings() {
                 return renderAboutSection();
             case 'newProfile':
                 return renderNewProfileSection();
+            case 'addChildrenBudget':
+                return <AddChildrenBudget />;
             default:
                 return renderProfileSection();
         }

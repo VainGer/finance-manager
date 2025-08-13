@@ -273,8 +273,12 @@ export default function useSettingsState({ account, profile, setAccount, setProf
     { id: 'profile', name: 'פרופיל', icon: '👤' },
     { id: 'account', name: 'חשבון', icon: '⚙️' },
     { id: 'about', name: 'אודות', icon: 'ℹ️' },
-    { id: 'newProfile', name: 'פרופיל חדש', icon: '➕' }
+    { id: 'newProfile', name: 'פרופיל חדש', icon: '➕' },
   ];
+
+  if (profile.children && profile.children.length > 0) {
+    sections.push({ id: 'addChildrenBudget', name: 'הוספת תקציב לילדים', icon: '👶' });
+  }
 
   return {
     state: {

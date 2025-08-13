@@ -14,7 +14,7 @@ export default function Home() {
                 </div>
 
                 {/* Buttons */}
-                <div className="space-y-4 w-1/4 mx-auto">
+                <div className="space-y-4 mx-auto">
                     <Button
                         onClick={() => navigate('/login')}
                         style="success"

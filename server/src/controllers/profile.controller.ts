@@ -120,8 +120,8 @@ export default class ProfileController {
 
     static async addChildBudgets(req: Request, res: Response) {
         try {
-            const { childId, budget } = req.body;
-            const result = await ProfileService.addChildBudgets(childId, budget);
+            const { username, profileName, budget } = req.body;
+            const result = await ProfileService.addChildBudgets(username, profileName, budget);
             res.status(200).json({
                 message: result.message || "Child budget added successfully"
             });

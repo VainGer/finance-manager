@@ -109,11 +109,40 @@ export default class ProfileService {
         return { success: true, profileId: createdProfile.insertedId, message: "Child profile created successfully" };
     }
 
-    static async addChildBudgets(childId: string, budget: { startDate: Date; endDate: Date; amount: number }) {
-        if (!childId || !budget || !budget.startDate || !budget.endDate || !budget.amount) {
-            throw new BadRequestError("Child ID and budget data are required");
+    static async addChildBudgets(username: string, profileName: string, budget: { startDate: Date; endDate: Date; amount: number }) {
+        if (!username || !profileName || !budget || !budget.startDate || !budget.endDate || !budget.amount) {
+            throw new BadRequestError("Username, profile name and budget data are required");
         }
-        const result = await ProfileModel.addBudgetToChild(childId, budget);
+        const profile = await ProfileModel.findProfile(username, profileName);
+        if (!profile) {
+            throw new NotFoundError("Profile not found");
+        }
+        const foundNewBudgets = await this.getChildBudgets(username, profileName);
+        if (foundNewBudgets.budgets && foundNewBudgets.budgets.length > 0) {
+            const newStart = new Date(budget.startDate);
+            const newEnd = new Date(budget.endDate);
+            const overlappingDates = foundNewBudgets.budgets.some((b: ProfileBudget) => {
+                const budgetStart = new Date(b.startDate);
+                const budgetEnd = new Date(b.endDate);
+                return (
+                    (newStart >= budgetStart && newStart <= budgetEnd) ||
+
+                    (newEnd >= budgetStart && newEnd <= budgetEnd) ||
+
+                    (newStart <= budgetStart && newEnd >= budgetEnd) ||
+
+                    (newStart >= budgetStart && newEnd <= budgetEnd)
+                );
+            });
+            if (overlappingDates) {
+                throw new ConflictError("Budget dates overlap with existing budgets");
+            }
+        }
+        const validDatesInBudgets = await this.validateBudgetDates(username, profileName, budget.startDate, budget.endDate);
+        if (!validDatesInBudgets) {
+            throw new ConflictError("Invalid budget dates");
+        }
+        const result = await ProfileModel.addBudgetToChild(username, profileName, budget);
         if (!result || !result.success) {
             throw new AppError("Failed to add budget to child profile", 500);
         }

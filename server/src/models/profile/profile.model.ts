@@ -185,10 +185,10 @@ export default class ProfileModel {
         }
     }
 
-    static async addBudgetToChild(childId: string, budgetData: { startDate: Date, endDate: Date, amount: number }) {
+    static async addBudgetToChild(username: string, profileName: string, budgetData: { startDate: Date, endDate: Date, amount: number }) {
         try {
             const result = await db.UpdateDocument(this.profileCollection,
-                { _id: new ObjectId(childId) }, { $push: { budgets: budgetData } });
+                { username, profileName }, { $push: { newBudgets: budgetData } });
             if (!result || result.modifiedCount === 0) {
                 return { success: false, message: "Child profile not found or budget is the same" };
             }
@@ -202,7 +202,7 @@ export default class ProfileModel {
     static async clearChildBudget(username: string, profileName: string) {
         try {
             const result = await db.UpdateDocument(this.profileCollection,
-                { username, profileName }, { $set: { budgets: [] } });
+                { username, profileName }, { $set: { newBudgets: [] } });
             if (!result || result.modifiedCount === 0) {
                 return { success: false, message: "Profile not found or budgets are already empty" };
             }

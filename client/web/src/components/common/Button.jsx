@@ -6,7 +6,6 @@ export default function Button({
     style = 'primary',
     disabled = false,
     type = 'button',
-    fullWidth = false,
     className = '',
     bg
 }) {
@@ -79,7 +78,6 @@ export default function Button({
 
     const buttonClass = `
         ${getButtonStyle(style)} 
-        ${fullWidth ? 'w-full' : ''} 
         ${style !== 'link' ? 'px-6 py-2 rounded-lg shadow-sm' : ''}
         w-full
         font-medium focus:outline-none focus:ring-2 focus:ring-opacity-50

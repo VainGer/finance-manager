@@ -21,7 +21,7 @@ profileRouter.post<{}, {}, { username: string, profileName: string, avatar: stri
     ("/set-avatar", ProfileController.setAvatar);
 profileRouter.post<{}, {}, { username: string, profileName: string, color: string }>
     ("/set-color", ProfileController.setColor);
-profileRouter.post<{}, {}, { childId: string, budget: { startDate: Date; endDate: Date; amount: number } }>
+profileRouter.post<{}, {}, { username: string, profileName: string, budget: { startDate: Date; endDate: Date; amount: number } }>
     ("/add-child-budget", ProfileController.addChildBudgets);
 profileRouter.get<{}, {}, {}, { username: string, profileName: string }>
     ("/get-child-budgets", ProfileController.getChildBudgets);
