@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
 
@@ -18,18 +18,59 @@ export const AuthProvider = ({ children }) => {
     const pagesWithAccountOnly = ['/profiles', '/profile-auth'];
     const pagesWithProfilesAndAccount = ['/dashboard', '/settings'];
     const validateAccess = (path) => {
-        if (pagesWithAccountOnly.includes(path) && !account) {
-            window.location.href = '/';
+        if (path === '/' || path === '/login' || path === '/register') {
+            if (account || profile) {
+                setAccount(null);
+                setProfile(null);
+                sessionStorage.removeItem('account');
+                sessionStorage.removeItem('profile');
+                return;
+            }
         }
-        if (pagesWithProfilesAndAccount.includes(path) && !profile && !account) {
-            window.location.href = '/profile-auth';
+        
+        if (path === '/profiles') {
+            if (profile) {
+                setProfile(null);
+                sessionStorage.removeItem('profile');
+            }
+            if (!account) {
+                window.location.href = '/login';
+                return;
+            }
         }
-        if (pagesWithProfilesAndAccount.includes(path) && !profile) {
-            window.location.href = '/profiles';
+
+        if (pagesWithAccountOnly.some(page => path.startsWith(page)) && !account) {
+            window.location.href = '/login';
+            return;
+        }
+        
+        if (pagesWithProfilesAndAccount.some(page => path.startsWith(page))) {
+            if (!account) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            if (!profile) {
+                window.location.href = '/profiles';
+                return;
+            }
         }
     };
 
-    validateAccess(window.location.pathname);
+    useEffect(() => {
+        const handleLocationChange = () => {
+            const currentPath = window.location.pathname;
+            validateAccess(currentPath);
+        };
+        
+        handleLocationChange();
+
+        window.addEventListener('popstate', handleLocationChange);
+        
+        return () => {
+            window.removeEventListener('popstate', handleLocationChange);
+        };
+    }, [account, profile]);
 
     useEffect(() => {
         if (account) {
@@ -48,9 +89,29 @@ export const AuthProvider = ({ children }) => {
     }, [profile]);
 
 
+    const logout = useCallback(() => {
+        setAccount(null);
+        setProfile(null);
+        sessionStorage.removeItem('account');
+        sessionStorage.removeItem('profile');
+    }, []);
+    
+    const clearProfile = useCallback(() => {
+        setProfile(null);
+        sessionStorage.removeItem('profile');
+    }, []);
+
     return (
-        <AuthContext.Provider value={{ account, setAccount, profile, setProfile }}>
-            { }
+        <AuthContext.Provider value={{ 
+            account, 
+            setAccount, 
+            profile, 
+            setProfile,
+            logout,
+            clearProfile,
+            isAuthenticated: !!account,
+            hasActiveProfile: !!profile
+        }}>
             {children}
         </AuthContext.Provider>
     );

@@ -42,15 +42,6 @@ export default function Dashboard() {
             <Navbar />
 
             <div className="container mx-auto px-4 py-6">
-                {/* Welcome Section */}
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                        שלום, {profile?.profileName || 'משתמש'}!
-                    </h1>
-                    <p className="text-gray-600">
-                        ברוך הבא לדשבורד ניהול הכספים שלך
-                    </p>
-                </div>
 
                 {/* Display Selector */}
                 <DisplaySelector 
