@@ -3,6 +3,7 @@ import db from "../../server"
 import { v2 as cloudinary } from 'cloudinary';
 import bcrypt from 'bcrypt';
 import { ObjectId } from "mongodb";
+import { start } from "repl";
 export default class ProfileModel {
 
     private static profileCollection: string = 'profiles';
@@ -130,11 +131,15 @@ export default class ProfileModel {
         }
     }
 
-    static async deleteProfile(username: string, profileName: string) {
+    static async deleteProfile(username: string, profileName: string, refId: string) {
         try {
-            const result = await db.DeleteDocument(this.profileCollection, { username, profileName });
-            if (!result || result.deletedCount === 0) {
+            const profileDocument = await db.DeleteDocument(this.profileCollection, { username, profileName });
+            if (!profileDocument || profileDocument.deletedCount === 0) {
                 return { success: false, message: "Profile not found" };
+            }
+            const expensesDocument = await db.DeleteDocument(this.expensesCollection, { _id: new ObjectId(refId) });
+            if (!expensesDocument || expensesDocument.deletedCount === 0) {
+                return { success: false, message: "Expenses document not found" };
             }
             return { success: true, message: "Profile deleted successfully" };
         } catch (error) {
@@ -187,8 +192,16 @@ export default class ProfileModel {
 
     static async addBudgetToChild(username: string, profileName: string, budgetData: { startDate: Date, endDate: Date, amount: number }) {
         try {
+            const formattedBudgetData = {
+                startDate: new Date(budgetData.startDate).toISOString(),
+                endDate: new Date(budgetData.endDate).toISOString(),
+                amount: budgetData.amount
+            };
+
             const result = await db.UpdateDocument(this.profileCollection,
-                { username, profileName }, { $push: { newBudgets: budgetData } });
+                { username, profileName },
+                { $push: { newBudgets: formattedBudgetData } });
+
             if (!result || result.modifiedCount === 0) {
                 return { success: false, message: "Child profile not found or budget is the same" };
             }
@@ -199,17 +212,38 @@ export default class ProfileModel {
         }
     }
 
-    static async clearChildBudget(username: string, profileName: string) {
+    static async pullChildBudget(username: string, profileName: string, startDate: Date, endDate: Date) {
         try {
-            const result = await db.UpdateDocument(this.profileCollection,
-                { username, profileName }, { $set: { newBudgets: [] } });
-            if (!result || result.modifiedCount === 0) {
-                return { success: false, message: "Profile not found or budgets are already empty" };
+            const markResult = await db.UpdateDocument(
+                this.profileCollection,
+                { username, profileName },
+                { $set: { "newBudgets.$[budget]": null } },
+                {
+                    arrayFilters: [
+                        {
+                            "$and": [
+                                { "budget.startDate": new Date(startDate).toISOString() },
+                                { "budget.endDate": new Date(endDate).toISOString() }
+                            ]
+                        }
+                    ]
+                }
+            );
+            const pullResult = await db.UpdateDocument(
+                this.profileCollection,
+                { username, profileName },
+                { $pull: { newBudgets: null } }
+            );
+
+            if ((!markResult || markResult.modifiedCount === 0) &&
+                (!pullResult || pullResult.modifiedCount === 0)) {
+                return { success: false, message: "Budget not found with the specified dates" };
             }
-            return { success: true, message: "Child budgets cleared successfully" };
+
+            return { success: true, message: "Child budget removed successfully" };
         } catch (error) {
-            console.error("Error in ProfileModel.clearChildBudget", error);
-            throw new Error("Failed to clear child budget");
+            console.error("Error in ProfileModel.pullChildBudget", error);
+            throw new Error("Failed to pull child budget");
         }
     }
 

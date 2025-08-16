@@ -152,30 +152,6 @@ export default class ExpensesController {
         }
     }
 
-    static async editTransaction(req: Request, res: Response) {
-        try {
-            const { refId, catName, busName, transactionId, newAmount, newDate, newDescription } = req.body;
-            if (!refId || !catName || !busName || !transactionId) {
-                throw new appErrors.BadRequestError("Missing required fields");
-            }
-
-            // Run only the updates provided, keep current service behavior (including budget updates)
-            if (newAmount !== undefined) {
-                await TransactionService.changeAmount(refId, catName, busName, transactionId as any, Number(newAmount));
-            }
-            if (newDate) {
-                await TransactionService.changeDate(refId, catName, busName, transactionId, new Date(newDate));
-            }
-            if (newDescription !== undefined) {
-                await TransactionService.changeDescription(refId, catName, busName, transactionId, String(newDescription));
-            }
-
-            res.status(200).json({ message: "Transaction updated successfully" });
-        } catch (error) {
-            ExpensesController.handleError(error, res);
-        }
-    }
-
     static async deleteTransaction(req: Request, res: Response) {
         try {
             const { refId, catName, busName, transactionId } = req.body;

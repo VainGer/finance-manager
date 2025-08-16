@@ -16,7 +16,4 @@ categoryRouter.put<{}, {}, { refId: string, oldName: string, newName: string }>(
 categoryRouter.delete<{ refId: string, catName: string }, {}, {}, {}>(
     '/delete/:refId/:catName', ExpensesController.deleteCategory);
 
-categoryRouter.post<{}, {}, { refId: string, catName: string, budget: CategoryBudget }>(
-    '/create-budget', ExpensesController.createCategoryBudget);
-
 export default categoryRouter;

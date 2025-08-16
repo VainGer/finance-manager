@@ -71,10 +71,17 @@ export default class ProfileService {
         if (!expensesId) {
             throw new AppError("Failed to create expenses for the profile", 500);
         }
+        let avatarUrl = null;
+        if (childProfileCreation.avatar) {
+            avatarUrl = await ProfileModel.uploadAvatar(childProfileCreation.avatar);
+            if (!avatarUrl) {
+                throw new AppError("Failed to upload avatar", 500);
+            }
+        }
         const profile: ChildProfile = {
             username: childProfileCreation.username,
             profileName: childProfileCreation.profileName,
-            avatar: childProfileCreation.avatar,
+            avatar: avatarUrl,
             color: childProfileCreation.color,
             pin: childProfileCreation.pin,
             parentProfile: false,
@@ -257,8 +264,10 @@ export default class ProfileService {
         if (!isValidPin) {
             throw new BadRequestError("Invalid PIN");
         }
-        await this.deleteAvatar(username, profileName);
-        const result = await ProfileModel.deleteProfile(username, profileName);
+        if (profile.avatar) {
+            await this.deleteAvatar(username, profileName);
+        }
+        const result = await ProfileModel.deleteProfile(username, profileName, profile.expenses);
         if (!result.success) {
             throw new AppError(result.message, 500);
         }
@@ -385,7 +394,7 @@ export default class ProfileService {
         }
 
         if (!profile.parentProfile) {
-            const clearResult = await ProfileModel.clearChildBudget(username, profileName);
+            const clearResult = await ProfileModel.pullChildBudget(username, profileName, new Date(profileBudget.startDate), new Date(profileBudget.endDate));
             if (!clearResult || !clearResult.success) {
                 throw new AppError(clearResult?.message || "Failed to clear child budget", 500);
             }

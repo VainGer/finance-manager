@@ -21,16 +21,6 @@ transactionRouter.put<{}, {}, {
     refId: string, catName: string, busName: string, transactionId: string, newDescription: string
 }>('/change-description', ExpensesController.changeTransactionDescription);
 
-transactionRouter.put<{}, {}, {
-    refId: string,
-    catName: string,
-    busName: string,
-    transactionId: string,
-    newAmount?: number,
-    newDate?: Date,
-    newDescription?: string
-}>('/edit', ExpensesController.editTransaction);
-
 transactionRouter.delete<
     { refId: string, catName: string, busName: string, transactionId: string }, {}, {}, {}>
     ('/delete-transaction', ExpensesController.deleteTransaction);

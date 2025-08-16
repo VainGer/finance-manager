@@ -39,13 +39,14 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gray-100">
+            {!profile.parentProfile && <ChildrenBudgetUpdate username={account.username} profileName={profile.profileName} />}
             <Navbar />
 
             <div className="container mx-auto px-4 py-6">
 
                 {/* Display Selector */}
-                <DisplaySelector 
-                    setDisplay={setDisplay} 
+                <DisplaySelector
+                    setDisplay={setDisplay}
                     setCurrentDisplayType={setCurrentDisplayType}
                     profile={profile}
                     refreshTrigger={refreshTrigger}
@@ -67,7 +68,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-            
+
             {/* Footer */}
             <Footer />
         </div>
