@@ -116,6 +116,17 @@ export default class ProfileService {
         return { success: true, profileId: createdProfile.insertedId, message: "Child profile created successfully" };
     }
 
+    static async updateProfile(username: string, profileName: string) {
+        if (!username || !profileName) {
+            throw new BadRequestError("Username and profile name are required");
+        }
+        const profile = await ProfileModel.findProfile(username, profileName);
+        if (!profile) {
+            throw new NotFoundError("Profile not found");
+        }
+        return { success: true, profile };
+    }
+
     static async addChildBudgets(username: string, profileName: string, budget: { startDate: Date; endDate: Date; amount: number }) {
         if (!username || !profileName || !budget || !budget.startDate || !budget.endDate || !budget.amount) {
             throw new BadRequestError("Username, profile name and budget data are required");

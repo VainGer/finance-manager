@@ -226,6 +226,26 @@ export default function useSettingsState({ account, profile, setAccount, setProf
     }
   };
 
+  const updateProfile = async () => {
+    try {
+      const response = await post('profile/update-profile', { 
+        username: account.username, 
+        profileName: profile.profileName 
+      });
+      
+      if (response.ok || response.success || response.message?.includes('successfully')) {
+        setProfile(response.profile);
+        setMessage('הפרופיל עודכן בהצלחה!');
+      } else {
+        setMessage(`שגיאה בעדכון הפרופיל: ${response?.message || 'לא ידוע'}`);
+      }
+    } catch (error) {
+      console.error('Update profile error:', error);
+      setMessage('שגיאה בעדכון הפרופיל');
+    }
+    setTimeout(() => setMessage(''), 3000);
+  };
+
   const handleRemoveAvatar = async () => {
     try {
       const response = await post('profile/set-avatar', { username: account.username, profileName: profile.profileName, avatar: null });
@@ -293,6 +313,7 @@ export default function useSettingsState({ account, profile, setAccount, setProf
       sections,
     },
     actions: {
+      updateProfile,
       setActiveSection,
       setEditMode,
       setProfileForm,

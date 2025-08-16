@@ -17,8 +17,8 @@ export default function ExpensesTable({ filteredExpenses, expensesId, onTransact
                 </thead>
                 <tbody>
                     {filteredExpenses.length > 0 ? (
-                        filteredExpenses.map((expense) => (
-                            <tr key={expense._id} className="border-b hover:bg-gray-50">
+                        filteredExpenses.map((expense, index) => (
+                            <tr key={index} className="border-b hover:bg-gray-50">
                                 <td className="p-3">{formatDate(expense.date)}</td>
                                 <td className="p-3">{expense.description}</td>
                                 <td className="p-3">

@@ -17,6 +17,19 @@ export default class ProfileController {
         }
     }
 
+    static async updateProfile(req: Request, res: Response) {
+        try {
+            const { username, profileName } = req.body;
+            const result = await ProfileService.updateProfile(username, profileName);
+            res.status(200).json({
+                message: "Profile updated successfully",
+                profile: result.profile
+            });
+        } catch (error) {
+            ProfileController.handleError(error, res);
+        }
+    }
+
     static async createChildProfile(req: Request, res: Response) {
         try {
             const childProfileCreation = req.body as ChildProfileCreationData;

@@ -11,7 +11,6 @@ const toBase64 = async (file) => {
 }
 
 export default function CreateProfile({ username, firstProfile, onProfileCreated }) {
-
     const [profileName, setProfileName] = useState('');
     const [avatar, setAvatar] = useState(null);
     const [color, setColor] = useState('#000000');

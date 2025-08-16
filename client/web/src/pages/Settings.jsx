@@ -30,6 +30,7 @@ export default function Settings() {
             sections
         },
         actions: {
+            updateProfile,
             setActiveSection,
             setEditMode,
             setProfileForm,
@@ -160,7 +161,7 @@ export default function Settings() {
     );
 
     const renderNewProfileSection = () => (
-        <CreateProfile username={account.username} />
+        <CreateProfile username={account.username} onProfileCreated={updateProfile} />
     );
 
     const renderContent = () => {
@@ -231,7 +232,7 @@ export default function Settings() {
                     </div>
                 </div>
             </div>
-            
+
             {/* Footer */}
             <Footer />
         </div>

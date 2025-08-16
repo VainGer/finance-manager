@@ -15,6 +15,8 @@ profileRouter.post<{}, {}, { username: string, oldProfileName: string, newProfil
     ("/rename-profile", ProfileController.renameProfile);
 profileRouter.post<{}, {}, { username: string, profileName: string, pin: string }>
     ("/delete-profile", ProfileController.deleteProfile);
+profileRouter.post<{}, {}, { username: string, profileName: string }>
+    ("/update-profile", ProfileController.updateProfile);
 profileRouter.get<{}, {}, { username: string }>
     ("/get-profiles", ProfileController.getAllProfiles);
 profileRouter.post<{}, {}, { username: string, profileName: string, avatar: string }>
