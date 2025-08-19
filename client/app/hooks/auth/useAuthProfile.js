@@ -1,10 +1,12 @@
 import { post, get } from '../../utils/api.js';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 
 export default function useAuthProfile({ account, setProfile }) {
     const [profiles, setProfiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const router = useRouter();
 
     const fetchProfilesData = async () => {
         setLoading(true);
@@ -23,11 +25,10 @@ export default function useAuthProfile({ account, setProfile }) {
         const response = await post('profile/validate-profile',
             { username: account.username, profileName, pin });
         if (response.ok) {
-            alert("success")
             setProfile(response.profile);
+            router.replace('/home/budgetSummary');
         } else {
-            alert("error");
-            setError('שגיאה באימות הפרופיל');
+            setError('הוזן קוד סודי שגוי');
         }
         setLoading(false);
     };

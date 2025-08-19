@@ -12,7 +12,8 @@ export default function Button({
     disabled = false,
     className = "",
     bg,
-    textColor = "white"
+    textColor = "white",
+    textSize = "base"
 }) {
     const [pressed, setPressed] = useState(false);
 
@@ -72,6 +73,10 @@ export default function Button({
         mb-4
     `.trim();
 
+
+    const textClass = `text-${textColor} text-${textSize} text-center`;
+
+
     return (
         <AnimatedPressable
             onPress={onPress}
@@ -85,7 +90,7 @@ export default function Button({
             ]}
         >
             {typeof children === "string" ? (
-                <Text className={`text-${textColor}`}>{children}</Text>
+                <Text className={`$${textClass}`}>{children}</Text>
             ) : (
                 children
             )}

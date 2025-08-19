@@ -1,4 +1,3 @@
-import React from 'react';
 import { formatDate } from '../../../utils/budgetUtils';
 export default function BudgetPeriodSelector({ periods, selectedPeriod, onSelectPeriod }) {
 

@@ -9,42 +9,24 @@ export function useProfileBudgetData(profile) {
     const [selectedPeriod, setSelectedPeriod] = useState(null);
 
     useEffect(() => {
-        const fetchAllData = async () => {
-            if (!profile?.username || !profile?.expenses) {
-                setLoading(false);
-                return;
-            };
-
-            setLoading(true);
-            setError(null);
-
-            try {
-                const [budgetsResponse, expensesResponse] = await Promise.all([
-                    get(`profile/get-budgets?username=${profile.username}&profileName=${profile.profileName}`),
-                    get(`expenses/profile-expenses/${profile.expenses}`)
-                ]);
-
-                if (budgetsResponse.ok) {
-                    setProfileBudgets(budgetsResponse.budgets.budgets || []);
-                } else {
-                    throw new Error('Failed to fetch profile budgets');
-                }
-
-                if (expensesResponse.ok && expensesResponse.expenses) {
-                    setExpensesData(expensesResponse.expenses.categories || []);
-                } else {
-                    throw new Error('Failed to fetch expenses data');
-                }
-
-            } catch (err) {
-                console.error("Error fetching budget data:", err);
-                setError(err.message || 'An unexpected error occurred');
-            } finally {
-                setLoading(false);
+        setLoading(true);
+        setError(null);
+        const fetchData = async () => {
+            const [budgetsResponse, expensesResponse] = await Promise.all([
+                get(`profile/get-budgets?username=${profile.username}&profileName=${profile.profileName}`),
+                get(`expenses/profile-expenses/${profile.expenses}`)
+            ]);
+            if (budgetsResponse.ok && expensesResponse.ok) {
+                const budgets = budgetsResponse.budgets.budgets || [];
+                const expenses = expensesResponse.expenses.categories || [];
+                setProfileBudgets(budgets);
+                setExpensesData(expenses);
+            } else {
+                setError('שגיאה בטעינת נתונים, נסה שנית');
             }
+            setLoading(false);
         };
-
-        fetchAllData();
+        fetchData();
     }, [profile]);
 
     const availablePeriods = useMemo(() => {

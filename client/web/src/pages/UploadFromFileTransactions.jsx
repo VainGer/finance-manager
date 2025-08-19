@@ -32,7 +32,7 @@ export default function UploadFromFileTransactions() {
                 business: transaction.business.name,
                 bank: transaction.business.bankName,
                 description: transaction.business.bankName,
-                toUpload: true
+                toUpload: transaction.category && transaction.business
             }));
             setDataToUpload(data);
         }
@@ -264,7 +264,7 @@ export default function UploadFromFileTransactions() {
                     </div>
                 </div>
             )}
-            
+
             {/* Footer */}
             <Footer />
         </div>

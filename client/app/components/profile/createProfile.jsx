@@ -30,8 +30,6 @@ export default function CreateProfile({ username, firstProfile, setOnCreateLoadi
                 setAvatar(result.assets[0]);
             } else if (result.type === 'success') {
                 setAvatar(result);
-            } else {
-                console.log('User cancelled document picker');
             }
         } catch (err) {
             console.error('Error picking document:', err);

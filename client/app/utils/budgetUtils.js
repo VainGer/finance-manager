@@ -1,14 +1,6 @@
-export const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('he-IL');
-};
-
-export const formatCurrency = (amount) => {
-    return `₪${Number(amount).toLocaleString()}`;
-};
-
 export const getProgressPercentage = (spent, budget) => {
     if (!budget || budget === 0) return 0;
-    return (spent / budget) * 100;
+    return ((spent / budget) * 100).toFixed(1);
 };
 
 export const getProgressBarPercentage = (spent, budget) => {

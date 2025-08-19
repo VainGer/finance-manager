@@ -39,14 +39,10 @@ export default function useCreateProfile({ username, profileName, pin, avatar, c
         let avatarBase64 = null;
         if (avatar) {
             try {
-                // Get the correct URI from the avatar object
                 const uri = avatar.assets ? avatar.assets[0].uri : avatar.uri;
-                
                 if (!uri) {
                     throw new Error('Invalid avatar format');
                 }
-                
-                // Use the new function to resize and format the image
                 avatarBase64 = await prepareImage(uri);
             } catch (error) {
                 console.error('Base64 conversion error:', error);

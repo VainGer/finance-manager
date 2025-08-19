@@ -18,13 +18,14 @@ export default function ProfileBudgetDisplay({ profile }) {
         relevantPeriod
     } = useProfileBudgetData(profile);
 
+    if (error) {
+        return <ErrorMessage message={error} />;
+    }
+
     if (loading) {
         return <LoadingSpinner />;
     }
 
-    if (error) {
-        return <ErrorMessage message={error} />;
-    }
 
     if (!currentProfileBudget) {
         return (
