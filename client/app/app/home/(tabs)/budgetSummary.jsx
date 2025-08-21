@@ -1,10 +1,11 @@
 import { ScrollView, Text, View } from 'react-native';
-import BudgetPeriodSelector from '../../components/budgets/budgetPeriodSelector';
-import CategoryBudgetDetails from '../../components/budgets/categoryBudgetDetails';
-import OverallBudgetSummary from '../../components/budgets/overallBudgetSummary';
-import LoadingSpinner from '../../components/common/loadingSpinner';
-import { useAuth } from '../../context/AuthContext';
-import useBudgetSummary from '../../hooks/expenses/useBudgetSummary';
+import BudgetPeriodSelector from '../../../components/budgets/budgetPeriodSelector';
+import CategoryBudgetDetails from '../../../components/budgets/categoryBudgetDetails';
+import OverallBudgetSummary from '../../../components/budgets/overallBudgetSummary';
+import LoadingSpinner from '../../../components/common/loadingSpinner';
+import { useAuth } from '../../../context/AuthContext';
+import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
+
 
 export default function BudgetSummary() {
     const { profile } = useAuth();
@@ -45,7 +46,6 @@ export default function BudgetSummary() {
 
     return (
         <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
-
             <View className="bg-gray-200 py-6 px-4 mb-6">
                 <Text className="text-2xl font-bold text-center text-blue-800 mb-2">
                     סקירת תקציב - {profile.profileName}
