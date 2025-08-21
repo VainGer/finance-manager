@@ -2,7 +2,6 @@ import { useState } from "react"
 import CreateBusiness from "./CreateBusiness";
 import DeleteBusiness from "./DeleteBusiness";
 import RenameBusiness from "./RenameBusiness";
-import { menu } from "framer-motion/client";
 import Button from "../../../common/Button";
 
 export default function BusinessMenu({ goBack }) {

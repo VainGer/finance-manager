@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import LoadingSpinner from '../../components/common/loadingSpinner';
-import ProgressBar from '../../components/common/progressBar';
-import { useAuth } from '../../context/AuthContext';
-import useExpensesDisplay from '../../hooks/expenses/useExpensesDisplay';
+import LoadingSpinner from '../../../components/common/loadingSpinner';
+import ProgressBar from '../../../components/common/progressBar';
+import { useAuth } from '../../../context/AuthContext';
+import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
 
 
 const MainStats = ({ summary, formatAmount }) => (

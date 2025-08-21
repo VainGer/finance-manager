@@ -1,10 +1,10 @@
 import { ScrollView, Text, View } from 'react-native';
-import LoadingSpinner from '../../components/common/loadingSpinner';
-import ExpensesTable from '../../components/expenses/expensesTable';
-import Filter from '../../components/expenses/filter';
-import { useAuth } from '../../context/AuthContext';
-import useExpensesDisplay from '../../hooks/expenses/useExpensesDisplay';
-import { formatAmount } from '../../utils/formatters';
+import LoadingSpinner from '../../../components/common/loadingSpinner';
+import ExpensesTable from '../../../components/expenses/expensesTable';
+import Filter from '../../../components/expenses/filter';
+import { useAuth } from '../../../context/AuthContext';
+import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
+import { formatAmount } from '../../../utils/formatters';
 const TransactionsSummary = ({ filteredExpenses }) => {
     const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
     return (

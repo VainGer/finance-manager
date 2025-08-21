@@ -1,8 +1,8 @@
-import { Tabs } from "expo-router";
 import { useEffect } from "react";
 import { I18nManager } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { Drawer } from "expo-router/drawer";
+import Navbar from '../../components/common/navbar';
 export default function RootLayout() {
 
     useEffect(() => {
@@ -12,26 +12,60 @@ export default function RootLayout() {
 
     return (
         <SafeAreaView className="bg-gray-500 h-full">
-            <Tabs screenOptions={{
-                headerShown: false,
-                tabBarStyle: {
-                    height: 60,
-                    paddingBottom: 0,
-                    paddingTop: 0,
-                },
-                tabBarLabelStyle: {
-                    fontSize: 12,
-                    fontWeight: '500',
-                },
-                tabBarItemStyle: {
-                    padding: 0,
-                }
-            }}>
-                <Tabs.Screen name="graphs" options={{ title: "גרפים" }} />
-                <Tabs.Screen name="expenseSummary" options={{ title: "סקירת הוצאות" }} />
-                <Tabs.Screen name="expensesDisplay" options={{ title: "הוצאות" }} />
-                <Tabs.Screen name="budgetSummary" options={{ title: "סקירת תקציב" }} />
-            </Tabs>
+            <Drawer
+                screenOptions={{
+                    header: () => <Navbar />,
+                    drawerPosition: 'right',
+                    drawerLabelStyle: {
+                        fontWeight: '500',
+                        textAlign: 'right',
+                    },
+                    drawerContentStyle: {
+                        paddingTop: 20,
+                    },
+                }}
+            >
+                <Drawer.Screen
+                    name="(tabs)"
+                    options={{ drawerLabel: "דף ראשי", title: "דף ראשי",  }}
+                />
+                <Drawer.Screen name="addTransaction"
+                    options={{
+                        drawerLabel: 'הוסף הוצאה',
+                        title: 'הוסף הוצאה',
+                    }}
+                />
+                <Drawer.Screen name="categoryMenu"
+                    options={{
+                        drawerLabel: 'ניהול קטגוריות',
+                        title: 'ניהול קטגוריות',
+                    }}
+                />
+                <Drawer.Screen name="businessMenu"
+                    options={{
+                        drawerLabel: 'ניהול עסקים',
+                        title: 'ניהול עסקים',
+                    }}
+                />
+                <Drawer.Screen name="budgetsMenu"
+                    options={{
+                        drawerLabel: 'ניהול תקציבים',
+                        title: 'ניהול תקציבים',
+                    }}
+                />
+                <Drawer.Screen name="uploadTransactionsFromFile"
+                    options={{
+                        drawerLabel: 'העלאת עסקאות מקובץ',
+                        title: 'העלאת עסקאות מקובץ',
+                    }}
+                />
+                <Drawer.Screen name="profileSettings"
+                    options={{
+                        drawerLabel: 'הגדרות פרופיל',
+                        title: 'הגדרות פרופיל',
+                    }}
+                />
+            </Drawer>
         </SafeAreaView >
     );
 }
