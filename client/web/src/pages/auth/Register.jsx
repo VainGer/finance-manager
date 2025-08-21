@@ -2,7 +2,12 @@ import { useState } from "react";
 import { post } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
-import Footer from "../../components/common/Footer";
+import PageLayout from "../../components/layout/PageLayout";
+import NavigationHeader from "../../components/layout/NavigationHeader";
+import AuthFormContainer from "../../components/layout/AuthFormContainer";
+import FormInput from "../../components/common/FormInput";
+import ErrorAlert from "../../components/common/ErrorAlert";
+import SecurityBadge from "../../components/common/SecurityBadge";
 
 export default function Register() {
     const [username, setUsername] = useState('');
@@ -11,6 +16,21 @@ export default function Register() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const navigationButtons = [
+        {
+            label: 'התחברות',
+            path: '/login',
+            style: 'primary',
+            className: 'bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white shadow-md hover:shadow-lg transition-all duration-300'
+        },
+        {
+            label: 'דף הבית',
+            path: '/',
+            style: 'outline',
+            className: 'border-slate-400 text-slate-700 hover:bg-slate-100 hover:border-slate-500 transition-all duration-300'
+        }
+    ];
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -47,49 +67,62 @@ export default function Register() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-                <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-                    <h1 className="text-2xl font-bold text-center text-gray-900">הרשמה</h1>
-                    {error && <p className="text-sm text-center text-red-600 bg-red-100 border border-red-400 rounded-md py-2 px-4">{error}</p>}
-                    <form className='space-y-6' onSubmit={handleRegister}>
-                        <div>
-                            <input
-                                type="text"
-                                placeholder="שם משתמש"
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="password"
-                                placeholder="סיסמא"
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="password"
-                                placeholder="אימות סיסמא"
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-                        <Button
-                            type="submit"
-                            disabled={loading}
-                            style="primary"
-                        >
-                            {loading ? 'רושם...' : 'הירשם'}
-                        </Button>
-                    </form>
-                </div>
-            </div>
+        <PageLayout>
+            <NavigationHeader leftButtons={navigationButtons} />
             
-            {/* Footer */}
-            <Footer />
-        </div>
+            <AuthFormContainer 
+                title="הרשמה למערכת" 
+                subtitle="הצטרף לאלפי משתמשים המנהלים את הכספים שלהם בצורה חכמה"
+            >
+                {error && <ErrorAlert message={error} />}
+                
+                <form className='space-y-6' onSubmit={handleRegister}>
+                    <FormInput
+                        type="text"
+                        placeholder="שם משתמש"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                    />
+                    
+                    <FormInput
+                        type="password"
+                        placeholder="סיסמא"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    
+                    <FormInput
+                        type="password"
+                        placeholder="אימות סיסמא"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                    />
+                    
+                    <Button
+                        type="submit"
+                        disabled={loading}
+                        style="primary"
+                        className="w-full bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white font-medium py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                        {loading ? 'רושם...' : 'הירשם'}
+                    </Button>
+                </form>
+                
+                <div className="text-center text-sm text-slate-600 mt-6">
+                    יש לך כבר חשבון?{' '}
+                    <button
+                        onClick={() => navigate('/login')}
+                        className="text-slate-700 hover:text-slate-800 font-medium underline transition-colors duration-200"
+                    >
+                        התחבר כאן
+                    </button>
+                </div>
+                
+                <SecurityBadge />
+            </AuthFormContainer>
+        </PageLayout>
     );
 }

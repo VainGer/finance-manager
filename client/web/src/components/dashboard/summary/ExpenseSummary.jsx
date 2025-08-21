@@ -102,12 +102,37 @@ export default function ExpenseSummary({ profile }) {
 
     if (expenses.length === 0) {
         return (
-            <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">📊 סיכום הוצאות</h2>
-                <div className="text-center py-12">
-                    <div className="text-gray-400 text-6xl mb-4">📊</div>
-                    <div className="text-xl font-semibold text-gray-600 mb-2">אין הוצאות</div>
-                    <div className="text-gray-500">לא נמצאו עסקאות להצגה</div>
+            <div className="bg-white/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-bold">סיכום הוצאות</h2>
+                            <p className="text-white/80 text-sm">ניתוח מפורט של דפוסי ההוצאה</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Empty State */}
+                <div className="p-16 text-center">
+                    <div className="w-20 h-20 mx-auto mb-6 bg-slate-100 rounded-full flex items-center justify-center">
+                        <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <div className="text-xl font-bold text-slate-600 mb-3">עדיין אין הוצאות לניתוח</div>
+                    <div className="text-slate-500 mb-6">הוסף הוצאות כדי לראות סיכום ופירוט מפורט</div>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg text-sm text-slate-600">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        השתמש בכפתור הפעולות המהירות
+                    </div>
                 </div>
             </div>
         );
@@ -117,121 +142,154 @@ export default function ExpenseSummary({ profile }) {
     const formatAmount = (amount) => `₪${amount.toLocaleString()}`;
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl overflow-hidden">
             {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">📊 סיכום הוצאות</h2>
-                
-                {/* Breakdown Toggle Buttons */}
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setBreakdownView('category')}
-                        className={`px-4 py-2 rounded transition-colors ${
-                            breakdownView === 'category'
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                    >
-                        📈 הצגה לפי קטגוריות
-                    </button>
-                    <button
-                        onClick={() => setBreakdownView('business')}
-                        className={`px-4 py-2 rounded transition-colors ${
-                            breakdownView === 'business'
-                                ? 'bg-green-500 text-white'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                    >
-                        🏪 הצגה לפי עסקים
-                    </button>
+            <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-bold">סיכום הוצאות</h2>
+                            <p className="text-white/80 text-sm">ניתוח מפורט של דפוסי ההוצאה</p>
+                        </div>
+                    </div>
+                    
+                    {/* Breakdown Toggle Buttons */}
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setBreakdownView('category')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                                breakdownView === 'category'
+                                    ? 'bg-white text-slate-700 shadow-lg'
+                                    : 'bg-white/20 text-white hover:bg-white/30'
+                            }`}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                            קטגוריות
+                        </button>
+                        <button
+                            onClick={() => setBreakdownView('business')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                                breakdownView === 'business'
+                                    ? 'bg-white text-slate-700 shadow-lg'
+                                    : 'bg-white/20 text-white hover:bg-white/30'
+                            }`}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h4m9 0v-2.5A2.5 2.5 0 0018.5 16h-13A2.5 2.5 0 003 18.5V21" />
+                            </svg>
+                            עסקים
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* Main Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-blue-50 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold text-blue-600">{summary.transactionCount}</div>
-                    <div className="text-gray-600">עסקאות</div>
-                </div>
-                <div className="bg-red-50 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold text-red-600">{formatAmount(summary.totalAmount)}</div>
-                    <div className="text-gray-600">סה"כ הוצאות</div>
-                </div>
-                <div className="bg-green-50 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold text-green-600">
-                        {formatAmount(summary.totalAmount / summary.transactionCount)}
+            {/* Content */}
+            <div className="p-6 space-y-6">
+                {/* Main Stats */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 text-center border border-blue-200">
+                        <div className="text-3xl font-bold text-blue-600">{summary.transactionCount}</div>
+                        <div className="text-sm text-blue-700 font-medium">עסקאות</div>
                     </div>
-                    <div className="text-gray-600">ממוצע לעסקה</div>
-                </div>
-                <div className="bg-purple-50 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold text-purple-600">
-                        {Object.keys(summary.categoryTotals).length}
+                    <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 text-center border border-red-200">
+                        <div className="text-3xl font-bold text-red-600">{formatAmount(summary.totalAmount)}</div>
+                        <div className="text-sm text-red-700 font-medium">סה"כ הוצאות</div>
                     </div>
-                    <div className="text-gray-600">קטגוריות</div>
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 text-center border border-green-200">
+                        <div className="text-3xl font-bold text-green-600">{formatAmount(summary.totalAmount / summary.transactionCount)}</div>
+                        <div className="text-sm text-green-700 font-medium">ממוצע לעסקה</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 text-center border border-purple-200">
+                        <div className="text-3xl font-bold text-purple-600">
+                            {breakdownView === 'category' ? Object.keys(summary.categoryTotals).length : Object.keys(summary.businessTotals).length}
+                        </div>
+                        <div className="text-sm text-purple-700 font-medium">
+                            {breakdownView === 'category' ? 'קטגוריות' : 'עסקים'}
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            {/* Single Breakdown Display */}
-            <div>
-                {breakdownView === 'category' ? (
-                    /* Category Breakdown */
-                    <div>
-                        <h3 className="text-xl font-bold mb-4">📈 הצגה לפי קטגוריות</h3>
-                        <div className="space-y-3">
-                            {Object.entries(summary.categoryTotals)
-                                .sort(([,a], [,b]) => b - a)
-                                .map(([category, amount]) => {
-                                    const percentage = (amount / summary.totalAmount * 100).toFixed(1);
-                                    return (
-                                        <div key={category} className="bg-gray-50 rounded-lg p-4">
-                                            <div className="flex justify-between items-center mb-2">
-                                                <span className="font-semibold">{category}</span>
-                                                <span className="text-lg font-bold text-blue-600">
-                                                    {formatAmount(amount)}
-                                                </span>
+                {/* Breakdown */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+                    {breakdownView === 'category' ? (
+                        <div className="p-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center">
+                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-800">פירוט לפי קטגוריות</h3>
+                            </div>
+                            <div className="space-y-4">
+                                {Object.entries(summary.categoryTotals)
+                                    .sort(([,a], [,b]) => b - a)
+                                    .map(([category, amount]) => {
+                                        const percentage = (amount / summary.totalAmount * 100).toFixed(1);
+                                        return (
+                                            <div key={category} className="bg-slate-50 rounded-lg p-4">
+                                                <div className="flex justify-between items-center mb-3">
+                                                    <span className="font-semibold text-slate-800">{category}</span>
+                                                    <span className="text-lg font-bold text-blue-600">
+                                                        {formatAmount(amount)}
+                                                    </span>
+                                                </div>
+                                                <div className="w-full bg-slate-200 rounded-full h-3">
+                                                    <div 
+                                                        className="bg-blue-500 h-3 rounded-full transition-all duration-500" 
+                                                        style={{ width: `${percentage}%` }}
+                                                    ></div>
+                                                </div>
+                                                <div className="text-sm text-slate-600 mt-2 text-right">{percentage}%</div>
                                             </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div 
-                                                    className="bg-blue-500 h-2 rounded-full" 
-                                                    style={{ width: `${percentage}%` }}
-                                                ></div>
-                                            </div>
-                                            <div className="text-sm text-gray-600 mt-1">{percentage}%</div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    /* Business Breakdown */
-                    <div>
-                        <h3 className="text-xl font-bold mb-4">🏪 הצגה לפי עסקים</h3>
-                        <div className="space-y-3">
-                            {Object.entries(summary.businessTotals)
-                                .sort(([,a], [,b]) => b - a)
-                                .map(([business, amount]) => {
-                                    const percentage = (amount / summary.totalAmount * 100).toFixed(1);
-                                    return (
-                                        <div key={business} className="bg-gray-50 rounded-lg p-4">
-                                            <div className="flex justify-between items-center mb-2">
-                                                <span className="font-semibold">{business}</span>
-                                                <span className="text-lg font-bold text-green-600">
-                                                    {formatAmount(amount)}
-                                                </span>
+                    ) : (
+                        <div className="p-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-6 h-6 bg-green-500 rounded-lg flex items-center justify-center">
+                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h4m9 0v-2.5A2.5 2.5 0 0018.5 16h-13A2.5 2.5 0 003 18.5V21" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-800">פירוט לפי עסקים</h3>
+                            </div>
+                            <div className="space-y-4">
+                                {Object.entries(summary.businessTotals)
+                                    .sort(([,a], [,b]) => b - a)
+                                    .map(([business, amount]) => {
+                                        const percentage = (amount / summary.totalAmount * 100).toFixed(1);
+                                        return (
+                                            <div key={business} className="bg-slate-50 rounded-lg p-4">
+                                                <div className="flex justify-between items-center mb-3">
+                                                    <span className="font-semibold text-slate-800">{business}</span>
+                                                    <span className="text-lg font-bold text-green-600">
+                                                        {formatAmount(amount)}
+                                                    </span>
+                                                </div>
+                                                <div className="w-full bg-slate-200 rounded-full h-3">
+                                                    <div 
+                                                        className="bg-green-500 h-3 rounded-full transition-all duration-500" 
+                                                        style={{ width: `${percentage}%` }}
+                                                    ></div>
+                                                </div>
+                                                <div className="text-sm text-slate-600 mt-2 text-right">{percentage}%</div>
                                             </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div 
-                                                    className="bg-green-500 h-2 rounded-full" 
-                                                    style={{ width: `${percentage}%` }}
-                                                ></div>
-                                            </div>
-                                            <div className="text-sm text-gray-600 mt-1">{percentage}%</div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );

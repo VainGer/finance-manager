@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { post } from '../../utils/api';
 import Button from '../../components/common/Button';
-import Footer from '../../components/common/Footer';
+import PageLayout from '../../components/layout/PageLayout';
+import NavigationHeader from '../../components/layout/NavigationHeader';
+import AuthFormContainer from '../../components/layout/AuthFormContainer';
+import FormInput from '../../components/common/FormInput';
+import ErrorAlert from '../../components/common/ErrorAlert';
+import SecurityBadge from '../../components/common/SecurityBadge';
 
 export default function Login() {
-
     const { setAccount } = useAuth();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -39,50 +43,96 @@ export default function Login() {
         }
     }
 
+    const navigationButtons = [
+        {
+            label: 'דף הבית',
+            path: '/',
+            style: 'outline',
+            className: 'border-slate-400 text-slate-700 hover:bg-slate-100 hover:border-slate-500 transition-all duration-300'
+        },
+        {
+            label: 'הרשמה',
+            path: '/register',
+            style: 'primary',
+            className: 'bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white shadow-md hover:shadow-lg transition-all duration-300'
+        }
+    ];
+
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-                <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-                    <h1 className="text-2xl font-bold text-center text-gray-900">התחברות</h1>
-                    {error && <p className="text-sm text-center text-red-600 bg-red-100 border border-red-400 rounded-md py-2 px-4">{error}</p>}
-                    <form className='space-y-6' onSubmit={handleLogin}>
-                        <div>
-                            <input
-                                type="text"
-                                placeholder="שם משתמש"
-                                value={username}
-                                onChange={(e) => {
-                                    setUsername(e.target.value);
-                                    if (error) setError(''); // Clear error when user types
-                                }}
-                                className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="password"
-                                placeholder="סיסמא"
-                                value={password}
-                                onChange={(e) => {
-                                    setPassword(e.target.value);
-                                    if (error) setError(''); // Clear error when user types
-                                }}
-                                className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-                        <Button
-                            type="submit"
-                            disabled={loading}
-                            style="primary"
-                        >
-                            {loading ? 'מתחבר...' : 'התחבר'}
-                        </Button>
-                    </form>
-                </div>
-            </div>
+        <PageLayout>
+            <NavigationHeader leftButtons={navigationButtons} />
             
-            {/* Footer */}
-            <Footer />
-        </div>
+            <AuthFormContainer 
+                title="התחברות לחשבון"
+                subtitle="ברוך הבא חזרה למנהל הכספים שלך"
+            >
+                <ErrorAlert message={error} />
+
+                <form className="space-y-6" onSubmit={handleLogin}>
+                    <FormInput
+                        label="שם משתמש"
+                        placeholder="הזן את שם המשתמש שלך"
+                        value={username}
+                        onChange={(e) => {
+                            setUsername(e.target.value);
+                            if (error) setError('');
+                        }}
+                        required
+                    />
+                    
+                    <FormInput
+                        label="סיסמא"
+                        type="password"
+                        placeholder="הזן את הסיסמא שלך"
+                        value={password}
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            if (error) setError('');
+                        }}
+                        required
+                    />
+
+                    <Button
+                        type="submit"
+                        disabled={loading}
+                        style="primary"
+                        size="large"
+                        className="w-full bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white font-medium py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                        {loading ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                מתחבר...
+                            </span>
+                        ) : (
+                            <span className="flex items-center justify-center gap-2">
+                                התחבר לחשבון
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        )}
+                    </Button>
+                </form>
+
+                {/* Register Link */}
+                <div className="mt-6 text-center">
+                    <p className="text-slate-600 text-sm">
+                        עדיין אין לך חשבון?{' '}
+                        <button
+                            onClick={() => navigate('/register')}
+                            className="text-slate-700 font-medium hover:text-slate-900 transition-colors duration-300"
+                        >
+                            הירשם עכשיו
+                        </button>
+                    </p>
+                </div>
+            </AuthFormContainer>
+
+            <SecurityBadge />
+        </PageLayout>
     );
 }

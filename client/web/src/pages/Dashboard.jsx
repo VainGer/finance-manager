@@ -7,14 +7,16 @@ import ExpenseSummary from '../components/dashboard/summary/ExpenseSummary';
 import InteractiveCharts from '../components/dashboard/charts/InteractiveCharts';
 import SideMenu from '../components/dashboard/menu/SideMenu';
 import DisplaySelector from '../components/dashboard/DisplaySelector';
-import Navbar from '../components/Navbar';
-import Footer from '../components/common/Footer';
+import NavigationHeader from '../components/layout/NavigationHeader';
+import PageLayout from '../components/layout/PageLayout';
+import FloatingActionButton from '../components/common/FloatingActionButton';
 
 export default function Dashboard() {
     const { profile, account } = useAuth();
     const [display, setDisplay] = useState(<ProfileBudgetDisplay profile={profile} key="budget-initial" />);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [currentDisplayType, setCurrentDisplayType] = useState('budget');
+    const [showFloatingMenu, setShowFloatingMenu] = useState(false);
 
     // Function to trigger refresh of current display
     const triggerRefresh = useCallback(() => {
@@ -38,39 +40,78 @@ export default function Dashboard() {
     }, [profile, refreshTrigger, currentDisplayType]);
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            {!profile.parentProfile && <ChildrenBudgetUpdate username={account.username} profileName={profile.profileName} />}
-            <Navbar />
-
-            <div className="container mx-auto px-4 py-6">
-
-                {/* Display Selector */}
-                <DisplaySelector
-                    setDisplay={setDisplay}
-                    setCurrentDisplayType={setCurrentDisplayType}
-                    profile={profile}
-                    refreshTrigger={refreshTrigger}
+        <>
+            <PageLayout spacing={false}>
+                {/* Professional Navigation */}
+                <NavigationHeader 
+                    title="מערכת ניהול כספים"
+                    subtitle={`שלום ${profile?.profileName || account?.username}`}
                 />
 
-                {/* Main Content Area */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    {/* Side Menu */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-white rounded-lg shadow-lg p-4">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">פעולות מהירות</h3>
-                            <SideMenu onTransactionAdded={triggerRefresh} />
+                {/* Main Dashboard Container with proper spacing */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 flex-1">
+                    {/* Children Budget Update Banner */}
+                    {profile && !profile.parentProfile && (
+                        <ChildrenBudgetUpdate 
+                            username={account?.username} 
+                            profileName={profile?.profileName} 
+                        />
+                    )}
+
+                    {/* Display Selector - Now perfectly centered with proper spacing */}
+                    <DisplaySelector
+                        setDisplay={setDisplay}
+                        setCurrentDisplayType={setCurrentDisplayType}
+                        profile={profile}
+                        refreshTrigger={refreshTrigger}
+                    />
+
+                {/* Main Content Grid */}
+                    <div className="grid grid-cols-1 xl:grid-cols-7 gap-8">
+                        {/* Desktop Side Menu - Now wider */}
+                        <div className="hidden xl:block xl:col-span-2">
+                            <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-6 sticky top-6">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-8 h-8 bg-gradient-to-r from-slate-700 to-slate-800 rounded-lg flex items-center justify-center">
+                                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-lg font-bold text-slate-800">פעולות מהירות</h3>
+                                </div>
+                                <SideMenu onTransactionAdded={triggerRefresh} isFloatingMode={false} />
+                            </div>
+                        </div>
+
+                        {/* Enhanced Main Display Area */}
+                        <div className="xl:col-span-5">
+                            <div className="bg-white/60 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+                                {display}
+                            </div>
                         </div>
                     </div>
-
-                    {/* Main Display Area */}
-                    <div className="lg:col-span-3">
-                        {display}
-                    </div>
                 </div>
-            </div>
 
-            {/* Footer */}
-            <Footer />
-        </div>
+                {/* Pass floating menu state to SideMenu for modal handling */}
+                <SideMenu 
+                    onTransactionAdded={triggerRefresh} 
+                    showFloatingMenu={showFloatingMenu} 
+                    setShowFloatingMenu={setShowFloatingMenu}
+                    isFloatingMode={true}
+                />
+
+                {/* Grey Floating Action Button - Always visible on mobile/tablet */}
+                <div className="xl:hidden">
+                    <FloatingActionButton 
+                        onClick={() => setShowFloatingMenu(true)}
+                        icon={
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                        }
+                    />
+                </div>
+            </PageLayout>
+        </>
     );
 }

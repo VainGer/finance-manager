@@ -1,3 +1,8 @@
+import Button from '../common/Button';
+import FormInput from '../common/FormInput';
+import ErrorAlert from '../common/ErrorAlert';
+import SecurityBadge from '../common/SecurityBadge';
+
 export default function AuthForm({
     selectedProfile,
     error,
@@ -7,39 +12,58 @@ export default function AuthForm({
     loading
 }) {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-                <h1 className="text-2xl font-bold text-center text-gray-900">
-                    כניסה לפרופיל: {selectedProfile.profileName}
-                </h1>
-                {error && <p className="text-sm text-center text-red-600 bg-red-100 border border-red-400 rounded-md py-2 px-4">{error}</p>}
-                <form className='space-y-6' onSubmit={onSubmit}>
-                    <div>
-                        <input
+        <div className="flex justify-center">
+            <div className="w-full max-w-md">
+                <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 shadow-2xl p-8">
+                    {/* Profile Icon and Title */}
+                    <div className="text-center mb-6">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-slate-600 to-slate-800 rounded-full mb-4">
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h1 className="text-2xl font-bold text-slate-800 mb-2">
+                            כניסה לפרופיל
+                        </h1>
+                        <p className="text-lg text-slate-600">
+                            {selectedProfile.profileName}
+                        </p>
+                    </div>
+
+                    {error && <ErrorAlert message={error} className="mb-6" />}
+                    
+                    <form className='space-y-6' onSubmit={onSubmit}>
+                        <FormInput
                             type="password"
-                            placeholder="הזן את הקוד הסודי"
+                            placeholder="הזן את הקוד הסודי (4 ספרות)"
                             onChange={(e) => setPinInput(e.target.value)}
-                            className="w-full px-4 py-2 text-center border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             maxLength="4"
+                            className="text-center text-lg tracking-widest"
+                            required
                         />
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <button
-                            type="button"
-                            onClick={onCancel}
-                            className="w-full py-2 px-4 font-semibold text-gray-700 bg-gray-200 rounded-md shadow-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                        >
-                            ביטול
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full py-2 px-4 font-semibold text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        >
-                            {loading ? 'מאמת...' : 'כניסה'}
-                        </button>
-                    </div>
-                </form>
+                        
+                        <div className="flex gap-4">
+                            <Button
+                                type="button"
+                                onClick={onCancel}
+                                style="outline"
+                                className="flex-1 border-slate-400 text-slate-700 hover:bg-slate-100 hover:border-slate-500 transition-all duration-300"
+                            >
+                                ביטול
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                style="primary"
+                                className="flex-1 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                            >
+                                {loading ? 'מאמת...' : 'כניסה'}
+                            </Button>
+                        </div>
+                    </form>
+
+                    <SecurityBadge className="mt-6" />
+                </div>
             </div>
         </div>
     );

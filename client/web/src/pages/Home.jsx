@@ -24,7 +24,7 @@ export default function Home() {
                                 onClick={() => navigate('/login')}
                                 style="outline"
                                 size="small"
-                                className="border-slate-400 text-slate-700 hover:bg-slate-100 hover:border-slate-500 transition-all duration-300"
+                                className="min-w-[80px] border-slate-400 text-slate-700 hover:bg-slate-100 hover:border-slate-500 transition-all duration-300"
                             >
                                 התחברות
                             </Button>
@@ -32,7 +32,7 @@ export default function Home() {
                                 onClick={() => navigate('/register')}
                                 style="primary"
                                 size="small"
-                                className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                                className="min-w-[80px] bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
                             >
                                 הרשמה
                             </Button>

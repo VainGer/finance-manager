@@ -4,22 +4,40 @@ import { useAuth } from '../../context/AuthContext';
 import { get, post } from '../../utils/api';
 import CreateProfile from '../../components/profile/CreateProfile';
 import ProfileList from '../../components/profile/ProfileList';
-import Navbar from '../../components/Navbar';
 import AuthForm from '../../components/profile/AuthForm';
+import PageLayout from '../../components/layout/PageLayout';
+import NavigationHeader from '../../components/layout/NavigationHeader';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import Footer from '../../components/common/Footer';
+import ErrorAlert from '../../components/common/ErrorAlert';
+import Alert from '../../components/common/Alert';
 
 export default function ProfileAuth() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { account } = useAuth();
-    const { setProfile } = useAuth();
+    const { account, setProfile } = useAuth();
 
     const [profiles, setProfiles] = useState([]);
     const [selectedProfile, setSelectedProfile] = useState(null);
+    const [showCreateProfile, setShowCreateProfile] = useState(false);
     const [loading, setLoading] = useState(true);
     const [pinInput, setPinInput] = useState('');
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+
+    // Navigation configuration with logout option
+    const navigationButtons = [
+        {
+            label: 'התנתק',
+            path: '/',
+            style: 'outline',
+            className: 'border-red-400 text-red-600 hover:bg-red-50 hover:border-red-500 transition-all duration-300',
+            onClick: () => {
+                // Clear authentication and redirect to home
+                localStorage.removeItem('token');
+                localStorage.removeItem('account');
+            }
+        }
+    ];
 
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
@@ -74,22 +92,67 @@ export default function ProfileAuth() {
 
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Navbar />
-            {loading ? <LoadingSpinner /> : (
-                <>
-                    {profiles.length > 0 && !selectedProfile && <ProfileList profiles={profiles} onSelect={setSelectedProfile} />}
-                    {!profiles || profiles.length === 0 && <CreateProfile username={account.username} firstProfile={true} onProfileCreated={refreshProfiles} />}
-                    {selectedProfile && <AuthForm selectedProfile={selectedProfile}
-                        error={error}
-                        onSubmit={authProfile}
-                        setPinInput={setPinInput}
-                        onCancel={() => setSelectedProfile(null)}
-                        loading={loading} />}
-                </>)}
-                
-            {/* Footer */}
-            <Footer />
-        </div>
+        <PageLayout>
+            <NavigationHeader leftButtons={navigationButtons} />
+            
+            <div className="min-h-screen bg-gradient-to-b from-slate-50 to-gray-100 py-12">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Page Header */}
+                    <div className="text-center mb-8">
+                        <h1 className="text-3xl font-bold text-slate-800 mb-2">
+                            ניהול פרופילים
+                        </h1>
+                        <p className="text-lg text-slate-600">
+                            בחר פרופיל כדי להתחיל לנהל את הכספים שלך
+                        </p>
+                    </div>
+
+                    {/* Success Message */}
+                    {successMessage && (
+                        <div className="mb-6">
+                            <Alert type="success" message={successMessage} />
+                        </div>
+                    )}
+
+                    {/* Content */}
+                    {loading ? (
+                        <div className="flex justify-center items-center min-h-[400px]">
+                            <LoadingSpinner />
+                        </div>
+                    ) : (
+                        <div className="space-y-6">
+                            {/* Show Profile List */}
+                            {profiles.length > 0 && !selectedProfile && (
+                                <ProfileList 
+                                    profiles={profiles} 
+                                    onSelect={setSelectedProfile} 
+                                />
+                            )}
+
+                            {/* Show Create Profile */}
+                            {(!profiles || profiles.length === 0) && (
+                                <CreateProfile 
+                                    username={account.username} 
+                                    firstProfile={true} 
+                                    onProfileCreated={refreshProfiles} 
+                                />
+                            )}
+
+                            {/* Show Auth Form */}
+                            {selectedProfile && (
+                                <AuthForm 
+                                    selectedProfile={selectedProfile}
+                                    error={error}
+                                    onSubmit={authProfile}
+                                    setPinInput={setPinInput}
+                                    onCancel={() => setSelectedProfile(null)}
+                                    loading={loading} 
+                                />
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </PageLayout>
     );
 }

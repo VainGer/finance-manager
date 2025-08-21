@@ -51,24 +51,43 @@ export default function DeleteCategory({ goBack }) {
     };
 
     return (
-        <div className="p-4 border rounded-lg shadow-sm bg-white">
+        <div className="p-6 bg-white/95 backdrop-blur-sm">
             {showConfirm ? (
-                <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-center text-red-600">אישור מחיקת קטגוריה</h2>
-                    <div className="bg-red-50 border border-red-200 rounded-md p-4 my-4">
-                        <p className="text-center text-red-700">
-                            האם אתה בטוח שברצונך למחוק את הקטגוריה "{selectedCategory}"?
-                        </p>
-                        <p className="text-center text-red-700 text-sm mt-2">
-                            פעולה זו אינה ניתנת לביטול וכל התקציבים וההוצאות המשויכים לקטגוריה זו יימחקו.
-                        </p>
+                <div className="space-y-6">
+                    {/* Confirmation Header */}
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                        </div>
+                        <h2 className="text-xl font-bold text-slate-800 mb-2">אישור מחיקת קטגוריה</h2>
                     </div>
-                    <div className="flex items-center gap-4">
+
+                    {/* Warning Message */}
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+                        <div className="text-center space-y-3">
+                            <p className="text-red-800 font-semibold">
+                                האם אתה בטוח שברצונך למחוק את הקטגוריה "{selectedCategory}"?
+                            </p>
+                            <div className="bg-red-100 rounded-lg p-4">
+                                <p className="text-red-700 text-sm font-medium">
+                                    ⚠️ פעולה זו אינה ניתנת לביטול
+                                </p>
+                                <p className="text-red-600 text-sm mt-1">
+                                    כל התקציבים וההוצאות המשויכים לקטגוריה זו יימחקו לצמיתות
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-4">
                         <button
                             type="button"
                             onClick={cancelDelete}
-                            className="w-full py-2 px-4 font-semibold text-gray-700 bg-gray-200 rounded-md shadow-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                             disabled={loading}
+                            className="flex-1 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-50 text-slate-700 px-6 py-3 rounded-xl font-semibold transition-colors"
                         >
                             ביטול
                         </button>
@@ -76,49 +95,79 @@ export default function DeleteCategory({ goBack }) {
                             type="button"
                             onClick={deleteCategory}
                             disabled={loading}
-                            className="w-full py-2 px-4 font-semibold text-white bg-red-600 rounded-md shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold transition-colors"
                         >
-                            {loading ? 'מוחק...' : 'כן, מחק קטגוריה'}
+                            {loading ? (
+                                <div className="flex items-center gap-2 justify-center">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    מוחק...
+                                </div>
+                            ) : (
+                                'כן, מחק קטגוריה'
+                            )}
                         </button>
                     </div>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-800">מחיקת קטגוריה</h2>
-                    
+                <div className="space-y-6">
+                    {/* Error Alert */}
                     {error && (
-                        <p className="text-sm text-center text-red-600 bg-red-100 border border-red-400 rounded-md py-2 px-4">
-                            {error}
-                        </p>
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
+                            <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p className="text-red-700 text-sm font-medium">{error}</p>
+                        </div>
                     )}
                     
+                    {/* Success Alert */}
                     {success && (
-                        <p className="text-sm text-center text-green-600 bg-green-100 border border-green-400 rounded-md py-2 px-4">
-                            {success}
-                        </p>
+                        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+                            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p className="text-green-700 text-sm font-medium">{success}</p>
+                        </div>
                     )}
                     
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">בחר קטגוריה למחיקה</label>
-                        <CategorySelect refId={profile.expenses} setSelectedCategory={setSelectedCategory} />
-                    </div>
-                    
-                    <div className="flex items-center gap-4">
-                        <button
-                            type="button"
-                            onClick={goBack}
-                            className="w-full py-2 px-4 font-semibold text-gray-700 bg-gray-200 rounded-md shadow-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                        >
-                            ביטול
-                        </button>
-                        <button
-                            type="submit"
-                            className="w-full py-2 px-4 font-semibold text-white bg-red-600 rounded-md shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                        >
-                            המשך למחיקה
-                        </button>
-                    </div>
-                </form>
+                    <form onSubmit={handleSubmit} className="space-y-6" dir="rtl">
+                        {/* Warning Section */}
+                        <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3">
+                            <svg className="w-5 h-5 text-orange-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                            <div>
+                                <p className="text-orange-800 text-sm font-medium mb-1">זהירות - פעולה בלתי הפיכה</p>
+                                <p className="text-orange-700 text-sm">מחיקת קטגוריה תמחק את כל הנתונים הקשורים אליה</p>
+                            </div>
+                        </div>
+                        
+                        {/* Category Selection */}
+                        <div className="space-y-3">
+                            <label className="block text-sm font-semibold text-slate-800 text-right">בחר קטגוריה למחיקה</label>
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                                <CategorySelect refId={profile.expenses} setSelectedCategory={setSelectedCategory} />
+                            </div>
+                        </div>
+                        
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 pt-4">
+                            <button
+                                type="button"
+                                onClick={goBack}
+                                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-semibold transition-colors"
+                            >
+                                ביטול
+                            </button>
+                            <button
+                                type="submit"
+                                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                            >
+                                המשך למחיקה
+                            </button>
+                        </div>
+                    </form>
+                </div>
             )}
         </div>
     );

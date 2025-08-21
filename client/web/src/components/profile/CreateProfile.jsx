@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { post } from '../../utils/api';
+import FormInput from '../common/FormInput';
+import Button from '../common/Button';
+import ErrorAlert from '../common/ErrorAlert';
 
 const toBase64 = async (file) => {
     return new Promise((resolve, reject) => {
@@ -65,75 +68,203 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
     };
 
     return (
-        <div className="w-full max-w-md mx-auto" dir="rtl">
-            <div className="p-8 space-y-6 bg-white rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold text-center text-gray-900">הוספת פרופיל</h2>
-                {error && <p className="text-sm text-center text-red-600 bg-red-100 border border-red-400 rounded-md py-2 px-4">{error}</p>}
-                <form onSubmit={createProfile} className="space-y-6">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">שם פרופיל</label>
-                        <input
-                            type="text"
-                            className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="הכנס שם פרופיל"
-                            onChange={(e) => setProfileName(e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">קוד סודי</label>
-                        <input
-                            type="password"
-                            className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="הכנס קוד סודי (4 ספרות)"
-                            onChange={(e) => setPin(e.target.value)}
-                            maxLength="4"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">הוסף תמונת פרופיל</label>
-                        <div className="flex items-center gap-4">
-                            <label
-                                htmlFor="avatar-upload"
-                                className="w-full cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
-                            >
-                                <span>בחר קובץ</span>
-                            </label>
-                            <input
-                                id="avatar-upload"
-                                type="file"
-                                className="hidden"
-                                accept="image/*"
-                                onChange={(e) => setAvatar(e.target.files[0])}
-                            />
-                            {avatar && <span className="text-sm text-gray-500">{avatar.name}</span>}
+        <div className="w-full max-w-2xl mx-auto">
+            <div className="bg-white/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-bold">יצירת פרופיל חדש</h2>
+                            <p className="text-white/80 text-sm">הוסף פרופיל חדש למערכת ניהול הכספים</p>
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">בחר צבע</label>
-                        <input
-                            type="color"
-                            className="w-full h-10 p-1 border border-gray-300 rounded-md"
-                            onChange={(e) => setColor(e.target.value)}
-                        />
-                    </div>
-                    {!firstProfile && (
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                                checked={parentProfile}
-                                onChange={(e) => setParentProfile(e.target.checked)}
-                            />
-                            <label className="text-sm text-gray-900">הגדר כפרופיל הורה</label>
+                </div>
+
+                {/* Content */}
+                <div className="p-8">
+                    {error && (
+                        <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                            <div className="flex items-center gap-3">
+                                <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <span className="text-red-700 font-medium">{error}</span>
+                            </div>
                         </div>
                     )}
-                    <button
-                        className="w-full py-2 px-4 font-semibold text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        type="submit"
-                    >
-                        צור פרופיל
-                    </button>
-                </form>
+                    
+                    <form onSubmit={createProfile} className="space-y-6">
+                        {/* Profile Name */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-slate-700 uppercase tracking-wide">שם פרופיל</label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="הכנס שם פרופיל"
+                                    value={profileName}
+                                    onChange={(e) => setProfileName(e.target.value)}
+                                    className="w-full p-4 pr-12 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 bg-white shadow-sm"
+                                    required
+                                />
+                                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                                    <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* PIN */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-slate-700 uppercase tracking-wide">קוד סודי (4 ספרות)</label>
+                            <div className="relative">
+                                <input
+                                    type="password"
+                                    placeholder="●●●●"
+                                    value={pin}
+                                    onChange={(e) => setPin(e.target.value)}
+                                    className="w-full p-4 pr-12 text-center text-2xl tracking-widest border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 bg-white shadow-sm font-mono"
+                                    maxLength="4"
+                                    pattern="\d{4}"
+                                    required
+                                />
+                                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                                    <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p className="text-xs text-slate-600 bg-slate-50 rounded-lg p-3 border border-slate-200">
+                                הקוד חייב להכיל בדיוק 4 ספרות
+                            </p>
+                        </div>
+
+                        {/* Avatar Upload */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-slate-700 uppercase tracking-wide">תמונת פרופיל (אופציונלי)</label>
+                            <div className="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                    <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-slate-200 to-slate-300 border-4 border-white shadow-lg flex items-center justify-center">
+                                        {avatar ? (
+                                            <img src={URL.createObjectURL(avatar)} alt="תצוגה מקדימה" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <svg className="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 text-center sm:text-right">
+                                        <label
+                                            htmlFor="avatar-upload"
+                                            className="inline-flex items-center gap-2 cursor-pointer bg-white hover:bg-slate-50 py-3 px-6 border-2 border-slate-300 hover:border-slate-400 rounded-xl shadow-sm text-sm font-medium text-slate-700 transition-all duration-200"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            {avatar ? 'שנה תמונה' : 'בחר תמונה'}
+                                        </label>
+                                        <input
+                                            id="avatar-upload"
+                                            type="file"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={(e) => setAvatar(e.target.files[0])}
+                                        />
+                                        {avatar && (
+                                            <p className="text-sm text-slate-600 mt-2 font-medium">
+                                                {avatar.name}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Color Picker */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-slate-700 uppercase tracking-wide">צבע פרופיל</label>
+                            <div className="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                                <div className="grid grid-cols-6 gap-3 mb-4">
+                                    {[
+                                        { color: '#FF0000', name: 'אדום' },     
+                                        { color: '#00AA00', name: 'ירוק' },     
+                                        { color: '#0066FF', name: 'כחול' },     
+                                        { color: '#FFD700', name: 'צהוב' },     
+                                        { color: '#FF6B35', name: 'כתום' },     
+                                        { color: '#800080', name: 'סגול' },     
+                                        { color: '#FF1493', name: 'ורוד' },     
+                                        { color: '#20B2AA', name: 'טורקיז' },   
+                                        { color: '#4B0082', name: 'אינדיגו' },  
+                                        { color: '#708090', name: 'אפור' },     
+                                        { color: '#8B4513', name: 'חום' },      
+                                        { color: '#2E8B57', name: 'ירוק ים' }   
+                                    ].map(({ color: colorValue, name }) => (
+                                        <button
+                                            key={colorValue}
+                                            type="button"
+                                            onClick={() => setColor(colorValue)}
+                                            className={`w-12 h-12 rounded-xl border-4 transition-all duration-200 hover:scale-110 hover:shadow-lg ${
+                                                color === colorValue
+                                                    ? 'border-slate-800 shadow-lg transform scale-105'
+                                                    : 'border-slate-300 hover:border-slate-500'
+                                            }`}
+                                            style={{ backgroundColor: colorValue }}
+                                            title={name}
+                                        />
+                                    ))}
+                                </div>
+                                <div className="text-center text-sm text-slate-600 bg-white rounded-lg p-3 border border-slate-200">
+                                    צבע נבחר: <span className="font-semibold" style={{ color: color }}>
+                                        {[
+                                            { color: '#FF0000', name: 'אדום' }, { color: '#00AA00', name: 'ירוק' }, { color: '#0066FF', name: 'כחול' },
+                                            { color: '#FFD700', name: 'צהוב' }, { color: '#FF6B35', name: 'כתום' }, { color: '#800080', name: 'סגול' },
+                                            { color: '#FF1493', name: 'ורוד' }, { color: '#20B2AA', name: 'טורקיז' }, { color: '#4B0082', name: 'אינדיגו' },
+                                            { color: '#708090', name: 'אפור' }, { color: '#8B4513', name: 'חום' }, { color: '#2E8B57', name: 'ירוק ים' }
+                                        ].find(c => c.color === color)?.name || 'לא ידוע'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Parent Profile Checkbox */}
+                        {!firstProfile && (
+                            <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                                <div className="flex items-start gap-4">
+                                    <input
+                                        type="checkbox"
+                                        className="w-5 h-5 text-blue-600 border-2 border-blue-300 rounded focus:ring-blue-500 focus:ring-2 mt-0.5"
+                                        checked={parentProfile}
+                                        onChange={(e) => setParentProfile(e.target.checked)}
+                                    />
+                                    <div>
+                                        <label className="text-sm font-semibold text-blue-800">הגדר כפרופיל הורה</label>
+                                        <p className="text-xs text-blue-700 mt-1">פרופיל הורה יכול לנהל תקציבים של פרופילי ילדים</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Submit Button */}
+                        <div className="pt-6 border-t border-slate-200">
+                            <Button 
+                                type="submit" 
+                                className="w-full px-6 py-4 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white border-0 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl text-lg"
+                            >
+                                <div className="flex items-center justify-center gap-2">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                    </svg>
+                                    צור פרופיל חדש
+                                </div>
+                            </Button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );

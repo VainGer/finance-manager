@@ -63,58 +63,86 @@ export default function RenameCategory({ goBack }) {
     };
 
     return (
-        <div className="p-4 border rounded-lg shadow-sm bg-white">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">עריכת שם קטגוריה</h2>
-            
+        <div className="p-6 bg-white/95 backdrop-blur-sm">
+            {/* Error Alert */}
             {error && (
-                <p className="text-sm text-center text-red-600 bg-red-100 border border-red-400 rounded-md py-2 px-4 mb-4">
-                    {error}
-                </p>
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3 mb-6">
+                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-red-700 text-sm font-medium">{error}</p>
+                </div>
             )}
             
+            {/* Success Alert */}
             {success && (
-                <p className="text-sm text-center text-green-600 bg-green-100 border border-green-400 rounded-md py-2 px-4 mb-4">
-                    {success}
-                </p>
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3 mb-6">
+                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-green-700 text-sm font-medium">{success}</p>
+                </div>
             )}
             
-            <form onSubmit={editCategory} className="space-y-4">
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">בחר קטגוריה</label>
-                    <CategorySelect 
-                        refId={profile.expenses} 
-                        setSelectedCategory={setSelectedCategory} 
-                    />
+            <form onSubmit={editCategory} className="space-y-6" dir="rtl">
+                {/* Category Selection */}
+                <div className="space-y-3">
+                    <label className="block text-sm font-semibold text-slate-800 text-right">בחר קטגוריה לעריכה</label>
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                        <CategorySelect 
+                            refId={profile.expenses} 
+                            setSelectedCategory={setSelectedCategory} 
+                        />
+                    </div>
                 </div>
                 
-                <div>
-                    <label htmlFor="newCategoryName" className="block text-sm font-medium text-gray-700 mb-1">
+                {/* Current Category Display */}
+                {selectedCategory && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-right">
+                        <p className="text-blue-700 text-sm">
+                            <strong>קטגוריה נוכחית:</strong> {selectedCategory}
+                        </p>
+                    </div>
+                )}
+                
+                {/* New Name Input */}
+                <div className="space-y-3">
+                    <label htmlFor="newCategoryName" className="block text-sm font-semibold text-slate-800 text-right">
                         שם חדש לקטגוריה
                     </label>
                     <input 
                         type="text" 
                         id="newCategoryName"
-                        placeholder="הזן שם חדש לקטגוריה" 
+                        placeholder="הכנס שם חדש לקטגוריה..." 
+                        value={newCategoryName}
                         onChange={(e) => setNewCategoryName(e.target.value)}
-                        className="w-full px-4 py-2 text-right border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-right"
+                        required
                     />
                 </div>
                 
-                <div className="flex items-center gap-4 pt-2">
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
                     <button
                         type="button"
                         onClick={goBack}
-                        className="w-full py-2 px-4 font-semibold text-gray-700 bg-gray-200 rounded-md shadow-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-semibold transition-colors"
                     >
                         ביטול
                     </button>
-                    
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-2 px-4 font-semibold text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold transition-colors"
                     >
-                        {loading ? 'מעדכן...' : 'עדכן קטגוריה'}
+                        {loading ? (
+                            <div className="flex items-center gap-2 justify-center">
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                מעדכן...
+                            </div>
+                        ) : (
+                            'שמור שינויים'
+                        )}
                     </button>
                 </div>
             </form>

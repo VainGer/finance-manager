@@ -5,26 +5,30 @@ import { useAuth } from '../../../context/AuthContext';
 
 const Categories = memo(function Categories({ categoryBudgets, onChange }) {
     return (
-        <div className="grid gap-3">
+        <div className="space-y-3">
             {categoryBudgets.map((category, index) => (
                 <div
                     key={category.name ?? index}
-                    className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm"
+                    className="flex items-center justify-between bg-slate-50 border border-slate-200 p-4 rounded-xl"
                 >
                     <label
                         htmlFor={`category-${category.name ?? index}`}
-                        className="font-medium text-gray-800"
+                        className="font-semibold text-slate-800"
                     >
                         {category.name}
                     </label>
-                    <input
-                        type="number"
-                        inputMode="decimal"
-                        id={`category-${category.name ?? index}`}
-                        value={category.budget}
-                        onChange={(e) => onChange(index, e.target.value)}
-                        className="w-32 p-2 border border-gray-300 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
+                    <div className="relative">
+                        <input
+                            type="number"
+                            inputMode="decimal"
+                            id={`category-${category.name ?? index}`}
+                            value={category.budget}
+                            placeholder="0.00"
+                            onChange={(e) => onChange(index, e.target.value)}
+                            className="w-32 px-3 py-2 bg-white border border-slate-300 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent font-medium"
+                        />
+                        <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 text-sm">₪</div>
+                    </div>
                 </div>
             ))}
         </div>
@@ -46,66 +50,93 @@ const DateSelect = memo(function DateSelect({
     onSubmit
 }) {
     return (
-        <form className="grid gap-2 p-4 bg-gray-50 rounded-lg shadow" onSubmit={onSubmit}>
-            {error && <p className="text-red-500">{error}</p>}
-
-            {!profile.parentProfile ? (
-                <>
-                    <label htmlFor="date-select">להמשך בחר תקציב שאותו תרצה לערוך:</label>
-                    <select
-                        id="date-select"
-                        value={selectedChildBudget ?? ""}
-                        onChange={onChildSelect}
-                        className="p-2 border rounded"
-                    >
-                        <option value="">בחר תאריך</option>
-                        {childrenBudgets.map((budget, index) => (
-                            <option key={index} value={index}>
-                                תאריך התחלה: {formatDate(budget.startDate)} - תאריך סיום: {formatDate(budget.endDate)} - סכום: {budget.amount}
-                            </option>
-                        ))}
-                    </select>
-                </>
-            ) : (
-                <>
-                    <label htmlFor="start-date">תאריך התחלה:</label>
-                    <input
-                        type="date"
-                        id="start-date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="p-2 border rounded"
-                    />
-
-                    <label htmlFor="end-date">תאריך סוף:</label>
-                    <input
-                        type="date"
-                        id="end-date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="p-2 border rounded"
-                    />
-
-                    <input
-                        type="number"
-                        inputMode="decimal"
-                        name="amount"
-                        id="amount"
-                        placeholder="הזן את סכום התקציב"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        className="p-2 border rounded"
-                    />
-                </>
+        <div className="space-y-6">
+            {error && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
+                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-red-700 text-sm font-medium">{error}</p>
+                </div>
             )}
 
-            <button
-                type="submit"
-                className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-            >
-                המשך
-            </button>
-        </form>
+            <form className="space-y-6" onSubmit={onSubmit} dir="rtl">
+                {!profile.parentProfile ? (
+                    <div className="space-y-3">
+                        <label htmlFor="date-select" className="block text-sm font-semibold text-slate-800 text-right">
+                            להמשך בחר תקציב שאותו תרצה לערוך:
+                        </label>
+                        <select
+                            id="date-select"
+                            value={selectedChildBudget ?? ""}
+                            onChange={onChildSelect}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-right"
+                        >
+                            <option value="">בחר תאריך</option>
+                            {childrenBudgets.map((budget, index) => (
+                                <option key={index} value={index}>
+                                    תאריך התחלה: {formatDate(budget.startDate)} - תאריך סיום: {formatDate(budget.endDate)} - סכום: {budget.amount}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <label htmlFor="start-date" className="block text-sm font-semibold text-slate-800 text-right">
+                                תאריך התחלה:
+                            </label>
+                            <input
+                                type="date"
+                                id="start-date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-right"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label htmlFor="end-date" className="block text-sm font-semibold text-slate-800 text-right">
+                                תאריך סוף:
+                            </label>
+                            <input
+                                type="date"
+                                id="end-date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-right"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label htmlFor="amount" className="block text-sm font-semibold text-slate-800 text-right">
+                                סכום התקציב:
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type="number"
+                                    inputMode="decimal"
+                                    name="amount"
+                                    id="amount"
+                                    placeholder="0.00"
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-right font-medium"
+                                />
+                                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 font-medium">₪</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <button
+                    type="submit"
+                    className="w-full bg-slate-600 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                >
+                    המשך
+                </button>
+            </form>
+        </div>
     );
 });
 
@@ -248,8 +279,15 @@ export default function CreateProfileBudget({ goBack }) {
     }, [account.username, profile.profileName, profile.expenses, startDate, endDate, amount, categoryBudgets]);
 
     return (
-        <div className="bg-white p-4 rounded-lg shadow-md max-w-lg h-3/4 overflow-auto mx-auto space-y-4">
-            {success && <p className="text-green-500 font-semibold">{success}</p>}
+        <div className="p-6 bg-white/95 backdrop-blur-sm">
+            {success && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3 mb-6">
+                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-green-700 text-sm font-medium">{success}</p>
+                </div>
+            )}
 
             {!validDates && (
                 <DateSelect
@@ -269,38 +307,71 @@ export default function CreateProfileBudget({ goBack }) {
             )}
 
             {validDates && (
-                <form onSubmit={create} className="space-y-4">
-                    <p className="font-semibold">
-                        הגדרת תקציב לתאריכים: {startDate} - {endDate}
-                    </p>
-                    {remainingAmount >= 0 ? (
-                        <p className="text-gray-700">סכום פנוי: {remainingAmount}</p>
-                    ) : (
-                        <p className="text-red-500">הסכום חורג ב - {Math.abs(remainingAmount)}</p>
-                    )}
+                <div className="space-y-6">
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <h3 className="font-semibold text-slate-800 mb-2">
+                            הגדרת תקציב לתאריכים: {startDate} - {endDate}
+                        </h3>
+                        {remainingAmount >= 0 ? (
+                            <p className="text-slate-600 flex items-center gap-2">
+                                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                </svg>
+                                סכום פנוי: ₪{remainingAmount}
+                            </p>
+                        ) : (
+                            <p className="text-red-600 flex items-center gap-2">
+                                <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                הסכום חורג ב - ₪{Math.abs(remainingAmount)}
+                            </p>
+                        )}
+                    </div>
 
-                    <Categories
-                        categoryBudgets={categoryBudgets}
-                        onChange={handleCategoryBudgetChange}
-                    />
+                    <form onSubmit={create} className="space-y-6">
+                        <div className="space-y-3">
+                            <h4 className="font-semibold text-slate-800">תקציב קטגוריות:</h4>
+                            <Categories
+                                categoryBudgets={categoryBudgets}
+                                onChange={handleCategoryBudgetChange}
+                            />
+                        </div>
 
-                    <button
-                        disabled={remainingAmount !== 0}
-                        type="submit"
-                        className={`mt-2 ${remainingAmount !== 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'
-                            } text-white px-4 py-2 rounded`}
-                    >
-                        צור תקציב
-                    </button>
-                </form>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={goBack}
+                                type="button"
+                                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-semibold transition-colors"
+                            >
+                                ביטול
+                            </button>
+                            <button
+                                disabled={remainingAmount !== 0}
+                                type="submit"
+                                className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-colors ${
+                                    remainingAmount !== 0 
+                                        ? 'bg-slate-300 cursor-not-allowed text-slate-500' 
+                                        : 'bg-green-600 hover:bg-green-700 text-white'
+                                }`}
+                            >
+                                צור תקציב
+                            </button>
+                        </div>
+                    </form>
+                </div>
             )}
 
-            <button
-                onClick={goBack}
-                className="mt-4 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
-            >
-                חזור
-            </button>
+            {!validDates && (
+                <div className="pt-4">
+                    <button
+                        onClick={goBack}
+                        className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-semibold transition-colors"
+                    >
+                        ביטול
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
