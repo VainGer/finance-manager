@@ -46,7 +46,7 @@ export default function Home() {
                 {/* Background with overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10"></div>
-                
+
                 {/* Background pattern for texture */}
                 <div className="absolute inset-0 opacity-5">
                     <div className="absolute top-0 left-0 w-full h-full" style={{
@@ -88,37 +88,38 @@ export default function Home() {
                             </Button>
                         </div>
                     </div>
-                </div>
-
-                {/* Social Proof Notification */}
-                <div className="absolute bottom-8 left-8 bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-white/20 max-w-sm">
-                    <div className="flex items-center gap-4">
-                        <div className="relative">
-                            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                    {/* Social Proof Notification */}
+                    <div className='flex flex-wrap justify-around mt-8 *:my-4'>
+                        <div className=" bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-white/20 max-w-sm min-w-[280px]">
+                            <div className="flex items-center gap-4">
+                                <div className="relative">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-ping"></div>
+                                </div>
+                                <div className="text-sm bg-gray">
+                                    <p className="font-semibold text-slate-800">דני מתל אביב הצטרף עכשיו</p>
+                                    <p className="text-slate-600">חסך ₪2,400 בחודש הראשון</p>
+                                </div>
                             </div>
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-ping"></div>
                         </div>
-                        <div className="text-sm">
-                            <div className="font-semibold text-slate-800">דני מתל אביב הצטרף עכשיו</div>
-                            <div className="text-slate-600">חסך ₪2,400 בחודש הראשון</div>
-                        </div>
-                    </div>
-                </div>
 
-                {/* Trust Badge */}
-                <div className="absolute bottom-8 right-8 bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-white/20">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                        </div>
-                        <div className="text-sm">
-                            <div className="font-semibold text-slate-800">מאובטח ברמה בנקאית</div>
-                            <div className="text-slate-600">10,000+ משתמשים פעילים</div>
+                        {/* Trust Badge */}
+                        <div className=" bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-white/20 max-w-sm min-w-[280px]">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div className="text-sm">
+                                    <div className="font-semibold text-slate-800">מאובטח ברמה בנקאית</div>
+                                    <div className="text-slate-600">10,000+ משתמשים פעילים</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -189,7 +190,7 @@ export default function Home() {
                     <div className="bg-gradient-to-r from-slate-700 to-slate-800 rounded-2xl p-8 mb-16 text-white relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16"></div>
                         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
-                        
+
                         <div className="relative z-10">
                             <div className="flex flex-col md:flex-row items-center gap-8">
                                 <div className="flex-1">
@@ -203,15 +204,15 @@ export default function Home() {
                                             חדש! עיבוד LLM חכם
                                         </span>
                                     </div>
-                                    
+
                                     <h2 className="text-3xl font-bold mb-4">
                                         העלאת דוח הוצאות ועיבוד אוטומטי
                                     </h2>
-                                    
+
                                     <p className="text-xl text-slate-200 mb-6 leading-relaxed">
                                         העלה קובץ דוח בנק והמערכת תעבד אוטומטית את כל העסקאות, תקטלג אותן ותסנכרן עם התקציבים שלך באמצעות טכנולוגיית LLM מתקדמת
                                     </p>
-                                    
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center shadow-md">
@@ -246,7 +247,7 @@ export default function Home() {
                                             <span className="text-slate-200">עריכה ידנית לפני שמירה</span>
                                         </div>
                                     </div>
-                                    
+
                                     <Button
                                         onClick={() => navigate('/register')}
                                         style="primary"
@@ -256,7 +257,7 @@ export default function Home() {
                                         נסה עיבוד קבצים
                                     </Button>
                                 </div>
-                                
+
                                 <div className="flex-1 max-w-md">
                                     <div className="bg-slate-600/30 backdrop-blur-sm rounded-xl p-6 border border-slate-500/30 shadow-lg">
                                         <div className="space-y-4">
@@ -264,20 +265,20 @@ export default function Home() {
                                                 <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                                                 <span className="text-slate-200">מעבד LLM מוכן</span>
                                             </div>
-                                            
+
                                             <div className="bg-slate-700/50 rounded-lg p-4 backdrop-blur-sm border border-slate-600/30">
                                                 <div className="text-sm text-slate-300 mb-2">קובץ עובד:</div>
                                                 <div className="text-white font-medium">דוח_בנק_ינואר_2025.csv</div>
                                                 <div className="text-xs text-slate-400 mt-1">42 עסקאות זוהו</div>
                                             </div>
-                                            
+
                                             <div className="bg-slate-700/50 rounded-lg p-4 backdrop-blur-sm border border-slate-600/30">
                                                 <div className="text-sm text-slate-300 mb-2">קיטלוג אוטומטי:</div>
                                                 <div className="text-white font-medium">רמי לוי → מזון ומשקאות</div>
                                                 <div className="text-white font-medium">פז → תחבורה</div>
                                                 <div className="text-xs text-slate-400 mt-1">דיוק: 89%</div>
                                             </div>
-                                            
+
                                             <div className="bg-green-600/20 rounded-lg p-3 backdrop-blur-sm border border-green-500/30">
                                                 <div className="text-sm text-green-200">
                                                     ✅ מוכן לסנכרון עם תקציבים
@@ -308,7 +309,7 @@ export default function Home() {
                                 <li>• תחזיות AI</li>
                             </ul>
                         </div>
-                        
+
                         <div className="bg-white/80 backdrop-blur-sm border border-slate-200 p-8 rounded-xl hover:shadow-xl transition-all duration-300 group">
                             <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,7 +326,7 @@ export default function Home() {
                                 <li>• מעקב יעדים</li>
                             </ul>
                         </div>
-                        
+
                         <div className="bg-white/80 backdrop-blur-sm border border-slate-200 p-8 rounded-xl hover:shadow-xl transition-all duration-300 group">
                             <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -340,11 +341,11 @@ export default function Home() {
                                 <li>• הצפנה 256-bit</li>
                                 <li>• גיבוי אוטומטי</li>
                                 <li>• אימות דו-שלבי</li>
-                        </ul>
+                            </ul>
+                        </div>
                     </div>
-                </div>
 
-                {/* Final CTA Section */}
+                    {/* Final CTA Section */}
                     <div className="text-center bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-12 text-white shadow-xl">
                         <h2 className="text-3xl font-semibold mb-4">מוכן להתחיל?</h2>
                         <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
