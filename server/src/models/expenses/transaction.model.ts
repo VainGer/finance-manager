@@ -39,7 +39,7 @@ export default class TransactionModel {
                     arrayFilters: [
                         { "catFilter.name": catName },
                         { "bizFilter.name": busName },
-                        { "transFilter._id": transactionId }
+                        { "transFilter._id": new ObjectId(transactionId) }
                     ]
                 });
             if (!result || result.modifiedCount === 0) {
@@ -56,13 +56,13 @@ export default class TransactionModel {
         try {
             const result = await db.UpdateDocument(
                 this.expenseCollection,
-                { _id: new ObjectId(transactionId) },
+                { _id: new ObjectId(refId) },
                 { $set: { "categories.$[catFilter].Businesses.$[bizFilter].transactions.$[transFilter].description": newDescription } },
                 {
                     arrayFilters: [
                         { "catFilter.name": catName },
                         { "bizFilter.name": busName },
-                        { "transFilter._id": transactionId }
+                        { "transFilter._id": new ObjectId(transactionId) }
                     ]
                 });
             if (!result || result.modifiedCount === 0) {
