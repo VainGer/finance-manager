@@ -56,7 +56,7 @@ export default class TransactionModel {
         try {
             const result = await db.UpdateDocument(
                 this.expenseCollection,
-                { _id: new ObjectId(refId) },
+                { _id: new ObjectId(transactionId) },
                 { $set: { "categories.$[catFilter].Businesses.$[bizFilter].transactions.$[transFilter].description": newDescription } },
                 {
                     arrayFilters: [
