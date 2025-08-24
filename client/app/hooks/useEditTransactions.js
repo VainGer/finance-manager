@@ -1,14 +1,22 @@
 import { get, put, post, del } from '../utils/api.js';
-
+import { useState, useEffect } from 'react'
 export default function useEditTransactions({ profile }) {
-    const addTransaction = async (e) => {
-        e.preventDefault();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
+
+
+    const addTransaction = async (transactionData, setters) => {
+
+        const { selectedCategory, selectedBusiness, amount, date, description } = transactionData;
+        const { setSelectedCategory, setSelectedBusiness, setAmount, setDate, setDescription } = setters;
+
         if (!selectedCategory || !selectedBusiness || !amount || !date) {
             setError('אנא מלא את כל השדות');
             return;
         }
 
-        setIsSubmitting(true);
+        setLoading(true);
         setError(null);
         setSuccess(null);
 
@@ -18,40 +26,61 @@ export default function useEditTransactions({ profile }) {
             description: description
         }
 
-        try {
-            const response = await post('expenses/transaction/create', {
-                refId: profile.expenses,
-                catName: selectedCategory,
-                busName: selectedBusiness,
-                transaction
-            });
-
-            if (response.ok || response.success) {
-                setSuccess('העסקה נוספה בהצלחה!');
-
-                // Clear form
-                setSelectedCategory(null);
-                setSelectedBusiness(null);
-                setAmount('');
-                setDate('');
-                setDescription('');
-
-                // Trigger refresh of the dashboard
-                if (onTransactionAdded) {
-                    onTransactionAdded();
-                }
-
-                // Auto close after success
-                setTimeout(() => {
-                    goBack();
-                }, 1500);
-            } else {
-                setError(response.message || 'שגיאה בהוספת העסקה');
+        const response = await post('expenses/transaction/create', {
+            refId: profile.expenses,
+            catName: selectedCategory,
+            busName: selectedBusiness,
+            transaction
+        });
+        setLoading(false);
+        if (response.ok || response.success) {
+            setSuccess('העסקה נוספה בהצלחה!');
+            setSelectedCategory('');
+            setSelectedBusiness('');
+            setAmount('');
+            setDate(null);
+            setDescription('');
+            if (onTransactionAdded) {
+                onTransactionAdded();
             }
-        } catch (err) {
-            console.error('Error adding transaction:', err);
-            setError('שגיאה בחיבור למסד הנתונים');
-        } finally {
-            setIsSubmitting(false);
+            setTimeout(() => { setSuccess(null) }, 1500);
+        } else {
+            setError('שגיאה בהוספת העסקה');
         }
     }
+
+    const deleteTransaction = async () => {
+        setIsDeleting(true);
+        try {
+            const deleteData = {
+                refId: profile.expenses,
+                catName: transaction.category,
+                busName: transaction.business,
+                transactionId: transaction._id
+            };
+
+            const response = await del('expenses/transaction/delete-transaction', deleteData);
+
+            if (response.ok || response.success || response.message?.includes('successfully')) {
+                if (onTransactionDeleted) {
+                    onTransactionDeleted(transaction._id);
+                }
+                setShowConfirm(false);
+            } else {
+                console.error('Delete failed:', response);
+                alert(`שגיאה במחיקת העסקה: ${response.message || 'לא ידוע'}`);
+            }
+        } catch (error) {
+            console.error('Error deleting transaction:', error);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    return {
+        loading,
+        error,
+        success,
+        addTransaction
+    }
+}

@@ -1,32 +1,44 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { useState, useEffect, use } from 'react'
 import { formatAmount, formatDate } from "../../utils/formatters";
+import DeleteTransaction from '../transactions/deleteTransaction.jsx'
+import ChangeTransactionAmount from '../transactions/changeTransactionAmount.jsx'
+import ChangeTransactionDate from '../transactions/changeTransactionDate.jsx'
+import ChangeTransactionDescription from '../transactions/changeTransactionDescription.jsx'
+
 import Button from '../../components/common/button';
 
-const ExpenseCard = ({ expense }) => (
-  <View
-    className="bg-white border border-gray-200 rounded-lg mb-3 p-3 shadow-sm"
-  >
-    <View className="flex-row flex-wrap mb-2 gap-1">
-      <View className="bg-blue-100 rounded-full px-2 py-1">
-        <Text className="text-blue-800">{expense.category}</Text>
+const ExpenseCard = ({ expense, setEditDisplay }) => {
+  return (
+    <View
+      className="bg-white border border-gray-200 rounded-lg mb-3 p-3 shadow-sm"
+    >
+      <View className="flex-row flex-wrap mb-2 gap-1">
+        <View className="bg-blue-100 rounded-full px-2 py-1">
+          <Text className="text-blue-800">{expense.category}</Text>
+        </View>
+        <View className="bg-gray-100 rounded-full px-2 py-1">
+          <Text className="text-gray-800">{expense.business}</Text>
+        </View>
       </View>
-      <View className="bg-gray-100 rounded-full px-2 py-1">
-        <Text className="text-gray-800">{expense.business}</Text>
+      <View className="flex-row justify-between items-center mb-2">
+        <Text className="text-gray-500">{formatDate(expense.date)}</Text>
+        <Text className="font-bold text-red-600 text-lg">{formatAmount(expense.amount)}</Text>
+      </View>
+      <Text className="text-gray-800 mb-2 border-b-2 border-gray-200" numberOfLines={2}>{expense.description}</Text>
+      <View className="flex-row justify-center mt-1 pt-1 ">
+        <Button textClass='text-sm' size='small' className='w-1/5 mx-2 text-center'
+          onPress={() => setEditDisplay('changeAmount')}>עריכת סכום</Button>
+        <Button textClass='text-sm' size='small' className='w-1/5 mx-2 text-center'
+          onPress={() => setEditDisplay('changeDate')}>עריכת תאריך</Button>
+        <Button textClass='text-sm' size='small' className='w-1/5 mx-2 text-center'
+          onPress={() => setEditDisplay('changeDescription')}>עריכת תיאור</Button>
+        <Button textClass='text-sm' size='small' className='w-1/5 mx-2 text-center' style='danger'
+          onPress={() => setEditDisplay('delete')}>מחיקת עסקה</Button>
       </View>
     </View>
-    <View className="flex-row justify-between items-center mb-2">
-      <Text className="text-gray-500">{formatDate(expense.date)}</Text>
-      <Text className="font-bold text-red-600 text-lg">{formatAmount(expense.amount)}</Text>
-    </View>
-    <Text className="text-gray-800 mb-2 border-b-2 border-gray-200" numberOfLines={2}>{expense.description}</Text>
-    <View className="flex-row justify-center mt-1 pt-1 ">
-      <Button textSize='sm' size='small' className='w-1/5 mx-2'>עריכת סכום</Button>
-      <Button textSize='sm' size='small' className='w-1/5 mx-2'>עריכת תאריך</Button>
-      <Button textSize='sm' size='small' className='w-1/5 mx-2'>עריכת תיאור</Button>
-      <Button textSize='sm' size='small' className='w-1/5 mx-2' style='danger'>מחיקה</Button>
-    </View>
-  </View>
-);
+  );
+}
 
 const EmptyList = () => (
   <View className="py-8 items-center">
@@ -34,7 +46,21 @@ const EmptyList = () => (
   </View>
 );
 
-export default function ExpensesTable({ filteredExpenses }) {
+export default function ExpensesTable({ filteredExpenses, profile }) {
+  const [editDisplay, setEditDisplay] = useState(null);
+  const editDisplayToRender = () => {
+    switch (editDisplay) {
+      case 'delete':
+        return <DeleteTransaction profile={profile} goBack={() => setEditDisplay(null)} />
+      case 'changeAmount':
+        return <ChangeTransactionAmount profile={profile} goBack={() => setEditDisplay(null)} />
+      case 'changeDate':
+        return <ChangeTransactionDate profile={profile} goBack={() => setEditDisplay(null)} />
+      case 'changeDescription':
+        return <ChangeTransactionDescription profile={profile} goBack={() => setEditDisplay(null)} />
+    }
+  }
+
   return (
     <View className="mb-4">
       {/* Header */}
@@ -48,7 +74,7 @@ export default function ExpensesTable({ filteredExpenses }) {
       {filteredExpenses.length > 0 ? (
         <View style={{ padding: 2 }}>
           {filteredExpenses.map((expense, index) => (
-            <ExpenseCard key={expense._id || index} expense={expense} />
+            <ExpenseCard key={expense._id || index} expense={expense} setEditDisplay={setEditDisplay} />
           ))}
         </View>
       ) : (

@@ -5,7 +5,9 @@ import Filter from '../../../components/expenses/filter';
 import { useAuth } from '../../../context/AuthContext';
 import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
 import { formatAmount } from '../../../utils/formatters';
+
 const TransactionsSummary = ({ filteredExpenses }) => {
+
     const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
     return (
         <View className="bg-blue-50 rounded-lg p-4 mb-6">
@@ -96,6 +98,7 @@ export default function ExpensesDisplay() {
                     filteredExpenses={filteredExpenses}
                     expensesId={profile.expenses}
                     onTransactionDeleted={refetchExpenses}
+                    profile={profile}
                 />
             </View>
         </ScrollView>

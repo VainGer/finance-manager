@@ -9,7 +9,6 @@ export default function DeleteTransaction({ transaction, refId, onTransactionDel
 
     const handleDelete = async () => {
         setIsDeleting(true);
-        console.log("transaction", transaction);
         try {
             const deleteData = {
                 refId: refId,
@@ -31,7 +30,6 @@ export default function DeleteTransaction({ transaction, refId, onTransactionDel
             }
         } catch (error) {
             console.error('Error deleting transaction:', error);
-            alert('שגיאה במחיקת העסקה');
         } finally {
             setIsDeleting(false);
         }
