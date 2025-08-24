@@ -1,4 +1,4 @@
-import fs from "fs";
+import { prompt } from "./prompts/categorizing_prompt";
 import dotenv from "dotenv";
 import path from "path";
 dotenv.config({ path: path.join(__dirname, '../dotenv/.env') });
@@ -9,7 +9,7 @@ export default class LLM {
     private static readonly PROVIDER = "cerebras";
     private static readonly MODEL = "openai/gpt-oss-120b";
 
-    private static readonly TRANSACTION_CATEGORIZER_SYSTEM_PROMPT = fs.readFileSync(path.join(__dirname, '../utils/categorizing_prompt.txt'), 'utf-8');
+    private static readonly TRANSACTION_CATEGORIZER_SYSTEM_PROMPT = prompt;
 
     private static client: InferenceClient;
 
