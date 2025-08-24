@@ -96,8 +96,7 @@ export default function ExpensesDisplay() {
 
                 <ExpensesTable
                     filteredExpenses={filteredExpenses}
-                    expensesId={profile.expenses}
-                    onTransactionDeleted={refetchExpenses}
+                    refetchExpenses={refetchExpenses}
                     profile={profile}
                 />
             </View>

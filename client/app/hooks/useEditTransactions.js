@@ -1,10 +1,17 @@
+import { goBack } from 'expo-router/build/global-state/routing.js';
 import { get, put, post, del } from '../utils/api.js';
 import { useState, useEffect } from 'react'
+
 export default function useEditTransactions({ profile }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
 
+    const resetState = () => {
+        setLoading(false);
+        setError(null);
+        setSuccess(null);
+    }
 
     const addTransaction = async (transactionData, setters) => {
 
@@ -43,44 +50,116 @@ export default function useEditTransactions({ profile }) {
             if (onTransactionAdded) {
                 onTransactionAdded();
             }
-            setTimeout(() => { setSuccess(null) }, 1500);
         } else {
             setError('שגיאה בהוספת העסקה');
         }
+        setTimeout(() => { resetState(); }, 2000);
     }
 
-    const deleteTransaction = async () => {
-        setIsDeleting(true);
-        try {
-            const deleteData = {
-                refId: profile.expenses,
-                catName: transaction.category,
-                busName: transaction.business,
-                transactionId: transaction._id
-            };
-
-            const response = await del('expenses/transaction/delete-transaction', deleteData);
-
-            if (response.ok || response.success || response.message?.includes('successfully')) {
-                if (onTransactionDeleted) {
-                    onTransactionDeleted(transaction._id);
-                }
-                setShowConfirm(false);
-            } else {
-                console.error('Delete failed:', response);
-                alert(`שגיאה במחיקת העסקה: ${response.message || 'לא ידוע'}`);
-            }
-        } catch (error) {
-            console.error('Error deleting transaction:', error);
-        } finally {
-            setIsDeleting(false);
+    const deleteTransaction = async (transaction, goBack, refetchExpenses) => {
+        const deleteData = {
+            refId: profile.expenses,
+            catName: transaction.category,
+            busName: transaction.business,
+            transactionId: transaction._id
+        };
+        setLoading(true);
+        const response = await del('expenses/transaction/delete-transaction', deleteData);
+        setLoading(false);
+        if (response.ok) {
+            refetchExpenses();
+            setSuccess('העסקה נמחקה בהצלחה!');
+            setTimeout(() => { goBack(); setSuccess(null); }, 1500);
+        } else {
+            console.error('Delete failed:', response);
+            setError('שגיאה במחיקת העסקה');
+            alert(`שגיאה במחיקת העסקה`);
         }
     };
+
+    const changeTransactionAmount = async (transaction, newAmount, refetchExpenses) => {
+        if (!newAmount || isNaN(newAmount) || Number(newAmount) <= 0) {
+            setError('אנא הזן סכום תקין');
+            return;
+        }
+        const updateData = {
+            refId: profile.expenses,
+            catName: transaction.category,
+            busName: transaction.business,
+            transactionId: transaction._id,
+            newAmount: Number(newAmount)
+        };
+        setLoading(true);
+        const response = await put('expenses/transaction/change-amount', { ...updateData });
+        setLoading(false);
+        if (response.ok) {
+            setSuccess('סכום העסקה עודכן בהצלחה!');
+            refetchExpenses();
+            setTimeout(() => { setSuccess(null); goBack(); }, 2000);
+        } else {
+            console.error('Update failed:', response);
+            setError('שגיאה בעדכון סכום העסקה');
+            alert(`שגיאה בעדכון סכום העסקה`);
+        }
+    }
+
+    const changeTransactionDate = async (transaction, newDate, refetchExpenses) => {
+        if (!newDate || isNaN(newDate.getTime())) {
+            setError('אנא הזן תאריך תקין');
+            return;
+        }
+        const updateData = {
+            refId: profile.expenses,
+            catName: transaction.category,
+            busName: transaction.business,
+            transactionId: transaction._id,
+            newDate: new Date(newDate)
+        };
+        setLoading(true);
+        const response = await put('expenses/transaction/change-date', { ...updateData });
+        setLoading(false);
+        if (response.ok) {
+            setSuccess('תאריך העסקה עודכן בהצלחה!');
+            refetchExpenses();
+            setTimeout(() => { setSuccess(null); goBack(); }, 2000);
+        } else {
+            console.error('Update failed:', response);
+            setError('שגיאה בעדכון תאריך העסקה');
+            alert(`שגיאה בעדכון תאריך העסקה`);
+        }
+    }
+
+    const changeTransactionDescription = async (transaction, newDescription, refetchExpenses) => {
+        const updateData = {
+            refId: profile.expenses,
+            catName: transaction.category,
+            busName: transaction.business,
+            transactionId: transaction._id,
+            newDescription
+        };
+        console.log(updateData);
+        setLoading(true);
+        const response = await put('expenses/transaction/change-description', { ...updateData });
+        setLoading(false);
+        if (response.ok) {
+            setSuccess('תיאור העסקה עודכן בהצלחה!');
+            refetchExpenses();
+            setTimeout(() => { setSuccess(null); goBack(); }, 2000);
+        } else {
+            console.error('Update failed:', response);
+            setError('שגיאה בעדכון תיאור העסקה');
+            alert(`שגיאה בעדכון תיאור העסקה`);
+        }
+    }
 
     return {
         loading,
         error,
         success,
-        addTransaction
+        addTransaction,
+        deleteTransaction,
+        changeTransactionAmount,
+        changeTransactionDate,
+        changeTransactionDescription
     }
 }

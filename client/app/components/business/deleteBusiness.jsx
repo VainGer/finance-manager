@@ -14,7 +14,6 @@ export default function DeleteBusiness({ goBack, refId, error, success, deleteBu
         deleteBusiness(refId, selectedCategory, selectedBusiness);
     };
 
-    // If success message is present, show only that
     if (success) {
         return (
             <View className="p-4 bg-white rounded-lg w-3/4">

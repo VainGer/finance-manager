@@ -1,14 +1,31 @@
 import { Text, View } from 'react-native';
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect } from 'react'
 import { formatAmount, formatDate } from "../../utils/formatters";
 import DeleteTransaction from '../transactions/deleteTransaction.jsx'
 import ChangeTransactionAmount from '../transactions/changeTransactionAmount.jsx'
 import ChangeTransactionDate from '../transactions/changeTransactionDate.jsx'
 import ChangeTransactionDescription from '../transactions/changeTransactionDescription.jsx'
-
 import Button from '../../components/common/button';
 
-const ExpenseCard = ({ expense, setEditDisplay }) => {
+const ExpenseCard = ({ expense, profile, refetchExpenses }) => {
+  const [editDisplay, setEditDisplay] = useState(null);
+  const displayToRender = () => {
+    switch (editDisplay) {
+      case 'delete':
+        return <DeleteTransaction transaction={expense} profile={profile}
+          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} />
+      case 'changeAmount':
+        return <ChangeTransactionAmount transaction={expense} profile={profile}
+          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} />
+      case 'changeDate':
+        return <ChangeTransactionDate transaction={expense} profile={profile}
+          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} />
+      case 'changeDescription':
+        return <ChangeTransactionDescription transaction={expense} profile={profile}
+          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} />
+    }
+  }
+
   return (
     <View
       className="bg-white border border-gray-200 rounded-lg mb-3 p-3 shadow-sm"
@@ -36,6 +53,7 @@ const ExpenseCard = ({ expense, setEditDisplay }) => {
         <Button textClass='text-sm' size='small' className='w-1/5 mx-2 text-center' style='danger'
           onPress={() => setEditDisplay('delete')}>מחיקת עסקה</Button>
       </View>
+      {editDisplay && displayToRender()}
     </View>
   );
 }
@@ -46,20 +64,7 @@ const EmptyList = () => (
   </View>
 );
 
-export default function ExpensesTable({ filteredExpenses, profile }) {
-  const [editDisplay, setEditDisplay] = useState(null);
-  const editDisplayToRender = () => {
-    switch (editDisplay) {
-      case 'delete':
-        return <DeleteTransaction profile={profile} goBack={() => setEditDisplay(null)} />
-      case 'changeAmount':
-        return <ChangeTransactionAmount profile={profile} goBack={() => setEditDisplay(null)} />
-      case 'changeDate':
-        return <ChangeTransactionDate profile={profile} goBack={() => setEditDisplay(null)} />
-      case 'changeDescription':
-        return <ChangeTransactionDescription profile={profile} goBack={() => setEditDisplay(null)} />
-    }
-  }
+export default function ExpensesTable({ filteredExpenses, profile, refetchExpenses }) {
 
   return (
     <View className="mb-4">
@@ -74,7 +79,8 @@ export default function ExpensesTable({ filteredExpenses, profile }) {
       {filteredExpenses.length > 0 ? (
         <View style={{ padding: 2 }}>
           {filteredExpenses.map((expense, index) => (
-            <ExpenseCard key={expense._id || index} expense={expense} setEditDisplay={setEditDisplay} />
+            <ExpenseCard key={expense._id || index} expense={expense}
+              profile={profile} refetchExpenses={refetchExpenses} />
           ))}
         </View>
       ) : (
