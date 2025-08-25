@@ -34,12 +34,7 @@ export default function BudgetPeriodSelector({ periods, selectedPeriod, onSelect
                 <ScrollView 
                     horizontal 
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ 
-                        paddingBottom: 8, 
-                        paddingHorizontal: 4,
-                        justifyContent: periods.length <= 3 ? 'space-around' : 'flex-start',
-                        width: periods.length <= 3 ? '100%' : 'auto'
-                    }}
+                    contentContainerStyle={{ paddingBottom: 8 }}
                     className="mb-2"
                 >
                     {periods.map((period, index) => (
@@ -51,10 +46,7 @@ export default function BudgetPeriodSelector({ periods, selectedPeriod, onSelect
                                 ? 'bg-blue-100 border border-blue-300' 
                                 : 'bg-slate-100 border border-slate-200'
                             }`}
-                            style={{ 
-                                minWidth: periods.length <= 2 ? '45%' : 120,
-                                maxWidth: periods.length <= 2 ? '45%' : 160
-                            }}
+                            style={{ minWidth: 120 }}
                         >
                             <Text className={`text-center ${
                                 selectedIndex === index 

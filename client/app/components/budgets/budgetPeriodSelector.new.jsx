@@ -1,4 +1,5 @@
-import { Text, View, TouchableOpacity, ScrollView, I18nManager } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { Text, View, TouchableOpacity, I18nManager, ScrollView } from 'react-native';
 import { formatDate } from '../../utils/formatters.js';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -34,12 +35,7 @@ export default function BudgetPeriodSelector({ periods, selectedPeriod, onSelect
                 <ScrollView 
                     horizontal 
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ 
-                        paddingBottom: 8, 
-                        paddingHorizontal: 4,
-                        justifyContent: periods.length <= 3 ? 'space-around' : 'flex-start',
-                        width: periods.length <= 3 ? '100%' : 'auto'
-                    }}
+                    contentContainerStyle={{ paddingBottom: 8 }}
                     className="mb-2"
                 >
                     {periods.map((period, index) => (
@@ -51,10 +47,7 @@ export default function BudgetPeriodSelector({ periods, selectedPeriod, onSelect
                                 ? 'bg-blue-100 border border-blue-300' 
                                 : 'bg-slate-100 border border-slate-200'
                             }`}
-                            style={{ 
-                                minWidth: periods.length <= 2 ? '45%' : 120,
-                                maxWidth: periods.length <= 2 ? '45%' : 160
-                            }}
+                            style={{ minWidth: 120 }}
                         >
                             <Text className={`text-center ${
                                 selectedIndex === index 
@@ -74,9 +67,24 @@ export default function BudgetPeriodSelector({ periods, selectedPeriod, onSelect
                     ))}
                 </ScrollView>
             )}
+                    {periods.map((period, index) => {
+                        const startFormatted = formatDate(period.startDate);
+                        const endFormatted = formatDate(period.endDate);
+                        
+                        return (
+                            <Picker.Item
+                                key={period.startDate.toString()}
+                                label={`מ ${startFormatted} עד ${endFormatted}`}
+                                value={index.toString()}
+                                color="#334155"
+                            />
+                        );
+                    })}
+                </Picker>
+            </View>
 
             {periods.length > 0 && (
-                <View className="items-end">
+                <View className="mt-2 items-end">
                     <Text className="text-xs text-slate-500">
                         {periods.length} תקופות תקציב זמינות
                     </Text>

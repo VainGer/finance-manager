@@ -74,10 +74,12 @@ export default function useBudgetSummary({ profile }) {
         if (!profileBudgets?.length) return [];
 
         return profileBudgets
-            .map(budget => ({
-                startDate: budget.startDate,
-                endDate: budget.endDate
-            }))
+            .map(budget => {
+                return {
+                    startDate: budget.startDate,
+                    endDate: budget.endDate
+                };
+            })
             .sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
     }, [profileBudgets]);
 
