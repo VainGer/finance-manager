@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
     const router = useRouter();
     const pathname = usePathname();
 
-    // Load account and profile from AsyncStorage on mount
+   
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -25,7 +25,6 @@ export const AuthProvider = ({ children }) => {
         loadData();
     }, []);
 
-    // Persist account changes
     useEffect(() => {
         const storeAccount = async () => {
             try {
@@ -41,7 +40,7 @@ export const AuthProvider = ({ children }) => {
         storeAccount();
     }, [account]);
 
-    // Persist profile changes
+
     useEffect(() => {
         const storeProfile = async () => {
             try {
@@ -56,52 +55,6 @@ export const AuthProvider = ({ children }) => {
         };
         storeProfile();
     }, [profile]);
-
-    // // Access control logic
-    // const pagesWithAccountOnly = ['authProfile'];
-    // const pagesWithProfilesAndAccount = ['/dashboard', '/settings'];
-
-    // useEffect(() => {
-    //     const validateAccess = (path) => {
-    //         if (path === '/' || path === '/login' || path === '/register') {
-    //             if (account || profile) {
-    //                 setAccount(null);
-    //                 setProfile(null);
-    //                 AsyncStorage.multiRemove(['account', 'profile']);
-    //                 return;
-    //             }
-    //         }
-
-    //         if (path === '/profiles') {
-    //             if (profile) {
-    //                 setProfile(null);
-    //                 AsyncStorage.removeItem('profile');
-    //             }
-    //             if (!account) {
-    //                 router.replace('/login');
-    //                 return;
-    //             }
-    //         }
-
-    //         if (pagesWithAccountOnly.some(page => path.startsWith(page)) && !account) {
-    //             router.replace('/login');
-    //             return;
-    //         }
-
-    //         if (pagesWithProfilesAndAccount.some(page => path.startsWith(page))) {
-    //             if (!account) {
-    //                 router.replace('/login');
-    //                 return;
-    //             }
-    //             if (!profile) {
-    //                 router.replace('/profiles');
-    //                 return;
-    //             }
-    //         }
-    //     };
-
-    //     validateAccess(pathname);
-    // }, [pathname, account, profile, router]);
 
     const logout = useCallback(async () => {
         try {

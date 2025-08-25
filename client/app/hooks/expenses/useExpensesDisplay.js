@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { get } from '../../utils/api';
 
-export default function useExpensesDisplay(profile) {
+export default function useExpensesDisplay({ profile }) {
     const [expenses, setExpenses] = useState([]);
     const [filteredExpenses, setFilteredExpenses] = useState([]);
     const [dateFilteredExpenses, setDateFilteredExpenses] = useState([]);
@@ -19,10 +19,8 @@ export default function useExpensesDisplay(profile) {
     const fetchExpenses = useCallback(async () => {
         setLoading(true);
         setError(null);
-
         const expensesId = profile.expenses;
         const response = await get(`expenses/profile-expenses/${expensesId}`);
-
         if (response.ok && response.expenses) {
             const realExpenses = [];
             const expensesData = response.expenses;
@@ -50,7 +48,7 @@ export default function useExpensesDisplay(profile) {
         } else {
             setError(response.message || 'שגיאה בטעינת הנתונים');
         }
-        
+
         setLoading(false);
     }, [profile]);
 

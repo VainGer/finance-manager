@@ -46,7 +46,8 @@ export default function ExpensesDisplay() {
         categories,
         businesses,
         refetchExpenses
-    } = useExpensesDisplay(profile);
+    } = useExpensesDisplay({ profile });
+
 
     if (loading) {
         return <LoadingSpinner />;
@@ -77,7 +78,7 @@ export default function ExpensesDisplay() {
     }
 
     return (
-        <ScrollView className="flex-1">
+        <ScrollView key={expenses.length} className="flex-1">
             <View className="bg-white rounded-lg shadow-lg p-6 m-4">
                 <View className="flex-row justify-between items-center mb-6">
                     <Text className="text-2xl font-bold text-gray-800">💰 הוצאות</Text>

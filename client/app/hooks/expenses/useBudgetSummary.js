@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { get } from '../../utils/api';
 
-export default function useBudgetSummary(profile) {
+export default function useBudgetSummary({ profile }) {
     const [profileBudgets, setProfileBudgets] = useState([]);
     const [expensesData, setExpensesData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -9,33 +9,32 @@ export default function useBudgetSummary(profile) {
     const [selectedPeriod, setSelectedPeriod] = useState(null);
     const [categorySpendingByPeriod, setCategorySpendingByPeriod] = useState({});
 
-    useEffect(() => {
+    async function fetchData() {
+        setLoading(true);
+        setError(null);
 
-        async function fetchData() {
-            setLoading(true);
-            setError(null);
+        const [budgetsResponse, expensesResponse] = await Promise.all([
+            get(`profile/get-budgets?username=${profile.username}&profileName=${profile.profileName}`),
+            get(`expenses/profile-expenses/${profile.expenses}`)
+        ]);
 
-            const [budgetsResponse, expensesResponse] = await Promise.all([
-                get(`profile/get-budgets?username=${profile.username}&profileName=${profile.profileName}`),
-                get(`expenses/profile-expenses/${profile.expenses}`)
-            ]);
+        if (budgetsResponse.ok && expensesResponse.ok) {
+            const budgets = budgetsResponse.budgets.budgets || [];
+            const expenses = expensesResponse.expenses.categories || [];
 
-            if (budgetsResponse.ok && expensesResponse.ok) {
-                const budgets = budgetsResponse.budgets.budgets || [];
-                const expenses = expensesResponse.expenses.categories || [];
+            setProfileBudgets(budgets);
+            setExpensesData(expenses);
 
-                setProfileBudgets(budgets);
-                setExpensesData(expenses);
-
-                const spendingData = calculateCategorySpending(expenses, budgets);
-                setCategorySpendingByPeriod(spendingData);
-            } else {
-                setError('שגיאה בטעינת נתונים, נסה שנית');
-            }
-
-            setLoading(false);
+            const spendingData = calculateCategorySpending(expenses, budgets);
+            setCategorySpendingByPeriod(spendingData);
+        } else {
+            setError('שגיאה בטעינת נתונים, נסה שנית');
         }
 
+        setLoading(false);
+    }
+
+    useEffect(() => {
         fetchData();
     }, [profile]);
 
@@ -146,6 +145,7 @@ export default function useBudgetSummary(profile) {
         setSelectedPeriod,
         relevantPeriod,
         currentProfileBudget,
-        currentCategoryBudgets
+        currentCategoryBudgets,
+        refetchBudgets: fetchData
     };
 }

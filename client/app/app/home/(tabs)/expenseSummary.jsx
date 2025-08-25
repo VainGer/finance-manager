@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import LoadingSpinner from '../../../components/common/loadingSpinner';
 import ProgressBar from '../../../components/common/progressBar';
@@ -97,8 +97,9 @@ export default function ExpenseSummary() {
         loading,
         error,
         filteredExpenses,
-        summary
-    } = useExpensesDisplay(profile);
+        summary,
+        expenses,
+    } = useExpensesDisplay({ profile });
 
     const formatAmount = (amount) => `₪${amount.toLocaleString()}`;
 

@@ -47,9 +47,6 @@ export default function useEditTransactions({ profile }) {
             setAmount('');
             setDate(null);
             setDescription('');
-            if (onTransactionAdded) {
-                onTransactionAdded();
-            }
         } else {
             setError('שגיאה בהוספת העסקה');
         }
@@ -137,7 +134,6 @@ export default function useEditTransactions({ profile }) {
             transactionId: transaction._id,
             newDescription
         };
-        console.log(updateData);
         setLoading(true);
         const response = await put('expenses/transaction/change-description', { ...updateData });
         setLoading(false);

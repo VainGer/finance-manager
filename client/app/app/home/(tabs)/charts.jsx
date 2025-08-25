@@ -181,7 +181,7 @@ export default function Graphs() {
     }
 
     return (
-        <ScrollView>
+        <ScrollView key={expenses.length} className="flex-1">
             <View className="bg-white rounded-lg p-4 m-2">
                 <Text className="text-2xl font-bold text-gray-800 mb-4">📊 גרפים</Text>
 

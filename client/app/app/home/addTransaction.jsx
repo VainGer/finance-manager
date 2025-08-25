@@ -9,6 +9,7 @@ import LoadingSpinner from '../../components/common/loadingSpinner.jsx';
 import Button from '../../components/common/button.jsx';
 import useEditTransactions from '../../hooks/useEditTransactions.js';
 
+
 export default function addTransaction() {
     const { profile } = useAuth();
     const [selectedCategory, setSelectedCategory] = useState('');
@@ -18,6 +19,7 @@ export default function addTransaction() {
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
     const { loading, error, success, addTransaction } = useEditTransactions({ profile });
+
     return (
         <View>
             {loading && <LoadingSpinner />}

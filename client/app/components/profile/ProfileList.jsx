@@ -1,4 +1,4 @@
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, Text } from "react-native";
 
 export default function ProfileList({ profiles, onSelect }) {
     return (
@@ -11,7 +11,11 @@ export default function ProfileList({ profiles, onSelect }) {
                     style={{ backgroundColor: profile.color ? profile.color : 'blue' }}
                 >
                     <Image
-                        source={{ uri: profile.avatar || 'https://reactnative.dev/img/tiny_logo.png' }}
+                        source={
+                            profile.avatar
+                                ? { uri: profile.avatar }
+                                : require('../../assets/images/avatar_default.png')
+                        }
                         className="w-24 h-24 rounded-full object-cover border-4 border-white mb-3"
                     />
                     <Text

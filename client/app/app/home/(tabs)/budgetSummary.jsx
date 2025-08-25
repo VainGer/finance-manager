@@ -5,7 +5,8 @@ import OverallBudgetSummary from '../../../components/budgets/overallBudgetSumma
 import LoadingSpinner from '../../../components/common/loadingSpinner';
 import { useAuth } from '../../../context/AuthContext';
 import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
-
+import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
+import { useEffect } from 'react';
 
 export default function BudgetSummary() {
     const { profile } = useAuth();
@@ -17,8 +18,10 @@ export default function BudgetSummary() {
         setSelectedPeriod,
         relevantPeriod,
         currentProfileBudget,
-        currentCategoryBudgets
-    } = useBudgetSummary(profile);
+        currentCategoryBudgets,
+    } = useBudgetSummary({ profile });
+
+
 
     if (error) {
         return (

@@ -10,7 +10,7 @@ export default function useExpesesCharts({ profile }) {
         loading,
         error,
         refetchExpenses
-    } = useExpensesDisplay(profile);
+    } = useExpensesDisplay({ profile });
 
     const filteredByDateExpenses = useMemo(() => {
         if (!filteredExpenses) return [];
@@ -118,20 +118,20 @@ export default function useExpesesCharts({ profile }) {
 
     const monthlyChartData = useMemo(() => {
         if (!expenses || expenses.length === 0) return [];
-        
+
         const monthlyData = {};
         expenses.forEach(expense => {
             if (!expense.date) return;
-            
+
             const date = new Date(expense.date);
             const monthKey = `${date.getMonth() + 1}/${date.getFullYear()}`;
-            
+
             if (!monthlyData[monthKey]) {
                 monthlyData[monthKey] = { month: monthKey, amount: 0 };
             }
             monthlyData[monthKey].amount += expense.amount;
         });
-        
+
         return Object.values(monthlyData);
     }, [expenses]);
 
