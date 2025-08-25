@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import CategorySelect from '../categories/categorySelect';
-import Button from '../common/button';
 import BusinessSelect from './businessSelect';
 
 export default function RenameBusiness({ goBack, refId, error, success, renameBusiness }) {
@@ -14,73 +14,97 @@ export default function RenameBusiness({ goBack, refId, error, success, renameBu
     };
 
     return (
-        <View className="p-4 bg-white rounded-lg w-full">
-            <Text className="text-xl font-semibold text-center text-gray-800 mb-4">
-                שנה בעל עסק
-            </Text>
-
+        <View className="bg-white rounded-xl shadow p-6 w-full mx-auto max-w-md">
+            {/* Title */}
+            <View className="items-center mb-6">
+                <Text className="text-3xl font-bold text-slate-800">עדכון שם עסק</Text>
+                <View className="h-1.5 w-16 bg-blue-500 rounded-full mt-3" />
+            </View>
+            
+            {/* Status Messages */}
             {error && (
-                <View className="bg-red-100 border border-red-400 rounded-md py-2 px-4 mb-4">
-                    <Text className="text-sm text-center text-red-600">{error}</Text>
+                <View className="bg-red-50 border-2 border-red-200 rounded-xl py-3 px-4 mb-6">
+                    <View className="flex-row-reverse items-center">
+                        <Ionicons name="alert-circle" size={20} color="#DC2626" />
+                        <Text className="text-base text-right text-red-600 mr-2 font-medium">{error}</Text>
+                    </View>
                 </View>
             )}
 
             {success && (
-                <View className="bg-green-100 border border-green-400 rounded-md py-2 px-4 mb-4">
-                    <Text className="text-sm text-center text-green-600">{success}</Text>
+                <View className="bg-green-50 border-2 border-green-200 rounded-xl py-3 px-4 mb-6">
+                    <View className="flex-row-reverse items-center">
+                        <Ionicons name="checkmark-circle" size={20} color="#10b981" />
+                        <Text className="text-base text-right text-green-600 mr-2 font-medium">{success}</Text>
+                    </View>
                 </View>
             )}
-
-            <Text className="text-sm font-medium text-gray-700 mb-1">בחר קטגוריה</Text>
-            <CategorySelect
-                refId={refId}
-                setSelectedCategory={setSelectedCategory}
-                initialValue={selectedCategory}
-            />
-
-            {selectedCategory && (
-                <>
-                    <Text className="text-sm font-medium text-gray-700 mb-1 mt-4">בחר עסק</Text>
-                    <BusinessSelect
+            
+            {/* Category Selection */}
+            <View className="mb-6">
+                <Text className="text-slate-800 font-bold mb-3 text-lg text-right">בחר קטגוריה</Text>
+                <View className="border-2 border-gray-300 rounded-xl overflow-hidden">
+                    <CategorySelect
                         refId={refId}
-                        category={selectedCategory}
-                        setSelectedBusiness={setSelectedBusiness}
-                        initialValue={selectedBusiness}
+                        setSelectedCategory={setSelectedCategory}
+                        initialValue={selectedCategory}
                     />
-                </>
+                </View>
+            </View>
+            
+            {/* Business Selection - Only shown when category is selected */}
+            {selectedCategory && (
+                <View className="mb-6">
+                    <Text className="text-slate-800 font-bold mb-3 text-lg text-right">בחר עסק</Text>
+                    <View className="border-2 border-gray-300 rounded-xl overflow-hidden">
+                        <BusinessSelect
+                            refId={refId}
+                            category={selectedCategory}
+                            setSelectedBusiness={setSelectedBusiness}
+                            initialValue={selectedBusiness}
+                        />
+                    </View>
+                </View>
             )}
-
+            
+            {/* New Name Input - Only shown when business is selected */}
             {selectedBusiness && (
-                <>
-                    <Text className="text-sm font-medium text-gray-700 mb-1 mt-4">שם עסק חדש</Text>
+                <View className="mb-6">
+                    <Text className="text-slate-800 font-bold mb-3 text-lg text-right">שם עסק חדש</Text>
                     <TextInput
                         value={newName}
                         onChangeText={setNewName}
-                        placeholder="שם עסק חדש"
-                        className="w-full px-4 py-3 mb-4 text-right border border-gray-300 rounded-md"
-                        style={{ textAlign: 'right' }}
+                        placeholder="הזן שם עסק חדש"
+                        placeholderTextColor="#9CA3AF"
+                        className="w-full px-5 py-4 text-right bg-white border-2 border-gray-300 rounded-xl"
+                        style={{ textAlign: 'right', fontSize: 17 }}
                     />
-
-                    <View className="mt-2">
-                        <Button
-                            onPress={handleSubmit}
-                            style="primary"
-                            disabled={!newName.trim()}
-                        >
-                            שנה שם
-                        </Button>
-                    </View>
-                </>
+                </View>
             )}
-
-            <View className="mt-4">
-                <Button
+            
+            {/* Action Buttons */}
+            <View className="flex-row justify-between mt-6">
+                <TouchableOpacity
                     onPress={goBack}
-                    style="secondary"
-                    textClass="text-gray-700 font-medium"
+                    className="bg-gray-100 py-4 rounded-2xl w-[48%] border border-gray-200"
+                    activeOpacity={0.7}
                 >
-                    ביטול
-                </Button>
+                    <Text className="text-gray-700 font-bold text-center">ביטול</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                    onPress={handleSubmit}
+                    className="bg-blue-500 py-4 rounded-2xl w-[48%] flex-row items-center justify-center"
+                    activeOpacity={0.7}
+                    disabled={!selectedBusiness || !newName.trim()}
+                    style={{ 
+                        opacity: (!selectedBusiness || !newName.trim()) ? 0.6 : 1,
+                        elevation: 2
+                    }}
+                >
+                    <Text className="text-white font-bold text-center ml-2">עדכן שם</Text>
+                    <Ionicons name="create" size={20} color="white" />
+                </TouchableOpacity>
             </View>
         </View>
     );

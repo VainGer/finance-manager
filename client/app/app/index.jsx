@@ -34,7 +34,7 @@ export default function Index() {
             colors={["#1e293b", "#334155"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            className="w-24 h-24 rounded-3xl items-center justify-center mb-10"
+            className="w-24 h-24 items-center justify-center mb-10 rounded-3xl"
             style={{ 
               shadowColor: "#1e293b", 
               shadowOpacity: 0.3, 
