@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import Button from '../common/button';
 import CategorySelect from './categorySelect';
 
@@ -16,6 +17,7 @@ export default function DeleteCategory({ goBack, refId, error, success, deleteCa
         setLocalError(null);
         setShowConfirm(true);
     };
+    
     const handleDelete = () => {
         deleteCategory(refId, selectedCategory);
     };
@@ -23,96 +25,125 @@ export default function DeleteCategory({ goBack, refId, error, success, deleteCa
     const cancelDelete = () => {
         setShowConfirm(false);
     };
+    
     const displayError = error || localError;
 
     if (success) {
         return (
-            <View className="p-4 bg-white rounded-lg w-full">
-                <View className="bg-green-100 border border-green-400 rounded-md py-4 px-4 mb-4">
-                    <Text className="text-sm text-center text-green-600 font-medium">{success}</Text>
+            <View className="bg-white rounded-xl shadow p-6 w-full max-w-md mx-auto">
+                <View className="items-center mb-8">
+                    <Ionicons name="checkmark-circle" size={80} color="#10b981" />
+                    <Text className="text-3xl font-bold text-slate-800 mt-4">פעולה הושלמה</Text>
+                    <View className="h-1.5 w-16 bg-green-500 rounded-full mt-3" />
                 </View>
-                <Button
+                
+                <View className="bg-green-50 border-2 border-green-200 rounded-xl py-4 px-5 mb-8">
+                    <Text className="text-green-700 text-center font-bold text-lg">{success}</Text>
+                </View>
+                
+                <TouchableOpacity
                     onPress={goBack}
-                    style="primary"
-                    textClass="text-white font-medium"
+                    className="bg-blue-500 py-4 rounded-2xl w-3/4 flex-row items-center justify-center mx-auto"
+                    activeOpacity={0.7}
+                    style={{ elevation: 2 }}
                 >
-                    חזרה לתפריט
-                </Button>
+                    <Text className="text-white font-bold ml-2">חזרה לתפריט</Text>
+                    <Ionicons name="arrow-forward" size={20} color="white" />
+                </TouchableOpacity>
             </View>
         );
     }
 
     return (
-        <View className="p-4 bg-white rounded-lg w-full">
+        <View className="bg-white rounded-xl shadow p-6 w-full max-w-md mx-auto">
             {showConfirm ? (
                 <View>
-                    <Text className="text-lg font-semibold text-center text-red-600 mb-4">אישור מחיקת קטגוריה</Text>
+                    {/* Confirmation Header */}
+                    <View className="items-center mb-8">
+                        <Ionicons name="alert-circle" size={60} color="#ef4444" />
+                        <Text className="text-2xl font-bold text-red-600 mt-4">אישור מחיקת קטגוריה</Text>
+                        <View className="h-1.5 w-16 bg-red-500 rounded-full mt-3" />
+                    </View>
 
-                    <View className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
-                        <Text className="text-center text-red-700 mb-2">
+                    {/* Confirmation Warning */}
+                    <View className="bg-red-50 border-2 border-red-200 rounded-xl p-5 mb-8">
+                        <Text className="text-right text-red-700 font-bold mb-3 text-lg">
                             האם אתה בטוח שברצונך למחוק את הקטגוריה "{selectedCategory}"?
                         </Text>
-                        <Text className="text-center text-red-700 text-sm">
+                        <Text className="text-right text-red-600">
                             פעולה זו אינה ניתנת לביטול וכל התקציבים וההוצאות המשויכים לקטגוריה זו יימחקו.
                         </Text>
                     </View>
 
-                    <View className="flex-row justify-between">
-                        <View className="flex-1 mr-2">
-                            <Button
-                                onPress={cancelDelete}
-                                style="secondary"
-                                textClass="text-gray-700 font-medium"
-                            >
-                                ביטול
-                            </Button>
-                        </View>
-                        <View className="flex-1 ml-2">
-                            <Button
-                                onPress={handleDelete}
-                                style="custom"
-                                bg="#dc2626"
-                                textClass="text-white font-medium"
-                            >
-                                כן, מחק קטגוריה
-                            </Button>
-                        </View>
+                    {/* Buttons */}
+                    <View className="flex-row justify-between mt-4">
+                        <TouchableOpacity
+                            onPress={cancelDelete}
+                            className="bg-gray-100 py-4 rounded-2xl w-[48%] border border-gray-200"
+                            activeOpacity={0.7}
+                        >
+                            <Text className="text-gray-700 font-bold text-center">ביטול</Text>
+                        </TouchableOpacity>
+                        
+                        <TouchableOpacity
+                            onPress={handleDelete}
+                            className="bg-red-600 py-4 rounded-2xl w-[48%] flex-row items-center justify-center"
+                            activeOpacity={0.7}
+                            style={{ elevation: 2 }}
+                        >
+                            <Ionicons name="trash" size={20} color="white" />
+                            <Text className="text-white font-bold text-center ml-2">מחק קטגוריה</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             ) : (
                 <View>
-                    <Text className="text-lg font-semibold text-gray-800 mb-4">מחיקת קטגוריה</Text>
+                    {/* Title */}
+                    <View className="items-center mb-8">
+                        <Text className="text-3xl font-bold text-slate-800">מחיקת קטגוריה</Text>
+                        <View className="h-1.5 w-16 bg-red-500 rounded-full mt-3" />
+                    </View>
+                    
+                    {/* Error Message */}
                     {displayError && (
-                        <View className="bg-red-100 border border-red-400 rounded-md py-2 px-4 mb-4">
-                            <Text className="text-sm text-center text-red-600">{displayError}</Text>
+                        <View className="bg-red-50 border-2 border-red-200 rounded-xl py-3 px-4 mb-6">
+                            <Text className="text-base text-right text-red-600 font-medium">{displayError}</Text>
                         </View>
                     )}
-                    <Text className="text-sm font-medium text-gray-700 mb-1">בחר קטגוריה למחיקה</Text>
-                    <CategorySelect
-                        refId={refId}
-                        setSelectedCategory={setSelectedCategory}
-                        initialValue={selectedCategory}
-                    />
+                    
+                    {/* Category Selection */}
+                    <View className="mb-8">
+                        <Text className="text-slate-800 font-bold mb-3 text-lg text-right">בחר קטגוריה למחיקה</Text>
+                        <View className="border-2 border-gray-300 rounded-xl overflow-hidden">
+                            <CategorySelect
+                                refId={refId}
+                                setSelectedCategory={setSelectedCategory}
+                                initialValue={selectedCategory}
+                            />
+                        </View>
+                    </View>
+                    
+                    {/* Buttons */}
                     <View className="flex-row justify-between mt-4">
-                        <View className="flex-1 mr-2">
-                            <Button
-                                onPress={goBack}
-                                style="secondary"
-                                textClass="text-gray-700 font-medium"
-                            >
-                                ביטול
-                            </Button>
-                        </View>
-                        <View className="flex-1 ml-2">
-                            <Button
-                                onPress={handleSubmit}
-                                style="custom"
-                                bg="#dc2626"
-                                textClass="text-white font-medium"
-                            >
-                                המשך למחיקה
-                            </Button>
-                        </View>
+                        <TouchableOpacity
+                            onPress={goBack}
+                            className="bg-gray-100 py-4 rounded-2xl w-[48%] border border-gray-200"
+                            activeOpacity={0.7}
+                        >
+                            <Text className="text-gray-700 font-bold text-center">ביטול</Text>
+                            
+
+                        </TouchableOpacity>
+                        
+                        <TouchableOpacity
+                            onPress={handleSubmit}
+                            className="bg-red-600 py-4 rounded-2xl w-[48%] flex-row items-center justify-center"
+                            activeOpacity={0.7}
+                            style={{ elevation: 2 }}
+                        >
+                            <Text className="text-white font-bold text-center ml-2">מחיקה</Text>
+                            <Ionicons name="trash" size={20} color="white" />
+                        </TouchableOpacity>
                     </View>
                 </View>
             )}
