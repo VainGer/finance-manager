@@ -16,7 +16,7 @@ export default function FeatureCarousel({
     () => [
       { icon: "pie-chart", color: "#2563eb", title: "ניהול תקציבים", desc: "הגדר תקציבים לפי קטגוריות ועקוב אחרי ההוצאות" },
       { icon: "card", color: "#059669", title: "מעקב עסקאות", desc: "הוסף, ערוך ונהל את כל העסקאות שלך במקום אחד" },
-      { icon: "cloud-upload", color: "#7c3aed", title: " סריקת קבצים חכמה", desc: "העלה דוח הוצאות אשראי ו-AI יוסיף את העסקאות אוטומטית" },
+      { icon: "cloud-upload", color: "#7c3aed", title: " סריקת קבצים חכמה", desc: "העלה דוח הוצאות אשראי ותוסיף בקלות עסקאות" },
       { icon: "stats-chart", color: "#dc2626", title: "דוחות מפורטים", desc: "קבל תובנות על ההרגלים הכספיים שלך" },
     ],
     []
