@@ -1,10 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
-import { useState } from 'react';
-import { Text, TextInput, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { post } from '../../utils/api';
-import Button from '../common/button';
+import { useEffect, useState } from 'react';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function AddCategory({ goBack, addCategory, error, success, onCategoryAdded }) {
     const [categoryName, setCategoryName] = useState('');
@@ -15,10 +11,9 @@ export default function AddCategory({ goBack, addCategory, error, success, onCat
             onCategoryAdded();
         }
     }, [success, categoryName, onCategoryAdded]);
+    
     return (
-        <View className="p-4 bg-white rounded-lg">
-            <Text className="text-lg font-semibold text-gray-800 mb-4 text-center">הוספת קטגוריה</Text>
-        <View className="bg-white rounded-xl shadow p-6 w-full mx-auto max-w-md">
+        <View className="bg-white rounded-xl shadow p-6 w-full mx-auto" style={{ minHeight: 300 }}>
             {/* Title */}
             <View className="items-center mb-8">
                 <Text className="text-3xl font-bold text-slate-800">הוספת קטגוריה</Text>

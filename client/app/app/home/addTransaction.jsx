@@ -1,40 +1,30 @@
-import { useState } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, I18nManager } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
+import { I18nManager, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { useAuth } from '../../context/AuthContext.jsx';
 import DateTimePicker from 'react-native-modal-datetime-picker';
-import { formatDate } from '../../utils/formatters.js';
-import CategorySelect from '../../components/categories/categorySelect.jsx';
 import BusinessSelects from '../../components/business/businessSelect.jsx';
-import LoadingSpinner from '../../components/common/loadingSpinner.jsx';
+import CategorySelect from '../../components/categories/categorySelect.jsx';
 import Button from '../../components/common/button.jsx';
-import useEditTransactions from '../../hooks/useEditTransactions.js';
+import LoadingSpinner from '../../components/common/loadingSpinner.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import useBudgetSummary from '../../hooks/expenses/useBudgetSummary.js';
 import useExpensesDisplay from '../../hooks/expenses/useExpensesDisplay.js';
+import useEditTransactions from '../../hooks/useEditTransactions.js';
+import { formatDate } from '../../utils/formatters.js';
 
-export default function addTransaction() {
-    const { profile } = useAuth();
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [selectedBusiness, setSelectedBusiness] = useState('');
-    const [isVisibleDate, setVisibleDate] = useState(false);
-    const [date, setDate] = useState(null);
-    const [amount, setAmount] = useState('');
-    const [description, setDescription] = useState('');
-    const { refetchExpenses } = useExpensesDisplay({ profile });
-    const { refetchBudgets } = useBudgetSummary({ profile });
-    const { loading, error, success, addTransaction } = useEditTransactions({ profile, refetchExpenses, refetchBudgets });
-
-export default function addTransaction() {
+export default function AddTransaction() {
   const { profile } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedBusiness, setSelectedBusiness] = useState('');
   const [isVisibleDate, setVisibleDate] = useState(false);
-  const [date, setDate] = useState(null);
+  const [date, setDate] = useState(new Date());
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
-  const { loading, error, success, addTransaction } = useEditTransactions({ profile });
+  const { refetchExpenses } = useExpensesDisplay({ profile });
+  const { refetchBudgets } = useBudgetSummary({ profile });
+  const { loading, error, success, addTransaction } = useEditTransactions({ profile, refetchExpenses, refetchBudgets });
 
   const isRTL = I18nManager.isRTL;
 
@@ -141,7 +131,7 @@ export default function addTransaction() {
           <DateTimePicker
             isVisible={isVisibleDate}
             mode="date"
-            date={new Date()}
+            date={date || new Date()}
             onConfirm={(d) => { setVisibleDate(false); setDate(d); }}
             onCancel={() => setVisibleDate(false)}
           />
@@ -185,11 +175,13 @@ export default function addTransaction() {
           <Button
             onPress={() =>
               addTransaction(
-                { selectedCategory, selectedBusiness, amount, date, description },
+                { selectedCategory, selectedBusiness, amount, date: date || new Date(), description },
                 { setSelectedCategory, setSelectedBusiness, setAmount, setDate, setDescription }
               )
             }
             className="py-3 bg-blue-600 rounded-lg"
+            disabled={!selectedCategory || !selectedBusiness || !amount || amount === '0'}
+            style={{ opacity: (!selectedCategory || !selectedBusiness || !amount || amount === '0') ? 0.7 : 1 }}
           >
             <View
               style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}

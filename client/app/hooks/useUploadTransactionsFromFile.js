@@ -20,6 +20,7 @@ export default function useUploadTransactionFile() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Mobile file picker
   const pickFile = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -43,6 +44,27 @@ export default function useUploadTransactionFile() {
       await handleFileRead(result.assets[0]);
     } catch (err) {
       console.error("Error picking document:", err);
+      setError("אירעה שגיאה בבחירת הקובץ");
+    }
+  };
+  
+  // Web file upload handler for compatibility
+  const handleFileUpload = async (event) => {
+    try {
+      // This is used in web version
+      if (event?.target?.files?.length) {
+        const file = event.target.files[0];
+        setSelectedFile(file);
+        
+        // Read the file similarly to mobile version
+        // This would require a different implementation for web
+        console.log("Web file selected:", file);
+        
+        // Here you would implement web file reading logic
+        // For now, assuming the web component handles this separately
+      }
+    } catch (err) {
+      console.error("Error handling file upload:", err);
       setError("אירעה שגיאה בבחירת הקובץ");
     }
   };
@@ -181,6 +203,30 @@ export default function useUploadTransactionFile() {
     }
   };
 
+  // Fetch businesses for all categories
+  const fetchBusinesses = async () => {
+    if (!profile?.expenses || !categories.length) return;
+    
+    const fetchedSelects = [];
+    for (const category of categories) {
+      try {
+        const response = await get(`expenses/business/get-businesses/${profile.expenses}/${category}`);
+        if (response.ok) {
+          fetchedSelects.push({ category, businesses: response.businesses });
+        } else {
+          fetchedSelects.push({ category, businesses: [] });
+        }
+      } catch (error) {
+        console.error(`Error fetching businesses for ${category}:`, error);
+        fetchedSelects.push({ category, businesses: [] });
+      }
+    }
+
+    setSelects(fetchedSelects);
+    setRefreshCounter(prev => prev + 1);
+  };
+
+  // Initial data loading
   useEffect(() => {
     if (profile?.expenses) {
       getCategories();
@@ -189,32 +235,10 @@ export default function useUploadTransactionFile() {
 
   
   useEffect(() => {
-    if (categories.length > 0) {
-      const fetchBusinesses = async () => {
-        const fetchedSelects = [];
-
-        for (const category of categories) {
-          try {
-            const response = await get(`expenses/business/get-businesses/${profile.expenses}/${category}`);
-            if (response.ok) {
-              fetchedSelects.push({ category, businesses: response.businesses });
-            } else {
-              fetchedSelects.push({ category, businesses: [] });
-            }
-          } catch (error) {
-            console.error(`Error fetching businesses for ${category}:`, error);
-            fetchedSelects.push({ category, businesses: [] });
-          }
-        }
-
-        setSelects(fetchedSelects);
-      };
-
+    if (categories.length > 0 && profile?.expenses) {
       fetchBusinesses();
     }
   }, [categories, profile?.expenses]);
-
-
   const handleUpdateTransaction = (id, field, value) => {
     if (!dataToUpload) return;
 
@@ -233,13 +257,15 @@ export default function useUploadTransactionFile() {
     setRefreshCounter(prev => prev + 1);
   };
 
-  const handleToggleUpload = (id) => {
+  const handleToggleUpload = (id, checked) => {
     if (!dataToUpload) return;
 
     setDataToUpload(prevData => {
       return prevData.map(item => {
         if (item.id === id) {
-          return { ...item, toUpload: !item.toUpload };
+          // Use the provided checked value if available, otherwise toggle
+          const newValue = checked !== undefined ? checked : !item.toUpload;
+          return { ...item, toUpload: newValue };
         }
         return item;
       });
@@ -255,6 +281,7 @@ export default function useUploadTransactionFile() {
     setSubmitSuccess(false);
 
     try {
+      // Create properly formatted transactions objects to match web version
       const transactionsToUpload = dataToUpload
         .filter(t => t.toUpload)
         .map(t => ({
@@ -271,14 +298,15 @@ export default function useUploadTransactionFile() {
         return;
       }
 
+      // Log what we're submitting for debugging
+      console.log("Submitting transactions:", transactionsToUpload);
+
       const response = await post("profile/upload-transactions", {
         username: profile.username,
         profileName: profile.profileName,
         refId: profile.expenses,
         transactionsToUpload: transactionsToUpload
       });
-
-      console.log("Response from upload:", response);
 
       if (response.ok) {
         setSubmitSuccess(true);
@@ -304,7 +332,16 @@ export default function useUploadTransactionFile() {
 
     const categoryData = selects.find(select => select.category === categoryName);
     return categoryData ? categoryData.businesses : [];
-  }, [selects]); return {
+  }, [selects]); 
+  
+  // Function to refresh all data
+  const refreshAllData = async () => {
+    await getCategories();
+    // fetchBusinesses will be called automatically from the useEffect due to categories change
+    setRefreshCounter(prev => prev + 1);
+  };
+  
+  return {
     selectedFile,
     transactionsData,
     dataToUpload,
@@ -325,6 +362,12 @@ export default function useUploadTransactionFile() {
     handleSubmitTransactions,
     getSelects,
     processTransactions,
-    getBusinessesForCategory
+    getBusinessesForCategory,
+    // Add web compatibility function
+    handleFileUpload,
+    // Export the fetch functions directly for use in component
+    getCategories,
+    fetchBusinesses,
+    refreshAllData
   }
 }

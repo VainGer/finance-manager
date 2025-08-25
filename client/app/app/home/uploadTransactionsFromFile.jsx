@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Button from "../../components/common/button";
 import LoadingSpinner from '../../components/common/loadingSpinner';
@@ -16,23 +16,25 @@ import AddCategory from '../../components/categories/createCategory.jsx';
 export default function UploadTransactionsFromFile() {
     const router = useRouter();
     const { profile } = useAuth();
-    const [showCategoryModal, setShowCategoryModal] = useState(false);
-    const [showBusinessModal, setShowBusinessModal] = useState(false);
+    const [componentRefreshCounter, setComponentRefreshCounter] = useState(0);
+    
+    const refreshData = () => {
+        setComponentRefreshCounter(prev => prev + 1);
+    };
 
-    // Initialize category and business management hooks
     const {
         error: categoryError,
         success: categorySuccess,
         loading: categoryLoading,
         addCategory
-    } = useEditCategories({ profile, goBack: () => setShowCategoryModal(false) });
+    } = useEditCategories({ profile, goBack: () => refreshData() });
 
     const {
         error: businessError,
         success: businessSuccess,
         loading: businessLoading,
         addBusiness
-    } = useEditBusiness({ profile, goBack: () => setShowBusinessModal(false) });
+    } = useEditBusiness({ profile, goBack: () => refreshData() });
 
     const {
         selectedFile,
@@ -54,14 +56,30 @@ export default function UploadTransactionsFromFile() {
         processTransactions,
         getBusinessesForCategory,
         loading,
-        setDataToUpload
+        setDataToUpload,
+        // Import the exposed fetch functions
+        getCategories,
+        fetchBusinesses,
+        refreshAllData
     } = useUploadTransactionsFromFile();
 
     // Handle successful creation of a category or business
-    const handleCreationSuccess = () => {
-        // Reprocess the data to update categories and businesses
+    const handleCreationSuccess = async () => {
+        // Immediately refresh categories and businesses data
+        await refreshAllData(); // This will update both categories and businesses
+        
+        // Reprocess the data to update categories and businesses in transactions
         if (selectedFile && processTransactions) {
             processTransactions();
+            
+            // Force immediate UI update
+            setComponentRefreshCounter(prev => prev + 1);
+            
+            // Force re-render of data
+            setDataToUpload(prev => {
+                if (!prev) return prev;
+                return [...prev]; // Create a new array reference to trigger re-render
+            });
         }
     };
 
@@ -69,26 +87,34 @@ export default function UploadTransactionsFromFile() {
     useEffect(() => {
         if (categorySuccess) {
             // Close modal after a short delay
-            const timer = setTimeout(() => {
-                setShowCategoryModal(false);
+            const timer = setTimeout(async () => {
+                // Directly fetch categories and businesses
+                await getCategories();
+                await fetchBusinesses();
+                
                 // Re-fetch categories by re-processing the data
                 if (selectedFile && processTransactions) {
                     processTransactions();
+                    // Force refresh of UI components
+                    setComponentRefreshCounter(prev => prev + 1);
+                    // Force re-render by creating a new array reference
+                    setDataToUpload(prev => prev ? [...prev] : prev);
                 }
             }, 1500);
             return () => clearTimeout(timer);
         }
     }, [categorySuccess, selectedFile, processTransactions]);
 
-    // Update when new business is added successfully
     useEffect(() => {
         if (businessSuccess) {
-            // Close modal after a short delay
-            const timer = setTimeout(() => {
-                setShowBusinessModal(false);
-                // Re-fetch businesses by re-processing the data
+            const timer = setTimeout(async () => {
+                // Directly fetch businesses data
+                await fetchBusinesses();
+                
                 if (selectedFile && processTransactions) {
                     processTransactions();
+                    setComponentRefreshCounter(prev => prev + 1);
+                    setDataToUpload(prev => prev ? [...prev] : prev);
                 }
             }, 1500);
             return () => clearTimeout(timer);
@@ -248,20 +274,13 @@ export default function UploadTransactionsFromFile() {
             <View className="my-2">
                 <View className="flex-row justify-between items-center mb-1">
                     <Text className="font-medium text-slate-700">קטגוריה:</Text>
-                    <TouchableOpacity
-                        onPress={() => setShowCategoryModal(true)}
-                        className="flex-row items-center"
-                    >
-                        <Ionicons name="add-circle-outline" size={16} color="#3b82f6" />
-                        <Text className="text-blue-500 ml-1 font-medium">הוסף חדש</Text>
-                    </TouchableOpacity>
                 </View>
                 <View className="border border-slate-300 rounded-md overflow-hidden">
                     <Picker
                         selectedValue={(transaction?.category) || ""}
                         onValueChange={handleCategoryChange}
                         style={{ height: 56 }}
-                        key={`cat-${transaction.id}-${refreshCounter}`} // Add key for refreshing when data changes
+                        key={`cat-${transaction.id}-${refreshCounter}-${componentRefreshCounter}`} // Add dual keys for refreshing
                     >
                         <Picker.Item label="בחר קטגוריה" value="" />
                         {Array.isArray(categories) && categories.map((category, index) => (
@@ -271,12 +290,15 @@ export default function UploadTransactionsFromFile() {
                 </View>
             </View>
         );
-    };
+    };    
 
     const BusinessPicker = ({ transaction, getBusinessesForCategory, handleUpdateTransaction }) => {
-        const businesses = transaction?.category ?
-            (getBusinessesForCategory(transaction.category) || []) :
-            [];
+        // Force re-evaluation of businesses on every render
+        const businesses = useMemo(() => {
+            return transaction?.category ?
+                (getBusinessesForCategory(transaction.category) || []) :
+                [];
+        }, [transaction?.category, getBusinessesForCategory, componentRefreshCounter]);
 
         const handleBusinessChange = (value) => {
             if (transaction && transaction.id !== undefined) {
@@ -284,28 +306,22 @@ export default function UploadTransactionsFromFile() {
             }
         };
 
+        // Log when this component renders with new businesses
+        useEffect(() => {
+            console.log(`BusinessPicker rendering for transaction ${transaction.id} with ${businesses?.length} businesses`);
+        }, [transaction.id, businesses]);
+
         return (
             <View className="my-2">
                 <View className="flex-row justify-between items-center mb-1">
                     <Text className="font-medium text-slate-700">עסק:</Text>
-                    <TouchableOpacity
-                        onPress={() => setShowBusinessModal(true)}
-                        className="flex-row items-center"
-                        disabled={!transaction?.category}
-                    >
-                        <Ionicons name="add-circle-outline" size={16} color={transaction?.category ? "#3b82f6" : "#94a3b8"} />
-                        <Text className={transaction?.category ? "text-blue-500 ml-1 font-medium" : "text-slate-400 ml-1 font-medium"}>
-                            הוסף חדש
-                        </Text>
-                    </TouchableOpacity>
                 </View>
                 <View className="border border-slate-300 rounded-md overflow-hidden">
                     <Picker
-                        selectedValue={transaction?.business || ""}
+                        selectedValue={(transaction?.business) || ""}
                         onValueChange={handleBusinessChange}
                         style={{ height: 56 }}
-                        enabled={!!transaction?.category}
-                        key={`bus-${transaction.id}-${refreshCounter}`} // Add key for refreshing when data changes
+                        key={`bus-${transaction.id}-${refreshCounter}-${componentRefreshCounter}`} // Add dual keys for refreshing
                     >
                         <Picker.Item label="בחר עסק" value="" />
                         {Array.isArray(businesses) && businesses.map((business, index) => (
@@ -319,6 +335,35 @@ export default function UploadTransactionsFromFile() {
 
     const CreateNewCategory = () => {
         const [showCreate, setShowCreate] = useState(false);
+        
+        const handleClose = async () => {
+            setShowCreate(false);
+            
+            // Directly fetch updated categories and businesses
+            await getCategories();
+            await fetchBusinesses();
+            
+            // Force immediate refresh
+            refreshData();
+            
+            // Make sure to process transactions to update data
+            if (selectedFile && processTransactions) {
+                processTransactions();
+            }
+        };
+
+        const handleAddCategory = async (...args) => {
+            const result = await addCategory(...args);
+            
+            // Immediately fetch updated categories
+            await getCategories();
+            await fetchBusinesses();
+            
+            // Force refresh immediately after adding
+            setComponentRefreshCounter(prev => prev + 1);
+            return result;
+        };
+        
         return (
             <>
                 <Button onPress={() => setShowCreate(true)} style="success" size="small">
@@ -326,47 +371,15 @@ export default function UploadTransactionsFromFile() {
                 </Button>
 
                 {showCreate && (
-                    <View style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                        justifyContent: 'flex-end',
-                        zIndex: 9999,
-                        elevation: 10,
-                    }}>
-                        <View className="bg-white rounded-t-3xl max-h-[80%] overflow-hidden">
-                            <View className="border-b border-slate-200 p-4">
-                                <View className="flex-row justify-between items-center">
-                                    <Text className="text-lg font-semibold text-slate-800">הוספת קטגוריה חדשה</Text>
-                                    <TouchableOpacity
-                                        onPress={() => setShowCreate(false)}
-                                        className="w-8 h-8 bg-slate-100 rounded-lg items-center justify-center"
-                                    >
-                                        <Ionicons name="close" size={20} color="#475569" />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-
+                    <View className="flex-1 h-1/2">
+                        <View className="bg-white rounded-t-3xl max-h-[80%] min-h-[450px] overflow-hidden">
                             <AddCategory
-                                goBack={() => setShowCreate(false)}
-                                addCategory={addCategory}
+                                goBack={handleClose}
+                                addCategory={handleAddCategory}
                                 error={categoryError}
                                 success={categorySuccess}
                                 onCategoryAdded={handleCreationSuccess}
                             />
-
-                            <View className="p-4">
-                                <Button
-                                    onPress={() => setShowCreate(false)}
-                                    style="primary"
-                                    className="mt-4"
-                                >
-                                    <Text>סגור</Text>
-                                </Button>
-                            </View>
                         </View>
                     </View>
                 )}
@@ -376,6 +389,33 @@ export default function UploadTransactionsFromFile() {
 
     const CreateNewBusiness = () => {
         const [showCreate, setShowCreate] = useState(false);
+        
+        const handleClose = async () => {
+            setShowCreate(false);
+            
+            // Directly fetch updated businesses
+            await fetchBusinesses();
+            
+            // Force immediate refresh
+            refreshData();
+            
+            // Make sure to process transactions to update data
+            if (selectedFile && processTransactions) {
+                processTransactions();
+            }
+        };
+
+        const handleAddBusiness = async (...args) => {
+            const result = await addBusiness(...args);
+            
+            // Directly fetch updated businesses
+            await fetchBusinesses();
+            
+            // Force refresh immediately after adding
+            setComponentRefreshCounter(prev => prev + 1);
+            return result;
+        };
+        
         return (
             <>
                 <Button onPress={() => setShowCreate(true)} style="info" size="small">
@@ -383,48 +423,16 @@ export default function UploadTransactionsFromFile() {
                 </Button>
 
                 {showCreate && (
-                    <View style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                        justifyContent: 'flex-end',
-                        zIndex: 9999,
-                        elevation: 10,
-                    }}>
-                        <View className="bg-white rounded-t-3xl max-h-[80%] overflow-hidden">
-                            <View className="border-b border-slate-200 p-4">
-                                <View className="flex-row justify-between items-center">
-                                    <Text className="text-lg font-semibold text-slate-800">הוספת בעל עסק חדש</Text>
-                                    <TouchableOpacity
-                                        onPress={() => setShowCreate(false)}
-                                        className="w-8 h-8 bg-slate-100 rounded-lg items-center justify-center"
-                                    >
-                                        <Ionicons name="close" size={20} color="#475569" />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-
+                    <View className="flex-1 h-1/2">
+                        <View className="bg-white rounded-t-3xl max-h-[80%] min-h-[500px] overflow-hidden">
                             <CreateBusiness
-                                refId={profile?.id}
-                                goBack={() => setShowCreate(false)}
-                                addBusiness={addBusiness}
+                                refId={profile?.expenses}
+                                goBack={handleClose}
+                                addBusiness={handleAddBusiness}
                                 error={businessError}
                                 success={businessSuccess}
                                 onBusinessAdded={handleCreationSuccess}
                             />
-
-                            <View className="p-4">
-                                <Button
-                                    onPress={() => setShowCreate(false)}
-                                    style="primary"
-                                    className="mt-4"
-                                >
-                                    <Text>סגור</Text>
-                                </Button>
-                            </View>
                         </View>
                     </View>
                 )}
@@ -493,11 +501,13 @@ export default function UploadTransactionsFromFile() {
                                 {/* Category and Business Selectors */}
                                 <View className="space-y-3">
                                     <CategoryPicker
+                                        key={`cat-picker-${refreshCounter}-${componentRefreshCounter}-${transaction.id}`}
                                         transaction={transaction}
                                         categories={categories}
                                         handleUpdateTransaction={handleUpdateTransaction}
                                     />
                                     <BusinessPicker
+                                        key={`bus-picker-${refreshCounter}-${componentRefreshCounter}-${transaction.id}`}
                                         transaction={transaction}
                                         getBusinessesForCategory={getBusinessesForCategory}
                                         handleUpdateTransaction={handleUpdateTransaction}
@@ -579,136 +589,11 @@ export default function UploadTransactionsFromFile() {
     };
 
 
-    const renderCategoryModal = () => {
-        if (!showCategoryModal) return null;
-
-        return (
-            <View style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 9999
-            }}>
-                <View style={{
-                    backgroundColor: 'white',
-                    width: '90%', 
-                    maxWidth: 400,
-                    borderRadius: 16,
-                    padding: 24,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 4,
-                    elevation: 5,
-                }}>
-                    <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-xl font-bold text-slate-800">הוספת קטגוריה חדשה</Text>
-                        <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
-                            <Ionicons name="close" size={24} color="#64748b" />
-                        </TouchableOpacity>
-                    </View>
-
-                    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                        <AddCategory
-                            addCategory={addCategory}
-                            goBack={() => setShowCategoryModal(false)}
-                            error={categoryError}
-                            success={categorySuccess}
-                            onCategoryAdded={() => {
-                                // Refresh data when category is added
-                                if (processTransactions) {
-                                    // Refresh the categories list if possible
-                                    processTransactions();
-                                }
-                            }}
-                        />
-                    </ScrollView>
-
-                    {categorySuccess && (
-                        <View className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <Text className="text-green-700">הקטגוריה נוצרה בהצלחה!</Text>
-                        </View>
-                    )}
-                </View>
-            </View>
-        );
-    };
-
-    // Modal for adding a new business
-    const renderBusinessModal = () => {
-        if (!showBusinessModal) return null;
-
-        return (
-            <View
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    zIndex: 9999,
-                    elevation: 10,
-                }}
-            >
-                <View style={{
-                    backgroundColor: 'white',
-                    width: '90%',
-                    maxWidth: 400,
-                    maxHeight: '90%',
-                    borderRadius: 16,
-                    padding: 24,
-                    elevation: 5,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 3.84,
-                    overflow: 'hidden'
-                }}>
-                    <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-xl font-bold text-slate-800">הוספת עסק חדש</Text>
-                        <TouchableOpacity onPress={() => setShowBusinessModal(false)}>
-                            <Ionicons name="close" size={24} color="#64748b" />
-                        </TouchableOpacity>
-                    </View>
-
-                    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                        <CreateBusiness
-                            refId={profile?.id}
-                            addBusiness={addBusiness}
-                            goBack={() => setShowBusinessModal(false)}
-                            error={businessError}
-                            success={businessSuccess}
-                            onBusinessAdded={(categoryName) => {
-                                // Refresh data when business is added
-                                if (processTransactions) {
-                                    // Refresh the businesses list if possible
-                                    processTransactions();
-                                }
-                            }}
-                        />
-                    </ScrollView>
-
-                    {businessSuccess && (
-                        <View className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <Text className="text-green-700">העסק נוצר בהצלחה!</Text>
-                        </View>
-                    )}
-                </View>
-            </View>
-        );
-    };
+    // Modal rendering functions removed as they're now integrated directly within picker components
 
     // Render with ScrollView to prevent nesting virtualized lists
     return (
-        <View style={{ flex: 1 }}>
+        <View className="flex-1 h-full">
             <ScrollView className="flex-1 bg-slate-50 p-4">
                 <View className="mb-6">
                     {/* Main content */}
@@ -756,10 +641,6 @@ export default function UploadTransactionsFromFile() {
                     {dataToUpload && dataToUpload.length > 0 && renderTransactionList()}
                 </View>
             </ScrollView>
-
-            {/* Render modals as siblings to ScrollView */}
-            {renderCategoryModal()}
-            {renderBusinessModal()}
         </View>
     );
 }

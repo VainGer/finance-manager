@@ -80,7 +80,6 @@ export default function useUploadTransactionFile() {
         }
     }, [profile?.expenses]);
 
-    // Load businesses when categories change
     useEffect(() => {
         if (categories.length > 0) {
             const fetchBusinesses = async () => {
