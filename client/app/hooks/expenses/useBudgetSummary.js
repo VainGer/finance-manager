@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { get } from '../../utils/api';
-
 export default function useBudgetSummary({ profile }) {
     const [profileBudgets, setProfileBudgets] = useState([]);
     const [expensesData, setExpensesData] = useState([]);

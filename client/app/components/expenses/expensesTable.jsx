@@ -7,22 +7,22 @@ import ChangeTransactionDate from '../transactions/changeTransactionDate.jsx'
 import ChangeTransactionDescription from '../transactions/changeTransactionDescription.jsx'
 import Button from '../../components/common/button';
 
-const ExpenseCard = ({ expense, profile, refetchExpenses }) => {
+const ExpenseCard = ({ expense, profile, refetchExpenses, refetchBudgets }) => {
   const [editDisplay, setEditDisplay] = useState(null);
   const displayToRender = () => {
     switch (editDisplay) {
       case 'delete':
         return <DeleteTransaction transaction={expense} profile={profile}
-          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} />
+          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} refetchBudgets={refetchBudgets} />
       case 'changeAmount':
         return <ChangeTransactionAmount transaction={expense} profile={profile}
-          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} />
+          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} refetchBudgets={refetchBudgets} />
       case 'changeDate':
         return <ChangeTransactionDate transaction={expense} profile={profile}
-          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} />
+          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} refetchBudgets={refetchBudgets} />
       case 'changeDescription':
         return <ChangeTransactionDescription transaction={expense} profile={profile}
-          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} />
+          goBack={() => setEditDisplay(null)} refetchExpenses={refetchExpenses} refetchBudgets={refetchBudgets} />
     }
   }
 
@@ -64,7 +64,7 @@ const EmptyList = () => (
   </View>
 );
 
-export default function ExpensesTable({ filteredExpenses, profile, refetchExpenses }) {
+export default function ExpensesTable({ filteredExpenses, profile, refetchExpenses, refetchBudgets }) {
 
   return (
     <View className="mb-4">
@@ -80,7 +80,7 @@ export default function ExpensesTable({ filteredExpenses, profile, refetchExpens
         <View style={{ padding: 2 }}>
           {filteredExpenses.map((expense, index) => (
             <ExpenseCard key={expense._id || index} expense={expense}
-              profile={profile} refetchExpenses={refetchExpenses} />
+              profile={profile} refetchExpenses={refetchExpenses} refetchBudgets={refetchBudgets} />
           ))}
         </View>
       ) : (

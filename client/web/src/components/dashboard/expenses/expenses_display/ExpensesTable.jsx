@@ -94,7 +94,7 @@ export default function ExpensesTable({ filteredExpenses, expensesId, onTransact
                         </div>
 
                         {/* Actions */}
-                        <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                        <div className="md:flex justify-end gap-2 pt-3 border-t border-slate-200">
                             <EditTransaction
                                 transaction={expense}
                                 refId={expensesId}

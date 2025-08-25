@@ -1,12 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
-import { post } from '../../utils/api';
 import Button from '../common/button';
 
-export default function AddCategory({ goBack, addCategory, error, success }) {
+export default function AddCategory({ goBack, addCategory, error, success, onCategoryAdded }) {
     const [categoryName, setCategoryName] = useState('');
+    
+    // Watch for successful category addition and notify parent component
+    useEffect(() => {
+        if (success && categoryName === '' && onCategoryAdded) {
+            onCategoryAdded();
+        }
+    }, [success, categoryName, onCategoryAdded]);
     return (
-        <View className="p-4 bg-white rounded-lg w-3/4 ">
+        <View className="p-4 bg-white rounded-lg">
             <Text className="text-lg font-semibold text-gray-800 mb-4 text-center">הוספת קטגוריה</Text>
             {error && (
                 <View className="bg-red-100 border border-red-400 rounded-md py-2 px-4 mb-4">

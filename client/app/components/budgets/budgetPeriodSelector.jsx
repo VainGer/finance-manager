@@ -32,7 +32,7 @@ export default function BudgetPeriodSelector({ periods, selectedPeriod, onSelect
                             <Picker.Item
                                 key={period.startDate}
                                 label={`${formatDate(new Date(period.startDate))} - ${formatDate(new Date(period.endDate))}`}
-                                value={index.toString()}
+                                value={index}
                             />
                         ))}
                     </Picker>

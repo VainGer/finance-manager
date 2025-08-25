@@ -1,8 +1,8 @@
 import { goBack } from 'expo-router/build/global-state/routing.js';
-import { get, put, post, del } from '../utils/api.js';
-import { useState, useEffect } from 'react'
+import { put, post, del } from '../utils/api.js';
+import { useState } from 'react'
 
-export default function useEditTransactions({ profile }) {
+export default function useEditTransactions({ profile, refetchBudgets, refetchExpenses }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
@@ -47,13 +47,15 @@ export default function useEditTransactions({ profile }) {
             setAmount('');
             setDate(null);
             setDescription('');
+            refetchExpenses();
+            refetchBudgets();
         } else {
             setError('שגיאה בהוספת העסקה');
         }
         setTimeout(() => { resetState(); }, 2000);
     }
 
-    const deleteTransaction = async (transaction, goBack, refetchExpenses) => {
+    const deleteTransaction = async (transaction, goBack) => {
         const deleteData = {
             refId: profile.expenses,
             catName: transaction.category,
@@ -65,6 +67,7 @@ export default function useEditTransactions({ profile }) {
         setLoading(false);
         if (response.ok) {
             refetchExpenses();
+            refetchBudgets();
             setSuccess('העסקה נמחקה בהצלחה!');
             setTimeout(() => { goBack(); setSuccess(null); }, 1500);
         } else {
@@ -74,7 +77,7 @@ export default function useEditTransactions({ profile }) {
         }
     };
 
-    const changeTransactionAmount = async (transaction, newAmount, refetchExpenses) => {
+    const changeTransactionAmount = async (transaction, newAmount) => {
         if (!newAmount || isNaN(newAmount) || Number(newAmount) <= 0) {
             setError('אנא הזן סכום תקין');
             return;
@@ -92,6 +95,7 @@ export default function useEditTransactions({ profile }) {
         if (response.ok) {
             setSuccess('סכום העסקה עודכן בהצלחה!');
             refetchExpenses();
+            refetchBudgets();
             setTimeout(() => { setSuccess(null); goBack(); }, 2000);
         } else {
             console.error('Update failed:', response);
@@ -100,7 +104,7 @@ export default function useEditTransactions({ profile }) {
         }
     }
 
-    const changeTransactionDate = async (transaction, newDate, refetchExpenses) => {
+    const changeTransactionDate = async (transaction, newDate) => {
         if (!newDate || isNaN(newDate.getTime())) {
             setError('אנא הזן תאריך תקין');
             return;
@@ -118,6 +122,7 @@ export default function useEditTransactions({ profile }) {
         if (response.ok) {
             setSuccess('תאריך העסקה עודכן בהצלחה!');
             refetchExpenses();
+            refetchBudgets();
             setTimeout(() => { setSuccess(null); goBack(); }, 2000);
         } else {
             console.error('Update failed:', response);
@@ -126,7 +131,7 @@ export default function useEditTransactions({ profile }) {
         }
     }
 
-    const changeTransactionDescription = async (transaction, newDescription, refetchExpenses) => {
+    const changeTransactionDescription = async (transaction, newDescription) => {
         const updateData = {
             refId: profile.expenses,
             catName: transaction.category,
@@ -140,6 +145,7 @@ export default function useEditTransactions({ profile }) {
         if (response.ok) {
             setSuccess('תיאור העסקה עודכן בהצלחה!');
             refetchExpenses();
+            refetchBudgets();
             setTimeout(() => { setSuccess(null); goBack(); }, 2000);
         } else {
             console.error('Update failed:', response);
@@ -156,6 +162,7 @@ export default function useEditTransactions({ profile }) {
         deleteTransaction,
         changeTransactionAmount,
         changeTransactionDate,
-        changeTransactionDescription
+        changeTransactionDescription,
+        resetState
     }
 }

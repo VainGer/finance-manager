@@ -1,3 +1,5 @@
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import BudgetPeriodSelector from '../../../components/budgets/budgetPeriodSelector';
 import CategoryBudgetDetails from '../../../components/budgets/categoryBudgetDetails';
@@ -6,7 +8,6 @@ import LoadingSpinner from '../../../components/common/loadingSpinner';
 import { useAuth } from '../../../context/AuthContext';
 import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
 import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
-import { useEffect } from 'react';
 
 export default function BudgetSummary() {
     const { profile } = useAuth();
@@ -19,9 +20,18 @@ export default function BudgetSummary() {
         relevantPeriod,
         currentProfileBudget,
         currentCategoryBudgets,
+        refetchBudgets
     } = useBudgetSummary({ profile });
 
+    const { expenses } = useExpensesDisplay({ profile });
 
+    useFocusEffect(
+        useCallback(() => {
+            refetchBudgets();
+            return () => {
+            };
+        }, [])
+    );
 
     if (error) {
         return (

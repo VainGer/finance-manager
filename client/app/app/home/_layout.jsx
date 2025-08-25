@@ -27,12 +27,12 @@ export default function RootLayout() {
             >
                 <Drawer.Screen
                     name="(tabs)"
-                    options={{ drawerLabel: "דף ראשי", title: "דף ראשי",  }}
+                    options={{ drawerLabel: "דף ראשי", title: "דף ראשי", }}
                 />
                 <Drawer.Screen name="addTransaction"
                     options={{
-                        drawerLabel: 'הוסף הוצאה',
-                        title: 'הוסף הוצאה',
+                        drawerLabel: 'הוספת עסקה',
+                        title: 'הוספת עסקה',
                     }}
                 />
                 <Drawer.Screen name="categoryMenu"

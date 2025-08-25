@@ -1,5 +1,6 @@
 import { Picker } from '@react-native-picker/picker';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { ScrollView, Text, View } from 'react-native';
 import LineChartComparison from '../../../components/charts/lineChartComparison';
 import PieChartComponent from '../../../components/charts/pieChart';
@@ -165,7 +166,16 @@ export default function Graphs() {
         selectedMonth,
         setSelectedMonth,
         availableMonths,
+        refetchExpenses
     } = useExpensesCharts({ profile });
+
+    useFocusEffect(
+        useCallback(() => {
+            refetchExpenses();
+            return () => {
+            };
+        }, [])
+    );
 
     if (loading) {
         return <LoadingSpinner />;

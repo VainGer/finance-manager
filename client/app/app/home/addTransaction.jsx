@@ -8,7 +8,8 @@ import BusinessSelects from '../../components/business/businessSelect.jsx';
 import LoadingSpinner from '../../components/common/loadingSpinner.jsx';
 import Button from '../../components/common/button.jsx';
 import useEditTransactions from '../../hooks/useEditTransactions.js';
-
+import useBudgetSummary from '../../hooks/expenses/useBudgetSummary.js';
+import useExpensesDisplay from '../../hooks/expenses/useExpensesDisplay.js';
 
 export default function addTransaction() {
     const { profile } = useAuth();
@@ -18,7 +19,9 @@ export default function addTransaction() {
     const [date, setDate] = useState(null);
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
-    const { loading, error, success, addTransaction } = useEditTransactions({ profile });
+    const { refetchExpenses } = useExpensesDisplay({ profile });
+    const { refetchBudgets } = useBudgetSummary({ profile });
+    const { loading, error, success, addTransaction } = useEditTransactions({ profile, refetchExpenses, refetchBudgets });
 
     return (
         <View>

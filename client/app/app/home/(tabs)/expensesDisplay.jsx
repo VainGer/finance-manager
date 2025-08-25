@@ -4,8 +4,10 @@ import ExpensesTable from '../../../components/expenses/expensesTable';
 import Filter from '../../../components/expenses/filter';
 import { useAuth } from '../../../context/AuthContext';
 import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
+import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
 import { formatAmount } from '../../../utils/formatters';
-
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 const TransactionsSummary = ({ filteredExpenses }) => {
 
     const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -14,17 +16,17 @@ const TransactionsSummary = ({ filteredExpenses }) => {
             <View className="flex-row">
 
                 <View className="flex-1 items-center border-r-2 border-gray-300">
-                    <Text className="text-2xl font-bold text-blue-600">{filteredExpenses.length}</Text>
+                    <Text className="text-lg font-bold text-blue-600">{filteredExpenses.length}</Text>
                     <Text className="text-sm text-gray-600">עסקאות מוצגות</Text>
                 </View>
 
                 <View className="flex-1 items-center border-r-2 border-gray-300">
-                    <Text className="text-2xl font-bold text-red-600">{formatAmount(totalAmount)}</Text>
+                    <Text className="text-lg font-bold text-red-600">{formatAmount(totalAmount)}</Text>
                     <Text className="text-sm text-gray-600">סה"כ הוצאות</Text>
                 </View>
 
                 <View className="flex-1 items-center">
-                    <Text className="text-2xl font-bold text-green-600">
+                    <Text className="text-lg font-bold text-green-600">
                         {filteredExpenses.length > 0 ? formatAmount(totalAmount / filteredExpenses.length) : formatAmount(0)}
                     </Text>
                     <Text className="text-sm text-gray-600">ממוצע לעסקה</Text>
@@ -48,6 +50,15 @@ export default function ExpensesDisplay() {
         refetchExpenses
     } = useExpensesDisplay({ profile });
 
+    const { refetchBudgets } = useBudgetSummary({ profile });
+
+    useFocusEffect(
+        useCallback(() => {
+            refetchExpenses();
+            return () => {
+            };
+        }, [])
+    );
 
     if (loading) {
         return <LoadingSpinner />;
@@ -97,8 +108,9 @@ export default function ExpensesDisplay() {
 
                 <ExpensesTable
                     filteredExpenses={filteredExpenses}
-                    refetchExpenses={refetchExpenses}
                     profile={profile}
+                    refetchExpenses={refetchExpenses}
+                    refetchBudgets={refetchBudgets}
                 />
             </View>
         </ScrollView>

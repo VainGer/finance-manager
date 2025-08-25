@@ -1,4 +1,3 @@
-import React from 'react';
 import { formatCurrency, getProgressPercentage, getProgressBarPercentage, getProgressColor } from '../../../utils/budgetUtils';
 
 export default function OverallBudgetSummary({ budget }) {

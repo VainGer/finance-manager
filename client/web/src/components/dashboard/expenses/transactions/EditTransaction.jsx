@@ -99,7 +99,7 @@ export default function EditTransaction({ transaction, refId, onTransactionUpdat
                 <span className="font-medium">עריכת עסקה</span>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="md:grid md:grid-cols-3 md:gap-4 sm:grid sm:grid-cols-1 sm:gap-4">
                 <div className="space-y-2">
                     <label className="block text-xs font-medium text-slate-700">סכום</label>
                     <input

@@ -47,7 +47,7 @@ export default function UploadFromFileTransactions() {
                 if (item.id === id) {
                     const updatedItem = { ...item, [field]: value };
                     if (field === 'category') {
-                        updatedItem.business = ''; // Reset business when category changes
+                        updatedItem.business = '';
                     }
                     return updatedItem;
                 }
@@ -84,11 +84,8 @@ export default function UploadFromFileTransactions() {
             });
             console.log("Response from upload:", response);
             if (response.ok) {
-                // setSubmitSuccess(true);
-                // setDataToUpload([]);
             } else {
                 console.error("Failed to submit transactions");
-                // You can add error handling UI here
             }
         } catch (error) {
             console.error("Error submitting transactions:", error);
@@ -126,7 +123,6 @@ export default function UploadFromFileTransactions() {
 
     const handleClearFile = () => {
         setSelectedFile(null);
-        // Reset the file input
         const fileInput = document.querySelector('input[type="file"]');
         if (fileInput) fileInput.value = '';
     };

@@ -349,11 +349,10 @@ export default function CreateProfileBudget({ goBack }) {
                             <button
                                 disabled={remainingAmount !== 0}
                                 type="submit"
-                                className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-colors ${
-                                    remainingAmount !== 0 
-                                        ? 'bg-slate-300 cursor-not-allowed text-slate-500' 
+                                className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-colors ${remainingAmount !== 0
+                                        ? 'bg-slate-300 cursor-not-allowed text-slate-500'
                                         : 'bg-green-600 hover:bg-green-700 text-white'
-                                }`}
+                                    }`}
                             >
                                 צור תקציב
                             </button>

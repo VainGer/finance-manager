@@ -149,6 +149,7 @@ export default function useExpesesCharts({ profile }) {
         setDateFilter,
         selectedMonth,
         availableMonths,
-        setSelectedMonth
+        setSelectedMonth,
+        refetchExpenses
     }
 }
