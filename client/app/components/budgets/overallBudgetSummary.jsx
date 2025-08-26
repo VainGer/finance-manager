@@ -33,7 +33,7 @@ export default function OverallBudgetSummary({ budget }) {
                         <View style={{ width: '80%' }}>
                             <Text 
                                 className="font-bold text-slate-800 text-right"
-                                style={{ fontSize: 17 }}
+                                style={{ fontSize: 14 }}
                                 adjustsFontSizeToFit
                             >
                                 {totalBudget}
@@ -49,7 +49,7 @@ export default function OverallBudgetSummary({ budget }) {
                         <View style={{ width: '80%' }}>
                             <Text 
                                 className="font-bold text-slate-800 text-right"
-                                style={{ fontSize: 17 }}
+                                style={{ fontSize: 14 }}
                                 adjustsFontSizeToFit
                             >
                                 {totalSpent}
@@ -67,7 +67,7 @@ export default function OverallBudgetSummary({ budget }) {
                                 className="font-bold text-right"
                                 style={{ 
                                     color: spendingPercentage > 100 ? "#EF4444" : "#10B981",
-                                    fontSize: 17
+                                    fontSize: 14
                                 }}
                                 adjustsFontSizeToFit
                             >
