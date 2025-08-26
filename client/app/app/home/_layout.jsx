@@ -57,6 +57,8 @@ export default function RootLayout() {
                     options={{
                         drawerLabel: 'הוסף הוצאה',
                         title: 'הוסף הוצאה',
+                        drawerIcon: ({ color }) => <Ionicons name="add-outline" size={22} color={color} />
+
                     }}
                 />
                 <Drawer.Screen name="categoryMenu"
