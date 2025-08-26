@@ -51,30 +51,60 @@ export default function CategoryBudgetDetails({ categories }) {
                                     color={getProgressColor(progressPercentage)}
                                 />
                                 <View className="flex-row justify-between mt-1">
-                                    <Text className="text-xs text-slate-500">{formatCurrency(categorySpent)}</Text>
-                                    <Text className="text-xs font-medium" style={{ color: getProgressColor(progressPercentage) }}>
-                                        {Math.min(progressPercentage, 100).toFixed(1)}%
+                                    <Text className="text-slate-500" style={{ fontSize: 12, width: '30%', textAlign: 'left' }}>
+                                        {formatCurrency(categorySpent)}
                                     </Text>
-                                    <Text className="text-xs text-slate-500">{formatCurrency(budgetAmount)}</Text>
+                                    <View className="bg-slate-100 px-2 py-0.5 rounded-full">
+                                        <Text 
+                                            className="font-medium" 
+                                            style={{ 
+                                                color: getProgressColor(progressPercentage),
+                                                fontSize: 12
+                                            }}
+                                        >
+                                            {Math.min(progressPercentage, 100).toFixed(0)}%
+                                        </Text>
+                                    </View>
+                                    <Text className="text-slate-500" style={{ fontSize: 12, width: '30%', textAlign: 'right' }}>
+                                        {formatCurrency(budgetAmount)}
+                                    </Text>
                                 </View>
                             </View>
                             
                             <View className="flex-row justify-between mb-1">
-                                <View className="flex-1 items-center p-2 bg-slate-50 rounded-lg mx-1">
-                                    <Text className="text-xs text-slate-500 mb-1">תקציב</Text>
-                                    <Text className="text-sm font-bold text-slate-800">{formatCurrency(budgetAmount)}</Text>
-                                </View>
-                                
-                                <View className="flex-1 items-center p-2 bg-slate-50 rounded-lg mx-1">
-                                    <Text className="text-xs text-slate-500 mb-1">הוצאות</Text>
-                                    <Text className="text-sm font-bold text-slate-800">{formatCurrency(categorySpent)}</Text>
-                                </View>
-                                
-                                <View className="flex-1 items-center p-2 bg-slate-50 rounded-lg mx-1">
-                                    <Text className="text-xs text-slate-500 mb-1">יתרה</Text>
+                                <View className="flex-1 items-center p-3 py-4 bg-slate-50 rounded-lg mx-1">
+                                    <Text className="text-xs text-slate-500 mb-2">תקציב</Text>
                                     <Text 
-                                        className="text-sm font-bold" 
-                                        style={{ color: categorySpent <= budgetAmount ? "#10B981" : "#EF4444" }}
+                                        className="font-bold text-slate-800"
+                                        style={{ width: '100%', fontSize: 15, textAlign: 'center' }}
+                                        adjustsFontSizeToFit
+                                    >
+                                        {formatCurrency(budgetAmount)}
+                                    </Text>
+                                </View>
+                                
+                                <View className="flex-1 items-center p-3 py-4 bg-slate-50 rounded-lg mx-1">
+                                    <Text className="text-xs text-slate-500 mb-2">הוצאות</Text>
+                                    <Text 
+                                        className="font-bold text-slate-800"
+                                        style={{ width: '100%', fontSize: 15, textAlign: 'center' }}
+                                        adjustsFontSizeToFit
+                                    >
+                                        {formatCurrency(categorySpent)}
+                                    </Text>
+                                </View>
+                                
+                                <View className="flex-1 items-center p-3 py-4 bg-slate-50 rounded-lg mx-1">
+                                    <Text className="text-xs text-slate-500 mb-2">יתרה</Text>
+                                    <Text 
+                                        className="font-bold" 
+                                        style={{ 
+                                            color: categorySpent <= budgetAmount ? "#10B981" : "#EF4444",
+                                            width: '100%',
+                                            fontSize: 15,
+                                            textAlign: 'center'
+                                        }}
+                                        adjustsFontSizeToFit
                                     >
                                         {formatCurrency(budgetAmount - categorySpent)}
                                     </Text>

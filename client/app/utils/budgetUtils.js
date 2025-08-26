@@ -1,11 +1,16 @@
 export const getProgressPercentage = (spent, budget) => {
-    if (!budget || budget === 0) return 0;
-    return ((spent / budget) * 100).toFixed(1);
+    if (!budget || budget === 0 || isNaN(budget)) return 0;
+    const spentNum = parseFloat(spent) || 0;
+    const budgetNum = parseFloat(budget) || 0;
+    return parseFloat(((spentNum / budgetNum) * 100).toFixed(1));
 };
 
 export const getProgressBarPercentage = (spent, budget) => {
-    if (!budget || budget === 0) return 0;
-    return Math.min((spent / budget) * 100, 100);
+    if (!budget || budget === 0 || isNaN(budget)) return 0;
+    const spentNum = parseFloat(spent) || 0;
+    const budgetNum = parseFloat(budget) || 0;
+    // For visualization purposes, cap at 100% for the bar display
+    return Math.min(parseFloat(((spentNum / budgetNum) * 100).toFixed(1)), 100);
 };
 
 /**

@@ -21,9 +21,25 @@ export const formatDate = (date) => {
 };
 
 export const formatCurrency = (amount) => {
-    return `₪${Number(amount).toLocaleString()}`;
+    // Ensure we're working with a number
+    const numAmount = Number(amount);
+    
+    // Format with proper spacing and no decimal places for better display
+    return `₪${numAmount.toLocaleString('he-IL', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+        useGrouping: true
+    })}`;
 };
 
 export const formatAmount = (amount) => {
-    return `₪${amount.toLocaleString()}`;
+    // Ensure we're working with a number
+    const numAmount = Number(amount);
+    
+    // Format with proper spacing and no decimal places for better display
+    return `₪${numAmount.toLocaleString('he-IL', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+        useGrouping: true
+    })}`;
 };
