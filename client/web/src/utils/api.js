@@ -1,4 +1,4 @@
-const baseUrl = "https://finance-manager-m3au.onrender.com/api";
+const baseUrl = "http://localhost:5500/api";
 
 export async function get(endpoint) {
     try {

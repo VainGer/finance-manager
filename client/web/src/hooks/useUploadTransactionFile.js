@@ -14,13 +14,17 @@ export default function useUploadTransactionFile() {
     const processTransactions = async () => {
         if (!transactionsData) return;
         try {
-            const response = await post("profile/categorize-transactions", {
-                refId: profile.expenses,
-                transactionsData
-            });
-            console.log(response);
-            setCategorizedTransactions(response.categories.transactions);
-            localStorage.setItem('categorizedTransactions', JSON.stringify(response.categories.transactions));
+            if (!localStorage.getItem('categorizedTransactions')) {
+                const response = await post("profile/categorize-transactions", {
+                    refId: profile.expenses,
+                    transactionsData
+                });
+                setCategorizedTransactions(response.categories.transactions);
+                localStorage.setItem('categorizedTransactions', JSON.stringify(response.categories.transactions));
+            }
+            else {
+                setCategorizedTransactions(JSON.parse(localStorage.getItem('categorizedTransactions')));
+            }
         } catch (error) {
             console.error("Error uploading transactions:", error);
         }
@@ -66,14 +70,13 @@ export default function useUploadTransactionFile() {
 
             setSelects(fetchedSelects);
 
-            // Increment counter to signal data refresh to components
             setRefreshCounter(prev => prev + 1);
         } catch (error) {
             console.error("Failed in getSelects:", error);
         }
     };
 
-    // Initial load on mount only
+
     useEffect(() => {
         if (profile?.expenses) {
             getCategories();

@@ -17,13 +17,17 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness, i
                 setLoading(false);
                 return;
             }
-            
+
             setLoading(true);
             try {
                 const response = await get(`expenses/business/get-businesses/${refId}/${category}`);
                 if (response.ok) {
                     setBusinesses(response.businesses || []);
                     setError(null);
+                    if (initialValue !== "" && businesses.includes(initialValue)) {
+                        setSelectedBusiness(initialValue);
+                        setSelectedValue(initialValue);
+                    }
                 } else {
                     setError(response.error || 'אירעה שגיאה בעת טעינת העסקים, נסה שוב מאוחר יותר');
                     console.error('Error fetching businesses:', response.error);
@@ -53,7 +57,7 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness, i
                 </View>
             )}
 
-            <TouchableOpacity 
+            <TouchableOpacity
                 className="bg-slate-50 rounded-lg border border-slate-200 p-3.5"
                 onPress={() => !loading && businesses.length > 0 && setModalVisible(true)}
                 disabled={loading || businesses.length === 0 || !category}
@@ -62,14 +66,14 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness, i
             >
                 <View style={{ flexDirection: 'row-reverse', alignItems: 'center' }}>
                     <Ionicons name="storefront-outline" size={20} color="#64748b" style={{ marginLeft: 8 }} />
-                    <Text 
-                        style={{ textAlign: 'right' }} 
+                    <Text
+                        style={{ textAlign: 'right' }}
                         className={selectedValue ? "text-slate-800" : "text-slate-400"}
                     >
                         {selectedValue || "בחר עסק"}
                     </Text>
                 </View>
-                
+
                 {loading ? (
                     <ActivityIndicator size="small" color="#3b82f6" />
                 ) : (
@@ -82,38 +86,31 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness, i
                     לא נמצאו עסקים
                 </Text>
             )}
-            
-            {!category && (
-                <Text className="text-sm text-slate-500 mt-2 text-right">
-                    בחר קטגוריה תחילה
-                </Text>
-            )}
 
-            {/* Dropdown Modal */}
             <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <Pressable 
-                    style={{ 
-                        flex: 1, 
-                        backgroundColor: 'rgba(0,0,0,0.5)', 
-                        justifyContent: 'center', 
+                <Pressable
+                    style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        justifyContent: 'center',
                         alignItems: 'center',
                         padding: 20
                     }}
                     onPress={() => setModalVisible(false)}
                 >
-                    <View 
+                    <View
                         className="bg-white rounded-xl w-full max-h-80 p-2"
                         style={{ elevation: 5 }}
                     >
                         <Text className="text-slate-800 font-bold text-lg p-3 text-right border-b border-slate-100">
                             בחר עסק
                         </Text>
-                        
+
                         <FlatList
                             data={businesses}
                             keyExtractor={(item) => item}
@@ -122,13 +119,13 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness, i
                                     className={`p-4 border-b border-slate-100 flex-row-reverse items-center ${selectedValue === item ? 'bg-blue-50' : ''}`}
                                     onPress={() => selectItem(item)}
                                 >
-                                    <Ionicons 
-                                        name="storefront" 
-                                        size={18} 
-                                        color={selectedValue === item ? "#3b82f6" : "#64748b"} 
+                                    <Ionicons
+                                        name="storefront"
+                                        size={18}
+                                        color={selectedValue === item ? "#3b82f6" : "#64748b"}
                                         style={{ marginLeft: 10 }}
                                     />
-                                    <Text 
+                                    <Text
                                         className={`text-right flex-1 ${selectedValue === item ? 'text-blue-600 font-bold' : 'text-slate-800'}`}
                                     >
                                         {item}

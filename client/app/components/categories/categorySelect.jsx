@@ -9,7 +9,7 @@ export default function CategorySelect({ refId, setSelectedCategory, initialValu
     const [loading, setLoading] = useState(true);
     const [selectedValue, setSelectedValue] = useState(initialValue);
     const [modalVisible, setModalVisible] = useState(false);
-    
+
     useEffect(() => {
         const fetchCategories = async () => {
             setLoading(true);
@@ -18,6 +18,10 @@ export default function CategorySelect({ refId, setSelectedCategory, initialValu
             if (response.ok) {
                 setCategories(response.categoriesNames || []);
                 setError(null);
+                if (initialValue !== "" && categories.includes(initialValue)) {
+                    setSelectedCategory(initialValue);
+                    setSelectedValue(initialValue);
+                }
             } else {
                 setError(response.error || 'אירעה שגיאה בעת טעינת הקטגוריות, נסה שוב מאוחר יותר');
                 console.error('Error fetching categories:', response.error);
@@ -42,7 +46,7 @@ export default function CategorySelect({ refId, setSelectedCategory, initialValu
                 </View>
             )}
 
-            <TouchableOpacity 
+            <TouchableOpacity
                 className="bg-slate-50 rounded-lg border border-slate-200 p-3.5"
                 onPress={() => !loading && categories.length > 0 && setModalVisible(true)}
                 disabled={loading || categories.length === 0}
@@ -51,14 +55,14 @@ export default function CategorySelect({ refId, setSelectedCategory, initialValu
             >
                 <View style={{ flexDirection: 'row-reverse', alignItems: 'center' }}>
                     <Ionicons name="pricetag-outline" size={20} color="#64748b" style={{ marginLeft: 8 }} />
-                    <Text 
-                        style={{ textAlign: 'right' }} 
+                    <Text
+                        style={{ textAlign: 'right' }}
                         className={selectedValue ? "text-slate-800" : "text-slate-400"}
                     >
                         {selectedValue || "בחר קטגוריה"}
                     </Text>
                 </View>
-                
+
                 {loading ? (
                     <ActivityIndicator size="small" color="#3b82f6" />
                 ) : (
@@ -79,24 +83,24 @@ export default function CategorySelect({ refId, setSelectedCategory, initialValu
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <Pressable 
-                    style={{ 
-                        flex: 1, 
-                        backgroundColor: 'rgba(0,0,0,0.5)', 
-                        justifyContent: 'center', 
+                <Pressable
+                    style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        justifyContent: 'center',
                         alignItems: 'center',
                         padding: 20
                     }}
                     onPress={() => setModalVisible(false)}
                 >
-                    <View 
+                    <View
                         className="bg-white rounded-xl w-full max-h-80 p-2"
                         style={{ elevation: 5 }}
                     >
                         <Text className="text-slate-800 font-bold text-lg p-3 text-right border-b border-slate-100">
                             בחר קטגוריה
                         </Text>
-                        
+
                         <FlatList
                             data={categories}
                             keyExtractor={(item) => item}
@@ -105,13 +109,13 @@ export default function CategorySelect({ refId, setSelectedCategory, initialValu
                                     className={`p-4 border-b border-slate-100 flex-row-reverse items-center ${selectedValue === item ? 'bg-blue-50' : ''}`}
                                     onPress={() => selectItem(item)}
                                 >
-                                    <Ionicons 
-                                        name="pricetag" 
-                                        size={18} 
-                                        color={selectedValue === item ? "#3b82f6" : "#64748b"} 
+                                    <Ionicons
+                                        name="pricetag"
+                                        size={18}
+                                        color={selectedValue === item ? "#3b82f6" : "#64748b"}
                                         style={{ marginLeft: 10 }}
                                     />
-                                    <Text 
+                                    <Text
                                         className={`text-right flex-1 ${selectedValue === item ? 'text-blue-600 font-bold' : 'text-slate-800'}`}
                                     >
                                         {item}

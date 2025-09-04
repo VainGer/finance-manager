@@ -43,10 +43,12 @@ export default class LLM {
             const systemPrompt = this.TRANSACTION_CATEGORIZER_SYSTEM_PROMPT
                 .replace('{categories_json_string}', categoriesJsonString)
                 .replace('{transactions_json_string}', transactionsJsonString);
+            
             const response = await this.getResponse(systemPrompt);
             if (response.content) {
-                const transactions = this.parseJsonFromResponse(response.content);
-                return transactions;
+                const parsedResult = this.parseJsonFromResponse(response.content);
+                console.log("Categorized Transactions: ", parsedResult);
+                return parsedResult;
             }
             throw new Error("No content in response from LLM");
         } catch (error) {
