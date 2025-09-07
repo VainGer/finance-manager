@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Button from '../common/button';
 import CategorySelect from './categorySelect';
 
-export default function DeleteCategory({ goBack, refId, error, success, deleteCategory }) {
+export default function DeleteCategory({ goBack, refId, error, success, deleteCategory, getCategoriesLoading, getCategoriesError, categories }) {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [showConfirm, setShowConfirm] = useState(false);
     const [localError, setLocalError] = useState(null);
@@ -17,7 +17,7 @@ export default function DeleteCategory({ goBack, refId, error, success, deleteCa
         setLocalError(null);
         setShowConfirm(true);
     };
-    
+
     const handleDelete = () => {
         deleteCategory(refId, selectedCategory);
     };
@@ -25,7 +25,7 @@ export default function DeleteCategory({ goBack, refId, error, success, deleteCa
     const cancelDelete = () => {
         setShowConfirm(false);
     };
-    
+
     const displayError = error || localError;
 
     if (success) {
@@ -36,11 +36,11 @@ export default function DeleteCategory({ goBack, refId, error, success, deleteCa
                     <Text className="text-3xl font-bold text-slate-800 mt-4">פעולה הושלמה</Text>
                     <View className="h-1.5 w-16 bg-green-500 rounded-full mt-3" />
                 </View>
-                
+
                 <View className="bg-green-50 border-2 border-green-200 rounded-xl py-4 px-5 mb-8">
                     <Text className="text-green-700 text-center font-bold text-lg">{success}</Text>
                 </View>
-                
+
                 <TouchableOpacity
                     onPress={goBack}
                     className="bg-blue-500 py-4 rounded-2xl w-3/4 flex-row items-center justify-center mx-auto"
@@ -84,7 +84,7 @@ export default function DeleteCategory({ goBack, refId, error, success, deleteCa
                         >
                             <Text className="text-gray-700 font-bold text-center">ביטול</Text>
                         </TouchableOpacity>
-                        
+
                         <TouchableOpacity
                             onPress={handleDelete}
                             className="bg-red-600 py-4 rounded-2xl w-[48%] flex-row items-center justify-center"
@@ -103,26 +103,26 @@ export default function DeleteCategory({ goBack, refId, error, success, deleteCa
                         <Text className="text-3xl font-bold text-slate-800">מחיקת קטגוריה</Text>
                         <View className="h-1.5 w-16 bg-red-500 rounded-full mt-3" />
                     </View>
-                    
+
                     {/* Error Message */}
                     {displayError && (
                         <View className="bg-red-50 border-2 border-red-200 rounded-xl py-3 px-4 mb-6">
                             <Text className="text-base text-right text-red-600 font-medium">{displayError}</Text>
                         </View>
                     )}
-                    
+
                     {/* Category Selection */}
                     <View className="mb-8">
                         <Text className="text-slate-800 font-bold mb-3 text-lg text-right">בחר קטגוריה למחיקה</Text>
                         <View className="border-2 border-gray-300 rounded-xl overflow-hidden">
                             <CategorySelect
-                                refId={refId}
+                                loading={getCategoriesLoading} error={getCategoriesError} categories={categories}
                                 setSelectedCategory={setSelectedCategory}
                                 initialValue={selectedCategory}
                             />
                         </View>
                     </View>
-                    
+
                     {/* Buttons */}
                     <View className="flex-row justify-between mt-4">
                         <TouchableOpacity
@@ -131,10 +131,10 @@ export default function DeleteCategory({ goBack, refId, error, success, deleteCa
                             activeOpacity={0.7}
                         >
                             <Text className="text-gray-700 font-bold text-center">ביטול</Text>
-                            
+
 
                         </TouchableOpacity>
-                        
+
                         <TouchableOpacity
                             onPress={handleSubmit}
                             className="bg-red-600 py-4 rounded-2xl w-[48%] flex-row items-center justify-center"

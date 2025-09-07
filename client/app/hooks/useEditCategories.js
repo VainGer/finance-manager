@@ -1,16 +1,32 @@
-import { useState, useEffect } from 'react';
-import { post, put, del } from '../utils/api';
-import { useFocusEffect } from 'expo-router';
+import { useState } from 'react';
+import { del, get, post, put } from '../utils/api';
 export default function useEditCategories({ profile, goBack }) {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
-
+    const [getCategoriesLoading, setGetCategoriesLoading] = useState(false);
+    const [getCategoriesError, setGetCategoriesError] = useState(null);
     const resetState = () => {
         setError(null);
         setSuccess(false);
         setLoading(false);
+        setGetCategoriesLoading(false);
+        setGetCategoriesError(null);
     };
+
+    const getCategories = async () => {
+        setGetCategoriesLoading(true);
+        setGetCategoriesError(null);
+        const response = await get(`expenses/category/get-names/${profile.expenses}`);
+        if (response.ok) {
+            setGetCategoriesLoading(false);
+            return response.categoriesNames;
+        } else {
+            setGetCategoriesLoading(false);
+            setGetCategoriesError('אירעה שגיאה בעת קבלת הקטגוריות, נסה שוב מאוחר יותר');
+            console.error('Error fetching categories:', response.error);
+        }
+    }
 
 
     const addCategory = async (categoryName, setCategoryName) => {
@@ -97,9 +113,12 @@ export default function useEditCategories({ profile, goBack }) {
         error,
         success,
         loading,
+        getCategoriesLoading,
+        getCategoriesError,
         addCategory,
         renameCategory,
         deleteCategory,
-        resetState
+        resetState,
+        getCategories
     };
 }

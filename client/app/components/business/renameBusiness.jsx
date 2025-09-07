@@ -1,17 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import CategorySelect from '../categories/categorySelect';
 import BusinessSelect from './businessSelect';
 
-export default function RenameBusiness({ goBack, refId, error, success, renameBusiness }) {
+export default function RenameBusiness({ goBack, refId, error, success, renameBusiness, categories,
+    businesses, getBusinessesLoading, getBusinessesError, getCategoriesLoading, getCategoriesError }) {
     const [selectedCategory, setSelectedCategory] = useState("");
     const [selectedBusiness, setSelectedBusiness] = useState("");
     const [newName, setNewName] = useState("");
-
+    const [businessesList, setBusinessesList] = useState([]);
     const handleSubmit = () => {
         renameBusiness(refId, selectedCategory, selectedBusiness, newName);
     };
+
+    useEffect(() => {
+        const businessData = businesses.find(b => b.category === selectedCategory)?.businesses || [];
+        setSelectedBusiness("");
+        setBusinessesList(businessData);
+    }, [selectedCategory]);
 
     return (
         <View className="bg-white rounded-xl shadow p-6 w-full mx-auto max-w-md">
@@ -20,7 +27,7 @@ export default function RenameBusiness({ goBack, refId, error, success, renameBu
                 <Text className="text-3xl font-bold text-slate-800">עדכון שם עסק</Text>
                 <View className="h-1.5 w-16 bg-blue-500 rounded-full mt-3" />
             </View>
-            
+
             {/* Status Messages */}
             {error && (
                 <View className="bg-red-50 border-2 border-red-200 rounded-xl py-3 px-4 mb-6">
@@ -39,34 +46,38 @@ export default function RenameBusiness({ goBack, refId, error, success, renameBu
                     </View>
                 </View>
             )}
-            
+
             {/* Category Selection */}
             <View className="mb-6">
                 <Text className="text-slate-800 font-bold mb-3 text-lg text-right">בחר קטגוריה</Text>
                 <View className="border-2 border-gray-300 rounded-xl overflow-hidden">
                     <CategorySelect
-                        refId={refId}
-                        setSelectedCategory={setSelectedCategory}
                         initialValue={selectedCategory}
+                        categories={categories}
+                        loading={getCategoriesLoading}
+                        error={getCategoriesError}
+                        setSelectedCategory={setSelectedCategory}
                     />
                 </View>
             </View>
-            
+
             {/* Business Selection - Only shown when category is selected */}
             {selectedCategory && (
                 <View className="mb-6">
                     <Text className="text-slate-800 font-bold mb-3 text-lg text-right">בחר עסק</Text>
                     <View className="border-2 border-gray-300 rounded-xl overflow-hidden">
                         <BusinessSelect
-                            refId={refId}
-                            category={selectedCategory}
-                            setSelectedBusiness={setSelectedBusiness}
+                            selectedCategory={selectedCategory}
                             initialValue={selectedBusiness}
+                            businesses={businessesList}
+                            loading={getBusinessesLoading}
+                            error={getBusinessesError}
+                            setSelectedBusiness={setSelectedBusiness}
                         />
                     </View>
                 </View>
             )}
-            
+
             {/* New Name Input - Only shown when business is selected */}
             {selectedBusiness && (
                 <View className="mb-6">
@@ -81,7 +92,7 @@ export default function RenameBusiness({ goBack, refId, error, success, renameBu
                     />
                 </View>
             )}
-            
+
             {/* Action Buttons */}
             <View className="flex-row justify-between mt-6">
                 <TouchableOpacity
@@ -91,13 +102,13 @@ export default function RenameBusiness({ goBack, refId, error, success, renameBu
                 >
                     <Text className="text-gray-700 font-bold text-center">ביטול</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                     onPress={handleSubmit}
                     className="bg-blue-500 py-4 rounded-2xl w-[48%] flex-row items-center justify-center"
                     activeOpacity={0.7}
                     disabled={!selectedBusiness || !newName.trim()}
-                    style={{ 
+                    style={{
                         opacity: (!selectedBusiness || !newName.trim()) ? 0.6 : 1,
                         elevation: 2
                     }}

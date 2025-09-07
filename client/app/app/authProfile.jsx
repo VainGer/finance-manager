@@ -12,6 +12,7 @@ import AuthProfileForm from '../components/profile/authProfileForm.jsx';
 import useAuthProfile from '../hooks/auth/useAuthProfile.js';
 import CreateProfile from '../components/profile/createProfile.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { pickImage } from '../utils/imageProcessing.js';
 
 export default function AuthProfile() {
     const { account, setProfile } = useAuth();
@@ -33,13 +34,13 @@ export default function AuthProfile() {
             <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />
             <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
             <View pointerEvents="none" className="absolute top-1/3 right-10 h-24 w-24 rounded-full bg-white/20 blur-md" />
-            
+
             <SafeAreaView className="flex-1">
                 {loading || onCreateLoading && <LoadingSpinner />}
-                
+
                 {/* כפתור חזרה */}
-                <TouchableOpacity 
-                    className="absolute top-4 left-4 z-10 p-2 rounded-full bg-white/70" 
+                <TouchableOpacity
+                    className="absolute top-4 left-4 z-10 p-2 rounded-full bg-white/70"
                     onPress={() => router.back()}
                 >
                     <Ionicons name="arrow-back" size={24} color="#0f172a" />
@@ -53,30 +54,30 @@ export default function AuthProfile() {
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
                             className="w-16 h-16 items-center justify-center mb-6 rounded-3xl"
-                            style={{ 
-                                shadowColor: "#0f172a", 
-                                shadowOpacity: 0.3, 
-                                shadowOffset: { width: 0, height: 4 }, 
-                                shadowRadius: 10, 
-                                elevation: 8 
+                            style={{
+                                shadowColor: "#0f172a",
+                                shadowOpacity: 0.3,
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowRadius: 10,
+                                elevation: 8
                             }}
                         >
                             <Ionicons name="people-outline" size={26} color="#ffffff" />
                         </LinearGradient>
 
                         {/* כותרות */}
-                        <Text 
+                        <Text
                             className="text-3xl font-extrabold text-slate-900 text-center mb-1"
                             style={{ writingDirection: isRTL ? "rtl" : "ltr" }}
                         >
                             פרופילים
                         </Text>
-                        <Text 
+                        <Text
                             className="text-slate-600 text-center mb-6"
                             style={{ writingDirection: isRTL ? "rtl" : "ltr" }}
                         >
-                            {profiles.length > 0 
-                                ? "בחר פרופיל כדי להמשיך" 
+                            {profiles.length > 0
+                                ? "בחר פרופיל כדי להמשיך"
                                 : "צור פרופיל חדש כדי להתחיל"}
                         </Text>
 
@@ -89,24 +90,24 @@ export default function AuthProfile() {
                                         <ProfileList profiles={profiles} onSelect={setSelectedProfile} />
                                     </View>
                                 )}
-                                
+
                                 {/* טופס אימות פרופיל */}
                                 {selectedProfile && (
-                                    <AuthProfileForm 
-                                        loading={loading} 
-                                        error={error} 
+                                    <AuthProfileForm
+                                        loading={loading}
+                                        error={error}
                                         authProfile={authProfile}
-                                        selectedProfile={selectedProfile} 
-                                        onBack={() => setSelectedProfile(null)} 
+                                        selectedProfile={selectedProfile}
+                                        onBack={() => setSelectedProfile(null)}
                                     />
                                 )}
-                                
+
                                 {/* יצירת פרופיל חדש */}
                                 {profiles.length === 0 && !loading && !error && (
-                                    <CreateProfile 
-                                        firstProfile={true} 
-                                        username={account.username} 
-                                        setOnCreateLoading={setOnCreateLoading} 
+                                    <CreateProfile
+                                        firstProfile={true}
+                                        username={account.username}
+                                        setOnCreateLoading={setOnCreateLoading}
                                     />
                                 )}
                             </View>

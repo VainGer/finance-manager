@@ -12,15 +12,27 @@ import RenameCategory from '../../components/categories/renameCategory.jsx';
 
 
 export default function CategoryMenu() {
+
     const [selectedMenu, setSelectedMenu] = useState(null);
+    const [categories, setCategories] = useState([]);
     const { profile } = useAuth();
 
-    const { error, success, loading,
-        addCategory, renameCategory, deleteCategory, resetState } = useEditCategories({ profile, goBack: () => setSelectedMenu(null) });
+    const { error, success, loading, getCategoriesLoading, getCategoriesError,
+        addCategory, renameCategory, deleteCategory, resetState, getCategories } = useEditCategories({ profile, goBack: () => setSelectedMenu(null) });
 
     useEffect(() => {
         resetState();
     }, [selectedMenu]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const fetchedCategories = await getCategories();
+            setCategories(fetchedCategories);
+        };
+        fetchCategories();
+    }, [profile, error, success]);
+
+
 
     const renderSelectedMenu = () => {
         switch (selectedMenu) {
@@ -29,10 +41,10 @@ export default function CategoryMenu() {
                     error={error} success={success} addCategory={addCategory} />;
             case 'rename':
                 return <RenameCategory goBack={() => setSelectedMenu(null)}
-                    refId={profile.expenses} error={error} success={success}
+                    refId={profile.expenses} error={error} success={success} categories={categories} getCategoriesLoading={getCategoriesLoading} getCategoriesError={getCategoriesError}
                     renameCategory={renameCategory} />;
             case 'delete':
-                return <DeleteCategory goBack={() => setSelectedMenu(null)}
+                return <DeleteCategory goBack={() => setSelectedMenu(null)} categories={categories} getCategoriesError={getCategoriesError} getCategoriesLoading={getCategoriesLoading}
                     refId={profile.expenses} error={error} deleteCategory={deleteCategory} success={success} />;
             default:
                 return null;
@@ -58,7 +70,7 @@ export default function CategoryMenu() {
                         <LoadingSpinner />
                     </View>
                 )}
-                
+
                 {!selectedMenu && (
                     <View className="flex-1 items-center justify-center py-10 px-6">
                         {/* Title */}
@@ -66,14 +78,14 @@ export default function CategoryMenu() {
                             <Text className="text-2xl font-bold text-slate-800">ניהול קטגוריות</Text>
                             <View className="h-1 w-12 bg-green-500 rounded-full mt-2" />
                         </View>
-                        
+
                         {/* Category icon */}
                         <View className="items-center mb-8">
                             <View className="w-20 h-20 bg-green-100 rounded-full items-center justify-center mb-2">
                                 <Ionicons name="pricetags-outline" size={36} color="#10b981" />
                             </View>
                         </View>
-                        
+
                         {/* Menu options */}
                         <View className="w-full max-w-sm">
                             <Button
@@ -111,7 +123,7 @@ export default function CategoryMenu() {
                         </View>
                     </View>
                 )}
-                
+
                 {selectedMenu && (
                     <View className="flex-1 py-6 px-4">
                         {renderSelectedMenu()}

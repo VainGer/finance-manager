@@ -4,14 +4,13 @@ import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function AddCategory({ goBack, addCategory, error, success, onCategoryAdded }) {
     const [categoryName, setCategoryName] = useState('');
-    
-    // Watch for successful category addition and notify parent component
+
     useEffect(() => {
-        if (success && categoryName === '' && onCategoryAdded) {
-            onCategoryAdded();
+        if (success && onCategoryAdded) {
+            onCategoryAdded(true);
         }
-    }, [success, categoryName, onCategoryAdded]);
-    
+    }, [success, onCategoryAdded]);
+
     return (
         <View className="bg-white rounded-xl shadow p-6 w-full mx-auto" style={{ minHeight: 300 }}>
             {/* Title */}
@@ -19,7 +18,7 @@ export default function AddCategory({ goBack, addCategory, error, success, onCat
                 <Text className="text-3xl font-bold text-slate-800">הוספת קטגוריה</Text>
                 <View className="h-1.5 w-16 bg-blue-500 rounded-full mt-3" />
             </View>
-            
+
             {/* Status Messages */}
             {error && (
                 <View className="bg-red-50 border-2 border-red-200 rounded-xl py-3 px-4 mb-6">
@@ -61,13 +60,15 @@ export default function AddCategory({ goBack, addCategory, error, success, onCat
                 >
                     <Text className="text-gray-700 font-bold text-center">ביטול</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
-                    onPress={() => addCategory(categoryName, setCategoryName)}
+                    onPress={() => {
+                        addCategory(categoryName, setCategoryName);
+                    }}
                     className="bg-blue-500 py-4 rounded-2xl w-[48%] flex-row items-center justify-center"
                     activeOpacity={0.7}
                     disabled={!categoryName.trim()}
-                    style={{ 
+                    style={{
                         opacity: !categoryName.trim() ? 0.6 : 1,
                         elevation: 2
                     }}

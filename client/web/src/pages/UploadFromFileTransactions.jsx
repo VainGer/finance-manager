@@ -57,39 +57,16 @@ export default function UploadFromFileTransactions() {
     };
 
     const handleSubmitTransactions = async () => {
-        setIsSubmitting(true);
-        setSubmitSuccess(false);
-
-        try {
-            const t = dataToUpload.map(t => {
-                if (t.toUpload) {
-                    return {
-                        date: t.date,
-                        amount: t.amount,
-                        categoryName: t.category,
-                        businessName: t.business,
-                        description: `הועלה מקובץ: ${t.bank}`
-                    };
-                }
-            });
-
-            const transactionsToSubmit = dataToUpload.filter(t => t.toUpload);
-
-
-            const response = await post(`profile/upload-transactions`, {
-                username: profile.username,
-                profileName: profile.profileName,
-                refId: profile.expenses,
-                transactionsToUpload: transactionsToSubmit
-            });
-            if (response.ok) {
-            } else {
-                console.error("Failed to submit transactions");
-            }
-        } catch (error) {
-            console.error("Error submitting transactions:", error);
-        } finally {
-            setIsSubmitting(false);
+        const transactionsToSubmit = dataToUpload.filter(t => t.toUpload);
+        const response = await post(`profile/upload-transactions`, {
+            username: profile.username,
+            profileName: profile.profileName,
+            refId: profile.expenses,
+            transactionsToUpload: transactionsToSubmit
+        });
+        if (response.ok) {
+        } else {
+            console.error("Failed to submit transactions");
         }
     };
 

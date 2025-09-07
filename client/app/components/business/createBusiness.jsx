@@ -1,17 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import CategorySelect from '../../components/categories/categorySelect.jsx';
 
-export default function CreateBusiness({ goBack, refId, error, success, addBusiness, onBusinessAdded }) {
+const CreateBusiness = ({ goBack, refId, error, success, addBusiness, onBusinessAdded, categories, getCategoriesLoading, getCategoriesError }) => {
     const [name, setName] = useState('');
     const [category, setCategory] = useState(null);
-    
+
     useEffect(() => {
-        if (success && name === '' && onBusinessAdded) {
-            onBusinessAdded(category); 
+        if (success && onBusinessAdded) {
+            onBusinessAdded(false);
         }
-    }, [success, name, category, onBusinessAdded]);
+    }, [success, onBusinessAdded]);
 
     const handleSubmit = () => {
         addBusiness(refId, category, name, setName);
@@ -24,7 +24,7 @@ export default function CreateBusiness({ goBack, refId, error, success, addBusin
                 <Text className="text-3xl font-bold text-slate-800">הוספת עסק</Text>
                 <View className="h-1.5 w-16 bg-blue-500 rounded-full mt-3" />
             </View>
-            
+
             {/* Status Messages */}
             {error && (
                 <View className="bg-red-50 border-2 border-red-200 rounded-xl py-3 px-4 mb-6">
@@ -43,19 +43,19 @@ export default function CreateBusiness({ goBack, refId, error, success, addBusin
                     </View>
                 </View>
             )}
-            
+
             {/* Category Selection */}
             <View className="mb-7">
                 <Text className="text-slate-800 font-bold mb-3 text-lg text-right">בחר קטגוריה</Text>
                 <View className="border-2 border-gray-300 rounded-xl overflow-hidden">
-                    <CategorySelect refId={refId} setSelectedCategory={setCategory} />
+                    <CategorySelect categories={categories} setSelectedCategory={setCategory} loading={getCategoriesLoading} error={getCategoriesError} />
                 </View>
             </View>
-            
+
             {/* Business Name Input */}
             <View className="mb-8">
                 <Text className="text-slate-800 font-bold mb-3 text-lg text-right">שם העסק</Text>
-                <TextInput 
+                <TextInput
                     value={name}
                     onChangeText={setName}
                     placeholder="הזן שם עסק חדש"
@@ -64,7 +64,7 @@ export default function CreateBusiness({ goBack, refId, error, success, addBusin
                     style={{ textAlign: 'right', fontSize: 17 }}
                 />
             </View>
-            
+
             {/* Action Buttons */}
             <View className="flex-row justify-between mt-4">
                 <TouchableOpacity
@@ -74,13 +74,13 @@ export default function CreateBusiness({ goBack, refId, error, success, addBusin
                 >
                     <Text className="text-gray-700 font-bold text-center">ביטול</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                     onPress={handleSubmit}
                     className="bg-blue-500 py-4 rounded-2xl w-[48%] flex-row items-center justify-center"
                     activeOpacity={0.7}
                     disabled={!category || !name.trim()}
-                    style={{ 
+                    style={{
                         opacity: (!category || !name.trim()) ? 0.6 : 1,
                         elevation: 2
                     }}
@@ -92,3 +92,5 @@ export default function CreateBusiness({ goBack, refId, error, success, addBusin
         </View>
     );
 }
+
+export default memo(CreateBusiness);

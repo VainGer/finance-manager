@@ -1,36 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
-import { ActivityIndicator, Text, View, TouchableOpacity, Modal, FlatList, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { get } from "../../utils/api.js";
+import { useState } from 'react';
+import { ActivityIndicator, FlatList, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 
-export default function CategorySelect({ refId, setSelectedCategory, initialValue = "" }) {
-    const [categories, setCategories] = useState([]);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
+export default function CategorySelect({ categories = [], loading = false, error = null, setSelectedCategory, initialValue = "" }) {
     const [selectedValue, setSelectedValue] = useState(initialValue);
     const [modalVisible, setModalVisible] = useState(false);
-
-    useEffect(() => {
-        const fetchCategories = async () => {
-            setLoading(true);
-            const response = await get(`expenses/category/get-names/${refId}`);
-            setLoading(false);
-            if (response.ok) {
-                setCategories(response.categoriesNames || []);
-                setError(null);
-                if (initialValue !== "" && categories.includes(initialValue)) {
-                    setSelectedCategory(initialValue);
-                    setSelectedValue(initialValue);
-                }
-            } else {
-                setError(response.error || 'אירעה שגיאה בעת טעינת הקטגוריות, נסה שוב מאוחר יותר');
-                console.error('Error fetching categories:', response.error);
-            }
-        };
-        if (refId) {
-            fetchCategories();
-        }
-    }, [refId]);
 
     const selectItem = (value) => {
         setSelectedValue(value);
@@ -48,8 +22,12 @@ export default function CategorySelect({ refId, setSelectedCategory, initialValu
 
             <TouchableOpacity
                 className="bg-slate-50 rounded-lg border border-slate-200 p-3.5"
-                onPress={() => !loading && categories.length > 0 && setModalVisible(true)}
-                disabled={loading || categories.length === 0}
+                onPress={() => {
+                    if (!loading && categories && categories.length > 0) {
+                        setModalVisible(true);
+                    }
+                }}
+                disabled={loading || !categories || categories.length === 0}
                 activeOpacity={0.7}
                 style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' }}
             >

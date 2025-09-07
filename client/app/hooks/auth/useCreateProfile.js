@@ -1,27 +1,11 @@
 import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
+import { prepareImage } from '../../utils/imageProcessing';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { post } from '../../utils/api';
 
-const prepareImage = async (uri) => {
-  try {
-    const resizedImage = await ImageManipulator.manipulateAsync(
-      uri,
-      [{ resize: { width: 500 } }],
-      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
-    );
-    
-    const base64 = await FileSystem.readAsStringAsync(resizedImage.uri, { 
-      encoding: FileSystem.EncodingType.Base64 
-    });
-    
-    return `data:image/jpeg;base64,${base64}`;
-  } catch (error) {
-    console.error('Image preparation error:', error);
-    throw error;
-  }
-};
+
 
 export default function useCreateProfile({ username, profileName, pin, avatar, color, firstProfile, parentProfile }) {
     const [loading, setLoading] = useState(false);

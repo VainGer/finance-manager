@@ -47,7 +47,6 @@ export default class LLM {
             const response = await this.getResponse(systemPrompt);
             if (response.content) {
                 const parsedResult = this.parseJsonFromResponse(response.content);
-                console.log("Categorized Transactions: ", parsedResult);
                 return parsedResult;
             }
             throw new Error("No content in response from LLM");

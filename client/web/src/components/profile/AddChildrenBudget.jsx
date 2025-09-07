@@ -42,7 +42,6 @@ export default function AddChildrenBudget() {
                 }
             });
             if (response.ok) {
-                console.log('Children budget added successfully', response);
             } else {
                 setError('אירעה שגיאה בעת הוספת התקציב, נסה שוב מאוחר יותר');
                 console.error('Error adding children budget:', response.error);

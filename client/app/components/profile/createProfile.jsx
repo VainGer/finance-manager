@@ -1,13 +1,13 @@
-import * as DocumentPicker from 'expo-document-picker';
 import { useEffect, useState } from 'react';
 import { Modal, Switch, Text, View } from 'react-native';
 import WheelColorPicker from 'react-native-wheel-color-picker';
 import useCreateProfile from '../../hooks/auth/useCreateProfile.js';
+import { pickImage } from '../../utils/imageProcessing.js';
 import Button from '../common/button.jsx';
 import Input from '../common/textInput.jsx';
-import LoadingSpinner from '../common/loadingSpinner.jsx';
+import ColorPicker from '../common/colorPicker.jsx';
 
-export default function CreateProfile({ username, firstProfile, setOnCreateLoading }) {
+export default function CreateProfile({ username, firstProfile, setOnCreateLoading, goBack }) {
     const [profileName, setProfileName] = useState('');
     const [avatar, setAvatar] = useState(null);
     const [color, setColor] = useState('#000000');
@@ -20,27 +20,24 @@ export default function CreateProfile({ username, firstProfile, setOnCreateLoadi
         setOnCreateLoading(loading);
     }, [loading]);
 
+    useEffect(() => {
+        if (color) {
+            setOpenColorWheel(false);
+        }
+    }, [color])
+
     const pickAvatar = async () => {
-        try {
-            const result = await DocumentPicker.getDocumentAsync({
-                type: 'image/*',
-                copyToCacheDirectory: true,
-            });
-            if (result.assets && result.assets.length > 0) {
-                setAvatar(result.assets[0]);
-            } else if (result.type === 'success') {
-                setAvatar(result);
-            }
-        } catch (err) {
-            console.error('Error picking document:', err);
-            setError('שגיאה בטעינת התמונה');
+        const image = await pickImage(setError);
+        if (image) {
+            setAvatar(image);
         }
     };
 
     return (
         <View className="flex-1 justify-center items-center p-4 w-3/4">
-            <Text className="text-2xl font-bold mb-4">Create Profile</Text>
+            <Text className="text-2xl font-bold mb-4">יצירת פרופיל חדש</Text>
             <Input
+                className="w-1/2"
                 label="Profile Name"
                 value={profileName}
                 onChangeText={setProfileName}
@@ -53,7 +50,7 @@ export default function CreateProfile({ username, firstProfile, setOnCreateLoadi
                 placeholder="הכנס קוד סודי (4 תווים)"
                 secureTextEntry
             />
-            <Button onPress={pickAvatar} >הוסף תמונת פרופיל</Button>
+            <Button onPress={pickAvatar} >{avatar ? avatar.name : "הוסף תמונת פרופיל"}</Button>
             <Button
                 onPress={() => setOpenColorWheel(true)}
                 bg={color}
@@ -61,28 +58,19 @@ export default function CreateProfile({ username, firstProfile, setOnCreateLoadi
                 בחר צבע פרופיל
             </Button>
             <Modal visible={openColorWheel} transparent={true} animationType="fade">
-                <View className="flex-1 justify-center items-center bg-black/50">
+                <View className="flex-1 justify-center items-center bg-black/50 h-max">
                     <View className="bg-white p-4 rounded-lg w-5/6 h-2/3 m-4">
-                        <WheelColorPicker
-                            color={color}
-                            onColorChange={c => setColor(c)}
-                            thumbSize={40}
-                            sliderSize={40}
-                        />
-                        <Button
-                            className="mt-4"
-                            onPress={() => setOpenColorWheel(false)}
-                        >
-                            בחר צבע
-                        </Button>
+                        <ColorPicker setColor={setColor} />
                     </View>
                 </View>
             </Modal>
             {!firstProfile &&
-                <View className="flex-row items-center">
-                    <Switch value={parentProfile} onValueChange={setParentProfile} /> <Text>פרופיל הורה</Text>
+                <View className="flex-row items-center my-2">
+                    <Switch value={parentProfile} onValueChange={setParentProfile} />
+                    <Text className="ml-2">פרופיל הורה</Text>
                 </View>}
             <Button className='w-1/2' onPress={createProfile} >צור פרופיל</Button>
+            <Button className='w-1/2' onPress={goBack} >ביטול</Button>
             {error && <Text className="text-red-500">{error}</Text>}
         </View>)
 }

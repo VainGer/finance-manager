@@ -1,47 +1,22 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View, TouchableOpacity, Modal, FlatList, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { get } from "../../utils/api.js";
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 
-export default function BusinessSelect({ refId, category, setSelectedBusiness, initialValue = "" }) {
-    const [businesses, setBusinesses] = useState([]);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
+export default function BusinessSelect({ selectedCategory, businesses = [], loading = false, error = null, setSelectedBusiness, initialValue = "" }) {
     const [selectedValue, setSelectedValue] = useState(initialValue);
     const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
-        const fetchBusinesses = async () => {
-            if (!category) {
-                setBusinesses([]);
-                setLoading(false);
-                return;
-            }
+        if (initialValue && businesses.includes(initialValue)) {
+            setSelectedValue(initialValue);
+        } else if (initialValue && !businesses.includes(initialValue)) {
+            setSelectedValue('');
+        }
+    }, [initialValue, businesses]);
 
-            setLoading(true);
-            try {
-                const response = await get(`expenses/business/get-businesses/${refId}/${category}`);
-                if (response.ok) {
-                    setBusinesses(response.businesses || []);
-                    setError(null);
-                    if (initialValue !== "" && businesses.includes(initialValue)) {
-                        setSelectedBusiness(initialValue);
-                        setSelectedValue(initialValue);
-                    }
-                } else {
-                    setError(response.error || 'אירעה שגיאה בעת טעינת העסקים, נסה שוב מאוחר יותר');
-                    console.error('Error fetching businesses:', response.error);
-                }
-            } catch (err) {
-                setError('תקשורת עם השרת נכשלה');
-                console.error('Network error:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchBusinesses();
-    }, [refId, category]);
+    useEffect(() => {
+        setSelectedValue(initialValue);
+    }, [initialValue, selectedCategory]);
 
     const selectItem = (value) => {
         setSelectedValue(value);
@@ -59,8 +34,12 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness, i
 
             <TouchableOpacity
                 className="bg-slate-50 rounded-lg border border-slate-200 p-3.5"
-                onPress={() => !loading && businesses.length > 0 && setModalVisible(true)}
-                disabled={loading || businesses.length === 0 || !category}
+                onPress={() => {
+                    if (!loading && businesses && businesses.length > 0) {
+                        setModalVisible(true);
+                    }
+                }}
+                disabled={loading || !businesses || businesses.length === 0 || !selectedCategory}
                 activeOpacity={0.7}
                 style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' }}
             >
@@ -81,7 +60,7 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness, i
                 )}
             </TouchableOpacity>
 
-            {!loading && businesses.length === 0 && !error && category && (
+            {!loading && businesses.length === 0 && !error && selectedCategory && (
                 <Text className="text-sm text-slate-500 mt-2 text-right">
                     לא נמצאו עסקים
                 </Text>

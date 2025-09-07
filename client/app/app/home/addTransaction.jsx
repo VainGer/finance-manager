@@ -24,9 +24,11 @@ export default function AddTransaction() {
   const [description, setDescription] = useState('');
   const { refetchExpenses } = useExpensesDisplay({ profile });
   const { refetchBudgets } = useBudgetSummary({ profile });
-  const { loading, error, success, addTransaction } = useEditTransactions({ profile, refetchExpenses, refetchBudgets });
+  const { loading, error, success, categories, businesses, categoryLoading, businessLoading, categoryError, businessError, categorySuccess, businessSuccess,
+    addTransaction } = useEditTransactions({ profile, refetchExpenses, refetchBudgets });
 
   const isRTL = I18nManager.isRTL;
+
 
   return (
     <LinearGradient
@@ -83,7 +85,9 @@ export default function AddTransaction() {
           </Text>
           <View style={{ direction: isRTL ? 'rtl' : 'ltr' }}>
             <CategorySelect
-              refId={profile.expenses}
+              categories={categories}
+              loading={categoryLoading}
+              error={categoryError}
               setSelectedCategory={setSelectedCategory}
             />
           </View>
@@ -99,8 +103,10 @@ export default function AddTransaction() {
           </Text>
           <View style={{ direction: isRTL ? 'rtl' : 'ltr' }}>
             <BusinessSelects
-              refId={profile.expenses}
-              category={selectedCategory}
+              businesses={businesses.find(cat => cat.category === selectedCategory)?.businesses || []}
+              loading={businessLoading}
+              error={businessError}
+              selectedCategory={selectedCategory}
               setSelectedBusiness={setSelectedBusiness}
             />
           </View>

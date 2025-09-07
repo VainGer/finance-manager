@@ -8,14 +8,12 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness })
 
     useEffect(() => {
         const fetchBusinesses = async () => {
-
             const response = await get(`expenses/business/get-businesses/${refId}/${category}`);
             if (response.ok) {
                 setBusinesses(response.businesses || []);
             } else {
                 setError('אירעה שגיאה בעת טעינת העסקים');
             }
-
         };
 
         fetchBusinesses();

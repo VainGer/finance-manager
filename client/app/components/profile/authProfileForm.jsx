@@ -40,11 +40,10 @@ export default function AuthProfileForm({ authProfile, selectedProfile, onBack, 
                 </Text>
                 
                 <Input
-                    placeholder="הזן קוד סודי (4 ספרות)"
+                    placeholder="הזן קוד סודי"
                     value={pin}
                     onChangeText={setPin}
                     secureTextEntry
-                    maxLength={4}
                     keyboardType="numeric"
                 />
             </View>

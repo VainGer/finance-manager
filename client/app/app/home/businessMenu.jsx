@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { Text, View, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,17 +9,43 @@ import Button from '../../components/common/button.jsx';
 import LoadingSpinner from '../../components/common/loadingSpinner.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import useEditBusiness from '../../hooks/useEditBusiness.js';
+import useEditCategories from '../../hooks/useEditCategories.js';
 
 export default function BusinessMenu() {
     const [selectedMenu, setSelectedMenu] = useState(null);
+    const [businesses, setBusinesses] = useState([]);
+    const [categories, setCategories] = useState([]);
     const { profile } = useAuth();
 
-    const { error, success, loading,
-        addBusiness, renameBusiness, deleteBusiness, resetState } = useEditBusiness({ profile, goBack: () => setSelectedMenu(null) });
+    const { getCategories, getCategoriesError, getCategoriesLoading } = useEditCategories({ profile });
+
+    const { error, success, loading, getBusinessesLoading, getBusinessesError,
+        addBusiness, renameBusiness, deleteBusiness, resetState, getBusinesses } = useEditBusiness({ profile, goBack: () => setSelectedMenu(null) });
 
     useEffect(() => {
         resetState();
     }, [selectedMenu]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const fetchedCategories = await getCategories();
+            setCategories(fetchedCategories);
+        };
+        fetchCategories();
+    }, [profile, error, success]);
+
+    useEffect(() => {
+        const fetchBusinesses = async () => {
+            const businessData = await Promise.all(
+                categories.map(async (cat) => {
+                    const businesses = await getBusinesses(cat);
+                    return { category: cat, businesses };
+                })
+            );
+            setBusinesses(businessData);
+        };
+        fetchBusinesses();
+    }, [profile, error, success, categories]);
 
     const renderSelectedMenu = () => {
         switch (selectedMenu) {
@@ -30,6 +56,9 @@ export default function BusinessMenu() {
                     error={error}
                     success={success}
                     addBusiness={addBusiness}
+                    categories={categories}
+                    getCategoriesLoading={getCategoriesLoading}
+                    getCategoriesError={getCategoriesError}
                 />;
             case 'rename':
                 return <RenameBusiness
@@ -38,6 +67,12 @@ export default function BusinessMenu() {
                     error={error}
                     success={success}
                     renameBusiness={renameBusiness}
+                    categories={categories}
+                    businesses={businesses}
+                    getBusinessesLoading={getBusinessesLoading}
+                    getBusinessesError={getBusinessesError}
+                    getCategoriesLoading={getCategoriesLoading}
+                    getCategoriesError={getCategoriesError}
                 />;
             case 'delete':
                 return <DeleteBusiness
@@ -46,6 +81,12 @@ export default function BusinessMenu() {
                     error={error}
                     success={success}
                     deleteBusiness={deleteBusiness}
+                    categories={categories}
+                    businesses={businesses}
+                    getBusinessesLoading={getBusinessesLoading}
+                    getBusinessesError={getBusinessesError}
+                    getCategoriesLoading={getCategoriesLoading}
+                    getCategoriesError={getCategoriesError}
                 />;
             default:
                 return null;
@@ -79,14 +120,14 @@ export default function BusinessMenu() {
                             <Text className="text-2xl font-bold text-slate-800">ניהול עסקים</Text>
                             <View className="h-1 w-12 bg-blue-500 rounded-full mt-2" />
                         </View>
-                        
+
                         {/* Business icon */}
                         <View className="items-center mb-8">
                             <View className="w-20 h-20 bg-blue-100 rounded-full items-center justify-center mb-2">
                                 <Ionicons name="briefcase-outline" size={36} color="#3b82f6" />
                             </View>
                         </View>
-                        
+
                         {/* Menu options */}
                         <View className="w-full max-w-sm">
                             <Button

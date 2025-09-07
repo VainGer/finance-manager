@@ -63,34 +63,33 @@ export default function ProfileInfo({ profile, account, editMode, profileForm, s
             </div>
           </div>
         </div>
-        
+
         <div className="md:col-span-2 space-y-2">
           <label className="text-sm font-semibold text-slate-700 uppercase tracking-wide">צבע פרופיל</label>
           {editMode ? (
             <div className="space-y-4">
               <div className="grid grid-cols-6 gap-3 p-5 bg-slate-50 rounded-xl border border-slate-200">
                 {[
-                  { color: '#FF0000', name: 'אדום' },     
-                  { color: '#00AA00', name: 'ירוק' },     
-                  { color: '#0066FF', name: 'כחול' },     
-                  { color: '#FFD700', name: 'צהוב' },     
-                  { color: '#FF6B35', name: 'כתום' },     
-                  { color: '#800080', name: 'סגול' },     
-                  { color: '#FF1493', name: 'ורוד' },     
-                  { color: '#20B2AA', name: 'טורקיז' },   
-                  { color: '#4B0082', name: 'אינדיגו' },  
-                  { color: '#708090', name: 'אפור' },     
-                  { color: '#8B4513', name: 'חום' },      
-                  { color: '#2E8B57', name: 'ירוק ים' }   
+                  { color: '#FF0000', name: 'אדום' },
+                  { color: '#00AA00', name: 'ירוק' },
+                  { color: '#0066FF', name: 'כחול' },
+                  { color: '#FFD700', name: 'צהוב' },
+                  { color: '#FF6B35', name: 'כתום' },
+                  { color: '#800080', name: 'סגול' },
+                  { color: '#FF1493', name: 'ורוד' },
+                  { color: '#20B2AA', name: 'טורקיז' },
+                  { color: '#4B0082', name: 'אינדיגו' },
+                  { color: '#708090', name: 'אפור' },
+                  { color: '#8B4513', name: 'חום' },
+                  { color: '#2E8B57', name: 'ירוק ים' }
                 ].map(({ color, name }) => (
                   <button
                     key={color}
                     onClick={() => setProfileForm(prev => ({ ...prev, profileColor: color }))}
-                    className={`w-12 h-12 rounded-xl border-4 transition-all duration-200 hover:scale-110 hover:shadow-lg ${
-                      profileForm.profileColor === color
+                    className={`w-12 h-12 rounded-xl border-4 transition-all duration-200 hover:scale-110 hover:shadow-lg ${profileForm.profileColor === color
                         ? 'border-slate-800 shadow-lg transform scale-105'
                         : 'border-slate-300 hover:border-slate-500'
-                    }`}
+                      }`}
                     style={{ backgroundColor: color }}
                     title={name}
                   />
@@ -110,9 +109,9 @@ export default function ProfileInfo({ profile, account, editMode, profileForm, s
           ) : (
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
-                <div 
+                <div
                   className="w-8 h-8 rounded-lg border-2 border-white shadow-lg"
-                  style={{ backgroundColor: profile?.profileColor || '#0066FF' }}
+                  style={{ backgroundColor: profile?.color || '#0066FF' }}
                 ></div>
                 <span className="font-semibold text-slate-800">צבע פרופיל מותאם אישית</span>
               </div>
@@ -138,11 +137,10 @@ export default function ProfileInfo({ profile, account, editMode, profileForm, s
                     key={prof.profileId}
                     onClick={() => onSwitchProfile(prof.profileId)}
                     disabled={prof.profileId === profile?.profileId}
-                    className={`p-4 rounded-lg border-2 transition-all duration-200 ${
-                      prof.profileId === profile?.profileId
+                    className={`p-4 rounded-lg border-2 transition-all duration-200 ${prof.profileId === profile?.profileId
                         ? 'border-slate-400 bg-slate-100 cursor-not-allowed opacity-75'
                         : 'border-slate-200 bg-white hover:border-slate-400 hover:shadow-md cursor-pointer'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <div

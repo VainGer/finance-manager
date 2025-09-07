@@ -1,15 +1,36 @@
-import { useState, useEffect } from 'react';
-import { get, put, post, del } from '../utils/api.js';
+import { useState } from 'react';
+import { del, get, post, put } from '../utils/api.js';
 export default function useEditBusiness({ profile, goBack }) {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [getBusinessesLoading, setGetBusinessesLoading] = useState(false);
+    const [getBusinessesError, setGetBusinessesError] = useState(null);
 
     const resetState = () => {
         setError(null);
         setSuccess(false);
         setLoading(false);
     };
+
+    const getBusinesses = async (category) => {
+        try {
+            setGetBusinessesLoading(true);
+            const response = await get(`expenses/business/get-businesses/${profile.expenses}/${category}`);
+            if (response.ok) {
+                setGetBusinessesLoading(false);
+                return response.businesses;
+            } else {
+                setGetBusinessesLoading(false);
+                setGetBusinessesError('אירעה שגיאה בעת קבלת בעלי העסקים, נסה שוב מאוחר יותר');
+                console.error('Error fetching businesses:', response.error);
+                return [];
+            }
+        } catch (error) {
+            console.error("Exception in getBusinesses:", error);
+            return [];
+        }
+    }
 
     const addBusiness = async (refId, category, name, setName) => {
         if (!name || name.trim() === '') {
@@ -98,9 +119,12 @@ export default function useEditBusiness({ profile, goBack }) {
         error,
         success,
         loading,
+        getBusinessesLoading,
+        getBusinessesError,
         addBusiness,
         renameBusiness,
         deleteBusiness,
-        resetState
+        resetState,
+        getBusinesses
     }
 }
