@@ -1,6 +1,9 @@
-import { View, TouchableOpacity, FlatList } from "react-native";
+import { View, TouchableOpacity, FlatList, Text } from "react-native";
+import { useState } from 'react';
 
 export default function ColorPicker({ setColor }) {
+
+    const [selectedColor, setSelectedColor] = useState(null);
 
     const colors = [
         { color: '#FF0000', name: 'אדום' },
@@ -23,22 +26,29 @@ export default function ColorPicker({ setColor }) {
         { color: '#ADFF2F', name: 'ירוק בהיר' }
     ]
     return (
-        <FlatList
-            data={colors}
-            numColumns={6}
-            keyExtractor={(item) => item.name}
-            renderItem={({ item }) => (
-                <TouchableOpacity
-                    onPress={() => setColor(item.color)}
-                    className="flex-1 m-2 aspect-square h-10"
-                >
-                    <View
-                        className="flex-1 rounded-lg border-2 border-gray-400 w-full h-full"
-                        style={{ backgroundColor: item.color }}
-                    />
-                </TouchableOpacity>
-            )}
-        />
-
+        <View className='h-full w-full'>
+            <FlatList
+                data={colors}
+                numColumns={6}
+                scrollEnabled={false}
+                keyExtractor={(item) => item.name}
+                renderItem={({ item }) => (
+                    <TouchableOpacity
+                        onPress={() => { setColor(item.color); setSelectedColor(item) }}
+                        className="flex-1 m-1 aspect-square"
+                    >
+                        <View
+                            className="flex-1 rounded-lg border-2 border-gray-400"
+                            style={{ backgroundColor: item.color }}
+                        />
+                    </TouchableOpacity>
+                )
+                }
+            />
+            {selectedColor && <View className="flex-row items-center justify-center bg-gray-200 rounded-xl border border-gray-400 my-2">
+                <Text className="text-lg font-bold m-2">צבע נבחר:</Text>
+                <Text style={{ color: selectedColor.color }}>{selectedColor.name}</Text>
+                </View>}
+        </View >
     );
 }

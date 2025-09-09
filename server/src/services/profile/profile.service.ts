@@ -286,15 +286,18 @@ export default class ProfileService {
     }
 
     static async setAvatar(username: string, profileName: string, avatar: string) {
-        if (!username || !profileName || !avatar) {
-            throw new BadRequestError("Username, profile name and avatar are required");
+        if (!username || !profileName) {
+            throw new BadRequestError("Username and profile name are required");
         }
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
             throw new NotFoundError("Profile not found");
         }
-        if (profile.avatar !== null) {
+        if (profile.avatar !== null || avatar === null) {
             await ProfileModel.removeAvatar(username, profileName, profile.avatar);
+            if (avatar === null) {
+                return { success: true, message: "Avatar removed successfully" };
+            }
         }
         const avatarUrl = await ProfileModel.uploadAvatar(avatar);
         if (!avatarUrl) {

@@ -31,7 +31,7 @@ export default function ProfileList({ profiles, onSelect }) {
                         <Ionicons name="chevron-forward" size={20} color="#64748b" />
                         
                         <View className="flex-row items-center">
-                            <Text className="text-slate-700 text-sm mr-2 text-right">הזן קוד סודי כדי להמשיך</Text>
+                            <Text className="text-slate-700 text-sm mr-2 text-right">לחץ להתחברות</Text>
                             <Image
                                 source={
                                     profile.avatar
