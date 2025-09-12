@@ -207,7 +207,6 @@ export default function useUploadTransactionsFromFile({ profile }) {
     setSuccess(null);
     setLoading(true);
     const transactionsToSubmit = dataToUpload.filter(t => t.toUpload);
-    console.log(transactionsToSubmit);
     const response = await post(`profile/upload-transactions`, {
       username: profile.username,
       profileName: profile.profileName,

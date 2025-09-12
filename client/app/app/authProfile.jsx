@@ -12,7 +12,7 @@ import AuthProfileForm from '../components/profile/authProfileForm.jsx';
 import useAuthProfile from '../hooks/auth/useAuthProfile.js';
 import CreateProfile from '../components/profile/createProfile.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { pickImage } from '../utils/imageProcessing.js';
+
 
 export default function AuthProfile() {
     const { account, setProfile } = useAuth();

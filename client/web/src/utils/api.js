@@ -1,4 +1,7 @@
-const baseUrl = "https://finance-manager-m3au.onrender.com/api";
+//render url 
+// const baseUrl = "https://finance-manager-m3au.onrender.com/api";
+//local url
+const baseUrl = "http://localhost:5500/api";
 
 export async function get(endpoint) {
     try {
@@ -63,14 +66,14 @@ export async function del(endpoint, data = null) {
         const options = {
             method: 'DELETE',
         };
-        
+
         if (data) {
             options.headers = {
                 'Content-Type': 'application/json',
             };
             options.body = JSON.stringify(data);
         }
-        
+
         const response = await fetch(`${baseUrl}/${endpoint}`, options);
         const result = await response.json();
         return {

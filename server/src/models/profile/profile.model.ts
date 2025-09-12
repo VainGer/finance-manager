@@ -100,13 +100,22 @@ export default class ProfileModel {
         }
     }
 
-    static async renameProfile(username: string, oldProfileName: string, newProfileName: string) {
+    static async renameProfile(username: string, oldProfileName: string, newProfileName: string, expensesDoc: string) {
         try {
             const result = await db.UpdateDocument(this.profileCollection, {
                 username, profileName: oldProfileName
             }, { $set: { profileName: newProfileName } });
             if (!result || result.modifiedCount === 0) {
                 return { success: false, message: "Profile not found or name is the same" };
+            }
+            const expensesDocResult = await db.UpdateDocument(this.expensesCollection,
+                { _id: new ObjectId(expensesDoc) },
+                { $set: { profileName: newProfileName } });
+            if (!expensesDocResult || expensesDocResult.modifiedCount === 0) {
+                await db.UpdateDocument(this.profileCollection, {
+                    username, profileName: newProfileName
+                }, { $set: { profileName: oldProfileName } });
+                return { success: false, message: "Failed to rename expenses document" };
             }
             return { success: true, message: "Profile renamed successfully" };
         } catch (error) {

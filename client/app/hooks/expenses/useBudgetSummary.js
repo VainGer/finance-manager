@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { get } from '../../utils/api';
 export default function useBudgetSummary({ profile }) {
     const [profileBudgets, setProfileBudgets] = useState([]);
@@ -8,10 +8,9 @@ export default function useBudgetSummary({ profile }) {
     const [selectedPeriod, setSelectedPeriod] = useState(null);
     const [categorySpendingByPeriod, setCategorySpendingByPeriod] = useState({});
 
-    async function fetchData() {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         setError(null);
-
         const [budgetsResponse, expensesResponse] = await Promise.all([
             get(`profile/get-budgets?username=${profile.username}&profileName=${profile.profileName}`),
             get(`expenses/profile-expenses/${profile.expenses}`)
@@ -21,21 +20,20 @@ export default function useBudgetSummary({ profile }) {
             const budgets = budgetsResponse.budgets.budgets || [];
             const expenses = expensesResponse.expenses.categories || [];
 
+            const spendingData = calculateCategorySpending(expenses, budgets);
             setProfileBudgets(budgets);
             setExpensesData(expenses);
-
-            const spendingData = calculateCategorySpending(expenses, budgets);
             setCategorySpendingByPeriod(spendingData);
         } else {
             setError('שגיאה בטעינת נתונים, נסה שנית');
         }
 
         setLoading(false);
-    }
+    }, [profile]);
 
     useEffect(() => {
         fetchData();
-    }, [profile]);
+    }, [fetchData]);
 
     function calculateCategorySpending(categories, budgetPeriods) {
         const result = {};

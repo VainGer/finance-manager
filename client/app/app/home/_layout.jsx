@@ -32,12 +32,12 @@ export default function RootLayout() {
                     drawerPosition: 'right',
                     drawerLabelStyle: {
                         fontWeight: '600',
-                        textAlign: 'right',
+                        textAlign: 'left',
                         fontSize: 16,
                     },
                     drawerItemStyle: {
                         borderRadius: 8,
-                        marginHorizontal: 8,
+                        marginHorizontal: 40,
                         marginVertical: 4,
                     },
                     drawerContentStyle: {
@@ -51,14 +51,17 @@ export default function RootLayout() {
             >
                 <Drawer.Screen
                     name="(tabs)"
-                    options={{ drawerLabel: "דף ראשי", title: "דף ראשי", }}
+                    options={{
+                        drawerLabel: "דף ראשי",
+                        title: "דף ראשי",
+                        drawerIcon: ({ color }) => <Ionicons name="home-outline" size={22} color={color} />
+                    }}
                 />
                 <Drawer.Screen name="addTransaction"
                     options={{
                         drawerLabel: 'הוסף הוצאה',
                         title: 'הוסף הוצאה',
                         drawerIcon: ({ color }) => <Ionicons name="add-outline" size={22} color={color} />
-
                     }}
                 />
                 <Drawer.Screen name="categoryMenu"
@@ -89,7 +92,7 @@ export default function RootLayout() {
                         drawerIcon: ({ color }) => <Ionicons name="cloud-upload-outline" size={22} color={color} />
                     }}
                 />
-                <Drawer.Screen name="profileSettings"
+                <Drawer.Screen name="(profileSettings)"
                     options={{
                         drawerLabel: 'הגדרות פרופיל',
                         title: 'הגדרות פרופיל',

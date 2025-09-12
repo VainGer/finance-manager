@@ -1,16 +1,15 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from '@react-navigation/native';
+import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useEffect } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from "@expo/vector-icons";
 import BudgetPeriodSelector from '../../../components/budgets/budgetPeriodSelector';
 import CategoryBudgetDetails from '../../../components/budgets/categoryBudgetDetails';
 import OverallBudgetSummary from '../../../components/budgets/overallBudgetSummary';
 import LoadingSpinner from '../../../components/common/loadingSpinner';
 import { useAuth } from '../../../context/AuthContext';
 import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
-import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
 
 export default function BudgetSummary() {
     const { profile } = useAuth();
@@ -19,21 +18,21 @@ export default function BudgetSummary() {
         error,
         availablePeriods,
         selectedPeriod,
-        setSelectedPeriod,
         relevantPeriod,
         currentProfileBudget,
         currentCategoryBudgets,
+        setSelectedPeriod,
         refetchBudgets
     } = useBudgetSummary({ profile });
 
-    const { expenses } = useExpensesDisplay({ profile });
+
 
     useFocusEffect(
         useCallback(() => {
             refetchBudgets();
             return () => {
             };
-        }, [])
+        }, [refetchBudgets])
     );
     // Initialize selected period when available
     useEffect(() => {

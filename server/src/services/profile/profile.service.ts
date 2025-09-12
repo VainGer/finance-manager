@@ -1,4 +1,4 @@
-import { BadRequestError, ConflictError, AppError, NotFoundError } from "../../errors/AppError";
+import * as AppErrors from "../../errors/AppError";
 import ProfileModel from "../../models/profile/profile.model";
 import AccountModel from "../../models/account/account.model";
 import CategoryService from "../expenses/category.service";
@@ -13,21 +13,21 @@ export default class ProfileService {
 
     static async createProfile(profileData: ProfileCreationData) {
         if (!profileData.username || !profileData.profileName || !profileData.pin) {
-            throw new BadRequestError("Username, profile name and pin are required");
+            throw new AppErrors.BadRequestError("Username, profile name and pin are required");
         }
         const profileExist = await ProfileModel.findProfile(profileData.username, profileData.profileName);
         if (profileExist) {
-            throw new ConflictError("Profile already exists");
+            throw new AppErrors.BadRequestError("Profile already exists");
         }
         const expensesId = await ProfileModel.createExpensesDocument(profileData.username, profileData.profileName);
         if (!expensesId) {
-            throw new AppError("Failed to create expenses for the profile", 500);
+            throw new AppErrors.AppError("Failed to create expenses for the profile", 500);
         }
         let avatarUrl = null;
         if (profileData.avatar) {
             avatarUrl = await ProfileModel.uploadAvatar(profileData.avatar);
             if (!avatarUrl) {
-                throw new AppError("Failed to upload avatar", 500);
+                throw new AppErrors.AppError("Failed to upload avatar", 500);
             }
         }
         let allProfiles = await ProfileModel.getAllProfiles(profileData.username);
@@ -54,28 +54,28 @@ export default class ProfileService {
         }
         const result = await ProfileModel.create(profile);
         if (!result.insertedId || !result.success) {
-            throw new AppError("Failed to create profile", 500);
+            throw new AppErrors.AppError("Failed to create profile", 500);
         }
         return { success: true, profileId: result.insertedId, message: "Profile created successfully" };
     }
 
     static async createChildProfile(childProfileCreation: ChildProfileCreationData) {
         if (!childProfileCreation.username || !childProfileCreation.profileName || !childProfileCreation.pin) {
-            throw new BadRequestError("Username, profile name and pin are required");
+            throw new AppErrors.BadRequestError("Username, profile name and pin are required");
         }
         const profileExist = await ProfileModel.findProfile(childProfileCreation.username, childProfileCreation.profileName);
         if (profileExist) {
-            throw new ConflictError("Profile already exists");
+            throw new AppErrors.ConflictError("Profile already exists");
         }
         const expensesId = await ProfileModel.createExpensesDocument(childProfileCreation.username, childProfileCreation.profileName);
         if (!expensesId) {
-            throw new AppError("Failed to create expenses for the profile", 500);
+            throw new AppErrors.AppError("Failed to create expenses for the profile", 500);
         }
         let avatarUrl = null;
         if (childProfileCreation.avatar) {
             avatarUrl = await ProfileModel.uploadAvatar(childProfileCreation.avatar);
             if (!avatarUrl) {
-                throw new AppError("Failed to upload avatar", 500);
+                throw new AppErrors.AppError("Failed to upload avatar", 500);
             }
         }
         const profile: ChildProfile = {
@@ -94,11 +94,11 @@ export default class ProfileService {
 
         const createdProfile = await ProfileModel.create(profile);
         if (!createdProfile.insertedId || !createdProfile.success) {
-            throw new AppError("Failed to create child profile", 500);
+            throw new AppErrors.AppError("Failed to create child profile", 500);
         }
         const allProfiles = await ProfileModel.getAllProfiles(childProfileCreation.username);
         if (!allProfiles || allProfiles.length === 0) {
-            throw new NotFoundError("No profiles found");
+            throw new AppErrors.NotFoundError("No profiles found");
         }
         const promises = await Promise.all(allProfiles.map(async (profile) => {
             if (profile.parentProfile) {
@@ -111,29 +111,29 @@ export default class ProfileService {
             }
         }));
         if (promises.some(result => !result.success)) {
-            throw new AppError("Failed to add child to parent profiles", 500);
+            throw new AppErrors.AppError("Failed to add child to parent profiles", 500);
         }
         return { success: true, profileId: createdProfile.insertedId, message: "Child profile created successfully" };
     }
 
     static async updateProfile(username: string, profileName: string) {
         if (!username || !profileName) {
-            throw new BadRequestError("Username and profile name are required");
+            throw new AppErrors.BadRequestError("Username and profile name are required");
         }
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         return { success: true, profile };
     }
 
     static async addChildBudgets(username: string, profileName: string, budget: { startDate: Date; endDate: Date; amount: number }) {
         if (!username || !profileName || !budget || !budget.startDate || !budget.endDate || !budget.amount) {
-            throw new BadRequestError("Username, profile name and budget data are required");
+            throw new AppErrors.BadRequestError("Username, profile name and budget data are required");
         }
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         const foundNewBudgets = await this.getChildBudgets(username, profileName);
         if (foundNewBudgets.budgets && foundNewBudgets.budgets.length > 0) {
@@ -153,16 +153,16 @@ export default class ProfileService {
                 );
             });
             if (overlappingDates) {
-                throw new ConflictError("Budget dates overlap with existing budgets");
+                throw new AppErrors.ConflictError("Budget dates overlap with existing budgets");
             }
         }
         const validDatesInBudgets = await this.validateBudgetDates(username, profileName, budget.startDate, budget.endDate);
         if (!validDatesInBudgets) {
-            throw new ConflictError("Invalid budget dates");
+            throw new AppErrors.ConflictError("Invalid budget dates");
         }
         const result = await ProfileModel.addBudgetToChild(username, profileName, budget);
         if (!result || !result.success) {
-            throw new AppError("Failed to add budget to child profile", 500);
+            throw new AppErrors.AppError("Failed to add budget to child profile", 500);
         }
         return result;
     }
@@ -170,11 +170,11 @@ export default class ProfileService {
 
     static async getChildBudgets(username: string, profileName: string) {
         if (!username || !profileName) {
-            throw new BadRequestError("Username and profile name are required");
+            throw new AppErrors.BadRequestError("Username and profile name are required");
         }
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         const budgetsToDistribute = profile.newBudgets;
         return { success: true, budgets: budgetsToDistribute || [] };
@@ -182,15 +182,15 @@ export default class ProfileService {
 
     static async validateProfile(username: string, profileName: string, pin: string) {
         if (!username || !profileName || !pin) {
-            throw new BadRequestError("Username, profile name and pin are required");
+            throw new AppErrors.BadRequestError("Username, profile name and pin are required");
         }
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         const isValidPin = await ProfileModel.comparePin(profile.pin, pin);
         if (!isValidPin) {
-            throw new BadRequestError("Invalid PIN");
+            throw new AppErrors.UnauthorizedError("Invalid PIN");
         }
         const { pin: _, budgets: __, ...safeProfile } = profile;
         return { success: true, safeProfile, message: "Profile validated successfully" };
@@ -198,11 +198,11 @@ export default class ProfileService {
 
     static async getAllProfiles(username: string) {
         if (!username) {
-            throw new BadRequestError("Username is required");
+            throw new AppErrors.BadRequestError("Username is required");
         }
         const foundUser = AccountModel.findByUsername(username);
         if (!foundUser) {
-            throw new NotFoundError("User not found");
+            throw new AppErrors.NotFoundError("User not found");
         }
         const profilesDB = await ProfileModel.getAllProfiles(username);
         if (!profilesDB || profilesDB.length === 0) {
@@ -219,79 +219,83 @@ export default class ProfileService {
 
     static async renameProfile(username: string, oldProfileName: string, newProfileName: string) {
         if (!username || !oldProfileName || !newProfileName) {
-            throw new BadRequestError("Username, old profile name and new profile name are required");
+            throw new AppErrors.BadRequestError("Username, old profile name and new profile name are required");
         }
         const profile = await ProfileModel.findProfile(username, oldProfileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
-        const updatedProfile = await ProfileModel.renameProfile(username, oldProfileName, newProfileName);
+        const profileExist = await ProfileModel.findProfile(username, newProfileName);
+        if (profileExist) {
+            throw new AppErrors.ConflictError("Profile already exists");
+        }
+        const updatedProfile = await ProfileModel.renameProfile(username, oldProfileName, newProfileName, profile.expenses);
         if (!updatedProfile) {
-            throw new AppError("Failed to rename profile", 500);
+            throw new AppErrors.AppError("Failed to rename profile", 500);
         }
         if (!updatedProfile.success) {
-            throw new ConflictError(updatedProfile.message);
+            throw new AppErrors.ConflictError(updatedProfile.message);
         }
         return updatedProfile;
     }
 
     static async changeProfilePin(username: string, profileName: string, oldPin: string, newPin: string) {
         if (!username || !profileName || !oldPin || !newPin) {
-            throw new BadRequestError("Username, profile name, old pin and new pin are required");
+            throw new AppErrors.BadRequestError("Username, profile name, old pin and new pin are required");
         }
 
         if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
-            throw new BadRequestError("PIN must be exactly 4 digits");
+            throw new AppErrors.BadRequestError("PIN must be exactly 4 digits");
         }
 
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         const isValidOldPin = await ProfileModel.comparePin(profile.pin, oldPin);
         if (!isValidOldPin) {
-            throw new BadRequestError("Invalid old PIN");
+            throw new AppErrors.UnauthorizedError("Invalid old PIN");
         }
 
         const updatedProfile = await ProfileModel.updateProfilePin(username, profileName, newPin);
         if (!updatedProfile) {
-            throw new AppError("Failed to change profile PIN", 500);
+            throw new AppErrors.AppError("Failed to change profile PIN", 500);
         }
         if (!updatedProfile.success) {
-            throw new ConflictError(updatedProfile.message);
+            throw new AppErrors.ConflictError(updatedProfile.message);
         }
         return updatedProfile;
     }
 
     static async deleteProfile(username: string, profileName: string, pin: string) {
         if (!username || !profileName || !pin) {
-            throw new BadRequestError("Username, profile name and pin are required");
+            throw new AppErrors.BadRequestError("Username, profile name and pin are required");
         }
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         const isValidPin = await ProfileModel.comparePin(profile.pin, pin);
         if (!isValidPin) {
-            throw new BadRequestError("Invalid PIN");
+            throw new AppErrors.UnauthorizedError("Invalid PIN");
         }
         if (profile.avatar) {
             await this.deleteAvatar(username, profileName);
         }
         const result = await ProfileModel.deleteProfile(username, profileName, profile.expenses);
         if (!result.success) {
-            throw new AppError(result.message, 500);
+            throw new AppErrors.AppError(result.message, 500);
         }
         return result;
     }
 
     static async setAvatar(username: string, profileName: string, avatar: string) {
         if (!username || !profileName) {
-            throw new BadRequestError("Username and profile name are required");
+            throw new AppErrors.BadRequestError("Username and profile name are required");
         }
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         if (profile.avatar !== null || avatar === null) {
             await ProfileModel.removeAvatar(username, profileName, profile.avatar);
@@ -301,52 +305,52 @@ export default class ProfileService {
         }
         const avatarUrl = await ProfileModel.uploadAvatar(avatar);
         if (!avatarUrl) {
-            throw new AppError("Failed to upload avatar", 500);
+            throw new AppErrors.AppError("Failed to upload avatar", 500);
         }
         const result = await ProfileModel.setAvatar(username, profileName, avatarUrl);
         if (!result.success) {
-            throw new AppError(result.message, 500);
+            throw new AppErrors.AppError(result.message, 500);
         }
         return { success: true, message: "Avatar set successfully" };
     }
 
     static async deleteAvatar(username: string, profileName: string) {
         if (!username || !profileName) {
-            throw new BadRequestError("Username and profile name are required");
+            throw new AppErrors.BadRequestError("Username and profile name are required");
         }
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         const result = await ProfileModel.removeAvatar(username, profileName, profile.avatar);
         if (!result.success) {
-            throw new AppError("Failed to delete avatar", 500);
+            throw new AppErrors.AppError("Failed to delete avatar", 500);
         }
         return result;
     }
 
     static async setColor(username: string, profileName: string, color: string) {
         if (!username || !profileName || !color) {
-            throw new BadRequestError("Username, profile name and color are required");
+            throw new AppErrors.BadRequestError("Username, profile name and color are required");
         }
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         const result = await ProfileModel.setColor(username, profileName, color);
         if (!result.success) {
-            throw new AppError(result.message, 500);
+            throw new AppErrors.AppError(result.message, 500);
         }
         return { success: true, message: "Profile color set successfully" };
     }
 
     static async uploadTransactions(username: string, profileName: string, refId: string, transactionsToUpload: CategorizedFile[]) {
         if (!username || !profileName || !refId || !transactionsToUpload) {
-            throw new BadRequestError("Username, profile name, refId and transactionsToUpload are required");
+            throw new AppErrors.BadRequestError("Username, profile name, refId and transactionsToUpload are required");
         }
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         await this.updateBankNames(refId, transactionsToUpload);
         for (const item of transactionsToUpload) {
@@ -357,7 +361,7 @@ export default class ProfileService {
             }
             const result = await TransactionService.create(refId, item.category, item.business, transaction);
             if (!result || !result.success) {
-                throw new AppError(result?.message || "Failed to create transaction", 500);
+                throw new AppErrors.AppError(result?.message || "Failed to create transaction", 500);
             }
         }
         return { success: true, message: "Transactions uploaded successfully" };
@@ -366,12 +370,12 @@ export default class ProfileService {
     static async createBudget(budgetData: BudgetCreationData) {
         const { username, profileName, profileBudget, categoriesBudgets } = budgetData;
         if (!username || !profileName || !profileBudget || !categoriesBudgets) {
-            throw new BadRequestError("Username, profile name, profileBudget and categoriesBudgets are required");
+            throw new AppErrors.BadRequestError("Username, profile name, profileBudget and categoriesBudgets are required");
         }
 
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         const refId = profile.expenses;
 
@@ -398,19 +402,19 @@ export default class ProfileService {
         );
 
         if (!categoriesBudgetsCreated || !categoriesBudgetsCreated.success) {
-            throw new AppError(categoriesBudgetsCreated?.message || "Failed to create categories budgets", 500);
+            throw new AppErrors.AppError(categoriesBudgetsCreated?.message || "Failed to create categories budgets", 500);
         }
 
         const profileBudgetCreated = await ProfileModel.createBudget(username, profileName, newProfileBudget);
 
         if (!profileBudgetCreated || !profileBudgetCreated.success) {
-            throw new AppError(profileBudgetCreated?.message || "Failed to create budget", 500);
+            throw new AppErrors.AppError(profileBudgetCreated?.message || "Failed to create budget", 500);
         }
 
         if (!profile.parentProfile) {
             const clearResult = await ProfileModel.pullChildBudget(username, profileName, new Date(profileBudget.startDate), new Date(profileBudget.endDate));
             if (!clearResult || !clearResult.success) {
-                throw new AppError(clearResult?.message || "Failed to clear child budget", 500);
+                throw new AppErrors.AppError(clearResult?.message || "Failed to clear child budget", 500);
             }
         }
         return { success: true, message: "Budget created successfully" };
@@ -419,22 +423,22 @@ export default class ProfileService {
     static async getBudgets(username: string, profileName: string) {
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         const budgets = profile.budgets;
         if (!budgets) {
-            throw new NotFoundError("No budgets found for this profile");
+            throw new AppErrors.NotFoundError("No budgets found for this profile");
         }
         return { success: true, budgets };
     }
 
     static async validateBudgetDates(username: string, profileName: string, startDate: Date, endDate: Date) {
         if (!username || !profileName || !startDate || !endDate) {
-            throw new BadRequestError("Username, profile name, start date and end date are required");
+            throw new AppErrors.BadRequestError("Username, profile name, start date and end date are required");
         }
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
-            throw new NotFoundError("Profile not found");
+            throw new AppErrors.NotFoundError("Profile not found");
         }
         const budgets = profile.budgets || [];
         if (budgets.length === 0) {
@@ -459,14 +463,14 @@ export default class ProfileService {
             );
         });
         if (overlapingDates) {
-            throw new ConflictError("Budget dates overlap with existing budgets");
+            throw new AppErrors.ConflictError("Budget dates overlap with existing budgets");
         }
         return { success: true, message: "Budget dates are valid" };
     }
 
     static async categorizeTransactions(refId: string, transactionsData: string) {
         if (!refId || !transactionsData) {
-            throw new BadRequestError("Reference ID and transactions data are required");
+            throw new AppErrors.BadRequestError("Reference ID and transactions data are required");
         }
         const categories = await CategoryService.getProfileExpenses(refId);
         const categoriesAndBusinesses = categories.categories.map((category: any) => {
@@ -489,7 +493,7 @@ export default class ProfileService {
             return await BusinessModel.updateBusinessBankName(refId, item.category, item.business, item.bank);
         }));
         if (results.some(result => !result.success)) {
-            throw new AppError("Failed to update some business bank names", 500);
+            throw new AppErrors.AppError("Failed to update some business bank names", 500);
         }
         return true;
     }
@@ -512,24 +516,24 @@ export default class ProfileService {
             return totalSum;
         } catch (error) {
             console.error("Error calculating transactions sum:", error);
-            throw new AppError("Failed to calculate transactions sum", 500);
+            throw new AppErrors.AppError("Failed to calculate transactions sum", 500);
         }
     }
 
     private static async createCategoryBudgets
         (refId: string, categeriesBudgets: { categoryName: string; amount: number }[], budgetId: ObjectId, startDate: Date, endDate: Date) {
         if (!refId || !categeriesBudgets || !budgetId || !startDate || !endDate) {
-            throw new BadRequestError("Reference ID, categories budgets, budget ID, start date and end date are required");
+            throw new AppErrors.BadRequestError("Reference ID, categories budgets, budget ID, start date and end date are required");
         }
         const categories = await CategoryService.getCategoriesNames(refId);
         for (const category of categeriesBudgets) {
             if (!categories.categoriesNames.includes(category.categoryName)) {
-                throw new BadRequestError(`Category '${category.categoryName}' does not exist`);
+                throw new AppErrors.BadRequestError(`Category '${category.categoryName}' does not exist`);
             }
         }
         for (const categoryBudget of categeriesBudgets) {
             if (!categoryBudget.categoryName || !categoryBudget.amount) {
-                throw new BadRequestError("Category name and amount are required for each category budget");
+                throw new AppErrors.BadRequestError("Category name and amount are required for each category budget");
             }
             const budget: CategoryBudget = {
                 _id: budgetId,
@@ -540,10 +544,9 @@ export default class ProfileService {
             };
             const result = await CategoryService.createCategoryBudget(refId, budget, categoryBudget.categoryName);
             if (!result || !result.success) {
-                throw new AppError(result?.message || "Failed to create category budget", 500);
+                throw new AppErrors.AppError(result?.message || "Failed to create category budget", 500);
             }
         }
         return { success: true, message: "Category budgets created successfully" };
     }
 }
-

@@ -1,5 +1,5 @@
 import { Account } from "../../types/account.types";
-import { BadRequestError, ConflictError, AppError } from "../../errors/AppError";
+import { BadRequestError, ConflictError, AppError, UnauthorizedError } from "../../errors/AppError";
 import AccountModel from "../../models/account/account.model";
 
 export default class AccountService {
@@ -53,7 +53,7 @@ export default class AccountService {
         }
         const validatedAccount = await AccountModel.validate(username, currentPassword);
         if (!validatedAccount) {
-            throw new BadRequestError('Invalid current password');
+            throw new UnauthorizedError('Invalid current password');
         }
         const result = await AccountModel.updatePassword(username, newPassword);
         if (!result.success) {

@@ -1,5 +1,7 @@
-const baseUrl = "https://finance-manager-m3au.onrender.com/api";
-
+//render url
+//const baseUrl = "https://finance-manager-m3au.onrender.com/api";
+//local url
+const baseUrl = "http://192.168.0.152:5500/api";
 export async function get(endpoint) {
     try {
         const response = await fetch(`${baseUrl}/${endpoint}`);

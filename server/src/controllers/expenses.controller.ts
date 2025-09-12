@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import * as appErrors from "../errors/AppError";
+import * as AppErrors from "../errors/AppError";
 import CategoryService from "../services/expenses/category.service";
 import BusinessService from "../services/expenses/business.service";
 import TransactionService from "../services/expenses/transaction.service";
@@ -175,7 +175,7 @@ export default class ExpensesController {
     //private methods
 
     private static handleError(error: any, res: Response) {
-        if (error instanceof appErrors.AppError) {
+        if (error instanceof AppErrors.AppError) {
             return res.status(error.statusCode).json({ message: error.message });
         }
         console.error("Unexpected error:", error);

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import AccountService from "../services/account/account.service";
-import { AppError } from "../errors/AppError";
+import * as AppErrors from "../errors/AppError";
 
 export default class AccountController {
 
@@ -13,7 +13,7 @@ export default class AccountController {
             });
         } catch (error) {
             console.error(error);
-            if (error instanceof (AppError)) {
+            if (error instanceof AppErrors.AppError) {
                 res.status(error.statusCode).json({ message: error.message });
             } else {
                 res.status(500).json({ message: "Internal server error" });
@@ -31,7 +31,7 @@ export default class AccountController {
             });
         } catch (error) {
             console.error(error);
-            if (error instanceof (AppError)) {
+            if (error instanceof AppErrors.AppError) {
                 res.status(error.statusCode).json({ message: error.message });
             } else {
                 res.status(500).json({ message: "Internal server error" });
@@ -46,7 +46,7 @@ export default class AccountController {
             res.status(200).json({ message: result.message || 'Password changed successfully' });
         } catch (error) {
             console.error(error);
-            if (error instanceof (AppError)) {
+            if (error instanceof AppErrors.AppError) {
                 res.status(error.statusCode).json({ message: error.message });
             } else {
                 res.status(500).json({ message: "Internal server error" });
