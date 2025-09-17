@@ -33,36 +33,50 @@ export default function useProfileSettings({ setLoading, setProfile }) {
     const addSuccess = (msg) => setSuccesses((prev) => [...prev, msg]);
 
     const renameProfile = async (newProfileName) => {
-        if (newProfileName.trim().length < 2) {
-            addError("שם פרופיל חייב להכיל לפחות 2 תווים");
-            return false;
-        }
-        setLoading(true);
-        const response = await post("profile/rename-profile", {
-            username: account.username,
-            oldProfileName: profile.profileName,
-            newProfileName,
-        });
-        setLoading(false);
-        if (response.ok) {
-            setProfile((prev) => ({ ...prev, profileName: newProfileName }));
-            addSuccess("שם פרופיל עודכן בהצלחה");
-            return true;
-        } else {
+        try {
+            if (newProfileName.trim().length < 2) {
+                addError("שם הפרופיל חייב להכיל לפחות 2 תווים");
+                return false;
+            }
+
+            setLoading(true);
+            resetMessages();
+
+            const response = await post("profile/rename-profile", {
+                username: account.username,
+                oldProfileName: profile.profileName,
+                newProfileName,
+            });
+
+            if (response.ok) {
+                setProfile((prev) => ({ ...prev, profileName: newProfileName }));
+                addSuccess("שם פרופיל עודכן בהצלחה");
+                return true;
+            }
+
             switch (response.status) {
                 case 400:
-                    addError("מלא את כל השדות");
+                    addError("שם הפרופיל חייב להכיל לפחות 2 תווים");
                     break;
                 case 404:
-                    addError("פרופיל לא קיים");
+                    addError("הפרופיל לא נמצא");
                     break;
                 case 409:
-                    addError("שם פרופיל כבר קיים");
+                    addError("שם פרופיל כבר קיים במשתמש");
+                    break;
+                case 500:
+                    addError("שגיאת שרת בשינוי שם פרופיל");
                     break;
                 default:
-                    addError("שגיאה בעת שינוי שם פרופיל, נסה שוב מאוחר יותר");
+                    addError("שינוי שם הפרופיל נכשל");
             }
             return false;
+        } catch (err) {
+            console.error('Profile rename error:', err);
+            addError("תקשורת עם השרת נכשלה");
+            return false;
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -98,7 +112,11 @@ export default function useProfileSettings({ setLoading, setProfile }) {
                     addError("פרופיל לא קיים");
                     break;
                 case 400:
-                    addError("יש למלא את כל השדות");
+                    if (response.message.includes("4 digits")) {
+                        addError("הקוד החדש חייב להיות בדיוק 4 ספרות");
+                    } else {
+                        addError("יש למלא את כל השדות");
+                    }
                     break;
                 case 401:
                     addError("הקוד הישן לא נכון");
@@ -167,7 +185,7 @@ export default function useProfileSettings({ setLoading, setProfile }) {
             return true;
         } else {
             switch (response.status) {
-                case 409:
+                case 400:
                     addError("יש למלא את כל השדות");
                     break;
                 case 404:
@@ -195,7 +213,7 @@ export default function useProfileSettings({ setLoading, setProfile }) {
             return true;
         } else {
             switch (response.status) {
-                case 409:
+                case 400:
                     addError("יש למלא את כל השדות");
                     break;
                 case 404:

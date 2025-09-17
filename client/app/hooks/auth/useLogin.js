@@ -6,29 +6,46 @@ export default function useLogin({ setPassword }) {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-    const { setAccount } = useAuth();
+    const { setAccount, setStoreUser } = useAuth();
 
-    const login = async (username, password) => {
-        username = username.trim().toLowerCase();
-        password = password.trim();
-        setLoading(true);
-        setError(null);
-        if (!username || !password) {
-            setError('נא למלא את כל השדות');
+    const login = async (username, password, saveUser) => {
+        try {
+            username = username.trim().toLowerCase();
+            password = password.trim();
+            setLoading(true);
+            setError(null);
+            setStoreUser(saveUser);
+            if (!username || !password) {
+                setError('נא למלא את כל השדות');
+                setLoading(false);
+                return;
+            }
+            const response = await post('account/validate', { username, password });
+            if (response.ok) {
+                setAccount(response.account);
+                router.push('/authProfile');
+            } else {
+                switch (response.status) {
+                    case 400:
+                        setError('נא למלא את כל השדות');
+                        break;
+                    case 401:
+                        setError('שם משתמש או סיסמא שגויים');
+                        setPassword('');
+                        break;
+                    case 500:
+                        setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
+                        break;
+
+                }
+            }
             setLoading(false);
-            return;
+        } catch (error) {
+            setError('תקשורת עם השרת נכשלה');
+            setLoading(false);
         }
-        const response = await post('account/validate', { username, password });
-        if (response.ok) {
-            setAccount(response.account);
-            router.push('/authProfile');
-        } else if (response.status === 500) {
-            setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
-        } else {
-            setError('שם משתמש או סיסמא שגויים');
-            setPassword('');
-        }
-        setLoading(false);
     }
+
     return { error, loading, login };
+
 }

@@ -7,36 +7,58 @@ export default function useRegister({ setPassword, setUsername, setConfirmPasswo
     const router = useRouter();
 
     const register = async (username, password, confirmPassword) => {
-        username = username.trim().toLowerCase();
-        password = password.trim();
-        confirmPassword = confirmPassword.trim();
-        if (password !== confirmPassword) {
-            setError('הסיסמאות אינן תואמות');
-            return;
-        }
-        if (!username || !password) {
-            setError('נא למלא את כל השדות');
-            return;
-        }
-        if (password.length < 6) {
-            setError('הסיסמה חייבת להיות באורך של לפחות 6 תווים');
-            return;
-        }
-        setLoading(true);
-        setError(null);
-        const response = await post('account/register', { username, password });
-        if (response.ok) {
+        try {
+            username = username.trim().toLowerCase();
+            password = password.trim();
+            confirmPassword = confirmPassword.trim();
+            
+            if (password !== confirmPassword) {
+                setError('הסיסמאות אינן תואמות');
+                return;
+            }
+            if (!username || !password) {
+                setError('נא למלא את כל השדות');
+                return;
+            }
+            if (password.length < 6) {
+                setError('הסיסמה חייבת להיות באורך של לפחות 6 תווים');
+                return;
+            }
+            
+            setLoading(true);
+            setError(null);
+            const response = await post('account/register', { username, password });
+            
+            if (response.ok) {
+                router.replace('/login');
+                return;
+            } 
+            
+            switch (response.status) {
+                case 400:
+                    setError('נא למלא את כל השדות בצורה תקינה');
+                    break;
+                case 409:
+                    setError('שם המשתמש כבר קיים במערכת');
+                    setUsername('');
+                    break;
+                case 500:
+                    setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
+                    break;
+                case 503:
+                    setError('השירות אינו זמין כרגע, אנא נסה שוב מאוחר יותר');
+                    break;
+                default:
+                    setError('הרשמה נכשלה');
+                    setUsername('');
+                    setPassword('');
+                    setConfirmPassword('');
+            }
+        } catch (error) {
+            setError('תקשורת עם השרת נכשלה');
+            console.error('Registration error:', error);
+        } finally {
             setLoading(false);
-            router.replace('/login');
-        } else if (response.status === 500) {
-            setLoading(false);
-            setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
-        } else {
-            setLoading(false);
-            setError('הרשמה נכשלה');
-            setUsername('');
-            setPassword('');
-            setConfirmPassword('');
         }
     }
     return { error, loading, register };

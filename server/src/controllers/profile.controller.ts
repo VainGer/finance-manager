@@ -131,68 +131,7 @@ export default class ProfileController {
         }
     }
 
-    static async addChildBudgets(req: Request, res: Response) {
-        try {
-            const { username, profileName, budget } = req.body;
-            const result = await ProfileService.addChildBudgets(username, profileName, budget);
-            res.status(200).json({
-                message: result.message || "Child budget added successfully"
-            });
-        } catch (error) {
-            ProfileController.handleError(error, res);
-        }
-    }
-
-    static async getChildBudgets(req: Request, res: Response) {
-        try {
-            const { username, profileName } = req.query as { username: string, profileName: string };
-            const result = await ProfileService.getChildBudgets(username, profileName);
-            res.status(200).json({
-                message: "Child budgets retrieved successfully",
-                budgets: result.budgets || []
-            });
-        } catch (error) {
-            ProfileController.handleError(error, res);
-        }
-    }
-
-    static async createBudget(req: Request, res: Response) {
-        try {
-            const { budgetData } = req.body;
-            const result = await ProfileService.createBudget(budgetData);
-            res.status(201).json({
-                message: result.message || "Budget created successfully"
-            });
-        } catch (error) {
-            ProfileController.handleError(error, res);
-        }
-    }
-
-    static async getBudgets(req: Request, res: Response) {
-        try {
-            const { username, profileName } = req.query as { username: string, profileName: string };
-            const budgets = await ProfileService.getBudgets(username, profileName);
-            res.status(200).json({
-                message: "Budgets retrieved successfully",
-                budgets
-            });
-        } catch (error) {
-            ProfileController.handleError(error, res);
-        }
-    }
-
-    static async validateBudgetDates(req: Request, res: Response) {
-        try {
-            const { username, profileName, startDate, endDate } = req.body as { username: string, profileName: string, startDate: Date, endDate: Date };
-            const isValid = await ProfileService.validateBudgetDates(username, profileName, startDate, endDate);
-            res.status(200).json({
-                message: "Dates validated successfully",
-                isValid: isValid.success
-            });
-        } catch (error) {
-            ProfileController.handleError(error, res);
-        }
-    }
+    // Budget-related methods have been moved to BudgetController
 
     static async categorizeTransactions(req: Request, res: Response) {
         try {

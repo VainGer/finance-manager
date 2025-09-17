@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { get, post } from '../utils/api';
 
-export default function useBudgets() {
+export default function useBudgets({ setLoading }) {
   const { account, profile } = useAuth();
 
   const [startDate, setStartDate] = useState('');
@@ -10,12 +10,12 @@ export default function useBudgets() {
   const [amount, setAmount] = useState('');
   const [categoryBudgets, setCategoryBudgets] = useState([]);
   const [childrenBudgets, setChildrenBudgets] = useState([]);
+  const [childrenProfiles, setChildrenProfiles] = useState([]);
   const [selectedChildBudget, setSelectedChildBudget] = useState(null);
 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [validDates, setValidDates] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const resetState = useCallback(() => {
     setStartDate('');
@@ -32,40 +32,118 @@ export default function useBudgets() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      setLoading(true);
-      if (profile?.expenses) {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        if (!profile?.expenses) {
+          return;
+        }
+        
         const response = await get(`expenses/category/get-names/${profile.expenses}`);
+        
         if (response.ok) {
           setCategoryBudgets(
             response.categoriesNames.map((cat) => ({ name: cat, budget: '' }))
           );
-        } else {
-          setError('Failed to load categories');
+          return;
         }
+        
+        switch (response.status) {
+          case 400:
+            setError('בקשה לא תקינה בטעינת קטגוריות');
+            break;
+          case 404:
+            setError('לא נמצאו קטגוריות');
+            break;
+          case 500:
+            setError('שגיאת שרת בטעינת קטגוריות');
+            break;
+          default:
+            setError('שגיאה בטעינת קטגוריות');
+        }
+      } catch (err) {
+        console.error('Categories fetch error:', err);
+        setError('תקשורת עם השרת נכשלה');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchCategories();
   }, [profile]);
 
   const fetchBudgetsForChildren = useCallback(async () => {
-    setLoading(true);
     try {
+      setLoading(true);
+      setError(null);
+      
       const response = await get(
-        `profile/get-child-budgets?username=${account.username}&profileName=${profile.profileName}`
+        `budgets/get-child-budgets?username=${account.username}&profileName=${profile.profileName}`
       );
+      
       if (response.ok) {
         setChildrenBudgets(response.budgets);
+        return;
+      }
+      
+      switch (response.status) {
+        case 400:
+          setError('בקשה לא תקינה בטעינת תקציבים');
+          break;
+        case 404:
+          setError('לא נמצאו תקציבים');
+          break;
+        case 500:
+          setError('שגיאת שרת בטעינת תקציבי ילדים');
+          break;
+        default:
+          setError('שגיאה בטעינת תקציבי ילדים');
       }
     } catch (err) {
-      setError('Error fetching budgets');
+      console.error('Child budgets fetch error:', err);
+      setError('תקשורת עם השרת נכשלה');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [account.username, profile.profileName]);
+
+  const fetchChildrenProfiles = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await get(`profile/get-profiles?username=${account.username}`);
+      
+      if (response.ok) {
+        setChildrenProfiles(response.profiles.filter((p) => !p.parentProfile));
+        return;
+      }
+      
+      switch (response.status) {
+        case 400:
+          setError('בקשה לא תקינה בטעינת פרופילים');
+          break;
+        case 404:
+          setError('לא נמצאו פרופילי ילדים');
+          break;
+        case 500:
+          setError('שגיאת שרת בטעינת פרופילים');
+          break;
+        default:
+          setError('שגיאה בטעינת פרופילי ילדים');
+      }
+    } catch (err) {
+      console.error('Children profiles fetch error:', err);
+      setError('תקשורת עם השרת נכשלה');
+    } finally {
+      setLoading(false);
+    }
+  }, [account.username]);
 
   useEffect(() => {
     if (!profile.parentProfile) fetchBudgetsForChildren();
-  }, [profile, fetchBudgetsForChildren]);
+    if (profile.parentProfile) fetchChildrenProfiles();
+  }, [profile, fetchBudgetsForChildren, fetchChildrenProfiles]);
 
   const remainingAmount = useMemo(() => {
     const totalSpent = categoryBudgets.reduce(
@@ -92,75 +170,167 @@ export default function useBudgets() {
   }, [childrenBudgets]);
 
   const setDatesAndSum = useCallback(async () => {
-    setLoading(true);
-    if (!startDate || !endDate || parseFloat(amount) <= 0) {
-      setError('אנא מלא את כל השדות');
-      setLoading(false);
-      return false;
-    }
-
-    const response = await post('profile/check-budget-dates', {
-      username: account.username,
-      profileName: profile.profileName,
-      startDate,
-      endDate
-    });
-
-    if (response.ok) {
-      if (response.isValid) {
-        setValidDates(true);
-        setError(null);
-        setLoading(false);
-        return true;
-      } else {
-        setError('תקופת תקציב בתאריכים שהוזנו כבר קיימת');
-        setStartDate('');
-        setEndDate('');
-        setLoading(false);
+    try {
+      setLoading(true);
+      setError(null);
+      
+      if (!startDate || !endDate || parseFloat(amount) <= 0) {
+        setError('אנא מלא את כל השדות');
         return false;
       }
-    } else {
-      setError('אירעה שגיאה בבדיקת התאריכים');
-      setLoading(false);
+
+      const response = await post('budgets/check-budget-dates', {
+        username: account.username,
+        profileName: profile.profileName,
+        startDate,
+        endDate
+      });
+
+      if (response.ok) {
+        if (response.isValid) {
+          setValidDates(true);
+          return true;
+        } else {
+          setError('תקופת תקציב בתאריכים שהוזנו כבר קיימת');
+          setStartDate('');
+          setEndDate('');
+          return false;
+        }
+      } 
+      
+      switch (response.status) {
+        case 400:
+          setError('נתוני תאריכים לא תקינים');
+          break;
+        case 404:
+          setError('פרופיל לא נמצא');
+          break;
+        case 500:
+          setError('שגיאת שרת בבדיקת התאריכים');
+          break;
+        default:
+          setError('אירעה שגיאה בבדיקת התאריכים');
+      }
       return false;
+    } catch (err) {
+      console.error('Date check error:', err);
+      setError('תקשורת עם השרת נכשלה');
+      return false;
+    } finally {
+      setLoading(false);
     }
   }, [account.username, profile.profileName, startDate, endDate, amount]);
 
   const create = useCallback(async () => {
-    setLoading(true);
-    const finalCategoryBudgets = categoryBudgets
-      .filter((cat) => parseFloat(cat.budget) > 0)
-      .map((cat) => ({
-        categoryName: cat.name,
-        amount: parseFloat(cat.budget) || 0
-      }));
-
-    const response = await post('profile/add-budget', {
-      budgetData: {
-        username: account.username,
-        profileName: profile.profileName,
-        refId: profile.expenses,
-        profileBudget: {
-          startDate,
-          endDate,
-          amount: parseFloat(amount) || 0,
-          spent: 0
-        },
-        categoriesBudgets: finalCategoryBudgets
-      }
-    });
-
-    if (response.ok) {
-      setSuccess('התקציב נוצר בהצלחה!');
+    try {
+      setLoading(true);
       setError(null);
-      setLoading(false);
-      return true;
-    } else {
-      setError('נכשל ביצירת התקציב.');
-      setLoading(false);
+      
+      const finalCategoryBudgets = categoryBudgets
+        .filter((cat) => parseFloat(cat.budget) > 0)
+        .map((cat) => ({
+          categoryName: cat.name,
+          amount: parseFloat(cat.budget) || 0
+        }));
+
+      const response = await post('budgets/add-budget', {
+        budgetData: {
+          username: account.username,
+          profileName: profile.profileName,
+          refId: profile.expenses,
+          profileBudget: {
+            startDate,
+            endDate,
+            amount: parseFloat(amount) || 0,
+            spent: 0
+          },
+          categoriesBudgets: finalCategoryBudgets
+        }
+      });
+
+      if (response.ok) {
+        setSuccess('התקציב נוצר בהצלחה!');
+        return true;
+      }
+      
+      switch (response.status) {
+        case 400:
+          setError('נתוני תקציב לא תקינים');
+          break;
+        case 404:
+          setError('פרופיל לא נמצא');
+          break;
+        case 409:
+          setError('תקציב לתקופה זו כבר קיים');
+          break;
+        case 500:
+          setError('שגיאת שרת ביצירת התקציב');
+          break;
+        default:
+          setError('נכשל ביצירת התקציב');
+      }
       return false;
+    } catch (err) {
+      console.error('Budget creation error:', err);
+      setError('תקשורת עם השרת נכשלה');
+      return false;
+    } finally {
+      setLoading(false);
     }
   }, [account.username, profile.profileName, profile.expenses, startDate, endDate, amount, categoryBudgets]);
+
+  const addChildBudget = useCallback(async ({ profileName, startDate: sDate, endDate: eDate, amount: amt }) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      if (!sDate || !eDate || parseFloat(amt) <= 0) {
+        setError('אנא מלא את כל נתוני התקציב');
+        return false;
+      }
+      
+      const response = await post('budgets/add-child-budget', {
+        username: account.username,
+        profileName,
+        budget: {
+          startDate: sDate,
+          endDate: eDate,
+          amount: parseFloat(amt) || 0,
+        },
+      });
+
+      if (response.ok) {
+        setSuccess('התקציב נוסף בהצלחה');
+        fetchBudgetsForChildren();
+        fetchChildrenProfiles();
+        return true;
+      }
+      
+      switch (response.status) {
+        case 400:
+          setError('נתוני תקציב לא תקינים');
+          break;
+        case 404:
+          setError('פרופיל ילד לא נמצא');
+          break;
+        case 409:
+          setError('תקציב לתקופה זו כבר קיים');
+          break;
+        case 500:
+          setError('שגיאת שרת בהוספת תקציב');
+          break;
+        default:
+          setError('אירעה שגיאה בעת הוספת התקציב');
+      }
+      return false;
+    } catch (err) {
+      console.error('Child budget addition error:', err);
+      setError('תקשורת עם השרת נכשלה');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [account.username, fetchBudgetsForChildren, fetchChildrenProfiles]);
 
   return {
     account,
@@ -176,7 +346,8 @@ export default function useBudgets() {
     remainingAmount,
     setDatesAndSum,
     create,
-    loading,
     resetState,
+    childrenProfiles,
+    addChildBudget,
   };
 }

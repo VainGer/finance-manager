@@ -1,5 +1,5 @@
 import db from "../../server";
-import { CategoryBudget, Category } from "../../types/expenses.types";
+import { Category } from "../../types/expenses.types";
 import { ObjectId } from "mongodb";
 
 export default class CategoriesModel {
@@ -65,43 +65,6 @@ export default class CategoriesModel {
         }
     }
 
-    static async createCategoriesBudgets(refId: string, budget: CategoryBudget, categoryName: string) {
-        try {
-            const result = await db.UpdateDocument(
-                CategoriesModel.expenseCollection,
-                { _id: new ObjectId(refId), "categories.name": categoryName },
-                { $addToSet: { "categories.$.budgets": budget } });
-            if (!result || result.modifiedCount === 0) {
-                return { success: false, message: "Failed to create category budget" };
-            }
-            return { success: true, message: "Category budget created successfully" };
-        } catch (error) {
-            console.error("Error in CategoriesModel.createCategoriesBudgets", error);
-            throw new Error("Failed to create category budget");
-        }
-    }
 
-    static async updateCategoryBudgetSpent(refId: string, catName: string, budgetId: string, amount: number) {
-        try {
-            const result = await db.UpdateDocument(
-                CategoriesModel.expenseCollection,
-                { _id: new ObjectId(refId) },
-                { $inc: { "categories.$[cat].budgets.$[budget].spent": amount } },
-                {
-                    arrayFilters: [
-                        { "cat.name": catName },
-                        { "budget._id": new ObjectId(budgetId) }
-                    ]
-                }
-            );
-            if (!result || result.modifiedCount === 0) {
-                return { success: false, message: "Failed to update category budget spent" };
-            }
-            return { success: true, message: "Category budget spent updated successfully" };
-        } catch (error) {
-            console.error("Error in CategoriesModel.updateCategoryBudgetSpent", error);
-            throw new Error("Failed to update category budget spent");
-        }
-    }
 
 }

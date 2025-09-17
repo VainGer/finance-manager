@@ -1,16 +1,13 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from 'react-native';
 import { getProgressBarPercentage, getProgressColor, getProgressPercentage } from '../../utils/budgetUtils.js';
 import { formatCurrency } from '../../utils/formatters.js';
 import ProgressBar from '../common/progressBar.jsx';
-import { Ionicons } from "@expo/vector-icons";
 
 export default function CategoryBudgetDetails({ categories }) {
     return (
         <View className="px-4 pb-20">
-            <View className="flex-row justify-between items-center mb-4">
-                <Ionicons name="analytics-outline" size={20} color="#334155" />
-                <Text className="text-lg font-bold text-slate-800">תקציב לפי קטגוריות</Text>
-            </View>
+
             
             {categories.length === 0 ? (
                 <View className="bg-white rounded-xl p-6 items-center justify-center border border-slate-100">
@@ -41,8 +38,15 @@ export default function CategoryBudgetDetails({ categories }) {
                     return (
                         <View key={index} className="bg-white rounded-xl p-4 mb-3 border border-slate-100 shadow-sm">
                             <View className="flex-row justify-between items-center mb-3">
-                                <Ionicons name={statusIcon.name} size={18} color={statusIcon.color} />
-                                <Text className="text-lg font-bold text-slate-800 text-right">{category.name}</Text>
+                                <View className="flex-row items-center">
+                                    <Ionicons name={statusIcon.name} size={18} color={statusIcon.color} className="mr-2" />
+                                    <Text className="text-base font-medium" style={{ color: statusIcon.color }}>
+                                        {progressPercentage > 100 ? "חריגה מהתקציב" : 
+                                         progressPercentage > 90 ? "קרוב לחריגה" :
+                                         progressPercentage > 75 ? "ניצול גבוה" : "במסגרת התקציב"}
+                                    </Text>
+                                </View>
+                                <Text className="text-lg font-bold text-slate-800">{category.name}</Text>
                             </View>
                             
                             <View className="mb-3">
@@ -71,56 +75,66 @@ export default function CategoryBudgetDetails({ categories }) {
                                 </View>
                             </View>
                             
-                            <View className="flex-row justify-between mb-1">
-                                <View className="flex-1 items-center p-3 py-4 bg-slate-50 rounded-lg mx-1">
-                                    <Text className="text-xs text-slate-500 mb-2">תקציב</Text>
-                                    <Text 
-                                        className="font-bold text-slate-800"
-                                        style={{ width: '100%', fontSize: 15, textAlign: 'center' }}
-                                        adjustsFontSizeToFit
-                                    >
-                                        {formatCurrency(budgetAmount)}
-                                    </Text>
+                            <View className="mb-1">
+                                {/* Budget Card */}
+                                <View className="bg-slate-50 rounded-lg p-3 mb-2">
+                                    <View className="flex-row justify-between items-center">
+                                        <View className="flex-row items-center">
+                                            <Ionicons name="wallet-outline" size={20} color="#334155" className="mr-2" />
+                                            <Text className="text-sm font-medium text-slate-700">תקציב</Text>
+                                        </View>
+                                        <Text 
+                                            className="font-bold text-slate-800"
+                                            style={{ fontSize: 15 }}
+                                            numberOfLines={1}
+                                            ellipsizeMode="tail"
+                                        >
+                                            {formatCurrency(budgetAmount)}
+                                        </Text>
+                                    </View>
                                 </View>
                                 
-                                <View className="flex-1 items-center p-3 py-4 bg-slate-50 rounded-lg mx-1">
-                                    <Text className="text-xs text-slate-500 mb-2">הוצאות</Text>
-                                    <Text 
-                                        className="font-bold text-slate-800"
-                                        style={{ width: '100%', fontSize: 15, textAlign: 'center' }}
-                                        adjustsFontSizeToFit
-                                    >
-                                        {formatCurrency(categorySpent)}
-                                    </Text>
+                                {/* Expenses Card */}
+                                <View className="bg-slate-50 rounded-lg p-3 mb-2">
+                                    <View className="flex-row justify-between items-center">
+                                        <View className="flex-row items-center">
+                                            <Ionicons name="card-outline" size={20} color="#334155" className="mr-2" />
+                                            <Text className="text-sm font-medium text-slate-700">הוצאות</Text>
+                                        </View>
+                                        <Text 
+                                            className="font-bold text-slate-800"
+                                            style={{ fontSize: 15 }}
+                                            numberOfLines={1}
+                                            ellipsizeMode="tail"
+                                        >
+                                            {formatCurrency(categorySpent)}
+                                        </Text>
+                                    </View>
                                 </View>
                                 
-                                <View className="flex-1 items-center p-3 py-4 bg-slate-50 rounded-lg mx-1">
-                                    <Text className="text-xs text-slate-500 mb-2">יתרה</Text>
-                                    <Text 
-                                        className="font-bold" 
-                                        style={{ 
-                                            color: categorySpent <= budgetAmount ? "#10B981" : "#EF4444",
-                                            width: '100%',
-                                            fontSize: 15,
-                                            textAlign: 'center'
-                                        }}
-                                        adjustsFontSizeToFit
-                                    >
-                                        {formatCurrency(budgetAmount - categorySpent)}
-                                    </Text>
+                                {/* Remaining Card */}
+                                <View className="bg-slate-50 rounded-lg p-3">
+                                    <View className="flex-row justify-between items-center">
+                                        <View className="flex-row items-center">
+                                            <Ionicons name="cash-outline" size={20} color="#334155" className="mr-2" />
+                                            <Text className="text-sm font-medium text-slate-700">יתרה</Text>
+                                        </View>
+                                        <Text 
+                                            className="font-bold"
+                                            style={{ 
+                                                color: categorySpent <= budgetAmount ? "#10B981" : "#EF4444",
+                                                fontSize: 15
+                                            }}
+                                            numberOfLines={1}
+                                            ellipsizeMode="tail"
+                                        >
+                                            {formatCurrency(budgetAmount - categorySpent)}
+                                        </Text>
+                                    </View>
                                 </View>
                             </View>
                             
-                            <View className="mt-2 items-end">
-                                <View className="flex-row items-center">
-                                    <Text className="text-sm mr-1" style={{ color: statusIcon.color }}>
-                                        {progressPercentage > 100 ? "חריגה מהתקציב" : 
-                                         progressPercentage > 90 ? "קרוב לחריגה" :
-                                         progressPercentage > 75 ? "ניצול גבוה" : "במסגרת התקציב"}
-                                    </Text>
-                                    <Ionicons name={statusIcon.name} size={16} color={statusIcon.color} />
-                                </View>
-                            </View>
+                            {/* Status message moved to the header */}
                         </View>
                     );
                 })

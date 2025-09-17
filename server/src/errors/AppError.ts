@@ -38,3 +38,51 @@ export class ForbiddenError extends AppError {
         super(message, 403);
     }
 }
+
+export class ValidationError extends BadRequestError {
+    constructor(message: string) {
+        super(message);
+    }
+}
+
+export class DatabaseError extends AppError {
+    constructor(message: string) {
+        super(message, 500);
+    }
+}
+
+export class ServiceUnavailableError extends AppError {
+    constructor(message: string) {
+        super(message, 503);
+    }
+}
+
+export class CredentialError extends UnauthorizedError {
+    constructor(message: string = "Invalid credentials") {
+        super(message);
+    }
+}
+
+export class BusinessError extends AppError {
+    constructor(message: string, statusCode: number = 400) {
+        super(message, statusCode);
+    }
+}
+
+export class CategoryBusinessError extends BusinessError {
+    constructor(message: string) {
+        super(message, 400);
+    }
+}
+
+export class CategoryError extends AppError {
+    constructor(message: string, statusCode: number = 400) {
+        super(message, statusCode);
+    }
+}
+
+export class TransactionError extends AppError {
+    constructor(message: string, statusCode: number = 400) {
+        super(message, statusCode);
+    }
+}

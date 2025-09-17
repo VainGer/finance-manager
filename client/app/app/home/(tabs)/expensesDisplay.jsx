@@ -6,8 +6,6 @@ import { useAuth } from '../../../context/AuthContext';
 import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
 import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
 import { formatAmount } from '../../../utils/formatters';
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
 const TransactionsSummary = ({ filteredExpenses }) => {
 
     const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -51,14 +49,6 @@ export default function ExpensesDisplay() {
     } = useExpensesDisplay({ profile });
 
     const { refetchBudgets } = useBudgetSummary({ profile });
-
-    useFocusEffect(
-        useCallback(() => {
-            refetchExpenses();
-            return () => {
-            };
-        }, [])
-    );
 
     if (loading) {
         return <LoadingSpinner />;

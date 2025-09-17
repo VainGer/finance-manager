@@ -96,4 +96,27 @@ export default class TransactionModel {
             throw new Error("Failed to delete transaction");
         }
     }
+
+    static async getById(refId: string, catName: string, busName: string, transactionId: string) {
+        try {
+            const pipeline = [
+                { $match: { _id: new ObjectId(refId) } },
+                { $unwind: "$categories" },
+                { $match: { "categories.name": catName } },
+                { $unwind: "$categories.Businesses" },
+                { $match: { "categories.Businesses.name": busName } },
+                { $unwind: "$categories.Businesses.transactions" },
+                { $match: { "categories.Businesses.transactions._id": new ObjectId(transactionId) } },
+                { $replaceRoot: { newRoot: "$categories.Businesses.transactions" } }
+            ];
+            const results = await db.Aggregate(this.expenseCollection, pipeline);     
+            if (!results || results.length === 0) {
+                return null;
+            }
+            return results[0];
+        } catch (error) {
+            console.error("Error in TransactionModel.getById", error);
+            throw new Error("Failed to get transaction");
+        }
+    }
 }

@@ -1,11 +1,9 @@
-import { useEffect } from "react";
-import { I18nManager, View } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Drawer } from "expo-router/drawer";
-import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import { Drawer } from "expo-router/drawer";
+import { useEffect } from "react";
+import { I18nManager, StatusBar, View } from "react-native";
 import Navbar from '../../components/common/navbar';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from '../../context/AuthContext';
 export default function RootLayout() {
     const { profile } = useAuth();
 
@@ -24,8 +22,10 @@ export default function RootLayout() {
     const baseColor = getBaseColor();
 
     return (
-        <SafeAreaView className="h-full" style={{ backgroundColor: '#f8fafc' }}>
-            <Drawer
+        <>
+            <StatusBar backgroundColor="#f8fafc" barStyle="dark-content" />
+            <View style={{ height: '100%', backgroundColor: '#f8fafc' }}>
+                <Drawer
                 screenOptions={{
                     header: () => <Navbar />,
                     headerShown: true,
@@ -100,6 +100,7 @@ export default function RootLayout() {
                     }}
                 />
             </Drawer>
-        </SafeAreaView >
+            </View>
+        </>
     );
 }

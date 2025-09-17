@@ -1,18 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from "expo-linear-gradient";
-import { useCallback, useEffect } from 'react';
-import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import BudgetPeriodSelector from '../../../components/budgets/budgetPeriodSelector';
 import CategoryBudgetDetails from '../../../components/budgets/categoryBudgetDetails';
 import OverallBudgetSummary from '../../../components/budgets/overallBudgetSummary';
 import LoadingSpinner from '../../../components/common/loadingSpinner';
+import Overlay from '../../../components/common/Overlay';
 import { useAuth } from '../../../context/AuthContext';
 import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
-
+import { formatDate } from '../../../utils/formatters';
+import Button from '../../../components/common/button';
 export default function BudgetSummary() {
     const { profile } = useAuth();
+    const [showNewBudgetsOverlay, setShowNewBudgetsOverlay] = useState(!profile.parentProfile && profile.newBudgets);
     const {
         loading,
         error,
@@ -26,18 +27,8 @@ export default function BudgetSummary() {
     } = useBudgetSummary({ profile });
 
 
-
-    useFocusEffect(
-        useCallback(() => {
-            refetchBudgets();
-            return () => {
-            };
-        }, [refetchBudgets])
-    );
-    // Initialize selected period when available
     useEffect(() => {
         if (availablePeriods?.length && !selectedPeriod) {
-            // Select the current period if it exists, otherwise the first available period
             const now = new Date();
             const currentPeriod = availablePeriods.find(p => {
                 const startDate = new Date(p.startDate);
@@ -48,6 +39,34 @@ export default function BudgetSummary() {
         }
     }, [availablePeriods, selectedPeriod]);
 
+    if (showNewBudgetsOverlay) {
+        return (
+            <Overlay onClose={() => { setShowNewBudgetsOverlay(false); }}>
+                <View className="w-full max-w-md bg-white rounded-xl p-5 shadow-lg">
+                    <View className="flex-row items-start justify-between mb-3">
+                        <View className="flex-1">
+                            <Text className="text-lg font-bold">עדכון תקציב חדש</Text>
+                            <Text className="text-sm text-slate-600 mt-1">היי {profile.profileName} — קיבלת עדכון תקציב חדש, כנס ליצירת תקציב למימוש</Text>
+                        </View>
+                    </View>
+
+                    <View className="mb-3">
+                        <Text className="font-medium mb-2">פירוט התקציב:</Text>
+                        <View className="space-y-2">
+                            {Array.isArray(profile.newBudgets) && profile.newBudgets.map((budget) => (
+                                <View key={budget.amount} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                    <Text className="text-slate-800">תקציב חדש בסך <Text className="font-semibold">₪{budget.amount}</Text></Text>
+                                    <Text className="text-slate-600 text-sm">לתקופה {formatDate(budget.startDate)} עד {formatDate(budget.endDate)}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+                    <Button onPress={() => { setShowNewBudgetsOverlay(false); }}>סגור</Button>
+                </View>
+            </Overlay>
+        )
+    }
+
     if (error) {
         return (
             <LinearGradient
@@ -56,14 +75,14 @@ export default function BudgetSummary() {
                 end={{ x: 1, y: 1 }}
                 style={{ flex: 1 }}
             >
-                <SafeAreaView className="flex-1 justify-center items-center p-6">
+                <View className="flex-1 justify-center items-center p-6">
                     <View className="bg-red-50 border border-red-200 rounded-xl p-5 w-full shadow-sm">
                         <View className="items-center mb-3">
                             <Ionicons name="alert-circle-outline" size={36} color="#DC2626" />
                         </View>
                         <Text className="text-red-600 text-center font-medium">{error}</Text>
                     </View>
-                </SafeAreaView>
+                </View>
             </LinearGradient>
         );
     }
@@ -76,9 +95,9 @@ export default function BudgetSummary() {
                 end={{ x: 1, y: 1 }}
                 style={{ flex: 1 }}
             >
-                <SafeAreaView className="flex-1 justify-center items-center">
+                <View className="flex-1 justify-center items-center">
                     <LoadingSpinner />
-                </SafeAreaView>
+                </View>
             </LinearGradient>
         );
     }
@@ -91,14 +110,14 @@ export default function BudgetSummary() {
                 end={{ x: 1, y: 1 }}
                 style={{ flex: 1 }}
             >
-                <SafeAreaView className="flex-1 justify-center items-center p-6">
+                <View className="flex-1 justify-center items-center p-6">
                     <View className="bg-white rounded-xl shadow-sm p-6 w-full border border-slate-100">
                         <View className="items-center mb-3">
                             <Ionicons name="wallet-outline" size={36} color="#64748B" />
                         </View>
                         <Text className="text-slate-600 text-center text-lg">לא נמצאו תקציבים לפרופיל זה.</Text>
                     </View>
-                </SafeAreaView>
+                </View>
             </LinearGradient>
         );
     }
@@ -114,7 +133,7 @@ export default function BudgetSummary() {
             <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />
             <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
 
-            <SafeAreaView className="flex-1">
+            <View className="flex-1">
                 <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
                     {/* כותרת הדף */}
                     <View className="py-6 px-4 mb-4">
@@ -156,32 +175,32 @@ export default function BudgetSummary() {
                     )}
 
                     {/* סיכום תקציב כללי */}
-                    <View className="mx-4 mb-6">
-                        <View className="w-full bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
-                            <View className="flex-row justify-between items-center mb-3">
-                                <Ionicons name="stats-chart-outline" size={20} color="#334155" />
-                                <Text className="text-slate-800 font-bold text-base">
-                                    סיכום תקציב כללי
-                                </Text>
-                            </View>
+                    <View className="mx-4 mb-">
+                        <View className="flex-1 items-center justify-center mb-3 bg-white p-6 rounded-xl">
+                            <Ionicons name="stats-chart-outline" size={26} color="#334155" />
+                            <Text className="text-slate-800 font-bold text-base">
+                                סיכום תקציב כללי
+                            </Text>
+                        </View>
+                        <View className="w-full bg-white rounded-xl border mb-4 border-slate-100 p-4 shadow-sm">
                             <OverallBudgetSummary budget={currentProfileBudget} />
                         </View>
                     </View>
 
                     {/* פירוט לפי קטגוריות */}
                     <View className="mx-4">
+                        <View className="flex-1 items-center justify-center mb-3 bg-white p-6 rounded-xl">
+                            <Ionicons name="pie-chart-outline" size={26} color="#334155" />
+                            <Text className="text-slate-800 font-bold text-base">
+                                פירוט לפי קטגוריות
+                            </Text>
+                        </View>
                         <View className="w-full bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
-                            <View className="flex-row justify-between items-center mb-3">
-                                <Ionicons name="pie-chart-outline" size={20} color="#334155" />
-                                <Text className="text-slate-800 font-bold text-base">
-                                    פירוט לפי קטגוריות
-                                </Text>
-                            </View>
                             <CategoryBudgetDetails categories={currentCategoryBudgets} />
                         </View>
                     </View>
                 </ScrollView>
-            </SafeAreaView>
+            </View>
         </LinearGradient>
     );
 }

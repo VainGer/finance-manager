@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import LoadingSpinner from '../../../components/common/loadingSpinner';
 import ProgressBar from '../../../components/common/progressBar';
@@ -103,13 +102,6 @@ export default function ExpenseSummary() {
         refetchExpenses
     } = useExpensesDisplay({ profile });
 
-    useFocusEffect(
-        useCallback(() => {
-            refetchExpenses();
-            return () => {
-            };
-        }, [])
-    );
 
     const formatAmount = (amount) => `₪${amount.toLocaleString()}`;
 

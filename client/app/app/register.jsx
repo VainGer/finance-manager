@@ -1,14 +1,13 @@
-import { View, Text, Switch, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, I18nManager } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from 'react';
-import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import useRegister from "../hooks/auth/useRegister.js";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { useState } from 'react';
+import { I18nManager, KeyboardAvoidingView, Platform, ScrollView, StatusBar, Switch, Text, TouchableOpacity, View } from "react-native";
 import Button from "../components/common/button.jsx";
-import TextInput from '../components/common/textInput.jsx';
 import LoadingSpinner from "../components/common/loadingSpinner.jsx";
+import TextInput from '../components/common/textInput.jsx';
+import useRegister from "../hooks/auth/useRegister.js";
 
 export default function Register() {
     const router = useRouter();
@@ -27,16 +26,17 @@ export default function Register() {
             style={{ flex: 1 }}
         >
             {/* אלמנטים דקורטיביים עדינים ברקע */}
+            <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
             <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />
             <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
             <View pointerEvents="none" className="absolute top-1/3 right-10 h-24 w-24 rounded-full bg-white/20 blur-md" />
             
-            <SafeAreaView className="flex-1">
+            <View className="flex-1" style={{ paddingTop: StatusBar.currentHeight }}>
                 {loading && <LoadingSpinner />}
                 
                 {/* כפתור חזרה */}
                 <TouchableOpacity 
-                    className="absolute top-4 left-4 z-10 p-2 rounded-full bg-white/70" 
+                    className="absolute top-12 left-4 z-10 p-2 rounded-full bg-white/70" 
                     onPress={() => router.back()}
                 >
                     <Ionicons name="arrow-back" size={24} color="#0f172a" />
@@ -176,7 +176,7 @@ export default function Register() {
                         </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
-            </SafeAreaView>
+            </View>
         </LinearGradient>
     );
 }

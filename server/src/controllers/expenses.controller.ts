@@ -3,6 +3,7 @@ import * as AppErrors from "../errors/AppError";
 import CategoryService from "../services/expenses/category.service";
 import BusinessService from "../services/expenses/business.service";
 import TransactionService from "../services/expenses/transaction.service";
+import BudgetService from "../services/budget/budget.service";
 
 export default class ExpensesController {
 
@@ -49,15 +50,6 @@ export default class ExpensesController {
         }
     }
 
-    static async createCategoryBudget(req: Request, res: Response) {
-        try {
-            const { refId, catName, budget } = req.body;
-            const result = await CategoryService.createCategoryBudget(refId, budget, catName);
-            res.status(201).json({ message: result.message });
-        } catch (error) {
-            ExpensesController.handleError(error, res);
-        }
-    }
 
     //business
     static async addBusinessToCategory(req: Request, res: Response) {

@@ -174,7 +174,7 @@ export default function CreateProfileBudget({ goBack }) {
     const fetchBudgetsForChildren = useCallback(async () => {
         try {
             const response = await get(
-                `profile/get-child-budgets?username=${account.username}&profileName=${profile.profileName}`
+                `budgets/get-child-budgets?username=${account.username}&profileName=${profile.profileName}`
             );
             if (response.ok) {
                 setChildrenBudgets(response.budgets);
@@ -224,7 +224,7 @@ export default function CreateProfileBudget({ goBack }) {
             return;
         }
 
-        const response = await post('profile/check-budget-dates', {
+        const response = await post('budgets/check-budget-dates', {
             username: account.username,
             profileName: profile.profileName,
             startDate,
@@ -255,7 +255,7 @@ export default function CreateProfileBudget({ goBack }) {
                 amount: parseFloat(cat.budget) || 0
             }));
 
-        const response = await post('profile/add-budget', {
+        const response = await post('budgets/add-budget', {
             budgetData: {
                 username: account.username,
                 profileName: profile.profileName,

@@ -13,7 +13,7 @@ export function useProfileBudgetData(profile) {
         setError(null);
         const fetchData = async () => {
             const [budgetsResponse, expensesResponse] = await Promise.all([
-                get(`profile/get-budgets?username=${profile.username}&profileName=${profile.profileName}`),
+                get(`budgets/get-budgets?username=${profile.username}&profileName=${profile.profileName}`),
                 get(`expenses/profile-expenses/${profile.expenses}`)
             ]);
             if (budgetsResponse.ok && expensesResponse.ok) {

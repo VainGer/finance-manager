@@ -43,7 +43,7 @@ export default function Button({
             case "primary":
                 return "bg-blue-500";
             case "secondary":
-                return "bg-gray-300";
+                return "bg-gray-500";
             case "success":
                 return "bg-green-500";
             case "danger":

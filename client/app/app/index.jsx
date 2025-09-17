@@ -1,18 +1,29 @@
-import { Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { I18nManager, Text, View } from "react-native";
 import Button from "../components/common/button.jsx";
-import { I18nManager } from "react-native";
-import FeatureCarousel from "../components/common/FeatureCarousel.jsx"; 
+import FeatureCarousel from "../components/common/FeatureCarousel.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+import { useEffect } from "react";
 
 import "../global.css";
 
 export default function Index() {
   const router = useRouter();
   const isRTL = I18nManager.isRTL;
+
+  const { account, profile } = useAuth();
+
+  useEffect(() => {
+    if (account && profile) {
+      router.replace("/home/(tabs)/budgetSummary");
+    } else if (account && !profile) {
+      router.replace("/authProfile");
+    }
+  }, [account, profile, router]);
+
 
   return (
     <LinearGradient
@@ -26,7 +37,7 @@ export default function Index() {
       <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
       <View pointerEvents="none" className="absolute top-1/3 right-10 h-24 w-24 rounded-full bg-white/20 blur-md" />
 
-      <SafeAreaView className="h-full">
+      <View className="h-full pt-12">
         {/* אזור עליון: לוגו + טקסט פתיחה */}
         <View className="flex-1 items-center justify-center px-6">
           {/* סמל עם גרדיאנט וצל משופר */}
@@ -35,12 +46,12 @@ export default function Index() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             className="w-24 h-24 items-center justify-center mb-10 rounded-3xl"
-            style={{ 
-              shadowColor: "#1e293b", 
-              shadowOpacity: 0.3, 
-              shadowOffset: { width: 0, height: 8 }, 
-              shadowRadius: 16, 
-              elevation: 12 
+            style={{
+              shadowColor: "#1e293b",
+              shadowOpacity: 0.3,
+              shadowOffset: { width: 0, height: 8 },
+              shadowRadius: 16,
+              elevation: 12
             }}
           >
             <Ionicons name="wallet" size={42} color="#ffffff" />
@@ -113,7 +124,7 @@ export default function Index() {
             </View>
           </View>
         </BlurView>
-      </SafeAreaView>
+      </View>
     </LinearGradient>
   );
 }

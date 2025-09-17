@@ -90,5 +90,15 @@ export default class DB {
             throw error;
         }
     }
+    
+    async Aggregate(collection: string, pipeline: any[]) {
+        try {
+            const results = await this.client?.db(this.dbName).collection(collection).aggregate(pipeline).toArray();
+            return results;
+        } catch (error) {
+            console.error("Error aggregating documents: ", error);
+            throw error;
+        }
+    }
 }
 

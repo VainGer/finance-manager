@@ -1,7 +1,7 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 import { getProgressColor, getProgressPercentage } from '../../utils/budgetUtils';
 import { formatCurrency } from "../../utils/formatters";
-import { Ionicons } from "@expo/vector-icons";
 import ProgressBar from "../common/progressBar";
 
 export default function OverallBudgetSummary({ budget }) {
@@ -24,56 +24,62 @@ export default function OverallBudgetSummary({ budget }) {
 
     return (
         <View className="w-full mx-auto px-4 pb-6">
-            {/* Budget Stats Cards */}
-            <View className="flex-row justify-between mb-6">
-                <View className="bg-white rounded-xl p-4 py-5 flex-1 mx-1 shadow-sm">
-                    <Text className="text-xs text-slate-500 mb-3 text-right">תקציב</Text>
+            {/* Budget Stats Cards - Vertical Layout */}
+            <View className="mb-6">
+                {/* Budget Card */}
+                <View className="bg-white rounded-xl p-4 mb-3 shadow-sm">
                     <View className="flex-row justify-between items-center">
-                        <Ionicons name="wallet-outline" size={20} color="#334155" />
-                        <View style={{ width: '80%' }}>
-                            <Text 
-                                className="font-bold text-slate-800 text-right"
-                                style={{ fontSize: 14 }}
-                                adjustsFontSizeToFit
-                            >
-                                {totalBudget}
-                            </Text>
+                        <View className="flex-row items-center">
+                            <Ionicons name="wallet-outline" size={24} color="#334155" className="mr-3" />
+                            <Text className="text-base font-medium text-slate-700">תקציב</Text>
                         </View>
+                        <Text 
+                            className="font-bold text-slate-800"
+                            style={{ fontSize: 16 }}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                        >
+                            {totalBudget}
+                        </Text>
                     </View>
                 </View>
                 
-                <View className="bg-white rounded-xl p-4 py-5 flex-1 mx-1 shadow-sm">
-                    <Text className="text-xs text-slate-500 mb-3 text-right">הוצאות</Text>
+                {/* Expenses Card */}
+                <View className="bg-white rounded-xl p-4 mb-3 shadow-sm">
                     <View className="flex-row justify-between items-center">
-                        <Ionicons name="card-outline" size={20} color="#334155" />
-                        <View style={{ width: '80%' }}>
-                            <Text 
-                                className="font-bold text-slate-800 text-right"
-                                style={{ fontSize: 14 }}
-                                adjustsFontSizeToFit
-                            >
-                                {totalSpent}
-                            </Text>
+                        <View className="flex-row items-center">
+                            <Ionicons name="card-outline" size={24} color="#334155" className="mr-3" />
+                            <Text className="text-base font-medium text-slate-700">הוצאות</Text>
                         </View>
+                        <Text 
+                            className="font-bold text-slate-800"
+                            style={{ fontSize: 16 }}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                        >
+                            {totalSpent}
+                        </Text>
                     </View>
                 </View>
                 
-                <View className="bg-white rounded-xl p-4 py-5 flex-1 mx-1 shadow-sm">
-                    <Text className="text-xs text-slate-500 mb-3 text-right">יתרה</Text>
+                {/* Remaining Card */}
+                <View className="bg-white rounded-xl p-4 shadow-sm">
                     <View className="flex-row justify-between items-center">
-                        <Ionicons name="cash-outline" size={20} color="#334155" />
-                        <View style={{ width: '80%' }}>
-                            <Text 
-                                className="font-bold text-right"
-                                style={{ 
-                                    color: spendingPercentage > 100 ? "#EF4444" : "#10B981",
-                                    fontSize: 14
-                                }}
-                                adjustsFontSizeToFit
-                            >
-                                {remaining}
-                            </Text>
+                        <View className="flex-row items-center">
+                            <Ionicons name="cash-outline" size={24} color="#334155" className="mr-3" />
+                            <Text className="text-base font-medium text-slate-700">יתרה</Text>
                         </View>
+                        <Text 
+                            className="font-bold"
+                            style={{ 
+                                color: spendingPercentage > 100 ? "#EF4444" : "#10B981",
+                                fontSize: 16
+                            }}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                        >
+                            {remaining}
+                        </Text>
                     </View>
                 </View>
             </View>

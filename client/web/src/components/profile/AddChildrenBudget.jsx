@@ -32,7 +32,7 @@ export default function AddChildrenBudget() {
     const addChildrenBudget = async (e) => {
         e.preventDefault();
         try {
-            const response = await post('profile/add-child-budget', {
+            const response = await post('budgets/add-child-budget', {
                 username: account.username,
                 profileName: selectedChild,
                 budget: {

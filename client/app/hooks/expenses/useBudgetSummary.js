@@ -9,26 +9,63 @@ export default function useBudgetSummary({ profile }) {
     const [categorySpendingByPeriod, setCategorySpendingByPeriod] = useState({});
 
     const fetchData = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        const [budgetsResponse, expensesResponse] = await Promise.all([
-            get(`profile/get-budgets?username=${profile.username}&profileName=${profile.profileName}`),
-            get(`expenses/profile-expenses/${profile.expenses}`)
-        ]);
-
-        if (budgetsResponse.ok && expensesResponse.ok) {
-            const budgets = budgetsResponse.budgets.budgets || [];
-            const expenses = expensesResponse.expenses.categories || [];
-
-            const spendingData = calculateCategorySpending(expenses, budgets);
-            setProfileBudgets(budgets);
-            setExpensesData(expenses);
-            setCategorySpendingByPeriod(spendingData);
-        } else {
-            setError('שגיאה בטעינת נתונים, נסה שנית');
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const [budgetsResponse, expensesResponse] = await Promise.all([
+                get(`budgets/get-budgets?username=${profile.username}&profileName=${profile.profileName}`),
+                get(`expenses/profile-expenses/${profile.expenses}`)
+            ]);
+            
+            if (budgetsResponse.ok && expensesResponse.ok) {
+                const budgets = budgetsResponse.budgets.budgets || [];
+                const expenses = expensesResponse.expenses.categories || [];
+                const spendingData = calculateCategorySpending(expenses, budgets);
+                setProfileBudgets(budgets);
+                setExpensesData(expenses);
+                setCategorySpendingByPeriod(spendingData);
+                return;
+            } 
+            
+            if (!budgetsResponse.ok) {
+                switch (budgetsResponse.status) {
+                    case 400:
+                        setError('בקשה לא תקינה בטעינת תקציבים');
+                        break;
+                    case 404:
+                        setError('לא נמצאו תקציבים');
+                        break;
+                    case 500:
+                        setError('שגיאת שרת בטעינת תקציבים');
+                        break;
+                    default:
+                        setError('שגיאה בטעינת תקציבים');
+                }
+                return;
+            }
+            
+            if (!expensesResponse.ok) {
+                switch (expensesResponse.status) {
+                    case 400:
+                        setError('בקשה לא תקינה בטעינת הוצאות');
+                        break;
+                    case 404:
+                        setError('לא נמצאו הוצאות');
+                        break;
+                    case 500:
+                        setError('שגיאת שרת בטעינת הוצאות');
+                        break;
+                    default:
+                        setError('שגיאה בטעינת הוצאות');
+                }
+            }
+        } catch (err) {
+            console.error('Budget summary fetch error:', err);
+            setError('תקשורת עם השרת נכשלה');
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     }, [profile]);
 
     useEffect(() => {
