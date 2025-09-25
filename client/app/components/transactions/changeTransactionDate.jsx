@@ -1,21 +1,23 @@
-import { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
 import DateTimePicker from 'react-native-modal-datetime-picker';
-import Button from '../common/button.jsx';
 import useEditTransactions from '../../hooks/useEditTransactions.js';
 import { formatDate } from '../../utils/formatters.js';
-export default function ChangeTransactionDate({ profile, goBack, transaction, refetchExpenses, refetchBudgets }) {
-    const { error, loading, success, changeTransactionDate, resetState } = useEditTransactions({ profile, refetchBudgets, refetchExpenses });
+import Button from '../common/button.jsx';
+export default function ChangeTransactionDate({ goBack, transaction }) {
+    const { error, loading, success, changeTransactionDate, resetState } = useEditTransactions({ goBack });
     const [newDate, setNewDate] = useState(null);
     const [isVisibleDate, setVisibleDate] = useState(false);
 
     const handleChangeDate = () => {
-        changeTransactionDate(transaction, newDate);
+        if (transaction && newDate) {
+            changeTransactionDate(transaction, newDate);
+        }
     };
 
     useEffect(() => {
         resetState();
-    }, [profile]);
+    }, []);
 
     return (
         <View>

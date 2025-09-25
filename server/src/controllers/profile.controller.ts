@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import ProfileService from "../services/profile/profile.service";
 import * as AppErrors from "../errors/AppError";
-import { BudgetCreationData, ChildProfileCreationData } from "../types/profile.types";
+import {  ChildProfileCreationData } from "../types/profile.types";
 
 export default class ProfileController {
 
@@ -45,8 +45,8 @@ export default class ProfileController {
 
     static async validateProfile(req: Request, res: Response) {
         try {
-            const { username, profileName, pin } = req.body;
-            const result = await ProfileService.validateProfile(username, profileName, pin);
+            const { username, profileName, pin, device } = req.body;
+            const result = await ProfileService.validateProfile(username, profileName, pin, device);
             res.status(200).json({
                 message: "Profile validated successfully",
                 profile: result.safeProfile

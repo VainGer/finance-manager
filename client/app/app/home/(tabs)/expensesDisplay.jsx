@@ -1,20 +1,21 @@
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import LoadingSpinner from '../../../components/common/loadingSpinner';
 import ExpensesTable from '../../../components/expenses/expensesTable';
 import Filter from '../../../components/expenses/filter';
-import { useAuth } from '../../../context/AuthContext';
 import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
-import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
+import { useProfileData } from '../../../context/ProfileDataContext';
 import { formatAmount } from '../../../utils/formatters';
-const TransactionsSummary = ({ filteredExpenses }) => {
 
-    const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+const TransactionsSummary = ({ filteredExpenses }) => {
+    const expenses = filteredExpenses || [];
+    const totalAmount = expenses.reduce((sum, expense) => sum + (expense?.amount || 0), 0);
+    
     return (
         <View className="bg-blue-50 rounded-lg p-4 mb-6">
             <View className="flex-row">
 
                 <View className="flex-1 items-center border-r-2 border-gray-300">
-                    <Text className="text-lg font-bold text-blue-600">{filteredExpenses.length}</Text>
+                    <Text className="text-lg font-bold text-blue-600">{expenses.length}</Text>
                     <Text className="text-sm text-gray-600">עסקאות מוצגות</Text>
                 </View>
 
@@ -25,7 +26,7 @@ const TransactionsSummary = ({ filteredExpenses }) => {
 
                 <View className="flex-1 items-center">
                     <Text className="text-lg font-bold text-green-600">
-                        {filteredExpenses.length > 0 ? formatAmount(totalAmount / filteredExpenses.length) : formatAmount(0)}
+                        {expenses.length > 0 ? formatAmount(totalAmount / expenses.length) : formatAmount(0)}
                     </Text>
                     <Text className="text-sm text-gray-600">ממוצע לעסקה</Text>
                 </View>
@@ -35,22 +36,28 @@ const TransactionsSummary = ({ filteredExpenses }) => {
 };
 
 export default function ExpensesDisplay() {
-    const { profile } = useAuth();
+
     const {
         expenses,
-        filteredExpenses,
-        loading,
+        allExpenses,
+        monthlyExpenses,
+        isLoading,
         error,
-        filters,
-        setFilters,
-        categories,
-        businesses,
-        refetchExpenses
-    } = useExpensesDisplay({ profile });
+        availableDates,
+        availableBusinesses,
+        sortByDate,
+        sortByAmount,
+        filterByMonth,
+        filterByCategory,
+        filterByBusiness,
+        clearFilters,
+        applyFilters: applyAllFilters,
+    } = useExpensesDisplay();
 
-    const { refetchBudgets } = useBudgetSummary({ profile });
+    const {categories, businesses } = useProfileData();
 
-    if (loading) {
+
+    if (isLoading) {
         return <LoadingSpinner />;
     }
 
@@ -65,7 +72,7 @@ export default function ExpensesDisplay() {
         );
     }
 
-    if (expenses && expenses.length === 0) {
+    if (!allExpenses || allExpenses.length === 0) {
         return (
             <View className="bg-white rounded-lg shadow-lg p-6 m-4">
                 <Text className="text-2xl font-bold text-gray-800 mb-6">💰 הוצאות</Text>
@@ -78,29 +85,35 @@ export default function ExpensesDisplay() {
         );
     }
 
+    const displayExpenses = expenses || [];
+
     return (
-        <ScrollView key={expenses.length} className="flex-1">
+        <ScrollView key={allExpenses?.length || 0} className="flex-1">
             <View className="bg-white rounded-lg shadow-lg p-6 m-4">
                 <View className="flex-row justify-between items-center mb-6">
                     <Text className="text-2xl font-bold text-gray-800">💰 הוצאות</Text>
                 </View>
 
                 <Filter
-                    filters={filters}
-                    setFilters={setFilters}
-                    categories={categories}
-                    businesses={businesses}
+                    applyFilters={applyAllFilters}
+                    availableDates={availableDates}
+                    availableBusinesses={availableBusinesses}
+                    filterByMonth={filterByMonth}
+                    filterByCategory={filterByCategory}
+                    filterByBusiness={filterByBusiness}
+                    clearFilters={clearFilters}
+                    sortByDate={sortByDate}
+                    sortByAmount={sortByAmount}
+                    categories={categories || []}
+                    businesses={businesses || []}
                 />
 
                 <TransactionsSummary
-                    filteredExpenses={filteredExpenses}
+                    filteredExpenses={displayExpenses}
                 />
 
                 <ExpensesTable
-                    filteredExpenses={filteredExpenses}
-                    profile={profile}
-                    refetchExpenses={refetchExpenses}
-                    refetchBudgets={refetchBudgets}
+                    filteredExpenses={displayExpenses}
                 />
             </View>
         </ScrollView>

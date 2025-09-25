@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import AccountService from "../services/account/account.service";
+import ProfileService from "../services/profile/profile.service";
 import * as AppErrors from "../errors/AppError";
 
 export default class AccountController {
@@ -51,6 +52,46 @@ export default class AccountController {
             } else {
                 res.status(500).json({ message: "Internal server error" });
             }
+        }
+    }
+
+    static async validateToken(req: Request, res: Response) {
+        try {
+            const { username, profileId, refreshToken, device, isAutoLogin } = req.body;
+            const isAutoLoginAttempt = isAutoLogin === true;
+            
+            if (!username || !profileId || !refreshToken || !device) {
+                throw new AppErrors.ValidationError('Missing required fields for token validation');
+            }
+            
+            const result = await ProfileService.validateByRefreshToken(username, profileId, refreshToken, device);
+            
+            res.status(200).json({
+                success: true,
+                message: isAutoLoginAttempt ? "Auto login successful" : "Token validation successful",
+                tokens: result.tokens,
+                profile: result.safeProfile
+            });
+        } catch (error) {
+            const isAutoLoginAttempt = req.body.isAutoLogin === true;
+            console.error(isAutoLoginAttempt ? "Auto login failed:" : "Token validation failed:", error);
+            
+            let statusCode = 401;
+            let message = isAutoLoginAttempt
+                ? "Auto login failed, please login manually"
+                : "Token validation failed";
+            
+            if (error instanceof AppErrors.AppError) {
+                statusCode = error.statusCode;
+                message = error.message;
+            }
+            
+            res.status(statusCode).json({ 
+                success: false,
+                message: message,
+                // Only include requireManualLogin for auto-login attempts
+                ...(isAutoLoginAttempt && { requireManualLogin: true })
+            });
         }
     }
 }

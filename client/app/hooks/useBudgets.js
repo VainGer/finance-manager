@@ -1,10 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useProfileData } from '../context/ProfileDataContext';
 import { get, post } from '../utils/api';
 
 export default function useBudgets({ setLoading }) {
   const { account, profile } = useAuth();
-
+  const { 
+    fetchBudgets, 
+    categories, // Get categories from context
+    getCategoriesLoading, // Use loading state from context
+    errors // Use errors from context
+  } = useProfileData();
+  
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [amount, setAmount] = useState('');
@@ -16,6 +23,14 @@ export default function useBudgets({ setLoading }) {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [validDates, setValidDates] = useState(false);
+
+
+  useEffect(() => {
+    const categoryErrors = errors.find(e => e.categoriesErrors)?.categoriesErrors;
+    if (categoryErrors && categoryErrors.length > 0) {
+      setError(categoryErrors[0]);
+    }
+  }, [errors]);
 
   const resetState = useCallback(() => {
     setStartDate('');
@@ -30,47 +45,19 @@ export default function useBudgets({ setLoading }) {
     setLoading(false);
   }, []);
 
+  // Use categories from context to populate categoryBudgets
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        if (!profile?.expenses) {
-          return;
-        }
-        
-        const response = await get(`expenses/category/get-names/${profile.expenses}`);
-        
-        if (response.ok) {
-          setCategoryBudgets(
-            response.categoriesNames.map((cat) => ({ name: cat, budget: '' }))
-          );
-          return;
-        }
-        
-        switch (response.status) {
-          case 400:
-            setError('בקשה לא תקינה בטעינת קטגוריות');
-            break;
-          case 404:
-            setError('לא נמצאו קטגוריות');
-            break;
-          case 500:
-            setError('שגיאת שרת בטעינת קטגוריות');
-            break;
-          default:
-            setError('שגיאה בטעינת קטגוריות');
-        }
-      } catch (err) {
-        console.error('Categories fetch error:', err);
-        setError('תקשורת עם השרת נכשלה');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCategories();
-  }, [profile]);
+    if (categories && categories.length > 0) {
+      setCategoryBudgets(
+        categories.map((cat) => ({ name: cat, budget: '' }))
+      );
+    }
+  }, [categories]);
+
+  // Update loading state when context categories are loading
+  useEffect(() => {
+    setLoading(getCategoriesLoading);
+  }, [getCategoriesLoading, setLoading]);
 
   const fetchBudgetsForChildren = useCallback(async () => {
     try {
@@ -232,6 +219,7 @@ export default function useBudgets({ setLoading }) {
           categoryName: cat.name,
           amount: parseFloat(cat.budget) || 0
         }));
+
 
       const response = await post('budgets/add-budget', {
         budgetData: {

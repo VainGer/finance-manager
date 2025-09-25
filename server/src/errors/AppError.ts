@@ -86,3 +86,9 @@ export class TransactionError extends AppError {
         super(message, statusCode);
     }
 }
+
+export class InternalServerError extends AppError {
+    constructor(message: string = "Internal Server Error") {
+        super(message, 500);
+    }
+}

@@ -153,6 +153,32 @@ export default class ExpensesController {
             ExpensesController.handleError(error, res);
         }
     }
+    
+    static async getAllTransactions(req: Request, res: Response) {
+        try {
+            const { refId, catName, busName } = req.params;
+            const result = await TransactionService.getAll(refId, catName, busName);
+            res.status(200).json({ 
+                transactions: result.transactions,
+                message: result.message 
+            });
+        } catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
+    
+    static async getAllTransactionsByMonth(req: Request, res: Response) {
+        try {
+            const { refId, catName, busName } = req.params;
+            const result = await TransactionService.getAllByMonth(refId, catName, busName);
+            res.status(200).json({ 
+                monthlyTransactions: result.monthlyTransactions,
+                message: result.message 
+            });
+        } catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
 
     static async getProfileExpenses(req: Request, res: Response) {
         try {

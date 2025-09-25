@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StatusBar,
   Text,
   TouchableOpacity,
   View,
@@ -27,11 +26,9 @@ export default function Login() {
   const [saveUser, setSaveUser] = useState(true);
   const { error, loading, login } = useLogin({ setPassword });
   const isRTL = I18nManager.isRTL;
-  const statusBarHeight = StatusBar.currentHeight || 0;
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="black" />
       <LinearGradient
         colors={["#f8fafc", "#eef2f7", "#e5eaf1"]}
         start={{ x: 0, y: 0 }}
@@ -45,7 +42,6 @@ export default function Login() {
 
         <View style={{
           flex: 1,
-          paddingTop: statusBarHeight + 10, // Add padding for status bar plus some extra space
           paddingBottom: 10
         }}>
           {loading && <LoadingSpinner />}
@@ -156,7 +152,6 @@ export default function Login() {
                       <Switch
                         value={saveUser}
                         onValueChange={setSaveUser}
-                        thumbColor={saveUser ? "#4CAF50" : "#f4f3f4"}
                         trackColor={{ false: "#767577", true: "#81b0ff" }}
                       />
                     </View>

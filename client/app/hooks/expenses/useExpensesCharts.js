@@ -1,30 +1,28 @@
 import { useMemo, useState } from 'react';
 import useExpensesDisplay from './useExpensesDisplay';
 
-export default function useExpesesCharts({ profile }) {
+export default function useExpensesCharts() {
     const [dateFilter, setDateFilter] = useState('all');
     const [selectedMonth, setSelectedMonth] = useState('');
     const {
         expenses,
-        filteredExpenses,
-        loading,
+        allExpenses,
+        monthlyExpenses,
+        isLoading: loading,
         error,
-        refetchExpenses
-    } = useExpensesDisplay({ profile });
+        availableDates
+    } = useExpensesDisplay();
 
     const filteredByDateExpenses = useMemo(() => {
-        if (!filteredExpenses) return [];
-        if (dateFilter === 'all') return filteredExpenses;
+        if (!allExpenses || !allExpenses.length) return [];
+        if (dateFilter === 'all') return allExpenses;
 
         const now = new Date();
 
         if (dateFilter === 'specific' && selectedMonth) {
-            const [year, month] = selectedMonth.split('-');
-            return filteredExpenses.filter(expense => {
-                const expenseDate = new Date(expense.date);
-                return expenseDate.getFullYear() === parseInt(year) &&
-                    expenseDate.getMonth() === parseInt(month) - 1;
-            });
+            // Safely access monthlyExpenses with fallbacks
+            return monthlyExpenses && monthlyExpenses[selectedMonth] ? 
+                [...monthlyExpenses[selectedMonth]] : [];
         }
 
         const cutoffDate = new Date();
@@ -40,14 +38,14 @@ export default function useExpesesCharts({ profile }) {
                 cutoffDate.setFullYear(now.getFullYear() - 1);
                 break;
             default:
-                return filteredExpenses;
+                return allExpenses;
         }
 
-        return filteredExpenses.filter(expense => {
+        return allExpenses.filter(expense => {
             const expenseDate = new Date(expense.date);
             return expenseDate >= cutoffDate && expenseDate <= now;
         });
-    }, [filteredExpenses, dateFilter, selectedMonth]);
+    }, [allExpenses, monthlyExpenses, dateFilter, selectedMonth]);
 
     const generateColors = (count) => {
         const colors = [];
@@ -106,39 +104,62 @@ export default function useExpesesCharts({ profile }) {
     }, [filteredByDateExpenses]);
 
     const availableMonths = useMemo(() => {
-        if (!expenses || expenses.length === 0) return [];
-        const months = new Set();
-        expenses.forEach(expense => {
-            const date = new Date(expense.date);
-            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            months.add(monthKey);
-        });
-        return Array.from(months).sort().reverse();
-    }, [expenses]);
+        if (!availableDates || !Array.isArray(availableDates) || availableDates.length <= 1) return [];
+        // Safely map dateYM with validation
+        return availableDates
+            .filter(dateObj => dateObj && typeof dateObj === 'object' && dateObj.dateYM)
+            .map(dateObj => dateObj.dateYM);
+    }, [availableDates]);
 
     const monthlyChartData = useMemo(() => {
-        if (!expenses || expenses.length === 0) return [];
+        // Validate monthlyExpenses exists and has entries
+        if (!monthlyExpenses || typeof monthlyExpenses !== 'object' || Object.keys(monthlyExpenses).length === 0) {
+            return [];
+        }
+        
+        try {
+            const monthlyData = Object.entries(monthlyExpenses).map(([monthKey, monthTransactions]) => {
+                // Validate monthKey format and transactions array
+                if (!monthKey || !monthKey.includes('-') || !Array.isArray(monthTransactions)) {
+                    return null;
+                }
+                
+                const [year, month] = monthKey.split('-');
+                if (!year || !month) {
+                    return null;
+                }
+                
+                const formattedKey = `${month}/${year}`;
+                // Safely reduce with validation for each transaction
+                const amount = monthTransactions.reduce((sum, tx) => {
+                    return sum + (tx && typeof tx.amount === 'number' ? tx.amount : 0);
+                }, 0);
+                
+                return { 
+                    month: formattedKey, 
+                    amount: amount,
+                    originalKey: monthKey
+                };
+            })
+            // Filter out any null entries from invalid data
+            .filter(item => item !== null);
 
-        const monthlyData = {};
-        expenses.forEach(expense => {
-            if (!expense.date) return;
-
-            const date = new Date(expense.date);
-            const monthKey = `${date.getMonth() + 1}/${date.getFullYear()}`;
-
-            if (!monthlyData[monthKey]) {
-                monthlyData[monthKey] = { month: monthKey, amount: 0 };
+            // Only sort if we have valid data
+            if (monthlyData.length > 0) {
+                return monthlyData.sort((a, b) => {
+                    return a.originalKey.localeCompare(b.originalKey);
+                });
             }
-            monthlyData[monthKey].amount += expense.amount;
-        });
-
-        return Object.values(monthlyData);
-    }, [expenses]);
+            return [];
+        } catch (err) {
+            console.error('Error processing monthly chart data:', err);
+            return [];
+        }
+    }, [monthlyExpenses]);
 
 
     return {
         expenses,
-        filteredExpenses,
         loading,
         error,
         filteredByDateExpenses,
@@ -150,6 +171,6 @@ export default function useExpesesCharts({ profile }) {
         selectedMonth,
         availableMonths,
         setSelectedMonth,
-        refetchExpenses
+        monthlyExpenses
     }
 }

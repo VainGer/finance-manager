@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react'
-import { View, Text, ScrollView } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../context/AuthContext.jsx';
-import useEditCategories from '../../hooks/useEditCategories.js';
-import Button from '../../components/common/button.jsx';
-import LoadingSpinner from '../../components/common/loadingSpinner.jsx';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 import CreateCategory from '../../components/categories/createCategory.jsx';
 import DeleteCategory from '../../components/categories/deleteCategory.jsx';
 import RenameCategory from '../../components/categories/renameCategory.jsx';
+import Button from '../../components/common/button.jsx';
+import LoadingSpinner from '../../components/common/loadingSpinner.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+import useEditCategories from '../../hooks/useEditCategories.js';
 
 
 export default function CategoryMenu() {
@@ -17,18 +17,23 @@ export default function CategoryMenu() {
     const [categories, setCategories] = useState([]);
     const { profile } = useAuth();
 
-    const { error, success, loading, getCategoriesLoading, getCategoriesError,
-        addCategory, renameCategory, deleteCategory, resetState, getCategories } = useEditCategories({ profile, goBack: () => setSelectedMenu(null) });
+    const { error, success, loading, categoriesLoading, categoriesError, categories: hookCategories,
+        addCategory, renameCategory, deleteCategory, resetState, fetchCategories } = useEditCategories({ 
+            profile, 
+            goBack: () => setSelectedMenu(null) 
+        });
 
     useEffect(() => {
         resetState();
     }, [selectedMenu]);
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            const fetchedCategories = await getCategories();
-            setCategories(fetchedCategories);
-        };
+        if (hookCategories?.length > 0) {
+            setCategories(hookCategories);
+        }
+    }, [hookCategories]);
+
+    useEffect(() => {
         fetchCategories();
     }, [profile, error, success]);
 
@@ -41,10 +46,12 @@ export default function CategoryMenu() {
                     error={error} success={success} addCategory={addCategory} />;
             case 'rename':
                 return <RenameCategory goBack={() => setSelectedMenu(null)}
-                    refId={profile.expenses} error={error} success={success} categories={categories} getCategoriesLoading={getCategoriesLoading} getCategoriesError={getCategoriesError}
+                    refId={profile.expenses} error={error} success={success} categories={categories} 
+                    getCategoriesLoading={categoriesLoading} getCategoriesError={categoriesError}
                     renameCategory={renameCategory} />;
             case 'delete':
-                return <DeleteCategory goBack={() => setSelectedMenu(null)} categories={categories} getCategoriesError={getCategoriesError} getCategoriesLoading={getCategoriesLoading}
+                return <DeleteCategory goBack={() => setSelectedMenu(null)} 
+                    categories={categories} getCategoriesError={categoriesError} getCategoriesLoading={categoriesLoading}
                     refId={profile.expenses} error={error} deleteCategory={deleteCategory} success={success} />;
             default:
                 return null;
@@ -65,7 +72,7 @@ export default function CategoryMenu() {
             style={{ flex: 1 }}
         >
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                {loading && (
+                {(loading || categoriesLoading) && (
                     <View className="absolute inset-0 bg-black/5 items-center justify-center z-10">
                         <LoadingSpinner />
                     </View>

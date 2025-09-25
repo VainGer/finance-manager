@@ -1,13 +1,12 @@
 import { Picker } from '@react-native-picker/picker';
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import LineChartComparison from '../../../components/charts/lineChartComparison';
 import PieChartComponent from '../../../components/charts/pieChart';
 import Button from '../../../components/common/button';
 import LoadingSpinner from '../../../components/common/loadingSpinner';
-import { useAuth } from '../../../context/AuthContext';
 import useExpensesCharts from '../../../hooks/expenses/useExpensesCharts';
-import { formatAmount } from '../../../utils/formatters';
+import { formatAmount, formatYearMonth } from '../../../utils/formatters';
 
 const ExpensesDetails = ({ data }) => {
     return (<View className="mt-8">
@@ -99,11 +98,7 @@ const DateFilterButtons = ({ dateFilter, setDateFilter, selectedMonth, setSelect
                             <Picker.Item label="בחר חודש..." value="" />
                             {availableMonths.map(month => {
                                 const [year, monthNum] = month.split('-');
-                                const monthDate = new Date(year, parseInt(monthNum) - 1);
-                                const monthName = monthDate.toLocaleDateString('he-IL', {
-                                    year: 'numeric',
-                                    month: 'long'
-                                });
+                                const monthName = formatYearMonth(month);
 
                                 return (
                                     <Picker.Item
@@ -149,8 +144,8 @@ const ChartTypeSelector = ({ chartType, setChartType }) => {
     );
 };
 
-export default function Graphs() {
-    const { profile } = useAuth();
+export default function Charts() {
+
     const [chartType, setChartType] = useState('pie');
 
     const {
@@ -164,9 +159,8 @@ export default function Graphs() {
         setDateFilter,
         selectedMonth,
         setSelectedMonth,
-        availableMonths,
-        refetchExpenses
-    } = useExpensesCharts({ profile });
+        availableMonths
+    } = useExpensesCharts();
 
 
     if (loading) {
@@ -183,7 +177,7 @@ export default function Graphs() {
     }
 
     return (
-        <ScrollView key={expenses.length} className="flex-1">
+        <ScrollView key={expenses ? expenses.length : 'no-expenses'} className="flex-1">
             <View className="bg-white rounded-lg p-4 m-2">
                 <Text className="text-2xl font-bold text-gray-800 mb-4">📊 גרפים</Text>
 

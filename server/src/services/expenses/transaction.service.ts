@@ -1,7 +1,7 @@
 import * as appErrors from "../../errors/AppError";
 import TransactionModel from "../../models/expenses/transaction.model";
 import { ObjectId } from "mongodb";
-import { Transaction, TransactionWithoutId } from "../../types/expenses.types";
+import { CategoryBudget, MonthlyTransactions, Transaction, TransactionWithoutId } from "../../types/expenses.types";
 import { ProfileBudget } from "../../types/profile.types";
 import BudgetService from "../budget/budget.service";
 import CategoriesModel from "../../models/expenses/categories.model";
@@ -56,31 +56,34 @@ export default class TransactionService {
         return result;
     }
 
-    static async changeDate
-        (refId: string, catName: string, busName: string, transactionId: string, newDate: Date) {
+    static async changeDate(refId: string, catName: string, busName: string, transactionId: string, newDate: string) {
         if (!refId || !catName || !busName || !transactionId || !newDate) {
             throw new appErrors.ValidationError("Reference ID, category name, business name, transaction ID and new date are required.");
         }
-
         const transaction = await this.getById(refId, catName, busName, transactionId);
         if (!transaction) {
             throw new appErrors.NotFoundError(`Transaction ${transactionId} not found.`);
         }
 
-        const newCreated = await this.create(refId, catName, busName, {
+        const deleteResult = await this.delete(refId, catName, busName, transactionId);
+        if (!deleteResult?.success) {
+            throw new appErrors.DatabaseError(
+                deleteResult?.message || `Failed to delete transaction ${transactionId} for date change.`);
+        }
+        const newTransaction: TransactionWithoutId = {
             amount: transaction.amount,
             date: newDate,
-            description: transaction.description
-        });
+            description: transaction.description,
+        };
 
-        const oldDeleted = await this.delete(refId, catName, busName, transactionId);
-
-        if (!newCreated?.success || !oldDeleted?.success) {
-            throw new appErrors.DatabaseError("Failed to complete transaction date change operation.");
+        const createResult = await this.create(refId, catName, busName, newTransaction);
+        if (!createResult?.success) {
+            throw new appErrors.DatabaseError(
+                createResult?.message || `Failed to create transaction for ${busName}.`);
         }
-
         return { success: true, message: "Transaction date changed successfully" };
     }
+
 
     static async changeDescription
         (refId: string, catName: string, busName: string, transactionId: string, newDescription: string) {
@@ -177,5 +180,41 @@ export default class TransactionService {
         }
 
         return { success: true, message: "Budget updated successfully" };
+    }
+
+    static async getAll(refId: string, catName: string, busName: string) {
+        if (!refId || !catName || !busName) {
+            throw new appErrors.ValidationError("Reference ID, category name, and business name are required.");
+        }
+
+        try {
+            const transactions = await TransactionModel.getAll(refId, catName, busName);
+            return {
+                success: true,
+                transactions,
+                message: "Transactions retrieved successfully"
+            };
+        } catch (error) {
+            console.error("Error in TransactionService.getAll", error);
+            throw new appErrors.DatabaseError("Failed to retrieve transactions.");
+        }
+    }
+
+    static async getAllByMonth(refId: string, catName: string, busName: string) {
+        if (!refId || !catName || !busName) {
+            throw new appErrors.ValidationError("Reference ID, category name, and business name are required.");
+        }
+
+        try {
+            const monthlyTransactions = await TransactionModel.getAllByMonth(refId, catName, busName);
+            return {
+                success: true,
+                monthlyTransactions,
+                message: "Monthly transactions retrieved successfully"
+            };
+        } catch (error) {
+            console.error("Error in TransactionService.getAllByMonth", error);
+            throw new appErrors.DatabaseError("Failed to retrieve monthly transactions.");
+        }
     }
 }

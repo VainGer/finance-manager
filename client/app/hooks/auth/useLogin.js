@@ -8,7 +8,7 @@ export default function useLogin({ setPassword }) {
     const router = useRouter();
     const { setAccount, setStoreUser } = useAuth();
 
-    const login = async (username, password, saveUser) => {
+    const login = async (username, password, saveUser, toNavigate = true) => {
         try {
             username = username.trim().toLowerCase();
             password = password.trim();
@@ -23,7 +23,11 @@ export default function useLogin({ setPassword }) {
             const response = await post('account/validate', { username, password });
             if (response.ok) {
                 setAccount(response.account);
-                router.push('/authProfile');
+                setLoading(false);
+                if (toNavigate) {
+                    router.push('/authProfile');
+                }
+                return true;
             } else {
                 switch (response.status) {
                     case 400:
@@ -36,13 +40,14 @@ export default function useLogin({ setPassword }) {
                     case 500:
                         setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
                         break;
-
                 }
+                return false;
             }
             setLoading(false);
         } catch (error) {
             setError('תקשורת עם השרת נכשלה');
             setLoading(false);
+            return false;
         }
     }
 

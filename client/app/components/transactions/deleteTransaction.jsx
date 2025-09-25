@@ -1,16 +1,18 @@
 import { useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { Text, View } from 'react-native';
+import useEditTransactions from '../../hooks/useEditTransactions.js';
 import Button from '../common/button.jsx';
-import useEditTransaction from '../../hooks/useEditTransactions.js';
-export default function DeleteTransaction({ profile, transaction, refetchExpenses, refetchBudgets, goBack }) {
-    const { loading, error, success, deleteTransaction, resetState } = useEditTransaction({ profile, refetchBudgets, refetchExpenses });
+export default function DeleteTransaction({ transaction, goBack }) {
+    const { loading, error, success, deleteTransaction, resetState } = useEditTransactions({ goBack });
 
     useEffect(() => {
         resetState();
-    }, [profile]);
+    }, []);
 
     const handleDelete = () => {
-        deleteTransaction(transaction, goBack);
+        if (transaction) {
+            deleteTransaction(transaction);
+        }
     };
 
     return (

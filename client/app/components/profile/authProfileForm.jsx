@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from 'react';
-import { I18nManager, Switch, Text, View } from 'react-native';
+import { I18nManager, Switch, Text, View} from 'react-native';
 import Button from '../common/button.jsx';
 import Input from '../common/textInput.jsx';
 
@@ -11,7 +11,7 @@ export default function AuthProfileForm({ authProfile, selectedProfile, onBack,
 
     return (
         <View className="w-full">
-            <View className="mb-6">
+            <View className="mb-6 flex-1 items-center">
                 <View className="flex-row items-center justify-between mb-4">
                     <Ionicons name="lock-closed" size={22} color={selectedProfile.color || '#1e293b'} />
                     <Text
@@ -39,13 +39,13 @@ export default function AuthProfileForm({ authProfile, selectedProfile, onBack,
                 >
                     הקוד הסודי שלך
                 </Text>
-
                 <Input
                     placeholder="הזן קוד סודי"
                     value={pin}
                     onChangeText={setPin}
                     secureTextEntry
                     keyboardType="numeric"
+                    maxLength={4}
                 />
                 <View className="flex-row items-center justify-between mt-3">
                     <Text
@@ -57,8 +57,7 @@ export default function AuthProfileForm({ authProfile, selectedProfile, onBack,
                     <Switch
                         value={storeProfile}
                         onValueChange={setStoreProfile}
-                        thumbColor="#ffffff"
-                        trackColor={{ false: "#ccc", true: "#4ade80" }}
+                        trackColor={{ false: "#767577", true: "#81b0ff" }}
                     />
                 </View>
             </View>

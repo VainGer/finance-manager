@@ -16,24 +16,56 @@ export default function LineChartComparison({ monthlyData }) {
             </View>
         );
     }
-    const sortedData = [...monthlyData].sort((a, b) => {
-        const [monthA, yearA] = a.month.split('/');
-        const [monthB, yearB] = b.month.split('/');
-        return new Date(yearA, monthA - 1) - new Date(yearB, monthB - 1);
-    });
+    // Validate and sort data with safety checks
+    const sortedData = Array.isArray(monthlyData) ? 
+        [...monthlyData]
+            .filter(item => item && item.month && item.month.includes('/'))
+            .sort((a, b) => {
+                try {
+                    const [monthA, yearA] = a.month.split('/');
+                    const [monthB, yearB] = b.month.split('/');
+                    
+                    if (!monthA || !yearA || !monthB || !yearB) {
+                        return 0; // Can't sort invalid data
+                    }
+                    
+                    return new Date(yearA, monthA - 1) - new Date(yearB, monthB - 1);
+                } catch (err) {
+                    console.error('Error sorting chart data:', err);
+                    return 0;
+                }
+            }) : [];
 
-    const recentMonths = sortedData.slice(-6);
+    // Take last 6 months or whatever is available
+    const recentMonths = sortedData.length > 0 ? sortedData.slice(-Math.min(6, sortedData.length)) : [];
 
     const formatMonthLabel = (monthStr) => {
-        const [month, year] = monthStr.split('/');
-        return `${month}/${year.slice(2)}`;
+        if (!monthStr || typeof monthStr !== 'string') {
+            return ''; // Return empty string for invalid input
+        }
+        
+        try {
+            const [month, year] = monthStr.split('/');
+            // Check if both parts exist and year has enough characters
+            if (!month || !year || year.length < 2) {
+                return monthStr; // Return original if format is unexpected
+            }
+            return `${month}/${year.slice(2)}`;
+        } catch (err) {
+            console.error('Error formatting month label:', err);
+            return monthStr || '';
+        }
     };
 
+    // Safely create chart data with validation
     const chartData = {
-        labels: recentMonths.map(item => formatMonthLabel(item.month)),
+        labels: recentMonths.map(item => formatMonthLabel(item?.month || '')),
         datasets: [
             {
-                data: recentMonths.map(item => item.amount),
+                data: recentMonths.map(item => 
+                    item && typeof item.amount === 'number' ? 
+                    item.amount : 0
+                ),
                 color: (opacity = 1) => `rgba(65, 105, 225, ${opacity})`, // Royal blue
                 strokeWidth: 2
             }
@@ -63,15 +95,22 @@ export default function LineChartComparison({ monthlyData }) {
         formatYLabel: (value) => `₪${Math.round(Number(value) / 100)}k`
     };
 
-    const maxMonth = recentMonths.reduce(
-        (max, item) => item.amount > max.amount ? item : max,
-        recentMonths[0]
-    );
+    // Safely calculate max/min with default values and validation
+    const maxMonth = recentMonths.length > 0 ?
+        recentMonths.reduce(
+            (max, item) => 
+                (item && typeof item.amount === 'number' && item.amount > max.amount) ? 
+                item : max,
+            recentMonths[0] || { month: '', amount: 0 }
+        ) : { month: '', amount: 0 };
 
-    const minMonth = recentMonths.reduce(
-        (min, item) => item.amount < min.amount ? item : min,
-        recentMonths[0]
-    );
+    const minMonth = recentMonths.length > 0 ?
+        recentMonths.reduce(
+            (min, item) => 
+                (item && typeof item.amount === 'number' && item.amount < min.amount) ? 
+                item : min,
+            recentMonths[0] || { month: '', amount: 0 }
+        ) : { month: '', amount: 0 };
 
     return (
         <ScrollView>

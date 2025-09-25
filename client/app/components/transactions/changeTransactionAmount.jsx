@@ -1,18 +1,20 @@
-import { useState, useEffect } from 'react';
-import { View, Text, TextInput } from 'react-native';
-import useEditTransaction from '../../hooks/useEditTransactions.js';
+import { useEffect, useState } from 'react';
+import { Text, TextInput, View } from 'react-native';
+import useEditTransactions from '../../hooks/useEditTransactions.js';
 import Button from '../common/button.jsx';
-export default function ChangeTransactionAmount({ profile, transaction, refetchExpenses, refetchBudgets, goBack }) {
+export default function ChangeTransactionAmount({ transaction, goBack }) {
     const [newAmount, setNewAmount] = useState('');
-    const { error, success, loading, changeTransactionAmount, resetState } = useEditTransaction({ profile, refetchExpenses, refetchBudgets });
+    const { error, success, loading, changeTransactionAmount, resetState } = useEditTransactions({ goBack });
 
     const handleChangeAmount = () => {
-        changeTransactionAmount(transaction, newAmount);
+        if (transaction && newAmount) {
+            changeTransactionAmount(transaction, newAmount);
+        }
     };
 
     useEffect(() => {
         resetState();
-    }, [profile]);
+    }, []);
 
     return (
         <View >

@@ -1,36 +1,40 @@
-import { useState } from 'react';
-import { del, get, post, put } from '../utils/api.js';
-export default function useEditBusiness({ profile, goBack }) {
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useProfileData } from '../context/ProfileDataContext';
+import { del, post, put } from '../utils/api.js';
+
+export default function useEditBusiness(props = {}) {
+    const { businesses, getBusinessesLoading, fetchBusinesses, errors } = useProfileData();
+    const authContext = useAuth();
+    const router = useRouter();
+
+    const profile = props.profile || authContext.profile;
+
+    const goBack = props.goBack || (() => router.back());
+
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [getBusinessesLoading, setGetBusinessesLoading] = useState(false);
-    const [getBusinessesError, setGetBusinessesError] = useState(null);
+    const [businessesError, setBusinessesError] = useState(null);
 
     const resetState = () => {
         setError(null);
         setSuccess(false);
         setLoading(false);
+        setBusinessesError(null);
     };
 
-    const getBusinesses = async (category) => {
-        try {
-            setGetBusinessesLoading(true);
-            const response = await get(`expenses/business/get-businesses/${profile.expenses}/${category}`);
-            if (response.ok) {
-                setGetBusinessesLoading(false);
-                return response.businesses;
-            } else {
-                setGetBusinessesLoading(false);
-                setGetBusinessesError('אירעה שגיאה בעת קבלת בעלי העסקים, נסה שוב מאוחר יותר');
-                console.error('Error fetching businesses:', response.error);
-                return [];
-            }
-        } catch (error) {
-            console.error("Exception in getBusinesses:", error);
-            return [];
+    useEffect(() => {
+        const businessErrors = errors.find(e => e.businessesErrors)?.businessesErrors;
+        if (businessErrors && businessErrors.length > 0) {
+            setBusinessesError(businessErrors[0]);
+        } else {
+            setBusinessesError(null);
         }
-    }
+    }, [errors]);
+
+
 
     const addBusiness = async (refId, category, name, setName) => {
         if (!name || name.trim() === '') {
@@ -84,7 +88,10 @@ export default function useEditBusiness({ profile, goBack }) {
         setTimeout(() => setLoading(false), 500);
         if (response.ok) {
             setSuccess('העסק שונה בהצלחה');
-            setTimeout(() => goBack(), 1500);
+            setTimeout(() => {
+                setSuccess(false);
+                goBack();
+            }, 1500);
         } else if (response.status === 400) {
             setError('שם העסק כבר קיים בקטגוריה זו');
         } else {
@@ -108,23 +115,48 @@ export default function useEditBusiness({ profile, goBack }) {
         const response = await del(`expenses/business/delete/${refId}/${selectedCategory}/${selectedBusiness}`);
         if (response.ok) {
             setSuccess('העסק נמחק בהצלחה');
-            setTimeout(() => { goBack(); }, 1500);
+            setTimeout(() => {
+                setSuccess(false);
+                goBack();
+            }, 1500);
         } else {
             setError('אירעה שגיאה בעת מחיקת העסק, נסה שוב מאוחר יותר');
             console.error('Error deleting business:', response.error);
         }
     }
 
+    const getBusinessesByCategory = (category) => {
+        if (!businesses || businesses.length === 0) {
+            return [];
+        }
+        const categoryBusinesses = businesses.find(b => b.category === category);
+        return categoryBusinesses ? categoryBusinesses.businesses : [];
+    };
+
+    const getAllBusinesses = () => {
+        if (!businesses) return [];
+
+        return businesses.reduce((acc, item) => {
+            return [...acc, ...item.businesses.map(b => ({
+                name: b,
+                category: item.category
+            }))];
+        }, []);
+    };
+
     return {
         error,
         success,
         loading,
-        getBusinessesLoading,
-        getBusinessesError,
+        businessesLoading: getBusinessesLoading,
+        businessesError,
+        businesses,
         addBusiness,
         renameBusiness,
         deleteBusiness,
         resetState,
-        getBusinesses
-    }
+        fetchBusinesses,
+        getBusinessesByCategory,
+        getAllBusinesses
+    };
 }

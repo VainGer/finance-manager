@@ -1,7 +1,7 @@
-import { use, useEffect, useState } from 'react';
-import { Text, View, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 import CreateBusiness from '../../components/business/createBusiness.jsx';
 import DeleteBusiness from '../../components/business/deleteBusiness.jsx';
 import RenameBusiness from '../../components/business/renameBusiness.jsx';
@@ -17,35 +17,47 @@ export default function BusinessMenu() {
     const [categories, setCategories] = useState([]);
     const { profile } = useAuth();
 
-    const { getCategories, getCategoriesError, getCategoriesLoading } = useEditCategories({ profile });
+    const { 
+        categories: hookCategories, 
+        categoriesLoading, 
+        categoriesError, 
+        fetchCategories 
+    } = useEditCategories({ profile });
 
-    const { error, success, loading, getBusinessesLoading, getBusinessesError,
-        addBusiness, renameBusiness, deleteBusiness, resetState, getBusinesses } = useEditBusiness({ profile, goBack: () => setSelectedMenu(null) });
+    const { 
+        error, 
+        success, 
+        loading, 
+        businessesLoading, 
+        businessesError,
+        businesses: hookBusinesses,
+        addBusiness, 
+        renameBusiness, 
+        deleteBusiness, 
+        resetState, 
+    } = useEditBusiness({ profile, goBack: () => setSelectedMenu(null) });
 
     useEffect(() => {
         resetState();
     }, [selectedMenu]);
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            const fetchedCategories = await getCategories();
-            setCategories(fetchedCategories);
-        };
+        if (hookCategories?.length > 0) {
+            setCategories(hookCategories);
+        }
+    }, [hookCategories]);
+
+    useEffect(() => {
         fetchCategories();
     }, [profile, error, success]);
 
+
     useEffect(() => {
-        const fetchBusinesses = async () => {
-            const businessData = await Promise.all(
-                categories.map(async (cat) => {
-                    const businesses = await getBusinesses(cat);
-                    return { category: cat, businesses };
-                })
-            );
-            setBusinesses(businessData);
-        };
-        fetchBusinesses();
-    }, [profile, error, success, categories]);
+        if (hookBusinesses?.length > 0) {
+            setBusinesses(hookBusinesses);
+        }
+    }, [hookBusinesses]);
+    
 
     const renderSelectedMenu = () => {
         switch (selectedMenu) {
@@ -57,8 +69,8 @@ export default function BusinessMenu() {
                     success={success}
                     addBusiness={addBusiness}
                     categories={categories}
-                    getCategoriesLoading={getCategoriesLoading}
-                    getCategoriesError={getCategoriesError}
+                    getCategoriesLoading={categoriesLoading}
+                    getCategoriesError={categoriesError}
                 />;
             case 'rename':
                 return <RenameBusiness
@@ -69,10 +81,10 @@ export default function BusinessMenu() {
                     renameBusiness={renameBusiness}
                     categories={categories}
                     businesses={businesses}
-                    getBusinessesLoading={getBusinessesLoading}
-                    getBusinessesError={getBusinessesError}
-                    getCategoriesLoading={getCategoriesLoading}
-                    getCategoriesError={getCategoriesError}
+                    getBusinessesLoading={businessesLoading}
+                    getBusinessesError={businessesError}
+                    getCategoriesLoading={categoriesLoading}
+                    getCategoriesError={categoriesError}
                 />;
             case 'delete':
                 return <DeleteBusiness
@@ -83,10 +95,10 @@ export default function BusinessMenu() {
                     deleteBusiness={deleteBusiness}
                     categories={categories}
                     businesses={businesses}
-                    getBusinessesLoading={getBusinessesLoading}
-                    getBusinessesError={getBusinessesError}
-                    getCategoriesLoading={getCategoriesLoading}
-                    getCategoriesError={getCategoriesError}
+                    getBusinessesLoading={businessesLoading}
+                    getBusinessesError={businessesError}
+                    getCategoriesLoading={categoriesLoading}
+                    getCategoriesError={categoriesError}
                 />;
             default:
                 return null;
@@ -107,7 +119,7 @@ export default function BusinessMenu() {
             style={{ flex: 1 }}
         >
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                {loading && (
+                {(loading || businessesLoading || categoriesLoading) && (
                     <View className="absolute inset-0 bg-black/5 items-center justify-center z-10">
                         <LoadingSpinner />
                     </View>

@@ -56,10 +56,10 @@ export default class ProfileModel {
         }
     }
 
-    static async findProfile(username: string, profileName: string) {
+    static async findProfile(username: string, profileName: string, profileId?: string) {
         try {
             const profile = await db.GetDocument(this.profileCollection, {
-                username, profileName
+                username, profileName, _id: profileId ? new ObjectId(profileId) : undefined
             });
             if (!profile) {
                 return null;
@@ -67,6 +67,21 @@ export default class ProfileModel {
             return profile;
         } catch (error) {
             console.error("Error in ProfileModel.findProfile", error);
+            throw new Error("Failed to find profile");
+        }
+    }
+
+    static async findProfileById(username: string, profileId: string) {
+        try {
+            const profile = await db.GetDocument(this.profileCollection, {
+                username, _id: new ObjectId(profileId)
+            });
+            if (!profile) {
+                return null;
+            }
+            return profile;
+        } catch (error) {
+            console.error("Error in ProfileModel.findProfileById", error);
             throw new Error("Failed to find profile");
         }
     }

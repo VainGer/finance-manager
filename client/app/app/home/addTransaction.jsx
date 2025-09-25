@@ -4,13 +4,11 @@ import { useState } from 'react';
 import { I18nManager, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import DateTimePicker from 'react-native-modal-datetime-picker';
-import BusinessSelects from '../../components/business/businessSelect.jsx';
+import BusinessSelect from '../../components/business/businessSelect.jsx';
 import CategorySelect from '../../components/categories/categorySelect.jsx';
 import Button from '../../components/common/button.jsx';
 import LoadingSpinner from '../../components/common/loadingSpinner.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
-import useBudgetSummary from '../../hooks/expenses/useBudgetSummary.js';
-import useExpensesDisplay from '../../hooks/expenses/useExpensesDisplay.js';
 import useEditTransactions from '../../hooks/useEditTransactions.js';
 import { formatDate } from '../../utils/formatters.js';
 
@@ -22,13 +20,25 @@ export default function AddTransaction() {
   const [date, setDate] = useState(new Date());
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
-  const { refetchExpenses } = useExpensesDisplay({ profile });
-  const { refetchBudgets } = useBudgetSummary({ profile });
-  const { loading, error, success, categories, businesses, categoryLoading, businessLoading, categoryError, businessError, categorySuccess, businessSuccess,
-    addTransaction } = useEditTransactions({ profile, refetchExpenses, refetchBudgets });
+  const {
+    loading,
+    error,
+    success,
+    categories,
+    businesses,
+    categoriesLoading,
+    businessesLoading,
+    categoryError,
+    businessError,
+    getBusinessesByCategory,
+    addTransaction
+  } = useEditTransactions({});
 
   const isRTL = I18nManager.isRTL;
 
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <LinearGradient
@@ -49,9 +59,6 @@ export default function AddTransaction() {
           </Text>
           <View className="h-1 w-12 bg-blue-500 rounded-full mt-2" />
         </View>
-
-        {/* Status Messages */}
-        {loading && <View className="items-center py-4"><LoadingSpinner /></View>}
 
         {error && (
           <View className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
@@ -84,11 +91,12 @@ export default function AddTransaction() {
             קטגוריה
           </Text>
           <View style={{ direction: isRTL ? 'rtl' : 'ltr' }}>
-            <CategorySelect
+            <CategorySelect key={selectedCategory}
               categories={categories}
-              loading={categoryLoading}
+              loading={categoriesLoading}
               error={categoryError}
               setSelectedCategory={setSelectedCategory}
+              initialValue={selectedCategory}
             />
           </View>
         </View>
@@ -102,12 +110,13 @@ export default function AddTransaction() {
             עסק
           </Text>
           <View style={{ direction: isRTL ? 'rtl' : 'ltr' }}>
-            <BusinessSelects
-              businesses={businesses.find(cat => cat.category === selectedCategory)?.businesses || []}
-              loading={businessLoading}
+            <BusinessSelect key={selectedBusiness}
+              businesses={getBusinessesByCategory(selectedCategory) || []}
+              loading={businessesLoading}
               error={businessError}
               selectedCategory={selectedCategory}
               setSelectedBusiness={setSelectedBusiness}
+              initialValue={selectedBusiness}
             />
           </View>
         </View>

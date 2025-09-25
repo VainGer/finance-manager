@@ -2,23 +2,27 @@ import { Router } from "express";
 import BudgetController from "../../controllers/budget.controller";
 import { BudgetCreationData } from "../../types/profile.types";
 import { CategoryBudget } from "../../types/expenses.types";
+import { accessTokenVerification } from "../../middleware/auth.middleware";
 
 const budgetRouter = Router();
 
-// Profile budget routes
+// Profile budget routes - all protected with token verification
 budgetRouter.post<{}, {}, { username: string, profileName: string, budget: { startDate: Date; endDate: Date; amount: number } }>(
-    "/add-child-budget", BudgetController.addChildBudgets);
+    "/add-child-budget", accessTokenVerification, BudgetController.addChildBudgets);
 
 budgetRouter.get<{}, {}, {}, { username: string, profileName: string }>(
-    "/get-child-budgets", BudgetController.getChildBudgets);
+    "/get-child-budgets", accessTokenVerification, BudgetController.getChildBudgets);
 
 budgetRouter.get<{}, {}, {}, { username: string, profileName: string }>(
-    "/get-budgets", BudgetController.getBudgets);
+    "/get-profile-budgets", accessTokenVerification, BudgetController.getProfileBudgets);
+
+budgetRouter.get<{}, {}, {}, { refId: string }>(
+    "/get-category-budgets", accessTokenVerification, BudgetController.getCategoryBudgets);
 
 budgetRouter.post<{}, {}, { budgetData: BudgetCreationData }>(
-    "/add-budget", BudgetController.createBudget);
+    "/add-budget", accessTokenVerification, BudgetController.createBudget);
 
 budgetRouter.post<{}, {}, { username: string, profileName: string, startDate: Date, endDate: Date }>(
-    "/check-budget-dates", BudgetController.validateBudgetDates);
+    "/check-budget-dates", accessTokenVerification, BudgetController.validateBudgetDates);
 
 export default budgetRouter;

@@ -8,27 +8,32 @@ import AddCategory from '../../components/categories/createCategory.jsx';
 import Button from "../../components/common/button";
 import LoadingSpinner from '../../components/common/loadingSpinner';
 import Overlay from '../../components/common/Overlay';
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from '../../context/AuthContext';
 import useUploadTransactionsFromFile from '../../hooks/useUploadTransactionsFromFile.js';
 
 export default function UploadTransactionsFromFile() {
     const { profile } = useAuth();
-
     const [showCreateCategory, setShowCreateCategory] = useState(false);
     const [showCreateBusiness, setShowCreateBusiness] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [categoryCreated, setCategoryCreated] = useState(true);
 
 
     const { handleFileSelect, processTransactions, handleCategoryChange,
         handleBusinessChange, handleUploadSwitch, addCategory, resetState,
-        addBusiness, onCategoryAndBusinessAdded, handleSubmitTransactions, onSuccessUpload,
+        addBusiness, onCategoryAndBusinessAdded, handleSubmitTransactions,
         dataToUpload, selectedFile, error,
         loading, success, categories,
         businesses, categoryLoading, businessLoading,
         getCategoriesError, getBusinessesError, getCategoriesLoading,
-        getBusinessesLoading, categorySuccess, businessSuccess, categoryCreated,
+        getBusinessesLoading, categorySuccess, businessSuccess,
         categoryError, businessError
-    } = useUploadTransactionsFromFile({ profile });
+    } = useUploadTransactionsFromFile({
+        setShowCreateCategory,
+        setShowCreateBusiness,
+        setShowSuccessMessage,
+        setCategoryCreated
+    });
 
 
 

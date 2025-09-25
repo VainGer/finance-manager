@@ -3,7 +3,7 @@ import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from 'react';
-import { I18nManager, KeyboardAvoidingView, Platform, ScrollView, StatusBar, Switch, Text, TouchableOpacity, View } from "react-native";
+import { I18nManager, KeyboardAvoidingView, Platform, ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 import Button from "../components/common/button.jsx";
 import LoadingSpinner from "../components/common/loadingSpinner.jsx";
 import TextInput from '../components/common/textInput.jsx';
@@ -26,17 +26,16 @@ export default function Register() {
             style={{ flex: 1 }}
         >
             {/* אלמנטים דקורטיביים עדינים ברקע */}
-            <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
             <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />
             <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
             <View pointerEvents="none" className="absolute top-1/3 right-10 h-24 w-24 rounded-full bg-white/20 blur-md" />
-            
-            <View className="flex-1" style={{ paddingTop: StatusBar.currentHeight }}>
+
+            <View className="flex-1">
                 {loading && <LoadingSpinner />}
-                
+
                 {/* כפתור חזרה */}
-                <TouchableOpacity 
-                    className="absolute top-12 left-4 z-10 p-2 rounded-full bg-white/70" 
+                <TouchableOpacity
+                    className="absolute top-12 left-4 z-10 p-2 rounded-full bg-white/70"
                     onPress={() => router.back()}
                 >
                     <Ionicons name="arrow-back" size={24} color="#0f172a" />
@@ -51,25 +50,25 @@ export default function Register() {
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
                                 className="w-16 h-16 items-center justify-center mb-6 rounded-3xl"
-                                style={{ 
-                                    shadowColor: "#0f172a", 
-                                    shadowOpacity: 0.3, 
-                                    shadowOffset: { width: 0, height: 4 }, 
-                                    shadowRadius: 10, 
-                                    elevation: 8 
+                                style={{
+                                    shadowColor: "#0f172a",
+                                    shadowOpacity: 0.3,
+                                    shadowOffset: { width: 0, height: 4 },
+                                    shadowRadius: 10,
+                                    elevation: 8
                                 }}
                             >
                                 <Ionicons name="person-add-outline" size={26} color="#ffffff" />
                             </LinearGradient>
 
                             {/* כותרות */}
-                            <Text 
+                            <Text
                                 className="text-3xl font-extrabold text-slate-900 text-center mb-1"
                                 style={{ writingDirection: isRTL ? "rtl" : "ltr" }}
                             >
                                 הרשמה
                             </Text>
-                            <Text 
+                            <Text
                                 className="text-slate-600 text-center mb-6"
                                 style={{ writingDirection: isRTL ? "rtl" : "ltr" }}
                             >
@@ -82,7 +81,7 @@ export default function Register() {
                                     {/* שגיאה */}
                                     {error ? (
                                         <View className="bg-red-50 border border-red-200 rounded-2xl p-3 mb-4">
-                                            <Text 
+                                            <Text
                                                 className="text-red-600 text-sm text-right"
                                                 style={{ writingDirection: isRTL ? "rtl" : "ltr" }}
                                             >
@@ -140,7 +139,7 @@ export default function Register() {
 
                                     {/* הצג סיסמה */}
                                     <View className="flex-row items-center justify-end mb-6">
-                                        <Text 
+                                        <Text
                                             className="text-slate-700 mr-2 font-medium"
                                             style={{ writingDirection: isRTL ? "rtl" : "ltr" }}
                                         >
@@ -155,8 +154,8 @@ export default function Register() {
                                     </View>
 
                                     {/* כפתור */}
-                                    <Button 
-                                        onPress={() => register(username, password, confirmPassword)} 
+                                    <Button
+                                        onPress={() => register(username, password, confirmPassword)}
                                         disabled={loading}
                                     >
                                         הרשמה
@@ -164,7 +163,7 @@ export default function Register() {
 
                                     {/* קישור */}
                                     <TouchableOpacity onPress={() => router.push("/login")} className="mt-4">
-                                        <Text 
+                                        <Text
                                             className="text-slate-600 text-center text-sm"
                                             style={{ writingDirection: isRTL ? "rtl" : "ltr" }}
                                         >

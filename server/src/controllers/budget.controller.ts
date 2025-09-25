@@ -3,7 +3,7 @@ import * as AppErrors from "../errors/AppError";
 import BudgetService from "../services/budget/budget.service";
 
 export default class BudgetController {
-    
+
     static async addChildBudgets(req: Request, res: Response) {
         try {
             const { username, profileName, budget } = req.body;
@@ -41,13 +41,26 @@ export default class BudgetController {
         }
     }
 
-    static async getBudgets(req: Request, res: Response) {
+    static async getProfileBudgets(req: Request, res: Response) {
         try {
             const { username, profileName } = req.query as { username: string, profileName: string };
             const budgets = await BudgetService.getBudgets(username, profileName);
             res.status(200).json({
                 message: "Budgets retrieved successfully",
                 budgets
+            });
+        } catch (error) {
+            BudgetController.handleError(error, res);
+        }
+    }
+
+    static async getCategoryBudgets(req: Request, res: Response) {
+        try {
+            const { refId } = req.query as { refId: string };
+            const result = await BudgetService.getCategoriesBudgets(refId);
+            res.status(200).json({
+                message: "Category budgets retrieved successfully",
+                budgets: result.categoriesBudgets || []
             });
         } catch (error) {
             BudgetController.handleError(error, res);
@@ -67,7 +80,7 @@ export default class BudgetController {
         }
     }
 
-    
+
     private static handleError(error: any, res: Response) {
         console.error("Controller error:", error);
         if (error instanceof AppErrors.AppError) {

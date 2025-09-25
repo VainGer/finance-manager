@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 import Papa from "papaparse";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 
 export const parseCSV = async (uri) => {
   const fileContent = await FileSystem.readAsStringAsync(uri, {

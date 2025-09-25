@@ -109,7 +109,6 @@ export default function CreateProfileBudget({ goBack, setLoading }) {
     };
 
     const DistributionPart = ({ categoryBudgets, handleCategoryBudgetChange, remainingAmount, create, setError, resetState }) => {
-        // helper to check category budgets validity
         const hasInvalidCategory = categoryBudgets.some(cat => {
             const val = parseFloat(cat.budget);
             return !(val > 0);
@@ -128,7 +127,6 @@ export default function CreateProfileBudget({ goBack, setLoading }) {
                         <TextInput
                             value={String(cat.budget ?? '')}
                             onChangeText={val => {
-                                // sanitize input: prevent negative sign and trim spaces
                                 const sanitized = val.replace(/[^0-9.]/g, '');
                                 handleCategoryBudgetChange(idx, sanitized);
                             }}

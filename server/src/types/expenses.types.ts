@@ -8,7 +8,7 @@ export type Category = {
 
 export type Business = {
     name: string;
-    transactions: Transaction[];
+    transactionsArray: MonthlyTransactions[];
     bankNames: string[];
 }
 
@@ -22,10 +22,17 @@ export type CategoryBudget = {
 
 export type CategoryBudgetWithoutId = Omit<CategoryBudget, '_id'>;
 
+export type YearMonth = `${number}-${string}`;
+
+export type MonthlyTransactions = {
+    dateYM: YearMonth;
+    transactions: Transaction[];
+}
+
 export type Transaction = {
     _id: ObjectId;
     amount: number;
-    date: Date;
+    date: string; // ISO string format
     description: string;
 }
 

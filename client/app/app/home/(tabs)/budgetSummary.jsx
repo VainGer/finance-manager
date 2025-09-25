@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import BudgetPeriodSelector from '../../../components/budgets/budgetPeriodSelector';
 import CategoryBudgetDetails from '../../../components/budgets/categoryBudgetDetails';
 import OverallBudgetSummary from '../../../components/budgets/overallBudgetSummary';
@@ -13,7 +13,7 @@ import { formatDate } from '../../../utils/formatters';
 import Button from '../../../components/common/button';
 export default function BudgetSummary() {
     const { profile } = useAuth();
-    const [showNewBudgetsOverlay, setShowNewBudgetsOverlay] = useState(!profile.parentProfile && profile.newBudgets);
+    const [showNewBudgetsOverlay, setShowNewBudgetsOverlay] = useState(!profile.parentProfile && profile.newBudgets.length > 0);
     const {
         loading,
         error,
@@ -140,11 +140,6 @@ export default function BudgetSummary() {
                         <View className="items-center mb-2">
                             <Text className="text-3xl font-bold text-slate-900 text-center">
                                 סקירת תקציב
-                            </Text>
-                        </View>
-                        <View className="items-center mb-4">
-                            <Text className="text-lg font-medium text-slate-600 text-center">
-                                {profile.profileName}
                             </Text>
                         </View>
 

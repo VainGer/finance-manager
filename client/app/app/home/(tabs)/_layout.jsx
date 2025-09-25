@@ -28,41 +28,45 @@ export default function RootLayout() {
             tabBarActiveTintColor: '#3b82f6', // Blue color for active tab
             tabBarInactiveTintColor: '#64748b', // Slate color for inactive tab
         }}>
-            <Tabs.Screen 
-                name="charts" 
-                options={{ 
+            <Tabs.Screen
+                name="charts"
+                options={{
                     title: "גרפים",
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="bar-chart" size={size} color={color} />
                     ),
-                }} 
+                    unmountOnBlur: true,
+                }}
             />
-            <Tabs.Screen 
-                name="expenseSummary" 
-                options={{ 
+            <Tabs.Screen
+                name="expenseSummary"
+                options={{
                     title: "סקירת הוצאות",
                     tabBarIcon: ({ color, size }) => (
                         <MaterialCommunityIcons name="finance" size={size} color={color} />
                     ),
-                }} 
+                    unmountOnBlur: true,
+                }}
             />
-            <Tabs.Screen 
-                name="expensesDisplay" 
-                options={{ 
+            <Tabs.Screen
+                name="expensesDisplay"
+                options={{
                     title: "הוצאות",
                     tabBarIcon: ({ color, size }) => (
                         <FontAwesome name="money" size={size} color={color} />
                     ),
-                }} 
+                    unmountOnBlur: true,
+                }}
             />
-            <Tabs.Screen 
-                name="budgetSummary" 
-                options={{ 
+            <Tabs.Screen
+                name="budgetSummary"
+                options={{
                     title: "סקירת תקציב",
                     tabBarIcon: ({ color, size }) => (
                         <MaterialCommunityIcons name="chart-pie" size={size} color={color} />
                     ),
-                }} 
+                    unmountOnBlur: true,
+                }}
             />
         </Tabs>
     );

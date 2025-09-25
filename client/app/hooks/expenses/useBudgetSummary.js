@@ -1,119 +1,69 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { get } from '../../utils/api';
-export default function useBudgetSummary({ profile }) {
-    const [profileBudgets, setProfileBudgets] = useState([]);
-    const [expensesData, setExpensesData] = useState([]);
-    const [loading, setLoading] = useState(true);
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { useProfileData } from '../../context/ProfileDataContext';
+
+export default function useBudgetSummary() {
+    const { profile } = useAuth();
+    const { profileBudgets, categoryBudgets, budgetLoading: contextLoading, errors, fetchBudgets } = useProfileData();
+
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedPeriod, setSelectedPeriod] = useState(null);
     const [categorySpendingByPeriod, setCategorySpendingByPeriod] = useState({});
 
-    const fetchData = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            
-            const [budgetsResponse, expensesResponse] = await Promise.all([
-                get(`budgets/get-budgets?username=${profile.username}&profileName=${profile.profileName}`),
-                get(`expenses/profile-expenses/${profile.expenses}`)
-            ]);
-            
-            if (budgetsResponse.ok && expensesResponse.ok) {
-                const budgets = budgetsResponse.budgets.budgets || [];
-                const expenses = expensesResponse.expenses.categories || [];
-                const spendingData = calculateCategorySpending(expenses, budgets);
-                setProfileBudgets(budgets);
-                setExpensesData(expenses);
-                setCategorySpendingByPeriod(spendingData);
-                return;
-            } 
-            
-            if (!budgetsResponse.ok) {
-                switch (budgetsResponse.status) {
-                    case 400:
-                        setError('בקשה לא תקינה בטעינת תקציבים');
-                        break;
-                    case 404:
-                        setError('לא נמצאו תקציבים');
-                        break;
-                    case 500:
-                        setError('שגיאת שרת בטעינת תקציבים');
-                        break;
-                    default:
-                        setError('שגיאה בטעינת תקציבים');
-                }
-                return;
+
+    useEffect(() => {
+        setLoading(true);
+        if (!profile) {
+            setLoading(false);
+            return;
+        }
+
+        if (errors.length > 0) {
+            const budgetErrors = errors.find(e => e.budgetErrors)?.budgetErrors;
+            if (budgetErrors && budgetErrors.length > 0) {
+                setError(budgetErrors[0]);
             }
-            
-            if (!expensesResponse.ok) {
-                switch (expensesResponse.status) {
-                    case 400:
-                        setError('בקשה לא תקינה בטעינת הוצאות');
-                        break;
-                    case 404:
-                        setError('לא נמצאו הוצאות');
-                        break;
-                    case 500:
-                        setError('שגיאת שרת בטעינת הוצאות');
-                        break;
-                    default:
-                        setError('שגיאה בטעינת הוצאות');
-                }
+        }
+
+        try {
+            if (profileBudgets?.budgets?.length > 0 && categoryBudgets?.length > 0) {
+                const budgets = profileBudgets.budgets;
+                const spendingData = {};
+                budgets.forEach(budget => {
+                    const periodKey = `${budget.startDate}-${budget.endDate}`;
+                    spendingData[periodKey] = {
+                        categories: {},
+                        totalSpent: budget.spent || 0
+                    };
+                    categoryBudgets.forEach(category => {
+                        const matchingBudget = category.budgets.find(
+                            b => b._id === budget._id
+                        );
+                        if (matchingBudget) {
+                            spendingData[periodKey].categories[category.name] = matchingBudget.spent || 0;
+                        } else {
+                            spendingData[periodKey].categories[category.name] = 0;
+                        }
+                    });
+                });
+                setCategorySpendingByPeriod(spendingData);
             }
         } catch (err) {
-            console.error('Budget summary fetch error:', err);
-            setError('תקשורת עם השרת נכשלה');
+            console.error('Error processing budget data:', err);
+            setError('שגיאה בעיבוד נתוני תקציב');
         } finally {
             setLoading(false);
         }
-    }, [profile]);
-
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
-
-    function calculateCategorySpending(categories, budgetPeriods) {
-        const result = {};
-
-        budgetPeriods.forEach(budget => {
-            const periodKey = `${budget.startDate}-${budget.endDate}`;
-            result[periodKey] = { categories: {} };
-        });
-
-        categories.forEach(category => {
-            const transactions = category.Businesses?.flatMap(
-                business => business.transactions || []
-            ) || [];
-
-            budgetPeriods.forEach(budget => {
-                const periodKey = `${budget.startDate}-${budget.endDate}`;
-                const startDate = new Date(budget.startDate);
-                const endDate = new Date(budget.endDate);
-
-                const categorySpent = transactions.reduce((total, transaction) => {
-                    const txDate = new Date(transaction.date);
-                    return (txDate >= startDate && txDate <= endDate)
-                        ? total + transaction.amount
-                        : total;
-                }, 0);
-
-                result[periodKey].categories[category.name] = categorySpent;
-            });
-        });
-
-        return result;
-    }
+    }, [profile, profileBudgets, categoryBudgets, errors]);
 
     const availablePeriods = useMemo(() => {
-        if (!profileBudgets?.length) return [];
-
-        return profileBudgets
-            .map(budget => {
-                return {
-                    startDate: budget.startDate,
-                    endDate: budget.endDate
-                };
-            })
+        if (!profileBudgets?.budgets?.length) return [];
+        return profileBudgets.budgets
+            .map(budget => ({
+                startDate: budget.startDate,
+                endDate: budget.endDate
+            }))
             .sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
     }, [profileBudgets]);
 
@@ -127,7 +77,7 @@ export default function useBudgetSummary({ profile }) {
     }, [selectedPeriod]);
 
     useEffect(() => {
-        if (availablePeriods?.length) {
+        if (availablePeriods?.length && !selectedPeriod) {
             const now = new Date();
             const currentPeriod = availablePeriods.find(period => {
                 const startDate = new Date(period.startDate);
@@ -137,14 +87,14 @@ export default function useBudgetSummary({ profile }) {
 
             setSelectedPeriod(currentPeriod || availablePeriods[0]);
         }
-    }, [availablePeriods]);
+    }, [availablePeriods, selectedPeriod]);
 
     const { currentProfileBudget, currentCategoryBudgets } = useMemo(() => {
-        if (!selectedPeriod || !Object.keys(categorySpendingByPeriod).length) {
+        if (!selectedPeriod || !profileBudgets?.budgets?.length || !Object.keys(categorySpendingByPeriod).length) {
             return { currentProfileBudget: null, currentCategoryBudgets: [] };
         }
 
-        const profileBudget = profileBudgets.find(
+        const profileBudget = profileBudgets.budgets.find(
             budget => budget.startDate === selectedPeriod.startDate &&
                 budget.endDate === selectedPeriod.endDate
         );
@@ -152,29 +102,29 @@ export default function useBudgetSummary({ profile }) {
         const periodKey = `${selectedPeriod.startDate}-${selectedPeriod.endDate}`;
         const periodData = categorySpendingByPeriod[periodKey] || { categories: {} };
 
-        const categoryBudgets = expensesData.map(category => {
-            const categoryBudget = category.budgets?.find(
+        const categoryBudgetData = categoryBudgets.map(category => {
+            const categoryBudget = category.budgets.find(
                 budget => budget.startDate === selectedPeriod.startDate &&
                     budget.endDate === selectedPeriod.endDate
             );
-
             const spent = periodData.categories[category.name] || 0;
-
             return {
                 name: category.name,
                 budget: categoryBudget?.amount || null,
-                spent
+                spent: spent
             };
         });
 
         return {
             currentProfileBudget: profileBudget,
-            currentCategoryBudgets: categoryBudgets
+            currentCategoryBudgets: categoryBudgetData
         };
-    }, [selectedPeriod, profileBudgets, expensesData, categorySpendingByPeriod]);
+    }, [selectedPeriod, profileBudgets, categoryBudgets, categorySpendingByPeriod]);
+
+    const isLoading = contextLoading || loading;
 
     return {
-        loading,
+        loading: isLoading,
         error,
         availablePeriods,
         selectedPeriod,
@@ -182,6 +132,6 @@ export default function useBudgetSummary({ profile }) {
         relevantPeriod,
         currentProfileBudget,
         currentCategoryBudgets,
-        refetchBudgets: fetchData
+        refetchBudgets: fetchBudgets
     };
 }

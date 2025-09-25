@@ -18,9 +18,9 @@ export default function Index() {
 
   useEffect(() => {
     if (account && profile) {
-      router.replace("/home/(tabs)/budgetSummary");
+      router.push("/home/(tabs)/budgetSummary");
     } else if (account && !profile) {
-      router.replace("/authProfile");
+      router.push("/authProfile");
     }
   }, [account, profile, router]);
 
@@ -37,7 +37,7 @@ export default function Index() {
       <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
       <View pointerEvents="none" className="absolute top-1/3 right-10 h-24 w-24 rounded-full bg-white/20 blur-md" />
 
-      <View className="h-full pt-12">
+      <View className="h-full pt-8 mt-12">
         {/* אזור עליון: לוגו + טקסט פתיחה */}
         <View className="flex-1 items-center justify-center px-6">
           {/* סמל עם גרדיאנט וצל משופר */}
@@ -90,8 +90,8 @@ export default function Index() {
 
         {/* אזור תחתון: כפתורים – זכוכית */}
         <BlurView intensity={22} tint="light" style={{ flex: 1 }}>
-          <View className="flex-1 items-center justify-center border-t border-white/40">
-            <View className="w-11/12 max-w-sm rounded-3xl border border-white/40 bg-white/30 backdrop-blur p-5 shadow-xl">
+          <View className="flex-1 items-center justify-center">
+            <View className="w-11/12 max-w-sm rounded-3xl border border-white/40 bg-white backdrop-blur p-5 shadow-xl">
               <Text
                 className="text-center text-slate-800 text-base font-semibold mb-4"
                 style={{ writingDirection: "rtl", textAlign: "center" }}
@@ -99,16 +99,14 @@ export default function Index() {
                 התחבר או צור חשבון כדי להתחיל
               </Text>
 
-              <View className="flex flex-col gap-4">
+              <View className="flex flex-col justify-center content-center items-center">
                 <Button onPress={() => router.push("/login")}>
                   לכניסה
                 </Button>
 
-                <View className="flex-row items-center">
-                  <View className="flex-1 h-[1px] bg-white/50" />
-                  <Text className="mx-3 text-xs text-slate-500">או</Text>
-                  <View className="flex-1 h-[1px] bg-white/50" />
-                </View>
+                <Text className="mb-4 text-slate-500">
+                  או
+                </Text>
 
                 <Button onPress={() => router.push("/register")}>
                   להרשמה

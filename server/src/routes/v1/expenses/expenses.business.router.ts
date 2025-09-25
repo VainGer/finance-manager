@@ -1,20 +1,21 @@
 import { Router } from "express";
 import ExpensesController from "../../../controllers/expenses.controller";
+import { accessTokenVerification } from "../../../middleware/auth.middleware";
 const businessRouter = Router();
 
 businessRouter.post<{}, {}, { refId: string, catName: string, name: string }>(
-    '/add', ExpensesController.addBusinessToCategory);
+    '/add', accessTokenVerification, ExpensesController.addBusinessToCategory);
 
 businessRouter.put<{}, {}, { refId: string, catName: string, oldName: string, newName: string }>(
-    '/rename', ExpensesController.renameBusiness);
+    '/rename', accessTokenVerification, ExpensesController.renameBusiness);
 
 businessRouter.put<{}, {}, { refId: string, catName: string, busName: string, bankName: string }>(
-    '/update-bank-name', ExpensesController.updateBusinessBankName);
+    '/update-bank-name', accessTokenVerification, ExpensesController.updateBusinessBankName);
 
 businessRouter.get<{ refId: string, catName: string }, {}, {}>(
-    '/get-businesses/:refId/:catName', ExpensesController.getBusinessNamesByCategory);
+    '/get-businesses/:refId/:catName', accessTokenVerification, ExpensesController.getBusinessNamesByCategory);
 
 businessRouter.delete<{ refId: string, catName: string, busName: string }, {}, {}, {}>(
-    '/delete/:refId/:catName/:busName', ExpensesController.deleteBusiness);
+    '/delete/:refId/:catName/:busName', accessTokenVerification, ExpensesController.deleteBusiness);
 
 export default businessRouter;

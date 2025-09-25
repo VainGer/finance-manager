@@ -1,9 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import LoadingSpinner from '../../../components/common/loadingSpinner';
 import ProgressBar from '../../../components/common/progressBar';
-import { useAuth } from '../../../context/AuthContext';
 import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
+import { formatAmount } from '../../../utils/formatters';
 
 
 const MainStats = ({ summary, formatAmount }) => (
@@ -90,20 +90,40 @@ const BusinessBreakdown = ({ businesses, totalAmount, formatAmount }) => (
 );
 
 export default function ExpenseSummary() {
-    const { profile } = useAuth();
     const [breakdownView, setBreakdownView] = useState('category');
 
     const {
-        loading,
+        isLoading: loading,
         error,
-        filteredExpenses,
-        summary,
         expenses,
-        refetchExpenses
-    } = useExpensesDisplay({ profile });
-
-
-    const formatAmount = (amount) => `₪${amount.toLocaleString()}`;
+        allExpenses,
+    } = useExpensesDisplay();
+    
+    // Calculate summary data from expenses
+    const summary = {
+        transactionCount: allExpenses?.length || 0,
+        totalAmount: allExpenses?.reduce((sum, exp) => sum + exp.amount, 0) || 0,
+        categoryTotals: {},
+        businessTotals: {}
+    };
+    
+    // Calculate category totals
+    if (allExpenses?.length) {
+        allExpenses.forEach(expense => {
+            const category = expense.category || 'ללא קטגוריה';
+            const business = expense.business || 'ללא עסק';
+            
+            if (!summary.categoryTotals[category]) {
+                summary.categoryTotals[category] = 0;
+            }
+            summary.categoryTotals[category] += expense.amount;
+            
+            if (!summary.businessTotals[business]) {
+                summary.businessTotals[business] = 0;
+            }
+            summary.businessTotals[business] += expense.amount;
+        });
+    }
 
     if (loading) {
         return <LoadingSpinner />;
@@ -120,7 +140,7 @@ export default function ExpenseSummary() {
         );
     }
 
-    if (filteredExpenses.length === 0) {
+    if (!allExpenses || allExpenses.length === 0) {
         return (
             <View className="bg-white rounded-lg shadow p-6 m-4">
                 <Text className="text-2xl font-bold text-gray-800 mb-6">📊 סיכום הוצאות</Text>

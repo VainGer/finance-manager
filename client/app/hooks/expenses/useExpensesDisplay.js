@@ -1,223 +1,249 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { get } from '../../utils/api';
+import { useCallback, useEffect, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { useProfileData } from '../../context/ProfileDataContext';
+import { monthToHebrewName } from '../../utils/formatters';
 
+export default function useExpensesDisplay() {
+    const { profile } = useAuth();
+    const {
+        expenses: contextExpenses,
+        expensesLoading,
+        errors: contextErrors,
+        categories: contextCategories,
+        businesses: contextBusinesses
+    } = useProfileData();
 
-export default function useExpensesDisplay({ profile }) {
-    const [expenses, setExpenses] = useState([]);
-    const [filteredExpenses, setFilteredExpenses] = useState([]);
-    const [dateFilteredExpenses, setDateFilteredExpenses] = useState([]);
+    const [allExpenses, setAllExpenses] = useState(null);
+    const [monthlyExpenses, setMonthlyExpenses] = useState({});
+    const [processingData, setProcessingData] = useState(false);
+    const [availableDates, setAvailableDates] = useState([]);
+    const [sortedExpenses, setSortedExpenses] = useState(null);
+    const [filteredExpenses, setFilteredExpenses] = useState(null);
+    const [stagedFilters, setStagedFilters] = useState({ month: null, category: null, business: null });
+    const [appliedFilters, setAppliedFilters] = useState({ month: null, category: null, business: null });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [filters, setFilters] = useState({
-        category: 'all',
-        business: 'all',
-        sortBy: 'date',
-        sortOrder: 'desc'
-    });
-    const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
-    const [showDateFilter, setShowDateFilter] = useState(false);
+    const [availableBusinesses, setAvailableBusinesses] = useState([]);
 
-    const fetchExpenses = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        const expensesId = profile.expenses;
-        const response = await get(`expenses/profile-expenses/${expensesId}`);
-        if (response.ok && response.expenses) {
-            const realExpenses = [];
-            const expensesData = response.expenses;
-            if (expensesData.categories) {
-                expensesData.categories.forEach(category => {
-                    if (category.Businesses) {
-                        category.Businesses.forEach(business => {
-                            if (business.transactions) {
-                                business.transactions.forEach(transaction => {
-                                    realExpenses.push({
-                                        _id: transaction._id,
-                                        amount: Number(transaction.amount),
-                                        date: transaction.date,
-                                        description: transaction.description,
-                                        category: category.name,
-                                        business: business.name
-                                    });
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-            setExpenses(realExpenses);
-        } else {
-            setError(response.message || 'שגיאה בטעינת הנתונים');
-        }
-
-        setLoading(false);
-    }, [profile]);
+    const isLoading = expensesLoading || processingData;
 
     useEffect(() => {
-        fetchExpenses();
-    }, [fetchExpenses]);
+        setLoading(isLoading);
+    }, [isLoading]);
 
     useEffect(() => {
-        let filtered = [...expenses];
-
-        if (filters.category !== 'all') {
-            filtered = filtered.filter(expense => expense.category === filters.category);
+        if (sortedExpenses) {
+            applyAllFilters();
         }
-
-        if (filters.business !== 'all') {
-            filtered = filtered.filter(expense => expense.business === filters.business);
-        }
-        filtered.sort((a, b) => {
-            let aValue, bValue;
-
-            switch (filters.sortBy) {
-                case 'amount':
-                    aValue = a.amount;
-                    bValue = b.amount;
-                    break;
-                case 'date':
-                    aValue = new Date(a.date);
-                    bValue = new Date(b.date);
-                    break;
-                case 'description':
-                    aValue = a.description?.toLowerCase() || '';
-                    bValue = b.description?.toLowerCase() || '';
-                    break;
-                default:
-                    aValue = new Date(a.date);
-                    bValue = new Date(b.date);
-            }
-
-            if (filters.sortOrder === 'asc') {
-                if (aValue < bValue) return -1;
-                if (aValue > bValue) return 1;
-                return 0;
-            } else {
-                if (aValue > bValue) return -1;
-                if (aValue < bValue) return 1;
-                return 0;
-            }
-        });
-        setFilteredExpenses(filtered);
-    }, [expenses, filters]);
-
-    const categories = useMemo(() => {
-        const allCategories = expenses.map(e => e.category);
-        return ['all', ...new Set(allCategories)];
-    }, [expenses]);
-
-    const businesses = useMemo(() => {
-        const allBusinesses = expenses.map(e => e.business);
-        return ['all', ...new Set(allBusinesses)];
-    }, [expenses]);
-
+    }, [sortedExpenses, applyAllFilters]);
 
     useEffect(() => {
-        if (!dateRange.startDate || !dateRange.endDate) {
-            setDateFilteredExpenses(filteredExpenses);
+        processExpensesData();
+    }, [processExpensesData, contextExpenses, contextErrors, profile]);
+
+    useEffect(() => {
+        sortByDate(true, true);
+    }, [allExpenses, monthlyExpenses]);
+
+    const processExpensesData = useCallback(() => {
+        setProcessingData(true);
+        if (!profile) {
+            setAllExpenses([]);
+            setError(null);
+            setProcessingData(false);
             return;
         }
 
-        const start = new Date(dateRange.startDate);
-        const end = new Date(dateRange.endDate);
-        end.setHours(23, 59, 59, 999); // Include the entire end date
+        const expenseErrors = contextErrors.find(e => e.expensesErrors)?.expensesErrors;
+        if (expenseErrors && expenseErrors.length > 0) {
+            setError(expenseErrors[0]);
+        } else {
+            setError(null);
+        }
 
-        const filtered = filteredExpenses.filter(expense => {
-            const expenseDate = new Date(expense.date);
-            return expenseDate >= start && expenseDate <= end;
+        try {
+            const realExpenses = [];
+            const monthlyExpenses = {};
+            const datesSet = new Set();
+            contextExpenses?.categories?.forEach(category =>
+                category.Businesses?.forEach(business =>
+                    business.transactionsArray?.forEach(({ dateYM, transactions }) => {
+                        transactions?.forEach(transaction => {
+                            const processed = {
+                                _id: transaction._id,
+                                amount: Number(transaction.amount),
+                                date: new Date(transaction.date),
+                                description: transaction.description,
+                                category: category.name,
+                                business: business.name,
+                                dateYM,
+                            };
+
+                            realExpenses.push(processed);
+                            (monthlyExpenses[dateYM] ??= []).push(processed);
+                            datesSet.add(dateYM);
+                        });
+                    })
+                )
+            );
+            sortAvailableDates(datesSet);
+            setAllExpenses(realExpenses);
+            setMonthlyExpenses(monthlyExpenses);
+        } catch (err) {
+            console.error('Error processing expenses data:', err);
+            setError('שגיאה בעיבוד נתוני ההוצאות');
+            setProcessingData(false);
+        } finally {
+            setProcessingData(false);
+        }
+    }, [contextExpenses, contextErrors, profile]);
+
+    const applyAllFilters = useCallback(() => {
+        if (!sortedExpenses) return;
+
+        // Apply the staged filters
+        setAppliedFilters({...stagedFilters});
+        
+        const { month, category, business } = stagedFilters;
+        let result;
+        if (month && monthlyExpenses[month]) {
+            result = [...monthlyExpenses[month]];
+        } else {
+            result = sortedExpenses;
+        }
+
+        if (category) {
+            result = result.filter(exp => exp.category === category);
+
+            const businessesInCategory = [...new Set(
+                result.map(exp => exp.business)
+            )].filter(Boolean);
+
+            setAvailableBusinesses(businessesInCategory);
+        } else {
+            const allBusinesses = [...new Set(
+                sortedExpenses.map(exp => exp.business)
+            )].filter(Boolean);
+
+            setAvailableBusinesses(allBusinesses);
+        }
+
+        if (business) {
+            result = result.filter(exp => exp.business === business);
+        }
+
+        setFilteredExpenses(result);
+    }, [stagedFilters, sortedExpenses, monthlyExpenses]);
+
+    const sortByDate = (descending = true, all = true) => {
+        if (all) {
+            if (!allExpenses || allExpenses.length === 0) { setSortedExpenses([]); return; }
+            const sorted = [...allExpenses].sort((a, b) => descending ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
+            setSortedExpenses(sorted);
+        } else {
+            if (!monthlyExpenses || Object.keys(monthlyExpenses).length === 0) { setSortedExpenses([]); return; }
+            const monthKeys = Object.keys(monthlyExpenses);
+            const sorted = [];
+            monthKeys.forEach(monthKey => {
+                const monthExpenses = monthlyExpenses[monthKey];
+                const monthSorted = [...monthExpenses].sort((a, b) => descending ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
+                sorted.push(...monthSorted);
+            });
+            setSortedExpenses(sorted);
+        }
+
+        if (appliedFilters.month || appliedFilters.category || appliedFilters.business) {
+            applyAllFilters();
+        }
+    };
+
+    const sortByAmount = (descending = true, all = true) => {
+        if (all) {
+            if (!allExpenses || allExpenses.length === 0) { setSortedExpenses([]); return; }
+            const sorted = [...allExpenses].sort((a, b) => descending ? b.amount - a.amount : a.amount - b.amount);
+            setSortedExpenses(sorted);
+        } else {
+            if (!monthlyExpenses || Object.keys(monthlyExpenses).length === 0) { setSortedExpenses([]); return; }
+            const monthKeys = Object.keys(monthlyExpenses);
+            const sorted = [];
+            monthKeys.forEach(monthKey => {
+                const monthExpenses = monthlyExpenses[monthKey];
+                const monthSorted = [...monthExpenses].sort((a, b) => descending ? b.amount - a.amount : a.amount - b.amount);
+                sorted.push(...monthSorted);
+            });
+            setSortedExpenses(sorted);
+        }
+
+        if (appliedFilters.month || appliedFilters.category || appliedFilters.business) {
+            applyAllFilters();
+        }
+    };
+
+    const filterByMonth = (month) => {
+        setStagedFilters(prev => {
+            const newFilters = { ...prev, month };
+            return newFilters;
         });
+    };
 
-        setDateFilteredExpenses(filtered);
-    }, [filteredExpenses, dateRange]);
+    const filterByCategory = (category) => {
+        setStagedFilters(prev => ({ ...prev, category, business: null }));
+    };
 
+    const filterByBusiness = (business) => {
+        setStagedFilters(prev => ({ ...prev, business }));
+    };
 
-    useEffect(() => {
-        if (expenses.length > 0 && (!dateRange.startDate || !dateRange.endDate)) {
-            let earliest = new Date();
-            let latest = new Date(0);
+    const clearFilters = () => {
+        setStagedFilters({ month: null, category: null, business: null });
+        setAppliedFilters({ month: null, category: null, business: null });
+        sortByDate(true, true);
+    };
 
-            expenses.forEach(expense => {
-                const expenseDate = new Date(expense.date);
-                if (expenseDate < earliest) earliest = expenseDate;
-                if (expenseDate > latest) latest = expenseDate;
-            });
-
-            setDateRange({
-                startDate: earliest.toISOString().split('T')[0],
-                endDate: latest.toISOString().split('T')[0]
-            });
-        }
-    }, [expenses]);
-
-    const calculateSummary = useCallback(() => {
-        const expensesToUse = dateFilteredExpenses;
-        const totalAmount = expensesToUse.reduce((sum, expense) => sum + expense.amount, 0);
-
-        const categoryTotals = expensesToUse.reduce((acc, expense) => {
-            if (!acc[expense.category]) {
-                acc[expense.category] = 0;
-            }
-            acc[expense.category] += expense.amount;
-            return acc;
-        }, {});
-
-        const businessTotals = expensesToUse.reduce((acc, expense) => {
-            if (!acc[expense.business]) {
-                acc[expense.business] = 0;
-            }
-            acc[expense.business] += expense.amount;
-            return acc;
-        }, {});
-
-        return {
-            totalAmount,
-            categoryTotals,
-            businessTotals,
-            transactionCount: expensesToUse.length
-        };
-    }, [dateFilteredExpenses]);
+    const sortAvailableDates = (datesSet) => {
+        const sortedDates = Array.from(datesSet)
+            .map(dateYM => {
+                const [year, month] = dateYM.split('-');
+                return {
+                    year: parseInt(year),
+                    yearStr: year,
+                    monthNum: parseInt(month),
+                    monthStr: month,
+                    month: monthToHebrewName(month),
+                    dateYM: dateYM // Include the original dateYM for filtering
+                };
+            }).sort((a, b) => {
+                if (a.year !== b.year) {
+                    return b.year - a.year;
+                }
+                return b.monthNum - a.monthNum;
+            }).map(({ year, month, dateYM }) => ({
+                year: year.toString(),
+                month,
+                dateYM 
+            }))
+        setAvailableDates(sortedDates);
+    }
 
 
-    const resetDateFilter = useCallback(() => {
-        if (expenses.length > 0) {
-            let earliest = new Date();
-            let latest = new Date(0);
-
-            expenses.forEach(expense => {
-                const expenseDate = new Date(expense.date);
-                if (expenseDate < earliest) earliest = expenseDate;
-                if (expenseDate > latest) latest = expenseDate;
-            });
-
-            setDateRange({
-                startDate: earliest.toISOString().split('T')[0],
-                endDate: latest.toISOString().split('T')[0]
-            });
-        }
-    }, [expenses]);
-
-
-    const expensesForConsumption = dateFilteredExpenses;
-
-    const summary = useMemo(() => calculateSummary(), [calculateSummary]);
 
     return {
-        filteredExpenses: expensesForConsumption,
-        loading,
+        expenses: filteredExpenses || sortedExpenses,
+        allExpenses,
+        monthlyExpenses,
+        isLoading: loading,
         error,
-        filters,
-        setFilters,
-        categories,
-        businesses,
-        refetchExpenses: fetchExpenses,
-
-        expenses,
-        dateRange,
-        setDateRange,
-        showDateFilter,
-        setShowDateFilter,
-        resetDateFilter,
-
-        summary
+        availableDates,
+        availableBusinesses,
+        sortByDate,
+        sortByAmount,
+        filterByMonth,
+        filterByCategory,
+        filterByBusiness,
+        clearFilters,
+        applyFilters: applyAllFilters,
+        stagedFilters,
+        appliedFilters,
     };
-}
+};
+

@@ -98,11 +98,13 @@ export default class BudgetService {
 
         let sum = 0;
         category.Businesses.forEach((business: Business) => {
-            business.transactions.forEach((transaction) => {
-                const transactionDate = new Date(transaction.date);
-                if (transactionDate >= startDate && transactionDate <= endDate) {
-                    sum += transaction.amount;
-                }
+            business.transactionsArray.forEach((monthlyTransactions) => {
+                monthlyTransactions.transactions.forEach((transaction) => {
+                    const transactionDate = new Date(transaction.date);
+                    if (transactionDate >= startDate && transactionDate <= endDate) {
+                        sum += transaction.amount;
+                    }
+                });
             });
         });
 
@@ -274,13 +276,11 @@ export default class BudgetService {
 
         const categories = await CategoryService.getCategoriesNames(refId);
         for (const category of categories.categoriesNames) {
-            if (!categoriesBudgets.includes(category.categoryName)) {
-                throw new AppErrors.ValidationError(`Category '${category.categoryName}' does not exist in categoriesBudgets, 
-                    each category must have a budget`);
+            if (!categoriesBudgets.find((cat) => cat.categoryName === category)) {
+                throw new AppErrors.ValidationError(`Category '${category}' does not have a budget`);
             }
         }
 
-        // First create all the category budgets
         const categoriesBudgetsCreated = await this.createCategoryBudgets(
             refId,
             categoriesBudgets,
@@ -289,7 +289,6 @@ export default class BudgetService {
             new Date(profileBudget.endDate)
         );
 
-        // Now calculate the total spent amount across all categories
         const totalSpent = await this.getTransactionSumInBudgetDateRange(refId, id);
 
         const newProfileBudget: ProfileBudget = {

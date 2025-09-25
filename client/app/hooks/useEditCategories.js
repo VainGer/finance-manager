@@ -1,32 +1,45 @@
-import { useState } from 'react';
-import { del, get, post, put } from '../utils/api';
-export default function useEditCategories({ profile, goBack }) {
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useProfileData } from '../context/ProfileDataContext';
+import { del, post, put } from '../utils/api';
+
+export default function useEditCategories(props = {}) {
+    const { categories, expensesLoading, errors, fetchCategories } = useProfileData();
+    const authContext = useAuth();
+    const router = useRouter();
+    
+    const profile = props.profile || authContext.profile;
+    
+    // Use custom goBack function if provided, otherwise use router
+    const goBack = props.goBack || (() => router.back());
+    
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [getCategoriesLoading, setGetCategoriesLoading] = useState(false);
     const [getCategoriesError, setGetCategoriesError] = useState(null);
+
     const resetState = () => {
         setError(null);
         setSuccess(false);
         setLoading(false);
-        setGetCategoriesLoading(false);
         setGetCategoriesError(null);
     };
-
-    const getCategories = async () => {
-        setGetCategoriesLoading(true);
-        setGetCategoriesError(null);
-        const response = await get(`expenses/category/get-names/${profile.expenses}`);
-        if (response.ok) {
-            setGetCategoriesLoading(false);
-            return response.categoriesNames;
-        } else {
-            setGetCategoriesLoading(false);
-            setGetCategoriesError('אירעה שגיאה בעת קבלת הקטגוריות, נסה שוב מאוחר יותר');
-            console.error('Error fetching categories:', response.error);
+    
+    // Fetch categories when profile changes
+    useEffect(() => {
+        if (profile?.expenses) {
+            fetchCategories();
+            
+            // Set categories error from context if available
+            const categoriesErrors = errors.find(e => e.categoriesErrors)?.categoriesErrors;
+            if (categoriesErrors && categoriesErrors.length > 0) {
+                setGetCategoriesError(categoriesErrors[0]);
+            } else {
+                setGetCategoriesError(null);
+            }
         }
-    }
+    }, [profile?.expenses, fetchCategories, errors]);
 
 
     const addCategory = async (categoryName, setCategoryName) => {
@@ -80,7 +93,10 @@ export default function useEditCategories({ profile, goBack }) {
             setSuccess('הקטגוריה עודכנה בהצלחה');
             setNewCategoryName('');
             setSelectedCategory('');
-            setTimeout(() => { setSuccess(false); goBack(); }, 1500);
+            setTimeout(() => { 
+                setSuccess(false); 
+                goBack();
+            }, 1500);
         } else if (response.status === 409) {
             setError('שם הקטגוריה כבר קיים');
         } else {
@@ -89,7 +105,7 @@ export default function useEditCategories({ profile, goBack }) {
         }
     };
 
-    const deleteCategory = async (refId, selectedCategory) => {
+    const deleteCategory = async (refId, selectedCategory, setShowConfirm) => {
         setError(null);
         setLoading(true);
         const response = await del(`expenses/category/delete/${refId}/${selectedCategory}`);
@@ -113,12 +129,13 @@ export default function useEditCategories({ profile, goBack }) {
         error,
         success,
         loading,
-        getCategoriesLoading,
-        getCategoriesError,
+        categoriesLoading: expensesLoading, 
+        categories,
+        categoriesError: getCategoriesError,
         addCategory,
         renameCategory,
         deleteCategory,
         resetState,
-        getCategories
+        fetchCategories 
     };
 }

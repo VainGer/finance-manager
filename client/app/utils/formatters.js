@@ -21,10 +21,7 @@ export const formatDate = (date) => {
 };
 
 export const formatCurrency = (amount) => {
-    // Ensure we're working with a number
     const numAmount = Number(amount);
-    
-    // Format with proper spacing and no decimal places for better display
     return `₪${numAmount.toLocaleString('he-IL', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
@@ -33,13 +30,44 @@ export const formatCurrency = (amount) => {
 };
 
 export const formatAmount = (amount) => {
-    // Ensure we're working with a number
     const numAmount = Number(amount);
-    
-    // Format with proper spacing and no decimal places for better display
     return `₪${numAmount.toLocaleString('he-IL', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
         useGrouping: true
     })}`;
+};
+
+/**
+ * Converts month number to Hebrew month name
+ * @param {string} monthStr - Month number as string (01-12)
+ * @returns {string} Hebrew month name
+ */
+export const monthToHebrewName = (monthStr) => {
+    const monthsToText = {
+        "01": 'ינואר', 
+        "02": 'פברואר', 
+        "03": 'מרץ',
+        "04": 'אפריל', 
+        "05": 'מאי', 
+        "06": 'יוני',
+        "07": 'יולי', 
+        "08": 'אוגוסט', 
+        "09": 'ספטמבר',
+        "10": 'אוקטובר', 
+        "11": 'נובמבר', 
+        "12": 'דצמבר',
+    };
+    return monthsToText[monthStr] || monthStr;
+};
+
+/**
+ * Formats a YYYY-MM date format to a readable Hebrew month and year
+ * @param {string} dateYM - Date in YYYY-MM format
+ * @returns {string} Formatted month and year in Hebrew
+ */
+export const formatYearMonth = (dateYM) => {
+    if (!dateYM) return '';
+    const [year, month] = dateYM.split('-');
+    return `${monthToHebrewName(month)} ${year}`;
 };

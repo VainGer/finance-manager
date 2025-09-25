@@ -43,7 +43,8 @@ export default function PieChartComponent({ data, totalAmount }) {
                     chartConfig={chartConfig}
                     accessor="population"
                     backgroundColor="transparent"
-                    paddingLeft="15"
+                    hasLegend={false}
+                    center={[screenWidth / 4, 0]}
                     absolute
                 />
             </View>

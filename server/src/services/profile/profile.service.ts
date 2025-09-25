@@ -2,13 +2,14 @@ import * as AppErrors from "../../errors/AppError";
 import ProfileModel from "../../models/profile/profile.model";
 import AccountModel from "../../models/account/account.model";
 import CategoryService from "../expenses/category.service";
-import { ProfileCreationData, Profile, SafeProfile, ProfileBudget, BudgetCreationData, CategorizedFile, ChildProfile, ChildProfileCreationData } from "../../types/profile.types";
-import { CategoryBudget, Transaction, TransactionWithoutId } from "../../types/expenses.types";
+import { ProfileCreationData, Profile, SafeProfile, CategorizedFile, ChildProfile, ChildProfileCreationData } from "../../types/profile.types";
+import { TransactionWithoutId } from "../../types/expenses.types";
 import { ObjectId } from "mongodb";
 import LLM from "../../utils/LLM";
 import BusinessModel from "../../models/expenses/business.model";
 import TransactionService from "../expenses/transaction.service";
-
+import JWT from "../../utils/JWT";
+import { Account, Token } from "../../types/account.types";
 export default class ProfileService {
 
     static async createProfile(profileData: ProfileCreationData) {
@@ -165,10 +166,11 @@ export default class ProfileService {
     }
 
 
-    static async validateProfile(username: string, profileName: string, pin: string) {
+    static async validateProfile(username: string, profileName: string, pin: string, device: string,
+        remember: boolean = false) {
         try {
-            if (!username || !profileName || !pin) {
-                throw new AppErrors.ValidationError("Username, profile name and PIN are required.");
+            if (!username || !profileName || !pin || !device) {
+                throw new AppErrors.ValidationError("Username, profile name, PIN and device are required.");
             }
 
             const profile = await ProfileModel.findProfile(username, profileName);
@@ -181,17 +183,147 @@ export default class ProfileService {
                 throw new AppErrors.UnauthorizedError("Invalid PIN. Access denied.");
             }
 
+            const accessToken = JWT.signAccessToken({ profileId: profile._id.toString() });
+            const refreshToken = JWT.signRefreshToken({ profileId: profile._id.toString() });
+            const tokens = remember ? { accessToken, refreshToken } : { accessToken, refreshToken: null };
+            if (remember && tokens.refreshToken) {
+                const tokenData: Token = {
+                    value: tokens.refreshToken,
+                    profileId: profile._id,
+                    device,
+                    createdAt: new Date(),
+                    expiredAt: JWT.getRefreshTokenExpiryDate(refreshToken),
+                    maxValidUntil: JWT.getRefreshTokenMaxValidityDate(refreshToken),
+                    lastUsedAt: new Date()
+                };
+                await AccountModel.storeToken(username, tokenData);
+            }
             const { pin: _, budgets: __, ...safeProfile } = profile;
             return {
                 success: true,
                 safeProfile,
-                message: "Profile validated successfully."
+                message: "Profile validated successfully.",
+                tokens
             };
         } catch (error) {
             if (error instanceof AppErrors.AppError) {
                 throw error;
             }
             throw new AppErrors.AppError(`Error validating profile: ${(error as Error).message}`, 500);
+        }
+    }
+
+    static async refreshDeviceToken(username: string, profileName: string, device: string) {
+        await AccountModel.cleanupExpiredTokens(username);
+
+        const tokens = await AccountModel.getTokens(username, profileName);
+        if (!tokens || !tokens.tokens || tokens.tokens.length === 0) {
+            return { success: true, message: "No tokens found for the profile on this device.", tokensRemoved: 0 };
+        }
+
+        const deviceTokens = tokens.tokens.filter((t: Token) => t.device === device);
+        if (!deviceTokens || deviceTokens.length === 0) {
+            return { success: true, message: "No tokens found for the profile on this device.", tokensRemoved: 0 };
+        }
+        const validToken = JWT.verifyRefreshToken(deviceTokens[0].value);
+        if (validToken) {
+            return { success: true, message: "Existing token is still valid. No need to refresh.", tokensRemoved: 0 };
+        }
+        const canBeRefreshed = JWT.getRefreshTokenMaxValidityDate(deviceTokens[0].value) > new Date();
+        if (!canBeRefreshed) {
+            await AccountModel.removeToken(username, deviceTokens[0].value);
+            return { success: true, message: "Token expired and cannot be refreshed. Please log in again.", tokensRemoved: 1 };
+        }
+        const removeResult = await AccountModel.removeToken(username, deviceTokens[0].value);
+        if (!removeResult.success) {
+            return { success: false, message: "Failed to remove old token. Cannot refresh.", tokensRemoved: 0 };
+        }
+
+        const tokenValue = JWT.signRefreshToken({ profileId: deviceTokens[0].profileId.toString() });
+
+        const newToken: Token = {
+            value: tokenValue,
+            profileId: deviceTokens[0].profileId,
+            device,
+            createdAt: new Date(),
+            expiredAt: JWT.getRefreshTokenExpiryDate(tokenValue),
+            maxValidUntil: JWT.getRefreshTokenMaxValidityDate(tokenValue),
+            lastUsedAt: new Date()
+        };
+        const storeResult = await AccountModel.storeToken(username, newToken);
+        if (!storeResult.success) {
+            return { success: false, message: "Failed to store new token. Cannot refresh.", tokensRemoved: 1 };
+        }
+        return { success: true, message: "Token refreshed successfully.", tokensRemoved: 1 };
+    }
+
+    static async validateByRefreshToken(username: string, profileId: string, refreshToken: string, device: string) {
+        try {
+            await AccountModel.cleanupExpiredTokens(username);
+
+            const tokens = await AccountModel.getTokens(username, profileId);
+            if (!tokens || !tokens.tokens || tokens.tokens.length === 0) {
+                throw new AppErrors.UnauthorizedError("No tokens found for the profile.");
+            }
+
+            const tokenRecord = tokens.tokens.find((t: Token) => t.value === refreshToken && t.device === device);
+            if (!tokenRecord) {
+                await this.refreshDeviceToken(username, profileId, device);
+                throw new AppErrors.UnauthorizedError("Refresh token not found or does not match the device.");
+            }
+
+            const profile = await ProfileModel.findProfileById(username, profileId);
+            if (!profile) {
+                throw new AppErrors.UnauthorizedError("Profile not found.");
+            }
+
+            const valid = JWT.verifyRefreshToken(refreshToken);
+            let newTokenRecord;
+
+            if (!valid) {
+                try {
+                    const maxValidDate = JWT.getRefreshTokenMaxValidityDate(refreshToken);
+                    const now = new Date();
+
+                    if (now > maxValidDate) {
+                        await AccountModel.removeToken(username, refreshToken);
+                        throw new AppErrors.UnauthorizedError("Token expired beyond maximum validity.");
+                    }
+                    const refreshResult = await this.refreshDeviceToken(username, profileId, device);
+                    if (!refreshResult.success) {
+                        throw new AppErrors.UnauthorizedError("Failed to refresh token.");
+                    }
+                    const newTokens = await AccountModel.getTokens(username, profileId);
+                    newTokenRecord = newTokens?.tokens?.find((t: Token) => t.device === device);
+                    if (!newTokenRecord) {
+                        throw new AppErrors.UnauthorizedError("No valid token available after refresh. Please log in again.");
+                    }
+                } catch (error) {
+                    await AccountModel.removeToken(username, refreshToken);
+                    if (error instanceof AppErrors.AppError) {
+                        throw error;
+                    }
+                    throw new AppErrors.UnauthorizedError("Invalid refresh token.");
+                }
+            }
+            const accessToken = JWT.signAccessToken({ profileId });
+            const newRefreshToken = newTokenRecord ? newTokenRecord.value : refreshToken;
+            if (!newTokenRecord) {
+                await AccountModel.updateTokenLastUsed(username, refreshToken);
+            }
+            const tokensToReturn = { accessToken, refreshToken: newRefreshToken };
+            const { pin: _, budgets: __, ...safeProfile } = profile;
+            return {
+                success: true,
+                safeProfile,
+                message: newTokenRecord ? "Token refreshed and validated successfully." : "Token validated successfully.",
+                tokens: tokensToReturn
+            };
+        } catch (error) {
+            if (error instanceof AppErrors.AppError) {
+                throw error;
+            }
+            throw new AppErrors.AppError(`Error validating token: ${(error as Error).message}`, 500);
         }
     }
 
@@ -385,8 +517,8 @@ export default class ProfileService {
         for (const item of transactionsToUpload) {
             const transaction: TransactionWithoutId = {
                 amount: item.amount,
-                date: new Date(item.date),
-                description: item.description
+                date: new Date(item.date).toISOString(),
+                description: item.description ?? ''
             }
             const result = await TransactionService.create(refId, item.category, item.business, transaction);
             if (!result || !result.success) {

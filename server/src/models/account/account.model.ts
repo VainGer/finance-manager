@@ -1,6 +1,6 @@
 import db from "../../server";
 import bcrypt from 'bcrypt';
-import { Account } from "../../types/account.types";
+import { Account, Token } from "../../types/account.types";
 
 export default class AccountModel {
 
@@ -68,6 +68,93 @@ export default class AccountModel {
         } catch (error) {
             console.error('Error in AccountModel.updatePassword', error);
             throw new Error('Failed to update password');
+        }
+    }
+
+    static async storeToken(username: string, token: Token) {
+        try {
+            const result = await db.UpdateDocument(this.accountCollection, { username },
+                { $addToSet: { tokens: token } });
+            if (!result || result.modifiedCount === 0) {
+                return { success: false, message: 'Account not found or token not added' };
+            }
+            return { success: true, message: 'Token added successfully' };
+        } catch (error) {
+            console.error('Error in AccountModel.addToken', error);
+            throw new Error('Failed to add token');
+        }
+    }
+
+    static async removeToken(username: string, tokenValue: string) {
+        try {
+            const result = await db.UpdateDocument(this.accountCollection, { username }, { $pull: { tokens: { value: tokenValue } } });
+            if (!result || result.modifiedCount === 0) {
+                return { success: false, message: 'Account not found or token not removed' };
+            }
+            return { success: true, message: 'Token removed successfully' };
+        } catch (error) {
+            console.error('Error in AccountModel.removeToken', error);
+            throw new Error('Failed to remove token');
+        }
+    }
+
+    static async getTokens(username: string, profileId: string) {
+        try {
+            const account = await db.GetDocument(this.accountCollection, { username });
+            if (!account || !account.tokens) {
+                return { success: true, tokens: [], message: 'No tokens found' };
+            }
+
+            const tokens = account.tokens.filter((token: Token) =>
+                token.profileId && token.profileId.toString() === profileId
+            );
+
+            return { success: true, tokens, message: 'Tokens retrieved successfully' };
+        } catch (error) {
+            console.error('Error in AccountModel.getTokens', error);
+            throw new Error('Failed to get tokens');
+        }
+    }
+
+    static async updateTokenLastUsed(username: string, tokenValue: string) {
+        try {
+            const result = await db.UpdateDocument(
+                this.accountCollection, 
+                { username, "tokens.value": tokenValue },
+                { $set: { "tokens.$.lastUsedAt": new Date() } }
+            );
+            
+            if (!result || result.modifiedCount === 0) {
+                return { success: false, message: 'Account not found or token not updated' };
+            }
+            return { success: true, message: 'Token last used timestamp updated successfully' };
+        } catch (error) {
+            console.error('Error in AccountModel.updateTokenLastUsed', error);
+            throw new Error('Failed to update token last used timestamp');
+        }
+    }
+
+    static async cleanupExpiredTokens(username: string) {
+        try {
+            const now = new Date();
+            const result = await db.UpdateDocument(
+                this.accountCollection,
+                { username },
+                { $pull: { tokens: { maxValidUntil: { $lt: now } } } }
+            );
+            
+            if (!result) {
+                return { success: false, message: 'Account not found or tokens not cleaned up' };
+            }
+            
+            return { 
+                success: true, 
+                message: 'Expired tokens cleaned up successfully',
+                removedCount: result.modifiedCount > 0 ? 'Some tokens were removed' : 'No tokens needed cleanup'
+            };
+        } catch (error) {
+            console.error('Error in AccountModel.cleanupExpiredTokens', error);
+            throw new Error('Failed to clean up expired tokens');
         }
     }
 }

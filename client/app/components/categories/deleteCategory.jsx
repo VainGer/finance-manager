@@ -19,7 +19,7 @@ export default function DeleteCategory({ goBack, refId, error, success, deleteCa
     };
 
     const handleDelete = () => {
-        deleteCategory(refId, selectedCategory);
+        deleteCategory(refId, selectedCategory, setShowConfirm);
     };
 
     const cancelDelete = () => {
