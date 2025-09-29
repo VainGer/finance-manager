@@ -2,17 +2,20 @@ import { Router } from "express";
 import ProfileController from "../../controllers/profile.controller";
 import { ProfileBudget, Profile, BudgetCreationData, ProfileCreationData, CategorizedFile } from "../../types/profile.types";
 import { accessTokenVerification, refreshTokenVerification } from "../../middleware/auth.middleware";
+import { profile } from "console";
 const profileRouter = Router();
 
 // Authentication endpoints (no middleware)
 profileRouter.post<{}, {}, { reqProfile: ProfileCreationData }>
-    ("/create-profile", ProfileController.createProfile);
+    ("/create-first-profile", ProfileController.createProfile);
 profileRouter.post<{}, {}, { username: string, profileName: string, pin: string }>
     ("/validate-profile", ProfileController.validateProfile);
 profileRouter.get<{}, {}, { username: string }>
     ("/get-profiles", ProfileController.getAllProfiles);
 
 // Routes that require authentication
+profileRouter.post<{}, {}, { reqProfile: ProfileCreationData }>
+    ("/create-profile", accessTokenVerification, ProfileController.createProfile);
 profileRouter.post<{}, {}, { username: string, profileName: string, childProfile: Profile }>
     ("/create-child-profile", accessTokenVerification, ProfileController.createChildProfile);
 profileRouter.post<{}, {}, { username: string, profileName: string, oldPin: string, newPin: string }>
@@ -27,7 +30,8 @@ profileRouter.post<{}, {}, { username: string, profileName: string, avatar: stri
     ("/set-avatar", accessTokenVerification, ProfileController.setAvatar);
 profileRouter.post<{}, {}, { username: string, profileName: string, color: string }>
     ("/set-color", accessTokenVerification, ProfileController.setColor);
-
+profileRouter.post<{}, {}, { profileId: string }>
+    ("/refresh-access-token", accessTokenVerification, ProfileController.refreshAccessToken);
 profileRouter.post<{}, {}, { refId: string, transactionsData: string }>
     ("/categorize-transactions", accessTokenVerification, ProfileController.categorizeTransactions);
 

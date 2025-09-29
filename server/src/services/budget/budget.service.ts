@@ -220,11 +220,12 @@ export default class BudgetService {
         if (!profile) {
             throw new AppErrors.NotFoundError("Profile not found");
         }
-        const budgets = profile.budgets;
-        if (!budgets) {
+        const profileBudget = profile.budgets;
+        if (!profileBudget) {
             throw new AppErrors.NotFoundError("No budgets found for this profile");
         }
-        return { success: true, budgets };
+        const categoriesBudgets = await this.getCategoriesBudgets(profile.expenses);
+        return { success: true, budgets: { profile: profileBudget, categories: categoriesBudgets.categoriesBudgets } };
     }
 
     static async validateBudgetDates(username: string, profileName: string, startDate: Date, endDate: Date) {

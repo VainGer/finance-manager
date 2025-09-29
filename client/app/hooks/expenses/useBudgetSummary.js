@@ -27,8 +27,8 @@ export default function useBudgetSummary() {
         }
 
         try {
-            if (profileBudgets?.budgets?.length > 0 && categoryBudgets?.length > 0) {
-                const budgets = profileBudgets.budgets;
+            if (profileBudgets?.length > 0 && categoryBudgets?.length > 0) {
+                const budgets = profileBudgets;
                 const spendingData = {};
                 budgets.forEach(budget => {
                     const periodKey = `${budget.startDate}-${budget.endDate}`;
@@ -58,8 +58,8 @@ export default function useBudgetSummary() {
     }, [profile, profileBudgets, categoryBudgets, errors]);
 
     const availablePeriods = useMemo(() => {
-        if (!profileBudgets?.budgets?.length) return [];
-        return profileBudgets.budgets
+        if (!profileBudgets?.length) return [];
+        return profileBudgets
             .map(budget => ({
                 startDate: budget.startDate,
                 endDate: budget.endDate
@@ -90,11 +90,11 @@ export default function useBudgetSummary() {
     }, [availablePeriods, selectedPeriod]);
 
     const { currentProfileBudget, currentCategoryBudgets } = useMemo(() => {
-        if (!selectedPeriod || !profileBudgets?.budgets?.length || !Object.keys(categorySpendingByPeriod).length) {
+        if (!selectedPeriod || !profileBudgets?.length || !Object.keys(categorySpendingByPeriod).length) {
             return { currentProfileBudget: null, currentCategoryBudgets: [] };
         }
 
-        const profileBudget = profileBudgets.budgets.find(
+        const profileBudget = profileBudgets.find(
             budget => budget.startDate === selectedPeriod.startDate &&
                 budget.endDate === selectedPeriod.endDate
         );

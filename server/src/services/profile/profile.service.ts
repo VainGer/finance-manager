@@ -155,8 +155,8 @@ export default class ProfileService {
             if (!profile) {
                 throw new AppErrors.NotFoundError(`Profile '${profileName}' not found.`);
             }
-
-            return { success: true, profile };
+            const { pin: _, budgets: __, ...safeProfile } = profile;
+            return { success: true, profile: safeProfile };
         } catch (error) {
             if (error instanceof AppErrors.AppError) {
                 throw error;
@@ -184,26 +184,39 @@ export default class ProfileService {
             }
 
             const accessToken = JWT.signAccessToken({ profileId: profile._id.toString() });
-            const refreshToken = JWT.signRefreshToken({ profileId: profile._id.toString() });
-            const tokens = remember ? { accessToken, refreshToken } : { accessToken, refreshToken: null };
-            if (remember && tokens.refreshToken) {
-                const tokenData: Token = {
-                    value: tokens.refreshToken,
-                    profileId: profile._id,
-                    device,
-                    createdAt: new Date(),
-                    expiredAt: JWT.getRefreshTokenExpiryDate(refreshToken),
-                    maxValidUntil: JWT.getRefreshTokenMaxValidityDate(refreshToken),
-                    lastUsedAt: new Date()
-                };
-                await AccountModel.storeToken(username, tokenData);
+            let refreshToken = null;
+
+            if (remember) {
+                await AccountModel.cleanupExpiredTokens(username);
+                const existingTokens = await AccountModel.getTokens(username, profile._id.toString());
+                const validDeviceToken = existingTokens?.tokens?.find((t: Token) =>
+                    t.device === device &&
+                    JWT.verifyRefreshToken(t.value)
+                );
+
+                if (validDeviceToken) {
+                    refreshToken = validDeviceToken.value;
+                    await AccountModel.updateTokenLastUsed(username, refreshToken);
+                } else {
+                    refreshToken = JWT.signRefreshToken({ profileId: profile._id.toString() });
+                    const tokenData: Token = {
+                        value: refreshToken,
+                        profileId: profile._id,
+                        device,
+                        createdAt: new Date(),
+                        expiredAt: JWT.getRefreshTokenExpiryDate(refreshToken),
+                        maxValidUntil: JWT.getRefreshTokenMaxValidityDate(refreshToken),
+                        lastUsedAt: new Date()
+                    };
+                    await AccountModel.storeToken(username, tokenData);
+                }
             }
             const { pin: _, budgets: __, ...safeProfile } = profile;
             return {
                 success: true,
                 safeProfile,
                 message: "Profile validated successfully.",
-                tokens
+                tokens: { accessToken, refreshToken }
             };
         } catch (error) {
             if (error instanceof AppErrors.AppError) {
@@ -313,9 +326,11 @@ export default class ProfileService {
             }
             const tokensToReturn = { accessToken, refreshToken: newRefreshToken };
             const { pin: _, budgets: __, ...safeProfile } = profile;
+            const { password: ___, tokens: ____, ...safeAccount } = await AccountModel.findByUsername(username) as Account;
             return {
                 success: true,
                 safeProfile,
+                safeAccount,
                 message: newTokenRecord ? "Token refreshed and validated successfully." : "Token validated successfully.",
                 tokens: tokensToReturn
             };
@@ -324,6 +339,15 @@ export default class ProfileService {
                 throw error;
             }
             throw new AppErrors.AppError(`Error validating token: ${(error as Error).message}`, 500);
+        }
+    }
+
+    static refreshAccessToken(profileId: string) {
+        try {
+            const newAccessToken = JWT.signAccessToken({ profileId });
+            return { success: true, message: "Access token refreshed successfully.", accessToken: newAccessToken };
+        } catch (error) {
+            throw new AppErrors.AppError(`Error refreshing access token: ${(error as Error).message}`, 500);
         }
     }
 

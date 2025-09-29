@@ -3,7 +3,8 @@ import { useEffect, useState, memo } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import CategorySelect from '../../components/categories/categorySelect.jsx';
 
-const CreateBusiness = ({ goBack, refId, error, success, addBusiness, onBusinessAdded, categories, getCategoriesLoading, getCategoriesError }) => {
+const CreateBusiness = ({ goBack, refId, error, success, addBusiness, onBusinessAdded,
+    categories, getCategoriesLoading, getCategoriesError, inOverlay = false }) => {
     const [name, setName] = useState('');
     const [category, setCategory] = useState(null);
 
@@ -18,7 +19,7 @@ const CreateBusiness = ({ goBack, refId, error, success, addBusiness, onBusiness
     };
 
     return (
-        <View className="bg-white rounded-xl shadow p-6 w-full mx-auto" style={{ minHeight: 380 }}>
+        <View className={`bg-white rounded-xl ${!inOverlay ? 'shadow-lg' : ''} p-6 w-full mx-auto`} style={{ minHeight: 380 }}>
             {/* Title */}
             <View className="items-center mb-8">
                 <Text className="text-3xl font-bold text-slate-800">הוספת עסק</Text>
@@ -45,10 +46,17 @@ const CreateBusiness = ({ goBack, refId, error, success, addBusiness, onBusiness
             )}
 
             {/* Category Selection */}
+
             <View className="mb-7">
                 <Text className="text-slate-800 font-bold mb-3 text-lg text-right">בחר קטגוריה</Text>
                 <View className="border-2 border-gray-300 rounded-xl overflow-hidden">
-                    <CategorySelect categories={categories} setSelectedCategory={setCategory} loading={getCategoriesLoading} error={getCategoriesError} />
+                    <CategorySelect
+                        initialValue={category}
+                        categories={categories}
+                        loading={getCategoriesLoading}
+                        error={getCategoriesError}
+                        setSelectedCategory={setCategory}
+                    />
                 </View>
             </View>
 

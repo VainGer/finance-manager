@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from 'react';
-import { I18nManager, Switch, Text, View} from 'react-native';
+import { I18nManager, Switch, Text, View } from 'react-native';
 import Button from '../common/button.jsx';
 import Input from '../common/textInput.jsx';
 
 export default function AuthProfileForm({ authProfile, selectedProfile, onBack,
-    loading, error, setStoreProfile, storeProfile }) {
+    loading, error, remember, setRemember }) {
     const [pin, setPin] = useState('');
     const isRTL = I18nManager.isRTL;
 
@@ -55,15 +55,15 @@ export default function AuthProfileForm({ authProfile, selectedProfile, onBack,
                         זכור אותי
                     </Text>
                     <Switch
-                        value={storeProfile}
-                        onValueChange={setStoreProfile}
+                        value={remember}
+                        onValueChange={setRemember}
                         trackColor={{ false: "#767577", true: "#81b0ff" }}
                     />
                 </View>
             </View>
 
             <Button
-                onPress={() => authProfile(selectedProfile.profileName, pin, storeProfile)}
+                onPress={() => authProfile(selectedProfile.profileName, pin, remember)}
                 disabled={loading}
             >
                 כניסה לפרופיל

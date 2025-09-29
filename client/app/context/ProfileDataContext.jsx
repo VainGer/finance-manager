@@ -1,44 +1,43 @@
-import { usePathname, useRouter } from 'expo-router';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { usePathname } from 'expo-router';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { get } from '../utils/api';
 import { useAuth } from './AuthContext';
 const ProfileDataContext = createContext();
 
 
 export function ProfileDataProvider({ children }) {
-    const { account, profile } = useAuth();
+    const { account, profile, isTokenReady, isExpiredToken } = useAuth();
     const [categories, setCategories] = useState([]);
     const [businesses, setBusinesses] = useState([]);
     const [profileBudgets, setProfileBudgets] = useState([]);
     const [categoryBudgets, setCategoryBudgets] = useState([]);
     const [expenses, setExpenses] = useState([]);
     const [errors, setErrors] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const router = useRouter();
-    const pathname = usePathname();
-
     const [budgetLoading, setBudgetLoading] = useState(false);
     const [expensesLoading, setExpensesLoading] = useState(false);
     const [getCategoriesLoading, setGetCategoriesLoading] = useState(false);
     const [getBusinessesLoading, setGetBusinessesLoading] = useState(false);
+    const [dataLoaded, setDataLoaded] = useState(false);
+    const prevProfileId = useRef(profile?._id);
+    const prevAccountUsername = useRef(account?.username);
+    const pathname = usePathname();
+    const restrictedPaths = ['/', '/login', '/authProfile', '/register'];
 
-    const fetchBudgets = useCallback(async () => {
+
+    const fetchBudgets = async () => {
         if (!account || !profile) {
             return false;
         }
         try {
+            setErrors(prev => prev.filter(e => !e.budgetErrors));
             setBudgetLoading(true);
             let errMsg = [];
-            const profileBudgetsRes = await get(
-                `budgets/get-profile-budgets?username=${account.username}&profileName=${profile.profileName}`
-            );
-
-            const categoryBudgetsRes = await get(`budgets/get-category-budgets?refId=${profile.expenses}`);
-
-            if (profileBudgetsRes.ok) {
-                setProfileBudgets(profileBudgetsRes.budgets || []);
+            const response = await get(`budgets/get-profile-budgets?username=${account.username}&profileName=${profile.profileName}`);
+            if (response.ok) {
+                setProfileBudgets(response.budgets.budgets.profile || []);
+                setCategoryBudgets(response.budgets.budgets.categories || []);
             } else {
-                switch (profileBudgetsRes.status) {
+                switch (response.status) {
                     case 400: errMsg.push('בקשה לא תקינה בטעינת תקציבי הפרופיל'); break;
                     case 404: errMsg.push('לא נמצאו תקציבי פרופיל'); break;
                     case 500: errMsg.push('שגיאת שרת בטעינת תקציבי פרופיל'); break;
@@ -46,21 +45,9 @@ export function ProfileDataProvider({ children }) {
                 }
             }
 
-            if (categoryBudgetsRes.ok) {
-                setCategoryBudgets(categoryBudgetsRes.budgets || []);
-            } else {
-                switch (categoryBudgetsRes.status) {
-                    case 400: errMsg.push('בקשה לא תקינה בטעינת תקציבי הקטגוריות'); break;
-                    case 404: errMsg.push('לא נמצאו תקציבי קטגוריות'); break;
-                    case 500: errMsg.push('שגיאת שרת בטעינת תקציבי קטגוריות'); break;
-                    default: errMsg.push('שגיאה בטעינת תקציבי קטגוריות'); break;
-                }
-            }
-
             if (errMsg.length > 0) {
                 setErrors(prev => [{ budgetErrors: errMsg }, ...prev]);
             }
-
         } catch (error) {
             setErrors(prev => [{ budgetErrors: ['שגיאה בטעינת תקציבים'] }, ...prev]);
             return false;
@@ -68,12 +55,13 @@ export function ProfileDataProvider({ children }) {
             setBudgetLoading(false);
         }
         return true;
-    }, [account, profile]);
+    };
 
-    const fetchExpenses = useCallback(async () => {
+    const fetchExpenses = async () => {
         if (!profile?.expenses) {
             return false;
         }
+        setErrors(prev => prev.filter(e => !e.expensesErrors));
         setExpensesLoading(true);
         try {
             const response = await get(`expenses/profile-expenses/${profile.expenses}`);
@@ -96,19 +84,21 @@ export function ProfileDataProvider({ children }) {
             setExpensesLoading(false);
         }
         return true;
-    }, [profile]);
+    };
 
 
 
-    const fetchCategories = useCallback(async () => {
+    const fetchCategories = async () => {
         if (!profile?.expenses) return;
 
         setGetCategoriesLoading(true);
         try {
+            setErrors(prev => prev.filter(e => !e.categoriesErrors));
             const response = await get(`expenses/category/get-names/${profile.expenses}`);
-
             if (response.ok) {
                 setCategories(response.categoriesNames || []);
+                setGetBusinessesLoading(true);
+                await fetchAllBusinesses(response.categoriesNames || []);
             } else {
                 let errorMsg;
                 switch (response.status) {
@@ -132,13 +122,14 @@ export function ProfileDataProvider({ children }) {
             console.error('Exception in fetchCategories:', error);
         } finally {
             setGetCategoriesLoading(false);
+            setGetBusinessesLoading(false);
         }
-    }, [profile?.expenses]);
+    };
 
-    const fetchBusinesses = useCallback(async (category) => {
+    const fetchBusinesses = async (category) => {
         if (!profile?.expenses) return [];
         try {
-            setGetBusinessesLoading(true);
+            setErrors(prev => prev.filter(e => !e.businessesErrors));
             const response = await get(`expenses/business/get-businesses/${profile.expenses}/${category}`);
             if (response.ok) {
                 return response.businesses;
@@ -160,49 +151,50 @@ export function ProfileDataProvider({ children }) {
         } catch (error) {
             console.error("Exception in getBusinesses:", error);
             return [];
-        } finally {
-            setGetBusinessesLoading(false);
         }
-    }, [profile?.expenses]);
+    };
 
-    useEffect(() => {
+    const fetchAllBusinesses = async (categories) => {
         if (categories.length > 0) {
-            setGetBusinessesLoading(true);
-            const fetchAllBusinesses = async () => {
-                let allBusinesses = [];
-                for (const category of categories) {
-                    const businesses = await fetchBusinesses(category);
-                    allBusinesses = [...allBusinesses, { category: category, businesses: businesses }]
-                }
-                setBusinesses(allBusinesses);
+            let allBusinesses = [];
+            for (const category of categories) {
+                const businesses = await fetchBusinesses(category);
+                allBusinesses = [...allBusinesses, { category: category, businesses: businesses }]
             }
-            fetchAllBusinesses();
-            setGetBusinessesLoading(false);
+            setBusinesses(allBusinesses);
         }
-    }, [categories])
+    };
 
     useEffect(() => {
-        setLoading(budgetLoading || expensesLoading || getCategoriesLoading || getBusinessesLoading);
-    }, [budgetLoading, expensesLoading, getCategoriesLoading, getBusinessesLoading]);
-
-    useEffect(() => {
-        if (account && profile) {
+        if (!dataLoaded && account && profile && isTokenReady && !isExpiredToken && !restrictedPaths.includes(pathname)) {
             setExpensesLoading(true);
-            setTimeout(() => {
-                fetchBudgets();
-                fetchExpenses();
-                fetchCategories();
-            }, 50);
-        } else {
+            const fetchData = async () => {
+                await fetchBudgets();
+                await fetchExpenses();
+                await fetchCategories();
+            }
+            fetchData();
+            setDataLoaded(true);
+        }
+    }, [account, profile, isTokenReady, isExpiredToken, pathname, dataLoaded]);
+
+    useEffect(() => {
+    }, [categoryBudgets, profileBudgets]);
+
+    useEffect(() => {
+        const profileChanged = prevProfileId.current !== profile?._id;
+        const accountChanged = prevAccountUsername.current !== account?.username;
+        if (profileChanged || accountChanged || (restrictedPaths.includes(pathname))) {
+            setDataLoaded(false);
             setProfileBudgets([]);
             setCategoryBudgets([]);
             setCategories([]);
             setBusinesses([]);
             setExpenses([]);
         }
-    }, [account, profile, fetchBudgets, fetchExpenses]);
+    }, [profile?._id, account?.username]);
 
-
+    const loading = budgetLoading || expensesLoading || getCategoriesLoading || getBusinessesLoading;
 
     const value = {
         categories,
@@ -219,7 +211,8 @@ export function ProfileDataProvider({ children }) {
         fetchBudgets,
         fetchExpenses,
         fetchCategories,
-        fetchBusinesses
+        fetchBusinesses,
+        setDataLoaded
     };
 
 

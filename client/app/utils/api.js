@@ -1,10 +1,28 @@
+import { getAccessToken } from './tokenUtils.js';
+
 //render url
 //const baseUrl = "https://finance-manager-m3au.onrender.com/api";
 //local url
 const baseUrl = "http://192.168.0.152:5500/api";
-export async function get(endpoint) {
+
+const getHeaders = async (secure = true) => {
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+    const accessToken = await getAccessToken();
+
+    if (accessToken && secure) {
+        headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+    return headers;
+};
+
+export async function get(endpoint, secure = true) {
     try {
-        const response = await fetch(`${baseUrl}/${endpoint}`);
+        const response = await fetch(`${baseUrl}/${endpoint}`, {
+            method: 'GET',
+            headers: await getHeaders(secure)
+        });
         const result = await response.json();
         return {
             status: response.status,
@@ -17,13 +35,11 @@ export async function get(endpoint) {
     }
 }
 
-export async function post(endpoint, data) {
+export async function post(endpoint, data, secure = true) {
     try {
         const response = await fetch(`${baseUrl}/${endpoint}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: await getHeaders(secure),
             body: JSON.stringify(data),
         });
         const result = await response.json();
@@ -39,13 +55,11 @@ export async function post(endpoint, data) {
     }
 }
 
-export async function put(endpoint, data) {
+export async function put(endpoint, data, secure = true) {
     try {
         const response = await fetch(`${baseUrl}/${endpoint}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: await getHeaders(secure),
             body: JSON.stringify(data),
         });
         const result = await response.json();
@@ -60,16 +74,15 @@ export async function put(endpoint, data) {
     }
 }
 
-export async function del(endpoint, data = null) {
+export async function del(endpoint, data = null, secure = true) {
     try {
         const options = {
+            headers: await getHeaders(secure),
             method: 'DELETE',
         };
 
         if (data) {
-            options.headers = {
-                'Content-Type': 'application/json',
-            };
+            options.headers = await getHeaders(secure);
             options.body = JSON.stringify(data);
         }
 

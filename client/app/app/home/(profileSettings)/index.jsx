@@ -2,30 +2,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { ScrollView, Text, View } from 'react-native';
+import { useState } from 'react';
 import Button from '../../../components/common/button';
-import { useAuth } from '../../../context/AuthContext';
+import useProfileSettings from '../../../hooks/useProfileSettings';
+import LoadingSpinner from '../../../components/common/loadingSpinner';
 
 export default function ProfileSettings() {
     const router = useRouter();
     const basePath = '/home/(profileSettings)';
-    const { clearProfile, logout } = useAuth();
-
-    const logOutProfile = () => {
-        router.replace('/authProfile');
-        setTimeout(() => {
-            clearProfile();
-        }, 1000);
-    }
-
-    const logOutAccount = () => {
-        router.replace('/login');
-        setTimeout(() => {
-            logout();
-        }, 1000);
-    }
+    const [loading, setLoading] = useState(false);
+    const { handleLogout, handleClearProfile } = useProfileSettings({ setLoading });
 
     const textClass = "text-slate-800 font-bold mx-4";
 
+    if (loading) {
+        return <LoadingSpinner />;
+    }
     return (
         <LinearGradient
             colors={["#f8fafc", "#eef2f7", "#e5eaf1"]}
@@ -86,7 +78,7 @@ export default function ProfileSettings() {
                         <Button
                             className="mb-4 py-4 bg-white border border-slate-200 rounded-xl shadow-sm"
                             textClass="text-slate-800 font-bold"
-                            onPress={logOutProfile}
+                            onPress={handleClearProfile}
                         >
                             <View className="flex-row items-center justify-center">
                                 <Ionicons name="swap-horizontal-outline" size={20} color="#3b82f6" className="ml-2" />
@@ -97,7 +89,7 @@ export default function ProfileSettings() {
                         <Button
                             className="mb-4 py-4 bg-white border border-slate-200 rounded-xl shadow-sm"
                             textClass="text-slate-800 font-bold"
-                            onPress={logOutAccount}
+                            onPress={handleLogout}
                         >
                             <View className="flex-row items-center justify-center">
                                 <Ionicons name="power-outline" size={20} color="#3b82f6" className="ml-2" />

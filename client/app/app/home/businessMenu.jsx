@@ -21,7 +21,6 @@ export default function BusinessMenu() {
         categories: hookCategories, 
         categoriesLoading, 
         categoriesError, 
-        fetchCategories 
     } = useEditCategories({ profile });
 
     const { 
@@ -46,10 +45,6 @@ export default function BusinessMenu() {
             setCategories(hookCategories);
         }
     }, [hookCategories]);
-
-    useEffect(() => {
-        fetchCategories();
-    }, [profile, error, success]);
 
 
     useEffect(() => {

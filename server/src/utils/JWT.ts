@@ -9,7 +9,7 @@ dotenv.config({ path: path.join(__dirname, '../dotenv/.env') });
 export default class JWT {
 
     private static JWT_SECRET = process.env.JWT_SECRET;
-    private static JWT_ACCESS_EXPIRATION = process.env.JWT_ACCESS_EXPIRATION || '1h';
+    private static JWT_ACCESS_EXPIRATION = process.env.JWT_ACCESS_EXPIRATION || '30m';
     private static JWT_REFRESH_EXPIRATION = process.env.JWT_REFRESH_EXPIRATION || '7d';
     private static JWT_REFRESH_MAX_VALIDITY = process.env.JWT_REFRESH_MAX_VALIDITY || '30d';
 

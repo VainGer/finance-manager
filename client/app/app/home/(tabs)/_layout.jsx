@@ -1,14 +1,23 @@
 import { FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from "expo-router";
 import { useEffect } from "react";
-import { I18nManager } from "react-native";
-
+import { I18nManager, View } from "react-native";
+import LoadingSpinner from "../../../components/common/loadingSpinner.jsx";
+import { useProfileData } from '../../../context/ProfileDataContext.jsx';
 export default function RootLayout() {
+
+    const { loading } = useProfileData();
 
     useEffect(() => {
         I18nManager.allowRTL(true);
         I18nManager.forceRTL(true);
     }, []);
+
+    if (loading) {
+        return <View className="flex-1 justify-center items-center bg-white">
+            <LoadingSpinner />
+        </View>
+    }
 
     return (
         <Tabs screenOptions={{

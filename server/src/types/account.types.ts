@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 
 export type Account = {
+    _id?: ObjectId;
     username: string;
     password: string;
     createdAt: Date;

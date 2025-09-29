@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-export default function AddCategory({ goBack, addCategory, error, success, onCategoryAdded }) {
+export default function AddCategory({ goBack, addCategory, error, success, onCategoryAdded, inOverlay = false }) {
     const [categoryName, setCategoryName] = useState('');
 
     useEffect(() => {
@@ -12,7 +12,7 @@ export default function AddCategory({ goBack, addCategory, error, success, onCat
     }, [success, onCategoryAdded]);
 
     return (
-        <View className="bg-white rounded-xl shadow p-6 w-full mx-auto" style={{ minHeight: 300 }}>
+        <View className={`bg-white rounded-xl ${!inOverlay ? 'shadow-lg' : ''} p-6 w-full mx-auto`} style={{ minHeight: 300 }}>
             {/* Title */}
             <View className="items-center mb-8">
                 <Text className="text-3xl font-bold text-slate-800">הוספת קטגוריה</Text>

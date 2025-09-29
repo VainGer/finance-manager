@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { post } from '../utils/api';
 import { prepareImage } from '../utils/imageProcessing';
+import { useRouter } from 'expo-router';
 
-export default function useProfileSettings({ setLoading, setProfile }) {
-    const { account, profile } = useAuth();
-
+export default function useProfileSettings({ setLoading }) {
+    const { account, profile, setAccount, setProfile, logout, clearProfile } = useAuth();
+    const router = useRouter();
     const resetMessages = () => {
         setErrors([]);
         setSuccesses([]);
@@ -309,7 +310,19 @@ export default function useProfileSettings({ setLoading, setProfile }) {
         }
     };
 
+    const handleLogout = async () => {
+        await logout();
+        router.replace('/');
+    }
+
+    const handleClearProfile = async () => {
+        await clearProfile();
+        router.replace('/authProfile');
+    }
+
     return {
+        handleLogout,
+        handleClearProfile,
         resetFormStates,
         resetMessages,
         renameProfile,

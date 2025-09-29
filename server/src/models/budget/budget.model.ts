@@ -144,4 +144,25 @@ export default class BudgetModel {
             throw new Error("Failed to update budget spent");
         }
     }
+
+    static async deleteBudget(username: string, profileName: string, budgetId: string) {
+        try {
+            const profileResult = await db.UpdateDocument(this.profileCollection,
+                { username, profileName },
+                { $pull: { budgets: { _id: new ObjectId(budgetId) } } });
+            const expenseResult = await db.UpdateDocument(this.expenseCollection,
+                { username, profileName },
+                { $pull: { budgets: { _id: new ObjectId(budgetId) } } });
+
+            if ((!profileResult || profileResult.modifiedCount === 0) &&
+                (!expenseResult || expenseResult.modifiedCount === 0)) {
+                return { success: false, message: "Budget not found" };
+            }
+
+            return { success: true, message: "Budget deleted successfully" };
+        } catch (error) {
+            console.error("Error in ProfileModel.deleteBudget", error);
+            throw new Error("Failed to delete budget");
+        }
+    }
 }

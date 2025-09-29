@@ -17,6 +17,8 @@ export default function Select({
     style = {},
     labelExtractor = item => typeof item === 'object' && item.label ? item.label : item,
     valueExtractor = item => typeof item === 'object' && item.value ? item.value : item,
+    showCreateNew = false,
+    onCreateNew = null,
 }) {
     const [modalVisible, setModalVisible] = useState(false);
     
@@ -104,6 +106,20 @@ export default function Select({
                             {title}
                         </Text>
 
+                        {showCreateNew && onCreateNew && (
+                            <TouchableOpacity
+                                className="p-4 border-b border-slate-200 flex-row-reverse items-center bg-blue-50"
+                                onPress={() => {
+                                    setModalVisible(false);
+                                    onCreateNew();
+                                }}
+                            >
+                                <Ionicons name="add-circle-outline" size={20} color="#3b82f6" style={{ marginLeft: 10 }} />
+                                <Text className="text-right flex-1 text-blue-600 font-bold">
+                                    צור חדש...
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                         <FlatList
                             data={items}
                             keyExtractor={(item, index) => valueExtractor(item)?.toString() || index.toString()}

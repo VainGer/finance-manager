@@ -6,24 +6,31 @@ import { I18nManager, Text, View } from "react-native";
 import Button from "../components/common/button.jsx";
 import FeatureCarousel from "../components/common/FeatureCarousel.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import { useEffect } from "react";
+import LoadingSpinner from "../components/common/loadingSpinner.jsx";
 
 import "../global.css";
+
+
 
 export default function Index() {
   const router = useRouter();
   const isRTL = I18nManager.isRTL;
+  const { autoLogin, isLoading } = useAuth();
 
-  const { account, profile } = useAuth();
-
-  useEffect(() => {
-    if (account && profile) {
-      router.push("/home/(tabs)/budgetSummary");
-    } else if (account && !profile) {
-      router.push("/authProfile");
+  const toLoginAction = async () => {
+    const result = await autoLogin();
+    if (result) {
+      router.push('/home/(tabs)/budgetSummary');
+    } else {
+      router.push('/login');
     }
-  }, [account, profile, router]);
+  }
 
+
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <LinearGradient
@@ -100,7 +107,7 @@ export default function Index() {
               </Text>
 
               <View className="flex flex-col justify-center content-center items-center">
-                <Button onPress={() => router.push("/login")}>
+                <Button onPress={() => toLoginAction()}>
                   לכניסה
                 </Button>
 

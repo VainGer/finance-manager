@@ -11,7 +11,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Switch
 } from "react-native";
 
 import Button from "../components/common/button.jsx";
@@ -23,7 +22,6 @@ export default function Login() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [saveUser, setSaveUser] = useState(true);
   const { error, loading, login } = useLogin({ setPassword });
   const isRTL = I18nManager.isRTL;
 
@@ -142,22 +140,8 @@ export default function Login() {
                       />
                     </View>
 
-                    <View className="flex-row items-center justify-between mb-6">
-                      <Text
-                        className="text-slate-700 font-medium"
-                        style={{ writingDirection: isRTL ? "rtl" : "ltr" }}
-                      >
-                        זכור אותי
-                      </Text>
-                      <Switch
-                        value={saveUser}
-                        onValueChange={setSaveUser}
-                        trackColor={{ false: "#767577", true: "#81b0ff" }}
-                      />
-                    </View>
-
                     {/* כפתור */}
-                    <Button onPress={() => login(username, password, saveUser)}>
+                    <Button onPress={() => login(username, password)}>
                       התחבר
                     </Button>
 

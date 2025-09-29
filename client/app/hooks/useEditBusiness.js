@@ -5,11 +5,8 @@ import { useProfileData } from '../context/ProfileDataContext';
 import { del, post, put } from '../utils/api.js';
 
 export default function useEditBusiness(props = {}) {
-    const { businesses, getBusinessesLoading, fetchBusinesses, errors } = useProfileData();
-    const authContext = useAuth();
+    const { businesses, getBusinessesLoading, fetchCategories, errors, } = useProfileData();
     const router = useRouter();
-
-    const profile = props.profile || authContext.profile;
 
     const goBack = props.goBack || (() => router.back());
 
@@ -51,6 +48,7 @@ export default function useEditBusiness(props = {}) {
         });
         setTimeout(() => setLoading(false), 500);
         if (response.ok) {
+            fetchCategories();
             setSuccess('בעל עסק נוסף בהצלחה');
             setName('');
             setTimeout(() => setSuccess(false), 2000);
@@ -87,6 +85,7 @@ export default function useEditBusiness(props = {}) {
         });
         setTimeout(() => setLoading(false), 500);
         if (response.ok) {
+            fetchCategories();
             setSuccess('העסק שונה בהצלחה');
             setTimeout(() => {
                 setSuccess(false);
@@ -114,6 +113,7 @@ export default function useEditBusiness(props = {}) {
 
         const response = await del(`expenses/business/delete/${refId}/${selectedCategory}/${selectedBusiness}`);
         if (response.ok) {
+            fetchCategories();
             setSuccess('העסק נמחק בהצלחה');
             setTimeout(() => {
                 setSuccess(false);
@@ -155,7 +155,6 @@ export default function useEditBusiness(props = {}) {
         renameBusiness,
         deleteBusiness,
         resetState,
-        fetchBusinesses,
         getBusinessesByCategory,
         getAllBusinesses
     };

@@ -14,11 +14,10 @@ import useEditCategories from '../../hooks/useEditCategories.js';
 export default function CategoryMenu() {
 
     const [selectedMenu, setSelectedMenu] = useState(null);
-    const [categories, setCategories] = useState([]);
     const { profile } = useAuth();
 
-    const { error, success, loading, categoriesLoading, categoriesError, categories: hookCategories,
-        addCategory, renameCategory, deleteCategory, resetState, fetchCategories } = useEditCategories({ 
+    const { error, success, loading, categoriesLoading, categoriesError, categories,
+        addCategory, renameCategory, deleteCategory, resetState } = useEditCategories({ 
             profile, 
             goBack: () => setSelectedMenu(null) 
         });
@@ -26,16 +25,6 @@ export default function CategoryMenu() {
     useEffect(() => {
         resetState();
     }, [selectedMenu]);
-
-    useEffect(() => {
-        if (hookCategories?.length > 0) {
-            setCategories(hookCategories);
-        }
-    }, [hookCategories]);
-
-    useEffect(() => {
-        fetchCategories();
-    }, [profile, error, success]);
 
 
 

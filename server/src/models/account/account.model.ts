@@ -46,7 +46,7 @@ export default class AccountModel {
     static async findByUsername(username: string) {
         try {
 
-            const account = await db.GetDocument(this.accountCollection, { "username": username });
+            const account = await db.GetDocument(this.accountCollection, { "username": username }) as Account;
             if (!account) {
                 return null;
             }

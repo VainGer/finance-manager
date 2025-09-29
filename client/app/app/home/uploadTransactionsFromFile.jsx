@@ -17,7 +17,8 @@ export default function UploadTransactionsFromFile() {
     const [showCreateBusiness, setShowCreateBusiness] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [categoryCreated, setCategoryCreated] = useState(true);
-
+    const createCategoryKey = "create-category";
+    const createBusinessKey = "create-business";
 
     const { handleFileSelect, processTransactions, handleCategoryChange,
         handleBusinessChange, handleUploadSwitch, addCategory, resetState,
@@ -34,7 +35,6 @@ export default function UploadTransactionsFromFile() {
         setShowSuccessMessage,
         setCategoryCreated
     });
-
 
 
 
@@ -94,11 +94,10 @@ export default function UploadTransactionsFromFile() {
         );
     }
 
-    const TransactionCard = ({ transaction, handleCategoryChange, handleBusinessChange, handleUploadSwitch }) => {
+    const TransactionCard = ({ transaction, handleCategoryChange, handleBusinessChange, handleUploadSwitch, onCreateCategory, onCreateBusiness }) => {
         const [selectedCategory, setSelectedCategory] = useState(transaction.category);
         const [selectedBusiness, setSelectedBusiness] = useState(transaction.business);
         const [toUpload, setToUpload] = useState(transaction.toUpload);
-
         useEffect(() => {
             if (selectedCategory !== transaction.category) {
                 handleCategoryChange(transaction.id, selectedCategory);
@@ -144,14 +143,18 @@ export default function UploadTransactionsFromFile() {
                     selectedCategory={selectedCategory}
                     initialValue={transaction.category ?? ""}
                     setSelectedCategory={handleCategorySelect}
+                    onCreateNew={onCreateCategory}
                 />
                 <BusinessSelect
                     initialValue={transaction.category && transaction.business ? transaction.business : ""}
-                    businesses={transaction.category ? businesses.find(b => b.category === transaction.category)?.businesses || [] : []}
+                    businesses={transaction.category ? businesses.find(b => b.category === transaction.category)?.businesses || [] :
+                        businesses.find(b => b.category === selectedCategory)?.businesses || []
+                    }
                     loading={getBusinessesLoading}
                     error={getBusinessesError}
                     setSelectedBusiness={handleBusinessSelect}
                     selectedCategory={selectedCategory}
+                    onCreateNew={onCreateBusiness}
                 />
                 <View className="flex-row items-center justify-between mt-2">
                     <Text>להעלות</Text>
@@ -206,7 +209,7 @@ export default function UploadTransactionsFromFile() {
             )}
             {showCreateCategory && (
                 <Overlay onClose={() => setShowCreateCategory(false)}>
-                    <AddCategory
+                    <AddCategory key={createCategoryKey}
                         onCategoryAdded={() => onCategoryAndBusinessAdded(true)}
                         addCategory={addCategory}
                         refId={profile.expenses}
@@ -214,13 +217,14 @@ export default function UploadTransactionsFromFile() {
                         error={categoryError}
                         success={categorySuccess}
                         toGoBack={true}
+                        inOverlay={true}
                     />
                 </Overlay>
             )}
 
             {showCreateBusiness && (
                 <Overlay onClose={() => setShowCreateBusiness(false)}>
-                    <CreateBusiness
+                    <CreateBusiness key={createBusinessKey}
                         goBack={() => setShowCreateBusiness(false)}
                         refId={profile.expenses}
                         error={businessError}
@@ -230,6 +234,7 @@ export default function UploadTransactionsFromFile() {
                         categories={categories}
                         getCategoriesLoading={getCategoriesLoading}
                         getCategoriesError={getCategoriesError}
+                        inOverlay={true}
                     />
                 </Overlay>
             )}
@@ -242,12 +247,8 @@ export default function UploadTransactionsFromFile() {
             )}
             {dataToUpload && dataToUpload.length > 0 && (
                 <ScrollView className="mt-6 mb-20 space-y-4">
-                    <View>
+                    <View className="w-3/4 mx-auto">
                         <Button onPress={resetState}>העלה קובץ אחר</Button>
-                    </View>
-                    <View>
-                        <Button onPress={() => setShowCreateCategory(true)}>צור קטגוריה חדשה</Button>
-                        <Button onPress={() => setShowCreateBusiness(true)}>צור עסק חדש</Button>
                     </View>
                     {dataToUpload.map((transaction) => (
                         <TransactionCard
@@ -256,9 +257,13 @@ export default function UploadTransactionsFromFile() {
                             handleCategoryChange={handleCategoryChange}
                             handleBusinessChange={handleBusinessChange}
                             handleUploadSwitch={handleUploadSwitch}
+                            onCreateCategory={() => setShowCreateCategory(true)}
+                            onCreateBusiness={() => setShowCreateBusiness(true)}
                         />
                     ))}
-                    <Button onPress={handleSubmitTransactions}>שמור תנועות</Button>
+                    <View className="w-3/4 mx-auto">
+                        <Button onPress={handleSubmitTransactions}>שמור תנועות</Button>
+                    </View>
                 </ScrollView>
             )}
         </View>

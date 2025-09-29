@@ -1,7 +1,6 @@
 import Select from '../common/Select';
 
-export default function BusinessSelect({ selectedCategory, businesses = [], loading = false, error = null, setSelectedBusiness, initialValue = "" }) {
-
+export default function BusinessSelect({ selectedCategory, businesses = [], loading = false, error = null, setSelectedBusiness, initialValue = "", onCreateNew = null }) {
     const handleSelectBusiness = (value) => {
         setSelectedBusiness(value);
     };
@@ -18,6 +17,8 @@ export default function BusinessSelect({ selectedCategory, businesses = [], load
             loading={loading}
             error={error}
             disabled={!selectedCategory}
+            showCreateNew={!!onCreateNew}
+            onCreateNew={onCreateNew}
         />
     );
 }

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import ProfileService from "../services/profile/profile.service";
 import * as AppErrors from "../errors/AppError";
-import {  ChildProfileCreationData } from "../types/profile.types";
+import { ChildProfileCreationData } from "../types/profile.types";
 
 export default class ProfileController {
 
@@ -43,13 +43,27 @@ export default class ProfileController {
         }
     }
 
+    static async refreshAccessToken(req: Request, res: Response) {
+        try {
+            const { profileId } = req.body;
+            const result = await ProfileService.refreshAccessToken(profileId);
+            res.status(200).json({
+                message: result.message || "Access token refreshed successfully",
+                accessToken: result.accessToken
+            });
+        } catch (error) {
+            ProfileController.handleError(error, res);
+        }
+    }
+
     static async validateProfile(req: Request, res: Response) {
         try {
-            const { username, profileName, pin, device } = req.body;
-            const result = await ProfileService.validateProfile(username, profileName, pin, device);
+            const { username, profileName, pin, device, remember } = req.body;
+            const result = await ProfileService.validateProfile(username, profileName, pin, device, remember);
             res.status(200).json({
                 message: "Profile validated successfully",
-                profile: result.safeProfile
+                profile: result.safeProfile,
+                tokens: result.tokens
             });
         } catch (error) {
             ProfileController.handleError(error, res);

@@ -50,6 +50,7 @@ export default function CreateProfile({ username, firstProfile, setOnCreateLoadi
                 onChangeText={setPin}
                 placeholder="הכנס קוד סודי (4 תווים)"
                 secureTextEntry
+                maxLength={4}
             />
             <Button className="w-full" onPress={pickAvatar}>{avatar ? avatar.name : "הוסף תמונת פרופיל"}</Button>
             <Button

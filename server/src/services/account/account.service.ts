@@ -40,7 +40,7 @@ export default class AccountService {
             throw new AppErrors.CredentialError("Invalid credentials. Please check your username and password.");
         }
 
-        const { password: _, ...safeAccount } = validatedAccount;
+        const { password: _, tokens, __, ...safeAccount } = validatedAccount;
         return { success: true, safeAccount, message: "Account validated successfully." };
     }
 

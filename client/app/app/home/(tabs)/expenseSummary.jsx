@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import LoadingSpinner from '../../../components/common/loadingSpinner';
 import ProgressBar from '../../../components/common/progressBar';
+import Select from '../../../components/common/Select';
 import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
 import { formatAmount } from '../../../utils/formatters';
 
@@ -91,39 +92,56 @@ const BusinessBreakdown = ({ businesses, totalAmount, formatAmount }) => (
 
 export default function ExpenseSummary() {
     const [breakdownView, setBreakdownView] = useState('category');
+    const [selectedMonth, setSelectedMonth] = useState('all');
 
     const {
         isLoading: loading,
         error,
-        expenses,
         allExpenses,
+        monthlyExpenses,
+        availableDates,
     } = useExpensesDisplay();
-    
-    // Calculate summary data from expenses
-    const summary = {
-        transactionCount: allExpenses?.length || 0,
-        totalAmount: allExpenses?.reduce((sum, exp) => sum + exp.amount, 0) || 0,
-        categoryTotals: {},
-        businessTotals: {}
-    };
-    
-    // Calculate category totals
-    if (allExpenses?.length) {
-        allExpenses.forEach(expense => {
-            const category = expense.category || 'ללא קטגוריה';
-            const business = expense.business || 'ללא עסק';
-            
-            if (!summary.categoryTotals[category]) {
-                summary.categoryTotals[category] = 0;
-            }
-            summary.categoryTotals[category] += expense.amount;
-            
-            if (!summary.businessTotals[business]) {
-                summary.businessTotals[business] = 0;
-            }
-            summary.businessTotals[business] += expense.amount;
-        });
-    }
+
+    const displayedExpenses = useMemo(() => {
+        if (selectedMonth === 'all') {
+            return allExpenses;
+        }
+        return monthlyExpenses[selectedMonth] || [];
+    }, [selectedMonth, allExpenses, monthlyExpenses]);
+
+    const summary = useMemo(() => {
+        const summaryData = {
+            transactionCount: displayedExpenses?.length || 0,
+            totalAmount: displayedExpenses?.reduce((sum, exp) => sum + exp.amount, 0) || 0,
+            categoryTotals: {},
+            businessTotals: {}
+        };
+
+        if (displayedExpenses?.length) {
+            displayedExpenses.forEach(expense => {
+                const category = expense.category || 'ללא קטגוריה';
+                const business = expense.business || 'ללא עסק';
+
+                if (!summaryData.categoryTotals[category]) {
+                    summaryData.categoryTotals[category] = 0;
+                }
+                summaryData.categoryTotals[category] += expense.amount;
+
+                if (!summaryData.businessTotals[business]) {
+                    summaryData.businessTotals[business] = 0;
+                }
+                summaryData.businessTotals[business] += expense.amount;
+            });
+        }
+        return summaryData;
+    }, [displayedExpenses]);
+
+    const formattedMonths = useMemo(() => {
+        return availableDates ? availableDates.map(({ year, month, dateYM }) => ({
+            value: dateYM,
+            label: `${month} ${year}`
+        })) : [];
+    }, [availableDates]);
 
     if (loading) {
         return <LoadingSpinner />;
@@ -158,6 +176,25 @@ export default function ExpenseSummary() {
             <View className="bg-white rounded-lg shadow p-6 m-4">
                 <View className="mb-6">
                     <Text className="text-2xl font-bold text-gray-800 mb-4">📊 סיכום הוצאות</Text>
+
+                    <View className="mb-4">
+                        <Text className="text-sm font-medium text-gray-700 mb-2 text-right">
+                            חודש
+                        </Text>
+                        <Select
+                            items={[
+                                { value: "all", label: "כל החודשים" },
+                                ...formattedMonths
+                            ]}
+                            selectedValue={selectedMonth}
+                            onSelect={setSelectedMonth}
+                            placeholder="בחר חודש"
+                            title="בחירת חודש"
+                            iconName="calendar-outline"
+                            itemIconName="calendar"
+                        />
+                    </View>
+
                     <View className="flex-row mx-auto">
                         <Pressable
                             onPress={() => setBreakdownView('category')}

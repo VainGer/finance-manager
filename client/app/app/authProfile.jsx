@@ -3,7 +3,7 @@ import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from 'react';
-import { I18nManager, ScrollView, Text, TouchableOpacity, View, Switch } from 'react-native';
+import { I18nManager, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import LoadingSpinner from '../components/common/loadingSpinner.jsx';
 import ProfileList from '../components/profile/ProfileList.jsx';
@@ -14,11 +14,15 @@ import useAuthProfile from '../hooks/auth/useAuthProfile.js';
 
 
 export default function AuthProfile() {
-    const { account, setProfile, storeProfile, setStoreProfile } = useAuth();
-    const { profiles, loading, error, authProfile } = useAuthProfile({ account, setProfile, setStoreProfile });
+    const { account, rememberMe, setRememberMe, setProfile, setStoreProfile, setLoggedIn } = useAuth();
+    const { profiles, loading, error, authProfile } = useAuthProfile({
+        account,
+        setProfile,
+        setStoreProfile,
+        setLoggedIn
+    });
     const [selectedProfile, setSelectedProfile] = useState(null);
     const [onCreateLoading, setOnCreateLoading] = useState(false);
-    const [pin, setPin] = useState('');
     const router = useRouter();
     const isRTL = I18nManager.isRTL;
 
@@ -98,8 +102,8 @@ export default function AuthProfile() {
                                     authProfile={authProfile}
                                     selectedProfile={selectedProfile}
                                     onBack={() => setSelectedProfile(null)}
-                                    setStoreProfile={setStoreProfile}
-                                    storeProfile={storeProfile}
+                                    remember={rememberMe}
+                                    setRemember={setRememberMe}
                                 />
                             )}
 

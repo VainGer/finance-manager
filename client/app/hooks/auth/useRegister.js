@@ -11,7 +11,7 @@ export default function useRegister({ setPassword, setUsername, setConfirmPasswo
             username = username.trim().toLowerCase();
             password = password.trim();
             confirmPassword = confirmPassword.trim();
-            
+
             if (password !== confirmPassword) {
                 setError('הסיסמאות אינן תואמות');
                 return;
@@ -24,16 +24,16 @@ export default function useRegister({ setPassword, setUsername, setConfirmPasswo
                 setError('הסיסמה חייבת להיות באורך של לפחות 6 תווים');
                 return;
             }
-            
+
             setLoading(true);
             setError(null);
-            const response = await post('account/register', { username, password });
-            
+            const response = await post('account/register', { username, password }, false);
+
             if (response.ok) {
                 router.replace('/login');
                 return;
-            } 
-            
+            }
+
             switch (response.status) {
                 case 400:
                     setError('נא למלא את כל השדות בצורה תקינה');

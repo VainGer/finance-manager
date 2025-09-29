@@ -5,15 +5,23 @@ import { ScrollView, Text, View } from 'react-native';
 import BudgetPeriodSelector from '../../../components/budgets/budgetPeriodSelector';
 import CategoryBudgetDetails from '../../../components/budgets/categoryBudgetDetails';
 import OverallBudgetSummary from '../../../components/budgets/overallBudgetSummary';
+import Button from '../../../components/common/button';
 import LoadingSpinner from '../../../components/common/loadingSpinner';
 import Overlay from '../../../components/common/Overlay';
 import { useAuth } from '../../../context/AuthContext';
 import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
 import { formatDate } from '../../../utils/formatters';
-import Button from '../../../components/common/button';
 export default function BudgetSummary() {
     const { profile } = useAuth();
-    const [showNewBudgetsOverlay, setShowNewBudgetsOverlay] = useState(!profile.parentProfile && profile.newBudgets.length > 0);
+    // Initialize with false and update after profile is confirmed loaded
+    const [showNewBudgetsOverlay, setShowNewBudgetsOverlay] = useState(false);
+    
+    // Set the overlay state once profile is definitely loaded
+    useEffect(() => {
+        if (profile) {
+            setShowNewBudgetsOverlay(!profile.parentProfile && profile.newBudgets && profile.newBudgets.length > 0);
+        }
+    }, [profile]);
     const {
         loading,
         error,
@@ -23,7 +31,6 @@ export default function BudgetSummary() {
         currentProfileBudget,
         currentCategoryBudgets,
         setSelectedPeriod,
-        refetchBudgets
     } = useBudgetSummary({ profile });
 
 
@@ -140,6 +147,11 @@ export default function BudgetSummary() {
                         <View className="items-center mb-2">
                             <Text className="text-3xl font-bold text-slate-900 text-center">
                                 סקירת תקציב
+                            </Text>
+                        </View>
+                        <View className="items-center mb-4">
+                            <Text className="text-lg font-medium text-slate-600 text-center">
+                                {profile.profileName}
                             </Text>
                         </View>
 

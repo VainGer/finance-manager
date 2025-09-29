@@ -194,6 +194,7 @@ export default class ExpensesController {
 
     private static handleError(error: any, res: Response) {
         if (error instanceof AppErrors.AppError) {
+            console.error("Application error:", error);
             return res.status(error.statusCode).json({ message: error.message });
         }
         console.error("Unexpected error:", error);

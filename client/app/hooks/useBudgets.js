@@ -5,13 +5,13 @@ import { get, post } from '../utils/api';
 
 export default function useBudgets({ setLoading }) {
   const { account, profile } = useAuth();
-  const { 
-    fetchBudgets, 
-    categories, // Get categories from context
-    getCategoriesLoading, // Use loading state from context
-    errors // Use errors from context
+  const {
+    fetchBudgets,
+    categories,
+    getCategoriesLoading,
+    errors
   } = useProfileData();
-  
+
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [amount, setAmount] = useState('');
@@ -63,16 +63,16 @@ export default function useBudgets({ setLoading }) {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await get(
         `budgets/get-child-budgets?username=${account.username}&profileName=${profile.profileName}`
       );
-      
+
       if (response.ok) {
         setChildrenBudgets(response.budgets);
         return;
       }
-      
+
       switch (response.status) {
         case 400:
           setError('בקשה לא תקינה בטעינת תקציבים');
@@ -98,14 +98,14 @@ export default function useBudgets({ setLoading }) {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await get(`profile/get-profiles?username=${account.username}`);
-      
+
       if (response.ok) {
         setChildrenProfiles(response.profiles.filter((p) => !p.parentProfile));
         return;
       }
-      
+
       switch (response.status) {
         case 400:
           setError('בקשה לא תקינה בטעינת פרופילים');
@@ -160,7 +160,7 @@ export default function useBudgets({ setLoading }) {
     try {
       setLoading(true);
       setError(null);
-      
+
       if (!startDate || !endDate || parseFloat(amount) <= 0) {
         setError('אנא מלא את כל השדות');
         return false;
@@ -183,8 +183,8 @@ export default function useBudgets({ setLoading }) {
           setEndDate('');
           return false;
         }
-      } 
-      
+      }
+
       switch (response.status) {
         case 400:
           setError('נתוני תאריכים לא תקינים');
@@ -212,7 +212,7 @@ export default function useBudgets({ setLoading }) {
     try {
       setLoading(true);
       setError(null);
-      
+
       const finalCategoryBudgets = categoryBudgets
         .filter((cat) => parseFloat(cat.budget) > 0)
         .map((cat) => ({
@@ -237,10 +237,11 @@ export default function useBudgets({ setLoading }) {
       });
 
       if (response.ok) {
+        await fetchBudgets();
         setSuccess('התקציב נוצר בהצלחה!');
         return true;
       }
-      
+
       switch (response.status) {
         case 400:
           setError('נתוני תקציב לא תקינים');
@@ -271,12 +272,12 @@ export default function useBudgets({ setLoading }) {
     try {
       setLoading(true);
       setError(null);
-      
+
       if (!sDate || !eDate || parseFloat(amt) <= 0) {
         setError('אנא מלא את כל נתוני התקציב');
         return false;
       }
-      
+
       const response = await post('budgets/add-child-budget', {
         username: account.username,
         profileName,
@@ -293,7 +294,7 @@ export default function useBudgets({ setLoading }) {
         fetchChildrenProfiles();
         return true;
       }
-      
+
       switch (response.status) {
         case 400:
           setError('נתוני תקציב לא תקינים');

@@ -1,6 +1,6 @@
 import Select from "../common/Select";
 
-export default function CategorySelect({ categories = [], loading = false, error = null, setSelectedCategory, initialValue = "" }) {
+export default function CategorySelect({ categories = [], loading = false, error = null, setSelectedCategory, initialValue = "", onCreateNew = null }) {
 
     const handleSelectCategory = (value) => {
         setSelectedCategory(value);
@@ -17,6 +17,8 @@ export default function CategorySelect({ categories = [], loading = false, error
             itemIconName="pricetag-outline"
             loading={loading}
             error={error}
+            showCreateNew={!!onCreateNew}
+            onCreateNew={onCreateNew}
         />
     );
 }

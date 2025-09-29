@@ -19,7 +19,7 @@ export default function useUploadTransactionsFromFile({
     businesses: contextBusinesses,
     fetchExpenses,
     fetchCategories,
-    fetchBusinesses
+    fetchBudgets
   } = useProfileData();
 
 
@@ -102,12 +102,11 @@ export default function useUploadTransactionsFromFile({
 
 
   const onCategoryAndBusinessAdded = useCallback(async (isCategory) => {
-    await fetchCategories();
     setShowCreateCategory(false);
     setShowCreateBusiness(false);
     setShowSuccessMessage(true);
-    setCategoryCreated(isCategory);
-  }, [fetchCategories, fetchBusinesses, contextCategories, setShowCreateCategory, setShowCreateBusiness, setShowSuccessMessage, setCategoryCreated]);
+    setCategoryCreated(isCategory ? categorySuccess : businessSuccess);
+  }, [fetchCategories, contextCategories, setShowCreateCategory, setShowCreateBusiness, setShowSuccessMessage, setCategoryCreated]);
 
 
   const processTransactions = async () => {
@@ -199,6 +198,7 @@ export default function useUploadTransactionsFromFile({
     if (response.ok) {
       setSuccess('העסקאות הועלו בהצלחה');
       fetchExpenses(); // Refetch expenses after successful upload
+      fetchBudgets();
       onSuccessUpload();
     } else {
       setError('שגיאה בהעלאת העסקאות, נסה שוב מאוחר יותר');

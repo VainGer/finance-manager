@@ -58,9 +58,14 @@ export default class ProfileModel {
 
     static async findProfile(username: string, profileName: string, profileId?: string) {
         try {
-            const profile = await db.GetDocument(this.profileCollection, {
-                username, profileName, _id: profileId ? new ObjectId(profileId) : undefined
-            });
+            let profile = null;
+            if (profileId) {
+                profile = await this.findProfileById(username, profileId);
+            } else {
+                profile = await db.GetDocument(this.profileCollection, {
+                    username, profileName
+                });
+            }
             if (!profile) {
                 return null;
             }

@@ -14,7 +14,6 @@ export default function useEditTransactions(props = {}) {
         getBusinessesLoading,
         fetchBudgets: refetchBudgets,
         fetchExpenses: refetchExpenses,
-        fetchCategories,
         errors
     } = useProfileData();
 

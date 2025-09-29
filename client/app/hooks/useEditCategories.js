@@ -8,12 +8,12 @@ export default function useEditCategories(props = {}) {
     const { categories, expensesLoading, errors, fetchCategories } = useProfileData();
     const authContext = useAuth();
     const router = useRouter();
-    
+
     const profile = props.profile || authContext.profile;
-    
+
     // Use custom goBack function if provided, otherwise use router
     const goBack = props.goBack || (() => router.back());
-    
+
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -25,21 +25,6 @@ export default function useEditCategories(props = {}) {
         setLoading(false);
         setGetCategoriesError(null);
     };
-    
-    // Fetch categories when profile changes
-    useEffect(() => {
-        if (profile?.expenses) {
-            fetchCategories();
-            
-            // Set categories error from context if available
-            const categoriesErrors = errors.find(e => e.categoriesErrors)?.categoriesErrors;
-            if (categoriesErrors && categoriesErrors.length > 0) {
-                setGetCategoriesError(categoriesErrors[0]);
-            } else {
-                setGetCategoriesError(null);
-            }
-        }
-    }, [profile?.expenses, fetchCategories, errors]);
 
 
     const addCategory = async (categoryName, setCategoryName) => {
@@ -56,8 +41,10 @@ export default function useEditCategories(props = {}) {
         });
         setTimeout(() => setLoading(false), 500);
         if (response.ok) {
+            setError(null);
             setSuccess('הקטגוריה נוספה בהצלחה');
             setCategoryName('');
+            await fetchCategories();
             setTimeout(() => setSuccess(false), 2000);
         } else if (response.status === 409) {
             setError('שם הקטגוריה כבר קיים');
@@ -93,8 +80,9 @@ export default function useEditCategories(props = {}) {
             setSuccess('הקטגוריה עודכנה בהצלחה');
             setNewCategoryName('');
             setSelectedCategory('');
-            setTimeout(() => { 
-                setSuccess(false); 
+            await fetchCategories();
+            setTimeout(() => {
+                setSuccess(false);
                 goBack();
             }, 1500);
         } else if (response.status === 409) {
@@ -111,6 +99,8 @@ export default function useEditCategories(props = {}) {
         const response = await del(`expenses/category/delete/${refId}/${selectedCategory}`);
         setLoading(false);
         if (response.ok) {
+            setError(null);
+            await fetchCategories();
             setSuccess('הקטגוריה נמחקה בהצלחה');
             setTimeout(() => {
                 setSuccess(false);
@@ -129,13 +119,12 @@ export default function useEditCategories(props = {}) {
         error,
         success,
         loading,
-        categoriesLoading: expensesLoading, 
+        categoriesLoading: expensesLoading,
         categories,
         categoriesError: getCategoriesError,
         addCategory,
         renameCategory,
         deleteCategory,
         resetState,
-        fetchCategories 
     };
 }

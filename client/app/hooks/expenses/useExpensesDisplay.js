@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useProfileData } from '../../context/ProfileDataContext';
 import { monthToHebrewName } from '../../utils/formatters';
@@ -9,27 +9,17 @@ export default function useExpensesDisplay() {
         expenses: contextExpenses,
         expensesLoading,
         errors: contextErrors,
-        categories: contextCategories,
-        businesses: contextBusinesses
     } = useProfileData();
 
     const [allExpenses, setAllExpenses] = useState(null);
     const [monthlyExpenses, setMonthlyExpenses] = useState({});
-    const [processingData, setProcessingData] = useState(false);
     const [availableDates, setAvailableDates] = useState([]);
     const [sortedExpenses, setSortedExpenses] = useState(null);
     const [filteredExpenses, setFilteredExpenses] = useState(null);
     const [stagedFilters, setStagedFilters] = useState({ month: null, category: null, business: null });
     const [appliedFilters, setAppliedFilters] = useState({ month: null, category: null, business: null });
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [availableBusinesses, setAvailableBusinesses] = useState([]);
-
-    const isLoading = expensesLoading || processingData;
-
-    useEffect(() => {
-        setLoading(isLoading);
-    }, [isLoading]);
 
     useEffect(() => {
         if (sortedExpenses) {
@@ -38,27 +28,23 @@ export default function useExpensesDisplay() {
     }, [sortedExpenses, applyAllFilters]);
 
     useEffect(() => {
-        processExpensesData();
-    }, [processExpensesData, contextExpenses, contextErrors, profile]);
+        if (!expensesLoading) {
+            processExpensesData();
+        } else {
+            setLoading(true);
+        }
+    }, [processExpensesData, contextExpenses, expensesLoading, profile]);
 
     useEffect(() => {
         sortByDate(true, true);
     }, [allExpenses, monthlyExpenses]);
 
     const processExpensesData = useCallback(() => {
-        setProcessingData(true);
-        if (!profile) {
+        setLoading(true);
+        if (!profile || !contextExpenses?.categories) {
             setAllExpenses([]);
-            setError(null);
-            setProcessingData(false);
+            setLoading(false);
             return;
-        }
-
-        const expenseErrors = contextErrors.find(e => e.expensesErrors)?.expensesErrors;
-        if (expenseErrors && expenseErrors.length > 0) {
-            setError(expenseErrors[0]);
-        } else {
-            setError(null);
         }
 
         try {
@@ -91,12 +77,10 @@ export default function useExpensesDisplay() {
             setMonthlyExpenses(monthlyExpenses);
         } catch (err) {
             console.error('Error processing expenses data:', err);
-            setError('שגיאה בעיבוד נתוני ההוצאות');
-            setProcessingData(false);
         } finally {
-            setProcessingData(false);
+            setLoading(false);
         }
-    }, [contextExpenses, contextErrors, profile]);
+    }, [contextExpenses, profile]);
 
     const applyAllFilters = useCallback(() => {
         if (!sortedExpenses) return;
@@ -225,6 +209,13 @@ export default function useExpensesDisplay() {
         setAvailableDates(sortedDates);
     }
 
+    const error = useMemo(() => {
+        const expenseErrors = contextErrors.find(e => e.expensesErrors)?.expensesErrors;
+        if (expenseErrors && expenseErrors.length > 0) {
+            return expenseErrors[0];
+        }
+        return null;
+    }, [contextErrors]);
 
 
     return {
@@ -232,7 +223,7 @@ export default function useExpensesDisplay() {
         allExpenses,
         monthlyExpenses,
         isLoading: loading,
-        error,
+        error: error,
         availableDates,
         availableBusinesses,
         sortByDate,
@@ -246,4 +237,3 @@ export default function useExpensesDisplay() {
         appliedFilters,
     };
 };
-

@@ -14,17 +14,17 @@ export default function useCreateProfile({ username, profileName, pin, avatar, c
         try {
             setLoading(true);
             setError(null);
-            
+
             if (!profileName || !pin || profileName.trim() === '' || pin.trim() === '') {
                 setError('נא למלא שם פרופיל וקוד זיהוי');
                 return;
             }
-            
+
             if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
                 setError('קוד זיהוי חייב להכיל 4 ספרות בלבד');
                 return;
             }
-            
+
             let avatarBase64 = null;
             if (avatar) {
                 try {
@@ -39,7 +39,7 @@ export default function useCreateProfile({ username, profileName, pin, avatar, c
                     return;
                 }
             }
-            
+
             const parent = firstProfile ? true : parentProfile;
             const newProfile = {
                 username,
@@ -50,25 +50,25 @@ export default function useCreateProfile({ username, profileName, pin, avatar, c
                 parentProfile: parent
             }
 
-            const uri = parent ? "create-profile" : "create-child-profile";
-            const response = await post(`profile/${uri}`, newProfile);
-            
+            const uri = parent && firstProfile ? "create-first-profile" : parent ? "create-profile" : "create-child-profile";
+            const response = await post(`profile/${uri}`, newProfile, !firstProfile);
+
             if (response.ok) {
                 if (profile && profile.parentProfile && !parent) {
                     setProfile(prev => ({
                         ...prev,
-                        children: Array.isArray(prev?.children) 
-                            ? [...prev.children, { name: profileName, id: response.profileId }] 
+                        children: Array.isArray(prev?.children)
+                            ? [...prev.children, { name: profileName, id: response.profileId }]
                             : [{ name: profileName, id: response.profileId }]
                     }));
                 }
-                
+
                 if (firstProfile) {
                     router.replace('/authProfile');
                 }
                 return;
-            } 
-            
+            }
+
             switch (response.status) {
                 case 400:
                     setError('נא למלא את כל השדות בצורה תקינה');
