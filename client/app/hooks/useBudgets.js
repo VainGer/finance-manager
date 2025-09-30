@@ -213,13 +213,21 @@ export default function useBudgets({ setLoading }) {
       setLoading(true);
       setError(null);
 
-      const finalCategoryBudgets = categoryBudgets
-        .filter((cat) => parseFloat(cat.budget) > 0)
-        .map((cat) => ({
-          categoryName: cat.name,
-          amount: parseFloat(cat.budget) || 0
-        }));
+      let finalCategoryBudgets = [];
 
+      categoryBudgets.forEach(cat => {
+        const amount = parseFloat(cat.budget);
+        if (amount <= 0) {
+          setError('סכום תקציב קטגוריה חייב להיות גדול מאפס');
+          return;
+        }
+        finalCategoryBudgets.push({
+          categoryName: cat.name,
+          amount
+        });
+      });
+
+      if (error) { return; }
 
       const response = await post('budgets/add-budget', {
         budgetData: {

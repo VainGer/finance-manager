@@ -17,7 +17,7 @@ export const accessTokenVerification = (req: Request, res: Response, next: NextF
     const authHeader = req.headers.authorization;
     const tokenFromHeader = req.headers['x-access-token'] as string;
     
-    let token: string | null = null;
+    let token: string | null = null;// hjsdafklahsdfkjldshfkjhsadfjkldshfjklasdhfjksdafhjkdsahfjksdalf --> signature + profileId + expiration
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
       token = authHeader.split(' ')[1];

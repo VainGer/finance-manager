@@ -6,7 +6,7 @@ const ProfileDataContext = createContext();
 
 
 export function ProfileDataProvider({ children }) {
-    const { account, profile, isTokenReady, isExpiredToken } = useAuth();
+    const { account, profile, isTokenReady, isExpiredToken, loggedIn } = useAuth();
     const [categories, setCategories] = useState([]);
     const [businesses, setBusinesses] = useState([]);
     const [profileBudgets, setProfileBudgets] = useState([]);
@@ -180,19 +180,6 @@ export function ProfileDataProvider({ children }) {
 
     useEffect(() => {
     }, [categoryBudgets, profileBudgets]);
-
-    useEffect(() => {
-        const profileChanged = prevProfileId.current !== profile?._id;
-        const accountChanged = prevAccountUsername.current !== account?.username;
-        if (profileChanged || accountChanged || (restrictedPaths.includes(pathname))) {
-            setDataLoaded(false);
-            setProfileBudgets([]);
-            setCategoryBudgets([]);
-            setCategories([]);
-            setBusinesses([]);
-            setExpenses([]);
-        }
-    }, [profile?._id, account?.username]);
 
     const loading = budgetLoading || expensesLoading || getCategoriesLoading || getBusinessesLoading;
 

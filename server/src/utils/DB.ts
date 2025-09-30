@@ -90,7 +90,7 @@ export default class DB {
             throw error;
         }
     }
-    
+
     async Aggregate(collection: string, pipeline: any[]) {
         try {
             const results = await this.client?.db(this.dbName).collection(collection).aggregate(pipeline).toArray();
@@ -98,6 +98,29 @@ export default class DB {
         } catch (error) {
             console.error("Error aggregating documents: ", error);
             throw error;
+        }
+    }
+
+    async TransactionUpdateMany(operations: { collection: string; query: any; update: any }[]) {
+        const session = this.client?.startSession();
+        if (!session) throw new Error("No Mongo client available");
+        try {
+            session.startTransaction();
+            for (const op of operations) {
+                await this.client
+                    ?.db(this.dbName)
+                    .collection(op.collection)
+                    .updateMany(op.query, op.update, { session });
+            }
+
+            await session.commitTransaction();
+            return { success: true, message: "Transaction committed successfully" };
+        } catch (error) {
+            console.error("Error in Transaction:", error);
+            await session.abortTransaction();
+            return { success: false, message: "Transaction aborted due to error" };
+        } finally {
+            await session.endSession();
         }
     }
 }

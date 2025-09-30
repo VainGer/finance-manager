@@ -14,6 +14,7 @@ export type Business = {
 
 export type CategoryBudget = {
     _id: ObjectId;
+    categoryName?: string; // only for service use
     startDate: Date;
     endDate: Date;
     amount: number;

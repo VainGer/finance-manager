@@ -4,27 +4,12 @@ import ProfileModel from "../profile/profile.model";
 import db from "../../server";
 import { CategoryBudget } from "../../types/expenses.types";
 import { ProfileBudget } from "../../types/profile.types";
+import { c } from "framer-motion/dist/types.d-6pKw1mTI";
 
 export default class BudgetModel {
 
     private static expenseCollection: string = "expenses";
     private static profileCollection: string = "profiles";
-
-    static async createCategoriesBudgets(refId: string, budget: CategoryBudget, categoryName: string) {
-        try {
-            const result = await db.UpdateDocument(
-                this.expenseCollection,
-                { _id: new ObjectId(refId), "categories.name": categoryName },
-                { $addToSet: { "categories.$.budgets": budget } });
-            if (!result || result.modifiedCount === 0) {
-                return { success: false, message: "Failed to create category budget" };
-            }
-            return { success: true, message: "Category budget created successfully" };
-        } catch (error) {
-            console.error("Error in BudgetModel.createCategoriesBudgets", error);
-            throw new Error("Failed to create category budget");
-        }
-    }
 
     static async updateCategoryBudgetSpent(refId: string, catName: string, budgetId: string, amount: number) {
         try {
@@ -106,12 +91,23 @@ export default class BudgetModel {
         }
     }
 
-    static async createBudget(username: string, profileName: string, budgetData: ProfileBudget) {
+    static async createBudget(username: string, profileName: string, refId: string, profileBudget: ProfileBudget, categoriesBudgets: CategoryBudget[]) {
         try {
-            const result = await db.UpdateDocument(this.profileCollection,
-                { username, profileName }, { $push: { budgets: budgetData } });
-            if (!result || result.modifiedCount === 0) {
-                return { success: false, message: "Profile not found or budget is the same" };
+            const operations = [
+                {
+                    collection: this.profileCollection,
+                    query: { username, profileName },
+                    update: { $push: { budgets: profileBudget } }
+                },
+                ...categoriesBudgets.map(({ categoryName, ...catBudget }) => ({
+                    collection: this.expenseCollection,
+                    query: { _id: new ObjectId(refId), "categories.name": categoryName },
+                    update: { $addToSet: { "categories.$.budgets": catBudget } }
+                }))
+            ];
+            const transactionResult = await db.TransactionUpdateMany(operations);
+            if (!transactionResult || !transactionResult.success) {
+                return { success: false, message: transactionResult?.message || "Failed to create budget" };
             }
             return { success: true, message: "Budget created successfully" };
         } catch (error) {

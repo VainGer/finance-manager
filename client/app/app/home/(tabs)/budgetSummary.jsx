@@ -15,13 +15,16 @@ export default function BudgetSummary() {
     const { profile } = useAuth();
     // Initialize with false and update after profile is confirmed loaded
     const [showNewBudgetsOverlay, setShowNewBudgetsOverlay] = useState(false);
-    
+
+
     // Set the overlay state once profile is definitely loaded
     useEffect(() => {
         if (profile) {
             setShowNewBudgetsOverlay(!profile.parentProfile && profile.newBudgets && profile.newBudgets.length > 0);
         }
     }, [profile]);
+
+    
     const {
         loading,
         error,

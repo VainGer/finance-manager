@@ -82,7 +82,8 @@ export default function useProfileSettings({ setLoading }) {
     };
 
     const changePin = async (oldPin, newPin, confirmNewPin) => {
-        if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+        if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)
+            || confirmNewPin.length !== 4 || !/^\d{4}$/.test(confirmNewPin)) {
             addError("הקוד החדש חייב להיות בדיוק 4 ספרות");
             return false;
         }

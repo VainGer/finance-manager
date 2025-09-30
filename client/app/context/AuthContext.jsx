@@ -113,6 +113,7 @@ export const AuthProvider = ({ children }) => {
             setAccount(null);
             setProfile(null);
             setAccessTokenReady(false);
+            setLoggedIn(false);
         } catch (error) {
             console.error('Error clearing auth data:', error);
         }
@@ -196,6 +197,7 @@ export const AuthProvider = ({ children }) => {
         setAccessTokenReady(false);
         setProfile(null);
         setIsExpiredToken(false);
+        setLoggedIn(false);
         try {
             await removeAccessToken();
         } catch (err) {
@@ -218,38 +220,38 @@ export const AuthProvider = ({ children }) => {
     }
 
 
-        return (
-            <AuthContext.Provider value={{
-                account,
-                profile,
-                logout,
-                clearProfile,
-                autoLogin,
-                isAuthenticated: !!account,
-                hasActiveProfile: !!profile,
-                storeUser,
-                setStoreUser,
-                storeProfile,
-                setStoreProfile,
-                setAccount,
-                setProfile,
-                isLoading,
-                checkStorage,
-                rememberMe,
-                setRememberMe,
-                isTokenReady: accessTokenReady,
-                isExpiredToken,
-                setLoggedIn,
-            }}>
-                {children}
-            </AuthContext.Provider>
-        );
-    };
+    return (
+        <AuthContext.Provider value={{
+            account,
+            profile,
+            logout,
+            clearProfile,
+            autoLogin,
+            isAuthenticated: !!account,
+            hasActiveProfile: !!profile,
+            storeUser,
+            setStoreUser,
+            storeProfile,
+            setStoreProfile,
+            setAccount,
+            setProfile,
+            isLoading,
+            checkStorage,
+            rememberMe,
+            setRememberMe,
+            isTokenReady: accessTokenReady,
+            isExpiredToken,
+            setLoggedIn,
+        }}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
 
-    export const useAuth = () => {
-        const context = useContext(AuthContext);
-        if (!context) {
-            throw new Error('useAuth must be used within an AuthProvider');
-        }
-        return context;
-    };
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};
