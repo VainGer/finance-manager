@@ -101,7 +101,9 @@ export default class DB {
         }
     }
 
-    async TransactionUpdateMany(operations: { collection: string; query: any; update: any }[]) {
+    async TransactionUpdateMany(
+        operations: { collection: string; query: any; update: any; options?: any }[]
+    ) {
         const session = this.client?.startSession();
         if (!session) throw new Error("No Mongo client available");
         try {
@@ -110,9 +112,8 @@ export default class DB {
                 await this.client
                     ?.db(this.dbName)
                     .collection(op.collection)
-                    .updateMany(op.query, op.update, { session });
+                    .updateMany(op.query, op.update, { session, ...(op.options || {}) });
             }
-
             await session.commitTransaction();
             return { success: true, message: "Transaction committed successfully" };
         } catch (error) {
