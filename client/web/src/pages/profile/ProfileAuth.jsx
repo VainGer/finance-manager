@@ -78,15 +78,62 @@ export default function ProfileAuth() {
             setError('אנא הזן את הקוד הסודי');
             return;
         }
-        const response = await post('profile/validate-profile',
-            { username: account.username, profileName: selectedProfile.profileName, pin: pinInput });
+        
+        try {
+            const response = await post('profile/validate-profile',
+            { 
+                username: account.username, 
+                profileName: selectedProfile.profileName, 
+                pin: pinInput,
+                device: navigator.userAgent,
+                remember: true
+            });
+            
+        console.log('PIN validation response:', response); // Debug log
+        
         if (response.ok) {
+            console.log('Server returned profile:', response.profile);
+            console.log('Profile ID from server:', response.profile?._id);
             setProfile(response.profile);
+            // שמירת טוקנים אם יש
+            if (response.tokens && response.tokens.accessToken) {
+                localStorage.setItem('accessToken', response.tokens.accessToken);
+            }
+            if (response.tokens && response.tokens.refreshToken) {
+                localStorage.setItem('refreshToken', response.tokens.refreshToken);
+            }
             navigate('/dashboard');
-        } else if (response.status === 400) {
-            setError('הקוד הסודי שגוי, אנא נסה שוב');
         } else {
-            setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
+            // בדיקה מפורטת של תגובת השרת
+            console.log('PIN validation failed:', {
+                status: response.status,
+                message: response.message,
+                error: response.error
+            });
+            
+            if (response.status === 400 || response.status === 401) {
+                // בדיקת הודעת השגיאה המדויקת מהשרת
+                if (response.message && response.message.includes('PIN') || 
+                    response.message && response.message.includes('pin') ||
+                    response.message && response.message.includes('קוד') ||
+                    response.error && response.error.includes('PIN') ||
+                    response.error && response.error.includes('pin')) {
+                    setError('הקוד הסודי שגוי, אנא נסה שוב');
+                } else {
+                    setError('הקוד הסודי שגוי, אנא נסה שוב');
+                }
+            } else if (response.status === 404) {
+                setError('פרופיל לא נמצא');
+            } else if (response.status >= 500) {
+                setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
+            } else {
+                // הודעה כללית עם פרטי השגיאה
+                setError(`שגיאה: ${response.message || response.error || 'הקוד הסודי שגוי'}`);
+            }
+        }
+        } catch (error) {
+            console.error('PIN validation error:', error);
+            setError('שגיאת תקשורת עם השרת, אנא נסה שוב');
         }
     }
 

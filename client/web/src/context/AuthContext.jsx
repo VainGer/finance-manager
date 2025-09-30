@@ -3,8 +3,6 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-
-
     const [account, setAccount] = useState(() => {
         const savedAccount = sessionStorage.getItem('account');
         return savedAccount ? JSON.parse(savedAccount) : null;

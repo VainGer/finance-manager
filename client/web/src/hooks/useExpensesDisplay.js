@@ -17,17 +17,12 @@ export default function useExpensesDisplay(profile) {
     const [showDateFilter, setShowDateFilter] = useState(false);
 
     const fetchExpenses = useCallback(async () => {
-        if (!profile?.expenses) {
-            setLoading(false);
-            setError("לא נמצאו הוצאות");
-            return;
-        }
-
         try {
             setLoading(true);
             setError(null);
 
-            const expensesId = profile.expenses;
+            // Use expenses field if available, otherwise fall back to profile ID  
+            const expensesId = profile?.expenses || profile._id;
             const response = await get(`expenses/profile-expenses/${expensesId}`);
 
             if (response.ok && response.expenses) {
@@ -37,23 +32,32 @@ export default function useExpensesDisplay(profile) {
                     expensesData.categories.forEach(category => {
                         if (category.Businesses) {
                             category.Businesses.forEach(business => {
-                                if (business.transactions) {
-                                    business.transactions.forEach(transaction => {
-                                        realExpenses.push({
-                                            _id: transaction._id,
-                                            amount: Number(transaction.amount),
-                                            date: transaction.date,
-                                            description: transaction.description,
-                                            category: category.name,
-                                            business: business.name
-                                        });
+                                if (business.transactionsArray) {
+                                    business.transactionsArray.forEach(transactionGroup => {
+                                        if (transactionGroup.transactions) {
+                                            transactionGroup.transactions.forEach(transaction => {
+                                                realExpenses.push({
+                                                    _id: transaction._id,
+                                                    amount: Number(transaction.amount),
+                                                    date: transaction.date,
+                                                    description: transaction.description,
+                                                    category: category.name,
+                                                    business: business.name
+                                                });
+                                            });
+                                        }
                                     });
                                 }
                             });
                         }
                     });
                 }
+
                 setExpenses(realExpenses);
+            } else if (response.status === 404) {
+                // New profile - no expenses yet
+                console.log('No expenses found for new profile');
+                setExpenses([]);
             } else {
                 setError(response.message || 'שגיאה בטעינת הנתונים');
             }

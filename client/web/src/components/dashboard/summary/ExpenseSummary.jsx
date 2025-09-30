@@ -17,8 +17,26 @@ export default function ExpenseSummary({ profile }) {
             setLoading(true);
             setError(null);
             
-            const expensesId = profile?.expenses || profile?.profileId || '6888fada86dcf136e4141d5d';
+            // Use expenses field if available, otherwise fall back to profile ID
+            const expensesId = profile?.expenses || profile?._id;
             const response = await get(`expenses/profile-expenses/${expensesId}`);
+            
+            if (response.ok && response.expenses) {
+                // Parse the real data from your API
+                const realExpenses = [];
+                const expensesData = response.expenses;
+            } else if (response.status === 404) {
+                // New profile - no expenses yet
+                console.log('No expenses found for new profile');
+                setExpenses([]);
+                setLoading(false);
+                return;
+            } else {
+                console.error('Failed to fetch expenses:', response);
+                setError('לא ניתן לטעון הוצאות');
+                setLoading(false);
+                return;
+            }
             
             if (response.ok && response.expenses) {
                 // Parse the real data from your API
@@ -29,20 +47,27 @@ export default function ExpenseSummary({ profile }) {
                     expensesData.categories.forEach(category => {
                         if (category.Businesses) {
                             category.Businesses.forEach(business => {
-                                if (business.transactions) {
-                                    business.transactions.forEach(transaction => {
-                                        realExpenses.push({
-                                            _id: transaction._id,
-                                            amount: Number(transaction.amount),
-                                            category: category.name,
-                                            business: business.name
-                                        });
+                                if (business.transactionsArray) {
+                                    business.transactionsArray.forEach(transactionGroup => {
+                                        if (transactionGroup.transactions) {
+                                            transactionGroup.transactions.forEach(transaction => {
+                                                realExpenses.push({
+                                                    _id: transaction._id,
+                                                    amount: Number(transaction.amount),
+                                                    date: transaction.date,
+                                                    description: transaction.description,
+                                                    category: category.name,
+                                                    business: business.name
+                                                });
+                                            });
+                                        }
                                     });
                                 }
                             });
                         }
                     });
                 }
+
                 
                 setExpenses(realExpenses);
             } else {

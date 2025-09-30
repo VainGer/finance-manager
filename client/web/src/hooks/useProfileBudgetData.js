@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { get } from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 export function useProfileBudgetData(profile) {
+    const { account } = useAuth();
     const [profileBudgets, setProfileBudgets] = useState([]);
     const [expensesData, setExpensesData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -9,28 +11,50 @@ export function useProfileBudgetData(profile) {
     const [selectedPeriod, setSelectedPeriod] = useState(null);
 
     useEffect(() => {
+        if (!profile || !account) {
+            setLoading(false);
+            return;
+        }
+        
         setLoading(true);
         setError(null);
         const fetchData = async () => {
+            // זהות נכונה מבסיס הנתונים
+                        // Use expenses field if available, otherwise fall back to profile ID
+            const expensesId = profile?.expenses || profile?._id;
             const [budgetsResponse, expensesResponse] = await Promise.all([
-                get(`budgets/get-profile-budgets?username=${profile.username}&profileName=${profile.profileName}`),
-                get(`expenses/profile-expenses/${profile.expenses}`)
+                get(`budgets/get-profile-budgets?username=${account?.username}&profileName=${profile.profileName}`),
+                get(`expenses/profile-expenses/${expensesId}`)
             ]);
-            if (budgetsResponse.ok && expensesResponse.ok) {
+            
+            // Handle budgets
+            if (budgetsResponse.ok) {
                 const budgets = budgetsResponse.budgets.budgets || [];
-                const expenses = expensesResponse.expenses.categories || [];
                 setProfileBudgets(budgets);
-                setExpensesData(expenses);
             } else {
-                setError('שגיאה בטעינת נתונים, נסה שנית');
+                console.error('Failed to fetch budgets:', budgetsResponse);
+                setProfileBudgets([]);
+            }
+            
+            // Handle expenses - might not exist for new profiles
+            if (expensesResponse.ok) {
+                const expenses = expensesResponse.expenses.categories || [];
+                setExpensesData(expenses);
+            } else if (expensesResponse.status === 404) {
+                // New profile - no expenses yet
+                console.log('No expenses found for new profile - this is normal');
+                setExpensesData([]);
+            } else {
+                console.error('Failed to fetch expenses:', expensesResponse);
+                setExpensesData([]);
             }
             setLoading(false);
         };
         fetchData();
-    }, [profile]);
+    }, [profile, account]);
 
     const availablePeriods = useMemo(() => {
-        if (!profileBudgets || profileBudgets.length === 0) return [];
+        if (!profileBudgets || !Array.isArray(profileBudgets) || profileBudgets.length === 0) return [];
         return profileBudgets.map(budget => ({
             startDate: budget.startDate,
             endDate: budget.endDate
