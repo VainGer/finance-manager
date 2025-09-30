@@ -2,15 +2,18 @@ import * as AppErrors from "../../errors/AppError";
 import ProfileModel from "../../models/profile/profile.model";
 import AccountModel from "../../models/account/account.model";
 import CategoryService from "../expenses/category.service";
-import { ProfileCreationData, Profile, SafeProfile, CategorizedFile, ChildProfile, ChildProfileCreationData } from "../../types/profile.types";
-import { TransactionWithoutId } from "../../types/expenses.types";
+import { CategoryBudget, Transaction, GroupedTransactions } from "../../types/expenses.types";
+import { ProfileCreationData, Profile, SafeProfile, CategorizedFile, ChildProfile, ChildProfileCreationData, ProfileBudget } from "../../types/profile.types";
 import { ObjectId } from "mongodb";
 import LLM from "../../utils/LLM";
 import BusinessModel from "../../models/expenses/business.model";
-import TransactionService from "../expenses/transaction.service";
 import JWT from "../../utils/JWT";
 import { Account, Token } from "../../types/account.types";
+import BudgetService from "../budget/budget.service";
+import { formatDateYM } from "../../utils/date.utils";
+import TransactionModel from "../../models/expenses/transaction.model";
 export default class ProfileService {
+
 
     static async createProfile(profileData: ProfileCreationData) {
         if (!profileData.username || !profileData.profileName || !profileData.pin) {
@@ -538,19 +541,113 @@ export default class ProfileService {
             throw new AppErrors.NotFoundError("Profile not found");
         }
         await this.updateBankNames(refId, transactionsToUpload);
-        for (const item of transactionsToUpload) {
-            const transaction: TransactionWithoutId = {
-                amount: item.amount,
-                date: new Date(item.date).toISOString(),
-                description: item.description ?? ''
-            }
-            const result = await TransactionService.create(refId, item.category, item.business, transaction);
-            if (!result || !result.success) {
-                throw new AppErrors.AppError(result?.message || "Failed to create transaction", 500);
-            }
+        const incValues = await this.getIncBudgetsValues(username, profileName, transactionsToUpload);
+        if (!incValues.success) {
+            throw new AppErrors.AppError("Failed to get budgets increase values", 500);
+        }
+        const { profileInc, categoryInc } = incValues.budgets;
+        const groupedTransactions = this.groupTransactions(transactionsToUpload);
+        const uploadResult = await TransactionModel.uploadFromFile(profileName, refId, groupedTransactions, profileInc, categoryInc);
+        if (!uploadResult || !uploadResult.success) {
+            throw new AppErrors.AppError(uploadResult?.message || "Failed to upload transactions", 500);
         }
         return { success: true, message: "Transactions uploaded successfully" };
     }
+
+    private static groupTransactions(transactions: CategorizedFile[]) {
+        const groupedMap = new Map<string, GroupedTransactions>();
+        for (const t of transactions) {
+            const dateObj = new Date(t.date);
+            const dateYM = formatDateYM(dateObj); // ✅ uses your util
+            const key = `${t.category}::${t.business}::${dateYM}`;
+            if (!groupedMap.has(key)) {
+                groupedMap.set(key, {
+                    category: t.category,
+                    business: t.business,
+                    dateYM,
+                    transactions: []
+                });
+            }
+            groupedMap.get(key)!.transactions.push({
+                _id: new ObjectId(),
+                amount: t.amount,
+                date: dateObj.toISOString(),
+                description: t.description
+            });
+        }
+        return Array.from(groupedMap.values());
+    }
+
+    private static async getIncBudgetsValues(username: string, profileName: string, transactions: CategorizedFile[]) {
+        const budgetsRes = await BudgetService.getBudgets(username, profileName);
+        if (!budgetsRes.success) {
+            throw new AppErrors.AppError("Failed to get budgets", 500);
+        }
+
+        const profileBudgets = budgetsRes.budgets.profile as ProfileBudget[] | undefined;
+        const categoriesBudgets = budgetsRes.budgets.categories as { name: string; budgets: CategoryBudget[] }[] | undefined;
+
+        const empty = {
+            success: true as const,
+            budgets: { profileInc: [] as { id: ObjectId; amount: number }[], categoryInc: [] as { categoryName: string; id: ObjectId; amount: number }[] }
+        };
+
+        if (!profileBudgets?.length || !categoriesBudgets?.length) {
+            console.log("No budgets found");
+            return empty;
+        }
+
+        const norm = (s?: string) => (s ?? "").trim();
+
+        const flatCategoryBudgets = categoriesBudgets.flatMap(cat =>
+            cat.budgets.map(b => ({
+                categoryName: norm(cat.name),
+                _id: b._id,
+                startDate: new Date(b.startDate),
+                endDate: new Date(b.endDate)
+            }))
+        );
+
+        const categoryIncMap = new Map<string, { categoryName: string; id: ObjectId; amount: number }>();
+        const profileIncMap = new Map<string, number>();
+
+        for (const t of transactions) {
+            const tCategory = norm(t.category);
+            const tDate = new Date(t.date);
+            const matchingBudgets = flatCategoryBudgets.filter(cb => {
+                const end = new Date(cb.endDate);
+                end.setHours(23, 59, 59, 999); 
+                return cb.categoryName === tCategory && tDate >= cb.startDate && tDate <= end;
+            });
+
+            for (const budget of matchingBudgets) {
+                const key = `${tCategory}_${budget._id.toString()}`;
+                const existing = categoryIncMap.get(key);
+                if (existing) {
+                    existing.amount += t.amount;
+                } else {
+                    categoryIncMap.set(key, { categoryName: tCategory, id: budget._id, amount: t.amount });
+                }
+                const pid = budget._id.toString();
+                profileIncMap.set(pid, (profileIncMap.get(pid) ?? 0) + t.amount);
+            }
+        }
+
+        const categoryInc = Array.from(categoryIncMap.values());
+        const profileInc = Array.from(profileIncMap.entries()).map(([id, amount]) => ({
+            id: new ObjectId(id),
+            amount
+        }));
+
+        if (!categoryInc.length && !profileInc.length) {
+            console.log("No budgets increase found");
+            return empty;
+        }
+
+        return { success: true as const, budgets: { profileInc, categoryInc } };
+    }
+
+
 
     static async categorizeTransactions(refId: string, transactionsData: string) {
         if (!refId || !transactionsData) {

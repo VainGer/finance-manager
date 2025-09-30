@@ -37,4 +37,11 @@ export type Transaction = {
     description: string;
 }
 
+export type GroupedTransactions = {
+    category: string;
+    business: string;
+    dateYM: string;
+    transactions: Transaction[];
+};
+
 export type TransactionWithoutId = Omit<Transaction, '_id'>;

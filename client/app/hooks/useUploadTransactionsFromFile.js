@@ -6,6 +6,7 @@ import { post } from "../utils/api";
 import { parseCSV, parseXLSX } from '../utils/parsers';
 import useEditBusiness from './useEditBusiness';
 import useEditCategories from './useEditCategories';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function useUploadTransactionsFromFile({
   setShowCreateCategory,
@@ -110,6 +111,14 @@ export default function useUploadTransactionsFromFile({
 
 
   const processTransactions = async () => {
+    /*******************************************************************************************/
+    // TESTING caching categorized transactions in AsyncStorage                                *
+    // const categorizedFromStorage = await AsyncStorage.getItem('categorizedTransactions');   *
+    // if (categorizedFromStorage) {                                                           *
+    //   setCategorizedTransactions(JSON.parse(categorizedFromStorage));                       *
+    //   return;                                                                               *
+    // }                                                                                       *
+    /*******************************************************************************************/
     setError(null);
     setSuccess(null);
     setLoading(true);
@@ -125,6 +134,7 @@ export default function useUploadTransactionsFromFile({
     setLoading(false);
     if (response.ok) {
       setCategorizedTransactions(response.categories.transactions);
+      AsyncStorage.setItem('categorizedTransactions', JSON.stringify(response.categories.transactions));
     } else {
       setError("שגיאה בעיבוד התנועות");
     }

@@ -1,9 +1,10 @@
 import db from "../../server";
 import { ObjectId } from "mongodb";
-import { MonthlyTransactions, Transaction, TransactionWithoutId } from "../../types/expenses.types";
+import { MonthlyTransactions, Transaction, GroupedTransactions } from "../../types/expenses.types";
 import { formatDateYM } from "../../utils/date.utils";
 
 export default class TransactionModel {
+    private static profileCollection: string = "profiles";
     private static expenseCollection: string = "expenses";
 
     static async create(refId: string, catName: string, busName: string, transaction: Transaction) {
@@ -11,14 +12,14 @@ export default class TransactionModel {
             const dateYM = formatDateYM(transaction.date);
             const existingMonth = await this.findMonthlyTransactionsByDateYM(
                 refId, catName, busName, dateYM);
-            
+
             if (existingMonth) {
                 const result = await db.UpdateDocument(
                     this.expenseCollection,
                     { _id: new ObjectId(refId) },
-                    { 
-                        $push: { 
-                            "categories.$[catFilter].Businesses.$[bizFilter].transactionsArray.$[dateFilter].transactions": transaction 
+                    {
+                        $push: {
+                            "categories.$[catFilter].Businesses.$[bizFilter].transactionsArray.$[dateFilter].transactions": transaction
                         }
                     },
                     {
@@ -29,7 +30,7 @@ export default class TransactionModel {
                         ]
                     }
                 );
-                
+
                 if (!result || result.modifiedCount === 0) {
                     return { success: false, message: "Failed to create transaction" };
                 }
@@ -39,13 +40,13 @@ export default class TransactionModel {
                     dateYM,
                     transactions: [transaction]
                 };
-                
+
                 const result = await db.UpdateDocument(
                     this.expenseCollection,
                     { _id: new ObjectId(refId) },
-                    { 
-                        $push: { 
-                            "categories.$[catFilter].Businesses.$[bizFilter].transactionsArray": newMonthlyTransactions 
+                    {
+                        $push: {
+                            "categories.$[catFilter].Businesses.$[bizFilter].transactionsArray": newMonthlyTransactions
                         }
                     },
                     {
@@ -55,7 +56,7 @@ export default class TransactionModel {
                         ]
                     }
                 );
-                
+
                 if (!result || result.modifiedCount === 0) {
                     return { success: false, message: "Failed to create transaction" };
                 }
@@ -71,13 +72,13 @@ export default class TransactionModel {
         (refId: string, catName: string, busName: string, transactionId: ObjectId | string, newAmount: number) {
         try {
             const txId = typeof transactionId === 'string' ? new ObjectId(transactionId) : transactionId;
-            
+
             const result = await db.UpdateDocument(
                 this.expenseCollection,
                 { _id: new ObjectId(refId) },
-                { 
-                    $set: { 
-                        "categories.$[catFilter].Businesses.$[bizFilter].transactionsArray.$[].transactions.$[transFilter].amount": newAmount 
+                {
+                    $set: {
+                        "categories.$[catFilter].Businesses.$[bizFilter].transactionsArray.$[].transactions.$[transFilter].amount": newAmount
                     }
                 },
                 {
@@ -102,9 +103,9 @@ export default class TransactionModel {
             const result = await db.UpdateDocument(
                 this.expenseCollection,
                 { _id: new ObjectId(refId) },
-                { 
-                    $set: { 
-                        "categories.$[catFilter].Businesses.$[bizFilter].transactionsArray.$[].transactions.$[transFilter].description": newDescription 
+                {
+                    $set: {
+                        "categories.$[catFilter].Businesses.$[bizFilter].transactionsArray.$[].transactions.$[transFilter].description": newDescription
                     }
                 },
                 {
@@ -130,16 +131,16 @@ export default class TransactionModel {
             if (!transaction) {
                 return { success: false, message: "Transaction not found" };
             }
-            
+
             const dateYM = formatDateYM(transaction.date);
             const result = await db.UpdateDocument(
                 this.expenseCollection,
                 { _id: new ObjectId(refId) },
-                { 
-                    $pull: { 
-                        "categories.$[catFilter].Businesses.$[bizFilter].transactionsArray.$[dateFilter].transactions": { 
-                            _id: new ObjectId(transactionId) 
-                        } 
+                {
+                    $pull: {
+                        "categories.$[catFilter].Businesses.$[bizFilter].transactionsArray.$[dateFilter].transactions": {
+                            _id: new ObjectId(transactionId)
+                        }
                     }
                 },
                 {
@@ -149,14 +150,14 @@ export default class TransactionModel {
                         { "dateFilter.dateYM": dateYM }
                     ]
                 });
-                
+
             if (!result || result.modifiedCount === 0) {
                 return { success: false, message: "Failed to delete transaction" };
             }
-            
+
             const monthlyTransactions = await this.findMonthlyTransactionsByDateYM(
                 refId, catName, busName, dateYM);
-            
+
             if (monthlyTransactions && monthlyTransactions.transactions.length === 0) {
                 await db.UpdateDocument(
                     this.expenseCollection,
@@ -176,7 +177,7 @@ export default class TransactionModel {
                     }
                 );
             }
-            
+
             return { success: true, message: "Transaction deleted successfully" };
         } catch (error) {
             console.error("Error in TransactionModel.delete", error);
@@ -197,7 +198,7 @@ export default class TransactionModel {
                 { $match: { "categories.Businesses.transactionsArray.transactions._id": new ObjectId(transactionId) } },
                 { $replaceRoot: { newRoot: "$categories.Businesses.transactionsArray.transactions" } }
             ];
-            const results = await db.Aggregate(this.expenseCollection, pipeline);     
+            const results = await db.Aggregate(this.expenseCollection, pipeline);
             if (!results || results.length === 0) {
                 return null;
             }
@@ -207,7 +208,7 @@ export default class TransactionModel {
             throw new Error("Failed to get transaction");
         }
     }
-    
+
     static async findMonthlyTransactionsByDateYM(refId: string, catName: string, busName: string, dateYM: string) {
         try {
             const pipeline = [
@@ -230,7 +231,7 @@ export default class TransactionModel {
             throw new Error("Failed to find transaction array by date");
         }
     }
-    
+
     static async getAll(refId: string, catName: string, busName: string) {
         try {
             const pipeline = [
@@ -239,10 +240,12 @@ export default class TransactionModel {
                 { $match: { "categories.name": catName } },
                 { $unwind: "$categories.Businesses" },
                 { $match: { "categories.Businesses.name": busName } },
-                { $project: {
-                    transactionsArray: "$categories.Businesses.transactionsArray",
-                    _id: 0
-                }}
+                {
+                    $project: {
+                        transactionsArray: "$categories.Businesses.transactionsArray",
+                        _id: 0
+                    }
+                }
             ];
             const results = await db.Aggregate(this.expenseCollection, pipeline);
             if (!results || results.length === 0) {
@@ -250,20 +253,20 @@ export default class TransactionModel {
             }
             let allTransactions: Transaction[] = [];
             const monthlyArrays = results[0].transactionsArray || [];
-            
+
             monthlyArrays.forEach((monthlyTx: MonthlyTransactions) => {
                 if (monthlyTx.transactions && monthlyTx.transactions.length > 0) {
                     allTransactions = allTransactions.concat(monthlyTx.transactions);
                 }
             });
-            
+
             return allTransactions;
         } catch (error) {
             console.error("Error in TransactionModel.getAll", error);
             throw new Error("Failed to get all transactions");
         }
     }
-    
+
     static async getAllByMonth(refId: string, catName: string, busName: string) {
         try {
             const pipeline = [
@@ -272,10 +275,12 @@ export default class TransactionModel {
                 { $match: { "categories.name": catName } },
                 { $unwind: "$categories.Businesses" },
                 { $match: { "categories.Businesses.name": busName } },
-                { $project: {
-                    transactionsArray: "$categories.Businesses.transactionsArray",
-                    _id: 0
-                }}
+                {
+                    $project: {
+                        transactionsArray: "$categories.Businesses.transactionsArray",
+                        _id: 0
+                    }
+                }
             ];
             const results = await db.Aggregate(this.expenseCollection, pipeline);
             if (!results || results.length === 0) {
@@ -285,6 +290,96 @@ export default class TransactionModel {
         } catch (error) {
             console.error("Error in TransactionModel.getAllByMonth", error);
             throw new Error("Failed to get transactions grouped by month");
+        }
+    }
+
+    static async uploadFromFile(
+        profileName: string,
+        refId: string,
+        groupedTransactions: GroupedTransactions[],
+        profileIncs: { id: ObjectId; amount: number }[],
+        categoryIncs: { id: ObjectId; categoryName: string; amount: number }[]
+    ) {
+        try {
+            const operations: { collection: string; query: any; update: any; options?: any }[] = [];
+
+            // 1. Insert grouped transactions
+            for (const group of groupedTransactions) {
+                // Step 1a: ensure the month bucket exists
+                operations.push({
+                    collection: "expenses",
+                    query: { _id: new ObjectId(refId) },
+                    update: {
+                        $addToSet: {
+                            "categories.$[cat].Businesses.$[biz].transactionsArray": {
+                                dateYM: group.dateYM,
+                                transactions: []
+                            }
+                        }
+                    },
+                    options: {
+                        arrayFilters: [
+                            { "cat.name": group.category },
+                            { "biz.name": group.business }
+                        ]
+                    }
+                });
+
+                // Step 1b: push transactions into the correct month
+                operations.push({
+                    collection: "expenses",
+                    query: { _id: new ObjectId(refId) },
+                    update: {
+                        $push: {
+                            "categories.$[cat].Businesses.$[biz].transactionsArray.$[month].transactions": {
+                                $each: group.transactions
+                            }
+                        }
+                    },
+                    options: {
+                        arrayFilters: [
+                            { "cat.name": group.category },
+                            { "biz.name": group.business },
+                            { "month.dateYM": group.dateYM }
+                        ]
+                    }
+                });
+            }
+
+            // 2. Update category budgets
+            for (const inc of categoryIncs) {
+                operations.push({
+                    collection: "expenses",
+                    query: { _id: new ObjectId(refId) },
+                    update: {
+                        $inc: { "categories.$[cat].budgets.$[b].spent": inc.amount }
+                    },
+                    options: {
+                        arrayFilters: [
+                            { "cat.name": inc.categoryName },
+                            { "b._id": inc.id }
+                        ]
+                    }
+                });
+            }
+
+            // 3. Update profile budgets
+            for (const inc of profileIncs) {
+                operations.push({
+                    collection: "profiles",
+                    query: { profileName, "budgets._id": inc.id },
+                    update: {
+                        $inc: { "budgets.$.spent": inc.amount }
+                    }
+                });
+            }
+
+            // 4. Execute all ops atomically
+            const result = await db.TransactionUpdateMany(operations);
+            return result;
+        } catch (error) {
+            console.error("Error in TransactionModel.uploadFromFile", error);
+            throw new Error("Failed to upload transactions from file");
         }
     }
 }

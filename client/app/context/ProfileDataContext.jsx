@@ -179,6 +179,19 @@ export function ProfileDataProvider({ children }) {
     }, [account, profile, isTokenReady, isExpiredToken, pathname, dataLoaded]);
 
     useEffect(() => {
+        if (profile?._id !== prevProfileId.current || account?.username !== prevAccountUsername.current) {
+            setDataLoaded(false);
+            prevProfileId.current = profile?._id;
+            prevAccountUsername.current = account?.username;
+            setCategories([]);
+            setBusinesses([]);
+            setProfileBudgets([]);
+            setCategoryBudgets([]);
+            setExpenses([]);
+        }
+    }, [profile, account]);
+
+    useEffect(() => {
     }, [categoryBudgets, profileBudgets]);
 
     const loading = budgetLoading || expensesLoading || getCategoriesLoading || getBusinessesLoading;
