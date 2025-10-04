@@ -60,17 +60,26 @@ export default function ChangeAccountPassword() {
     }
 
     return (
-        <ScrollView className="flex-1 bg-slate-50 p-4">
-            <View className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
+        <ScrollView contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        }}
+            className="flex-1 bg-slate-50 p-4">
+            <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />
+            <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
+            <View pointerEvents="none" className="absolute top-1/3 right-10 h-24 w-24 rounded-full bg-white/20 blur-md" />
+
+            <View className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden w-full max-w-md">
                 {/* Header */}
-                <View className="bg-slate-700 p-6">
+                <View className="flex content-center items-center bg-slate-700 p-6">
                     <View className="flex-row items-center" style={{ gap: 12 }}>
                         <View className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                             <Ionicons name="key-outline" size={24} color="white" />
                         </View>
                         <View>
-                            <Text className="text-xl font-bold text-white text-right">שינוי סיסמת חשבון</Text>
-                            <Text className="text-white/80 text-sm text-right">עדכן את סיסמת הכניסה למערכת</Text>
+                            <Text className="text-xl font-bold text-white text-center">שינוי סיסמת חשבון</Text>
+                            <Text className="text-white/80 text-sm text-center">עדכן את סיסמת הכניסה למערכת</Text>
                         </View>
                     </View>
                 </View>
@@ -80,7 +89,7 @@ export default function ChangeAccountPassword() {
                     <View style={{ gap: 24 }}>
                         {/* Current Password */}
                         <View style={{ gap: 8 }}>
-                            <Text className="text-sm font-semibold text-slate-700 text-right">סיסמה נוכחית</Text>
+                            <Text className="text-sm font-semibold text-slate-700 text-center">סיסמה נוכחית</Text>
                             <TextInput
                                 placeholder="הזן את הסיסמה הנוכחית"
                                 secureTextEntry
@@ -91,7 +100,7 @@ export default function ChangeAccountPassword() {
 
                         {/* New Password */}
                         <View style={{ gap: 8 }}>
-                            <Text className="text-sm font-semibold text-slate-700 text-right">סיסמה חדשה</Text>
+                            <Text className="text-sm font-semibold text-slate-700 text-center">סיסמה חדשה</Text>
                             <TextInput
                                 placeholder="מינימום 6 תווים"
                                 secureTextEntry
@@ -102,7 +111,7 @@ export default function ChangeAccountPassword() {
 
                         {/* Confirm Password */}
                         <View style={{ gap: 8 }}>
-                            <Text className="text-sm font-semibold text-slate-700 text-right">אישור סיסמה חדשה</Text>
+                            <Text className="text-sm font-semibold text-slate-700 text-center">אישור סיסמה חדשה</Text>
                             <TextInput
                                 placeholder="הזן שוב את הסיסמה החדשה"
                                 secureTextEntry

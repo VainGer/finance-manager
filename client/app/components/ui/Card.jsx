@@ -29,7 +29,7 @@ export default function Card({
   scrollable = false,
   maxHeight,
 }) {
-  // Prepare the header if title exists
+
   const header = (title || headerRight) ? (
     <View className="mb-3">
       <View className="flex-row justify-between items-start">
@@ -52,7 +52,7 @@ export default function Card({
     </View>
   ) : null;
 
-  // Content with optional scrolling
+
   const content = scrollable ? (
     <ScrollView 
       style={{ maxHeight: maxHeight || 300 }}
@@ -62,7 +62,7 @@ export default function Card({
     </ScrollView>
   ) : children;
 
-  // Render the appropriate card variant
+
   switch (variant) {
     case "glass":
       return (

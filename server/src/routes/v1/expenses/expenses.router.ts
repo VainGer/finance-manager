@@ -11,7 +11,16 @@ expensesRouter.use('/category', categoryRouter);
 expensesRouter.use('/business', businessRouter);
 expensesRouter.use('/transaction', transactionRouter);
 
-expensesRouter.get('/profile-expenses/:refId', accessTokenVerification, ExpensesController.getProfileExpenses);
+expensesRouter.get(
+    '/profile-expenses/:refId',
+    accessTokenVerification,
+    ExpensesController.getProfileExpensesByRef
+);
 
+expensesRouter.get(
+    '/profile-expenses/child/:username/:childId',
+    accessTokenVerification,
+    ExpensesController.getProfileExpensesByChild
+);
 
 export default expensesRouter;

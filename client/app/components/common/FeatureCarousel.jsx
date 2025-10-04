@@ -23,7 +23,7 @@ export default function FeatureCarousel({
   );
 
   const CARD_W = Math.min(maxCardWidth, SCREEN_W - sideGutter * 2);
-  const EDGE = (SCREEN_W - CARD_W) / 2; // כדי למרכז את הכרטיסים בקצוות
+  const EDGE = (SCREEN_W - CARD_W) / 2;
   const scrollRef = useRef(null);
   const [index, setIndex] = useState(0);
 
@@ -71,7 +71,7 @@ export default function FeatureCarousel({
           <View key={i} style={{ width: CARD_W }} className="px-2">
             <View
               className="rounded-2xl bg-white/95 border border-slate-200/50 backdrop-blur p-5"
-              style={{ height: cardHeight }}
+              style={{ height: cardHeight + 32 }}
             >
               <View className="flex-1 items-center justify-center">
                 <View

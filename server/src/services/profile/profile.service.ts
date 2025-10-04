@@ -398,7 +398,8 @@ export default class ProfileService {
         if (profileExist) {
             throw new AppErrors.ConflictError("Profile already exists");
         }
-        const updatedProfile = await ProfileModel.renameProfile(username, oldProfileName, newProfileName, profile.expenses);
+        const updatedProfile = await ProfileModel.renameProfile(username, oldProfileName,
+            newProfileName, profile.expenses, profile.parentProfile);
         if (!updatedProfile) {
             throw new AppErrors.AppError("Failed to rename profile", 500);
         }
@@ -616,7 +617,7 @@ export default class ProfileService {
             const tDate = new Date(t.date);
             const matchingBudgets = flatCategoryBudgets.filter(cb => {
                 const end = new Date(cb.endDate);
-                end.setHours(23, 59, 59, 999); 
+                end.setHours(23, 59, 59, 999);
                 return cb.categoryName === tCategory && tDate >= cb.startDate && tDate <= end;
             });
 

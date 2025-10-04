@@ -4,8 +4,12 @@ import { useEffect } from "react";
 import { I18nManager, View, Dimensions } from "react-native";
 import Navbar from '../../components/common/navbar';
 import { useAuth } from '../../context/AuthContext';
+import { useProfileData } from '../../context/ProfileDataContext';
+import LoadingSpinner from '../../components/common/loadingSpinner.jsx';
+
 export default function RootLayout() {
     const { profile } = useAuth();
+    const { loading, dataLoaded } = useProfileData();
     const windowWidth = Dimensions.get('window').width;
     useEffect(() => {
         I18nManager.allowRTL(true);
@@ -18,6 +22,8 @@ export default function RootLayout() {
         }
         return '#8A2BE2';
     };
+
+    if (!profile) { return null; }
 
     const baseColor = getBaseColor();
 
@@ -37,7 +43,9 @@ export default function RootLayout() {
                         drawerItemStyle: {
                             borderRadius: 8,
                             marginLeft: windowWidth * 0.16,
+                            borderBottomWidth: 1,
                             marginVertical: 4,
+                            borderBottomColor: "#7393B3"
                         },
                         drawerContentStyle: {
                             paddingTop: 24,
@@ -61,11 +69,11 @@ export default function RootLayout() {
                         options={{
                             drawerLabel: 'הוסף הוצאה',
                             title: 'הוסף הוצאה',
-                            drawerIcon: ({ color }) => <Ionicons name="add-outline" size={22} color={color} />,
+                            drawerIcon: ({ color }) => <Ionicons name="card-outline" size={22} color={color} />,
                             unmountOnBlur: true,
                         }}
                     />
-                    <Drawer.Screen name="categoryMenu"
+                    <Drawer.Screen name="(category)"
                         options={{
                             drawerLabel: 'ניהול קטגוריות',
                             title: 'ניהול קטגוריות',
@@ -73,7 +81,7 @@ export default function RootLayout() {
                             unmountOnBlur: true,
                         }}
                     />
-                    <Drawer.Screen name="businessMenu"
+                    <Drawer.Screen name="(business)"
                         options={{
                             drawerLabel: 'ניהול עסקים',
                             title: 'ניהול עסקים',
@@ -81,7 +89,7 @@ export default function RootLayout() {
                             unmountOnBlur: true,
                         }}
                     />
-                    <Drawer.Screen name="budgetsMenu"
+                    <Drawer.Screen name="(budget)"
                         options={{
                             drawerLabel: 'ניהול תקציבים',
                             title: 'ניהול תקציבים',

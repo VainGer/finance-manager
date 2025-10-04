@@ -29,7 +29,7 @@ export default function IconWithText({
 }) {
   const isRTL = forceRTL || I18nManager.isRTL;
   
-  // Set the right flexDirection and marginProp based on RTL
+
   const flexDirection = isRTL ? "flex-row-reverse" : "flex-row";
   const marginProp = isRTL ? { marginRight: spacing } : { marginLeft: spacing };
   const iconMarginProp = isRTL ? { marginLeft: spacing } : { marginRight: spacing };

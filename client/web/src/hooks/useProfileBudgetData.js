@@ -35,14 +35,10 @@ export function useProfileBudgetData(profile) {
                 console.error('Failed to fetch budgets:', budgetsResponse);
                 setProfileBudgets([]);
             }
-            
-            // Handle expenses - might not exist for new profiles
             if (expensesResponse.ok) {
                 const expenses = expensesResponse.expenses.categories || [];
                 setExpensesData(expenses);
             } else if (expensesResponse.status === 404) {
-                // New profile - no expenses yet
-                console.log('No expenses found for new profile - this is normal');
                 setExpensesData([]);
             } else {
                 console.error('Failed to fetch expenses:', expensesResponse);

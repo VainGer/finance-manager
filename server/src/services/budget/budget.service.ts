@@ -5,7 +5,6 @@ import BudgetModel from "../../models/budget/budget.model";
 import ProfileModel from "../../models/profile/profile.model";
 import { ObjectId } from "mongodb";
 import { ProfileBudget } from "../../types/profile.types";
-import CategoryService from "../expenses/category.service";
 
 export default class BudgetService {
 
@@ -19,6 +18,10 @@ export default class BudgetService {
         const { username, profileName, refId, profileBudget, categoriesBudgets } = budgetData;
         if (!refId || !profileBudget || !profileBudget.startDate || !profileBudget.endDate || !profileBudget.amount || !categoriesBudgets) {
             throw new AppErrors.ValidationError("Reference ID, profile budget data and categories budgets are required.");
+        }
+        const validDatesInBudgets = await this.validateBudgetDates(username, profileName, profileBudget.startDate, profileBudget.endDate);
+        if (!validDatesInBudgets) {
+            throw new AppErrors.ConflictError("Invalid budget dates");
         }
         const existingProfile = await ProfileModel.findProfile(username, profileName);
         const existingCategories = await CategoriesModel.getCategories(refId);
@@ -45,7 +48,8 @@ export default class BudgetService {
             amount: profileBudget.amount,
             spent: totalSpent
         };
-        const budgetResult = await BudgetModel.createBudget(username, profileName, refId, profileBudgetWithSpent, preparedBudgets);
+        const budgetResult = await BudgetModel.createBudget(username, profileName, refId,
+             profileBudgetWithSpent, preparedBudgets, !existingProfile.parentProfile);
         if (!budgetResult || !budgetResult.success) {
             throw new AppErrors.DatabaseError(budgetResult?.message || "Failed to create budget");
         }
@@ -123,17 +127,6 @@ export default class BudgetService {
         const result = await BudgetModel.addBudgetToChild(username, profileName, budgetData);
         if (!result || !result.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to add budget to child profile '${profileName}'.`);
-        }
-        return result;
-    }
-
-    static async pullChildBudget(username: string, profileName: string, startDate: Date, endDate: Date) {
-        if (!username || !profileName || !startDate || !endDate) {
-            throw new AppErrors.ValidationError("Username, profile name, start date, and end date are required.");
-        }
-        const result = await BudgetModel.pullChildBudget(username, profileName, startDate, endDate);
-        if (!result || !result.success) {
-            throw new AppErrors.DatabaseError(result?.message || `Failed to pull child budget for profile '${profileName}'.`);
         }
         return result;
     }
@@ -254,7 +247,7 @@ export default class BudgetService {
             business.transactionsArray.forEach((monthlyTransactions) => {
                 monthlyTransactions.transactions.forEach((transaction) => {
                     const transactionDate = new Date(transaction.date);
-                    if (transactionDate >= startDate && transactionDate <= endDate) {
+                    if (transactionDate >= new Date(startDate) && transactionDate <= new Date(endDate)) {
                         sum += transaction.amount;
                     }
                 });

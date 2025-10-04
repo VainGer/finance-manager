@@ -191,9 +191,6 @@ export function ProfileDataProvider({ children }) {
         }
     }, [profile, account]);
 
-    useEffect(() => {
-    }, [categoryBudgets, profileBudgets]);
-
     const loading = budgetLoading || expensesLoading || getCategoriesLoading || getBusinessesLoading;
 
     const value = {
@@ -208,6 +205,7 @@ export function ProfileDataProvider({ children }) {
         getCategoriesLoading,
         getBusinessesLoading,
         errors,
+        dataLoaded,
         fetchBudgets,
         fetchExpenses,
         fetchCategories,

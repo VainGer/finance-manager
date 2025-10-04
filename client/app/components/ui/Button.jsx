@@ -25,7 +25,6 @@ export default function Button({
   style = {},
   size = "default",
 }) {
-  // Determine the button styles based on variant
   let variantClasses = "";
   let textColorClass = "";
   
@@ -51,7 +50,7 @@ export default function Button({
       textColorClass = "text-white";
   }
   
-  // Determine size classes
+
   let sizeClasses = "";
   let textSizeClass = "";
   
@@ -69,7 +68,7 @@ export default function Button({
       textSizeClass = "text-base";
   }
   
-  // Handle disabled state
+
   if (disabled || loading) {
     variantClasses = "bg-slate-300";
     textColorClass = "text-slate-500";

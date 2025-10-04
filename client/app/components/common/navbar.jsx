@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
-import { Image, Text, TouchableOpacity, View, I18nManager, StyleSheet } from 'react-native';
+import { Image, Text, TouchableOpacity, View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../context/AuthContext';
 import { useEffect } from 'react';
@@ -9,11 +9,6 @@ export default function Navbar() {
     const { profile, account } = useAuth();
     const navigation = useNavigation();
 
-    // Note: Better to configure RTL once in app entry point instead of in the Navbar component
-    useEffect(() => {
-        I18nManager.allowRTL(true);
-        // I18nManager.forceRTL(true); // This causes full app re-render, better in app entry point
-    }, []);
 
 
     const getDisplayName = () => {
@@ -31,13 +26,6 @@ export default function Navbar() {
         return name.charAt(0).toUpperCase();
     };
 
-    const getNavbarColor = () => {
-        // Use profile color or default to a nice purple
-        if (profile?.color) {
-            return profile.color;
-        }
-        return '#8A2BE2'; // Purple default
-    };
 
     const getDarkerShade = (hex) => {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -73,14 +61,14 @@ export default function Navbar() {
 
     return (
         <View style={{ overflow: 'hidden' }} className="h-16">
-            {/* Beautiful gradient background using profile color */}
+            {/*gradient background using profile color */}
             <LinearGradient
                 colors={[getLighterShade(baseColor), baseColor, getDarkerShade(baseColor)]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 className="absolute inset-0"
                 style={{
-                    ...StyleSheet.absoluteFillObject, // top/right/bottom/left = 0
+                    ...StyleSheet.absoluteFillObject,
                     shadowColor: '#000',
                     shadowOffset: { width: 0, height: 3 },
                     shadowOpacity: 0.2,

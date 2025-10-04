@@ -1,19 +1,29 @@
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import LoadingSpinner from '../../../components/common/loadingSpinner';
 import ExpensesTable from '../../../components/expenses/expensesTable';
 import Filter from '../../../components/expenses/filter';
-import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
 import { useProfileData } from '../../../context/ProfileDataContext';
 import { formatAmount } from '../../../utils/formatters';
+import useExpensesDisplay from '../../../hooks/expenses/useExpensesDisplay';
+import Overlay from '../../../components/common/Overlay.jsx';
+import Button from '../../../components/common/button.jsx';
+import ChangeTransactionAmount from '../../../components/transactions/changeTransactionAmount.jsx';
+import ChangeTransactionDate from '../../../components/transactions/changeTransactionDate.jsx';
+import ChangeTransactionDescription from '../../../components/transactions/changeTransactionDescription.jsx';
+import DeleteTransaction from '../../../components/transactions/deleteTransaction.jsx';
+import { LinearGradient } from "expo-linear-gradient";
+import ProfileScopeSwitcher from '../../../components/expenses/profileScopeSwitcher';
+import useChildrenData from '../../../hooks/expenses/useChildrenData.js';
 
 const TransactionsSummary = ({ filteredExpenses }) => {
     const expenses = filteredExpenses || [];
     const totalAmount = expenses.reduce((sum, expense) => sum + (expense?.amount || 0), 0);
-    
+
     return (
         <View className="bg-blue-50 rounded-lg p-4 mb-6">
             <View className="flex-row">
-
                 <View className="flex-1 items-center border-r-2 border-gray-300">
                     <Text className="text-lg font-bold text-blue-600">{expenses.length}</Text>
                     <Text className="text-sm text-gray-600">עסקאות מוצגות</Text>
@@ -36,11 +46,9 @@ const TransactionsSummary = ({ filteredExpenses }) => {
 };
 
 export default function ExpensesDisplay() {
-
     const {
         expenses,
         allExpenses,
-        monthlyExpenses,
         isLoading,
         error,
         availableDates,
@@ -54,12 +62,98 @@ export default function ExpensesDisplay() {
         applyFilters: applyAllFilters,
     } = useExpensesDisplay();
 
-    const {categories, businesses } = useProfileData();
+    const { childrenCategories, childrenBusinesses, selectedChild } = useChildrenData();
 
 
-    if (isLoading) {
-        return <LoadingSpinner />;
-    }
+    const { categories, businesses } = useProfileData();
+
+    const [editDisplay, setEditDisplay] = useState(null);
+    const [currentExpense, setCurrentExpense] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
+
+    const closeOverlay = useCallback(() => {
+        setEditDisplay(null);
+        setCurrentExpense(null);
+        setSuccessMessage(null);
+    }, []);
+
+    const handleGoBack = useCallback(() => {
+        if (
+            editDisplay === "changeAmount" ||
+            editDisplay === "changeDate" ||
+            editDisplay === "changeDescription" ||
+            editDisplay === "delete"
+        ) {
+            setEditDisplay("editMenu");
+        } else {
+            closeOverlay();
+        }
+    }, [editDisplay, closeOverlay]);
+
+    const handleOpenEditor = (type, expense) => {
+        setCurrentExpense(expense);
+        setEditDisplay(type);
+    };
+
+    const handleSuccess = (message) => {
+        setEditDisplay(null);
+        setSuccessMessage(message);
+    };
+
+    useEffect(() => {
+        console.log(selectedChild);
+    }, [selectedChild]);
+
+    const renderEditor = () => {
+        if (!currentExpense) return null;
+
+        switch (editDisplay) {
+            case 'delete':
+                return <DeleteTransaction transaction={currentExpense} goBack={handleGoBack} onSuccess={handleSuccess} />;
+            case 'changeAmount':
+                return <ChangeTransactionAmount transaction={currentExpense} goBack={handleGoBack} onSuccess={handleSuccess} />;
+            case 'changeDate':
+                return <ChangeTransactionDate transaction={currentExpense} goBack={handleGoBack} onSuccess={handleSuccess} />;
+            case 'changeDescription':
+                return <ChangeTransactionDescription transaction={currentExpense} goBack={handleGoBack} onSuccess={handleSuccess} />;
+            case 'editMenu':
+                return (
+                    <View>
+                        <Text className="text-lg font-bold mb-4 text-center">ערוך עסקה</Text>
+                        <Button className="mb-2" onPress={() => setEditDisplay('changeAmount')}>
+                            עריכת סכום
+                        </Button>
+                        <Button className="mb-2" onPress={() => setEditDisplay('changeDate')}>
+                            עריכת תאריך
+                        </Button>
+                        <Button className="mb-4" onPress={() => setEditDisplay('changeDescription')}>
+                            עריכת תיאור
+                        </Button>
+                        <Button style="secondary" onPress={handleGoBack}>
+                            ביטול
+                        </Button>
+                    </View>
+                );
+            default:
+                return null;
+        }
+    };
+
+    const renderSuccessOverlay = () => (
+        <View className="items-center justify-center w-full max-w-sm p-4 mx-auto">
+            <Ionicons name="checkmark-circle" size={80} color="#10b981" />
+            <Text className="text-2xl font-bold text-slate-800 mt-4 text-center">
+                {successMessage}
+            </Text>
+            <Button className="mt-6 w-full" onPress={closeOverlay} style="primary">
+                אישור
+            </Button>
+        </View>
+    );
+
+
+
+    if (isLoading) return <LoadingSpinner />;
 
     if (error) {
         return (
@@ -88,34 +182,49 @@ export default function ExpensesDisplay() {
     const displayExpenses = expenses || [];
 
     return (
-        <ScrollView key={allExpenses?.length || 0} className="flex-1">
-            <View className="bg-white rounded-lg shadow-lg p-6 m-4">
-                <View className="flex-row justify-between items-center mb-6">
+        <LinearGradient
+            colors={["#f8fafc", "#eef2f7", "#e5eaf1"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ flex: 1 }}
+        >
+            <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />
+            <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
+
+            <ScrollView key={allExpenses?.length || 0} className="flex-1">
+                {(editDisplay || successMessage) && (
+                    <Overlay onClose={closeOverlay}>
+                        {successMessage ? renderSuccessOverlay() : renderEditor()}
+                    </Overlay>
+                )}
+                <View className="flex-1 justify-between items-center my-8">
                     <Text className="text-2xl font-bold text-gray-800">💰 הוצאות</Text>
                 </View>
+                <View className="bg-white rounded-lg shadow-lg p-6 m-4">
 
-                <Filter
-                    applyFilters={applyAllFilters}
-                    availableDates={availableDates}
-                    availableBusinesses={availableBusinesses}
-                    filterByMonth={filterByMonth}
-                    filterByCategory={filterByCategory}
-                    filterByBusiness={filterByBusiness}
-                    clearFilters={clearFilters}
-                    sortByDate={sortByDate}
-                    sortByAmount={sortByAmount}
-                    categories={categories || []}
-                    businesses={businesses || []}
-                />
+                    <ProfileScopeSwitcher />
 
-                <TransactionsSummary
-                    filteredExpenses={displayExpenses}
-                />
+                    <View className="border-b border-gray-300 mb-4" />
 
-                <ExpensesTable
-                    filteredExpenses={displayExpenses}
-                />
-            </View>
-        </ScrollView>
+                    <Filter
+                        applyFilters={applyAllFilters}
+                        availableDates={availableDates}
+                        availableBusinesses={availableBusinesses}
+                        filterByMonth={filterByMonth}
+                        filterByCategory={filterByCategory}
+                        filterByBusiness={filterByBusiness}
+                        clearFilters={clearFilters}
+                        sortByDate={sortByDate}
+                        sortByAmount={sortByAmount}
+                        categories={selectedChild ? childrenCategories : categories || []}
+                        businesses={selectedChild ? childrenBusinesses : businesses || []}
+                    />
+
+                    <TransactionsSummary filteredExpenses={displayExpenses} />
+
+                    <ExpensesTable filteredExpenses={displayExpenses} onOpenEditor={handleOpenEditor} />
+                </View>
+            </ScrollView >
+        </LinearGradient>
     );
 }

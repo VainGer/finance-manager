@@ -55,8 +55,6 @@ export default function useExpensesDisplay(profile) {
 
                 setExpenses(realExpenses);
             } else if (response.status === 404) {
-                // New profile - no expenses yet
-                console.log('No expenses found for new profile');
                 setExpenses([]);
             } else {
                 setError(response.message || 'שגיאה בטעינת הנתונים');

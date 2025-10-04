@@ -19,7 +19,6 @@ export default function ProgressBar({ progress, color, height = 8 }) {
                 style={{ 
                     ...barStyles,
                     height: '100%',
-                    // Add subtle shadow inside the progress bar for a more polished look
                     shadowColor: "#000",
                     shadowOffset: { width: 0, height: 1 },
                     shadowOpacity: 0.1,

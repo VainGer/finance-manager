@@ -53,13 +53,6 @@ export default function Index() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             className="w-24 h-24 items-center justify-center mb-10 rounded-3xl"
-            style={{
-              shadowColor: "#1e293b",
-              shadowOpacity: 0.3,
-              shadowOffset: { width: 0, height: 8 },
-              shadowRadius: 16,
-              elevation: 12
-            }}
           >
             <Ionicons name="wallet" size={42} color="#ffffff" />
           </LinearGradient>
@@ -67,30 +60,27 @@ export default function Index() {
           {/* כותרות – טיפוגרפיה מודרנית עם RTL נכון */}
           <Text
             className="text-5xl font-bold text-slate-900 tracking-tight text-center mb-2"
-            style={{ writingDirection: "rtl", textAlign: "center" }}
           >
             ברוך הבא
           </Text>
           <Text
             className="text-2xl font-semibold text-slate-600 text-center mb-6"
-            style={{ writingDirection: "rtl", textAlign: "center" }}
           >
             למנהל הכספים
           </Text>
 
           {/* תת-כותרת עם RTL נכון ואייקון משמאל */}
-          <View className="flex-row-reverse items-center mt-4" style={{ direction: 'rtl' }}>
-            <Ionicons name="trending-up" size={20} color="#64748b" style={{ marginRight: 8 }} />
+          <View className="flex items-center mt-4" style={{ direction: 'rtl' }}>
             <Text
               className="text-base text-slate-500 leading-6 text-center max-w-xs"
-              style={{ writingDirection: "rtl", textAlign: "right" }}
             >
               נהל את הכספים שלך בצורה חכמה ופשוטה
             </Text>
+          <Ionicons className="mr-4" name="trending-up" size={24} color="#64748b" />
           </View>
 
           {/* === הקרוסלה במקום ה"Highlights" הישנים === */}
-          <View className="mt-6 w-full">
+          <View className="mt-4 w-full">
             <FeatureCarousel />
           </View>
         </View>

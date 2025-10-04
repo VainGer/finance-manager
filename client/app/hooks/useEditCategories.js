@@ -1,61 +1,68 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useProfileData } from '../context/ProfileDataContext';
 import { del, post, put } from '../utils/api';
 
-export default function useEditCategories(props = {}) {
+export default function useEditCategories() {
     const { categories, expensesLoading, errors, fetchCategories } = useProfileData();
-    const authContext = useAuth();
+    const { profile } = useAuth();
     const router = useRouter();
-
-    const profile = props.profile || authContext.profile;
-
-    // Use custom goBack function if provided, otherwise use router
-    const goBack = props.goBack || (() => router.back());
 
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [getCategoriesError, setGetCategoriesError] = useState(null);
+
+    const categoriesErrors = useMemo(() => {
+        const catErrorObj = errors.find(e => e.categoriesErrors);
+        return catErrorObj ? catErrorObj.categoriesErrors : null;
+    }, [errors]);
+
+    const goBack = () => router.back();
 
     const resetState = () => {
         setError(null);
         setSuccess(false);
         setLoading(false);
-        setGetCategoriesError(null);
     };
 
-
     const addCategory = async (categoryName, setCategoryName) => {
+        resetState();
         if (!categoryName || categoryName.trim() === '') {
             setError('אנא הזן שם קטגוריה');
+            return;
+        }
+        if (categoryName.trim().length < 2) {
+            setError('שם הקטגוריה חייב להכיל לפחות 2 תווים');
             return;
         }
         setError(null);
         setSuccess(false);
         setLoading(true);
+
         const response = await post('expenses/category/create', {
             refId: profile.expenses,
-            name: categoryName.trim()
+            name: categoryName.trim(),
         });
+
         setTimeout(() => setLoading(false), 500);
+
         if (response.ok) {
             setError(null);
             setSuccess('הקטגוריה נוספה בהצלחה');
             setCategoryName('');
             await fetchCategories();
-            setTimeout(() => setSuccess(false), 2000);
+            setTimeout(() => setSuccess(false), 5000);
         } else if (response.status === 409) {
             setError('שם הקטגוריה כבר קיים');
         } else {
             setError('אירעה שגיאה בעת הוספת הקטגוריה, נסה שוב מאוחר יותר');
             console.error('Error adding category:', response.error);
         }
-    }
+    };
 
     const renameCategory = async (selectedCategory, newCategoryName, setNewCategoryName, setSelectedCategory) => {
-        setError(null);
+        resetState();
         if (!selectedCategory) {
             setError('אנא בחר קטגוריה לשינוי');
             return;
@@ -68,13 +75,15 @@ export default function useEditCategories(props = {}) {
             setError('השם החדש זהה לשם הנוכחי');
             return;
         }
+
         setLoading(true);
         const response = await put('expenses/category/rename', {
             refId: profile.expenses,
             oldName: selectedCategory,
-            newName: newCategoryName.trim()
+            newName: newCategoryName.trim(),
         });
         setLoading(false);
+
         if (response.ok) {
             setError(null);
             setSuccess('הקטגוריה עודכנה בהצלחה');
@@ -83,8 +92,7 @@ export default function useEditCategories(props = {}) {
             await fetchCategories();
             setTimeout(() => {
                 setSuccess(false);
-                goBack();
-            }, 1500);
+            }, 5000);
         } else if (response.status === 409) {
             setError('שם הקטגוריה כבר קיים');
         } else {
@@ -93,26 +101,32 @@ export default function useEditCategories(props = {}) {
         }
     };
 
-    const deleteCategory = async (refId, selectedCategory, setShowConfirm) => {
-        setError(null);
+    const deleteCategory = async (selectedCategory, setShowConfirm) => {
+        resetState();
         setLoading(true);
-        const response = await del(`expenses/category/delete/${refId}/${selectedCategory}`);
-        setLoading(false);
-        if (response.ok) {
-            setError(null);
-            await fetchCategories();
-            setSuccess('הקטגוריה נמחקה בהצלחה');
-            setTimeout(() => {
-                setSuccess(false);
-                goBack();
-            }, 1500);
-        } else {
+
+        try {
+            const response = await del(`expenses/category/delete/${profile.expenses}/${selectedCategory}`);
+            if (response.ok) {
+                setError(null);
+                await fetchCategories();
+                setSuccess('הקטגוריה נמחקה בהצלחה');
+                setTimeout(() => {
+                    setSuccess(false);
+                }, 5000);
+            } else {
+                setShowConfirm(false);
+                setError('אירעה שגיאה בעת מחיקת הקטגוריה, נסה שוב מאוחר יותר');
+                console.error('Error deleting category:', response.error);
+            }
+        } catch (err) {
+            console.error('Exception deleting category:', err);
+            setError('תקשורת עם השרת נכשלה');
             setShowConfirm(false);
-            setError('אירעה שגיאה בעת מחיקת הקטגוריה, נסה שוב מאוחר יותר');
-            console.error('Error deleting category:', response.error);
+            setLoading(false);
+        } finally {
+            setLoading(false);
         }
-        setShowConfirm(false);
-        setError('תקשורת עם השרת נכשלה');
     };
 
     return {
@@ -121,10 +135,11 @@ export default function useEditCategories(props = {}) {
         loading,
         categoriesLoading: expensesLoading,
         categories,
-        categoriesError: getCategoriesError,
+        categoriesErrors,
         addCategory,
         renameCategory,
         deleteCategory,
         resetState,
+        goBack,
     };
 }

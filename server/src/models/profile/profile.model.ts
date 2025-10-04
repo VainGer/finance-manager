@@ -134,22 +134,38 @@ export default class ProfileModel {
         }
     }
 
-    static async renameProfile(username: string, oldProfileName: string, newProfileName: string, expensesDoc: string) {
+    static async renameProfile(username: string, oldProfileName: string, newProfileName: string,
+        refId: string, parentProfile: boolean) {
         try {
-            const result = await db.UpdateDocument(this.profileCollection, {
-                username, profileName: oldProfileName
-            }, { $set: { profileName: newProfileName } });
-            if (!result || result.modifiedCount === 0) {
-                return { success: false, message: "Profile not found or name is the same" };
+            const operations = [
+                {
+                    collection: this.profileCollection,
+                    query: { username, profileName: oldProfileName },
+                    update: { $set: { profileName: newProfileName } }
+                },
+                {
+                    collection: this.expensesCollection,
+                    query: { _id: new ObjectId(refId) },
+                    update: { $set: { profileName: newProfileName } }
+                }
+            ] as any[];
+            if (!parentProfile) {
+                operations.push({
+                    collection: this.profileCollection,
+                    query: {
+                        username,
+                        parentProfile: true,
+                        "children.name": oldProfileName
+                    },
+                    update: { $set: { "children.$.name": newProfileName } }
+                });
             }
-            const expensesDocResult = await db.UpdateDocument(this.expensesCollection,
-                { _id: new ObjectId(expensesDoc) },
-                { $set: { profileName: newProfileName } });
-            if (!expensesDocResult || expensesDocResult.modifiedCount === 0) {
-                await db.UpdateDocument(this.profileCollection, {
-                    username, profileName: newProfileName
-                }, { $set: { profileName: oldProfileName } });
-                return { success: false, message: "Failed to rename expenses document" };
+            const transactionResult = await db.TransactionUpdateMany(operations);
+            if (!transactionResult?.success) {
+                return {
+                    success: false,
+                    message: transactionResult?.message || "Transaction failed during profile rename",
+                };
             }
             return { success: true, message: "Profile renamed successfully" };
         } catch (error) {

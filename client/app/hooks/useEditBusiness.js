@@ -1,161 +1,193 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useProfileData } from '../context/ProfileDataContext';
 import { del, post, put } from '../utils/api.js';
 
-export default function useEditBusiness(props = {}) {
-    const { businesses, getBusinessesLoading, fetchCategories, errors, } = useProfileData();
-    const router = useRouter();
+export default function useEditBusinesses(props = {}) {
+  const {
+    businesses,
+    categories,
+    getBusinessesLoading,
+    getCategoriesLoading,
+    fetchCategories,
+    errors,
+  } = useProfileData();
 
-    const goBack = props.goBack || (() => router.back());
+  const { profile } = useAuth();
+  const router = useRouter();
 
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [businessesError, setBusinessesError] = useState(null);
+  const goBack = props.goBack || (() => router.back());
 
-    const resetState = () => {
-        setError(null);
-        setSuccess(false);
-        setLoading(false);
-        setBusinessesError(null);
-    };
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        const businessErrors = errors.find(e => e.businessesErrors)?.businessesErrors;
-        if (businessErrors && businessErrors.length > 0) {
-            setBusinessesError(businessErrors[0]);
-        } else {
-            setBusinessesError(null);
-        }
-    }, [errors]);
+  const businessesErrors = useMemo(() => {
+    const errObj = errors.find(e => e.businessesErrors);
+    return errObj ? errObj.businessesErrors : null;
+  }, [errors]);
 
+  const categoriesErrors = useMemo(() => {
+    const errObj = errors.find(e => e.categoriesErrors);
+    return errObj ? errObj.categoriesErrors : null;
+  }, [errors]);
 
+  const resetState = () => {
+    setError(null);
+    setSuccess(false);
+    setLoading(false);
+  };
 
-    const addBusiness = async (refId, category, name, setName) => {
-        if (!name || name.trim() === '') {
-            setError('אנא הזן שם בעל העסק');
-            return;
-        }
-        setError(null);
-        setSuccess(false);
-        setLoading(true);
-        const response = await post('expenses/business/add', {
-            refId: refId,
-            catName: category,
-            name: name.trim()
-        });
-        setTimeout(() => setLoading(false), 500);
-        if (response.ok) {
-            fetchCategories();
-            setSuccess('בעל עסק נוסף בהצלחה');
-            setName('');
-            setTimeout(() => setSuccess(false), 2000);
-        } else if (response.status === 409) {
-            setError('שם בעל העסק כבר קיים');
-        } else {
-            setError('אירעה שגיאה בעת יצירת בעל העסק, נסה שוב מאוחר יותר');
-            console.error('Error creating business:', response.error);
-        }
+  const addBusiness = async (category, name, setName) => {
+    if (!category) {
+      setError('אנא בחר קטגוריה');
+      return;
+    }
+    if (!name || name.trim() === '') {
+      setError('אנא הזן שם בעל העסק');
+      return;
     }
 
-    const renameBusiness = async (refId, category, oldName, newName) => {
-        setError(null);
-        setSuccess(null);
-        setLoading(true);
-        if (!category) {
-            setError('אנא בחר קטגוריה');
-            return;
-        }
-        if (!oldName) {
-            setError('אנא בחר עסק');
-            return;
-        }
-        if (!newName || newName.trim() === '') {
-            setError('אנא הזן שם חדש לעסק');
-            return;
-        }
+    setError(null);
+    setSuccess(false);
+    setLoading(true);
 
-        const response = await put('expenses/business/rename', {
-            refId: refId,
-            catName: category,
-            oldName: oldName,
-            newName: newName.trim()
-        });
-        setTimeout(() => setLoading(false), 500);
-        if (response.ok) {
-            fetchCategories();
-            setSuccess('העסק שונה בהצלחה');
-            setTimeout(() => {
-                setSuccess(false);
-                goBack();
-            }, 1500);
-        } else if (response.status === 400) {
-            setError('שם העסק כבר קיים בקטגוריה זו');
-        } else {
-            setError('אירעה שגיאה בעת עריכת שם בעל העסק, נסה שוב מאוחר יותר');
-            console.error('Error renaming business:', response.error);
-        }
+    try {
+      const response = await post('expenses/business/add', {
+        refId: profile.expenses,
+        catName: category,
+        name: name.trim(),
+      });
+
+      if (response.ok) {
+        await fetchCategories();
+        setSuccess('בעל עסק נוסף בהצלחה');
+        setName('');
+        setTimeout(() => setSuccess(false), 5000);
+      } else if (response.status === 409) {
+        setError('שם בעל העסק כבר קיים');
+      } else {
+        setError('אירעה שגיאה בעת יצירת בעל העסק, נסה שוב מאוחר יותר');
+        console.error('Error creating business:', response.error);
+      }
+    } finally {
+      setTimeout(() => setLoading(false), 500);
+    }
+  };
+
+  const renameBusiness = async (category, oldName, newName) => {
+    if (!category) {
+      setError('אנא בחר קטגוריה');
+      return;
+    }
+    if (!oldName) {
+      setError('אנא בחר עסק');
+      return;
+    }
+    if (!newName || newName.trim() === '') {
+      setError('אנא הזן שם חדש לעסק');
+      return;
     }
 
-    const deleteBusiness = async (refId, selectedCategory, selectedBusiness) => {
-        setError(null);
-        setSuccess(null);
-        if (!selectedCategory) {
-            setError('אנא בחר קטגוריה');
-            return;
-        }
-        if (!selectedBusiness) {
-            setError('אנא בחר עסק');
-            return;
-        }
+    setError(null);
+    setSuccess(false);
+    setLoading(true);
 
-        const response = await del(`expenses/business/delete/${refId}/${selectedCategory}/${selectedBusiness}`);
-        if (response.ok) {
-            fetchCategories();
-            setSuccess('העסק נמחק בהצלחה');
-            setTimeout(() => {
-                setSuccess(false);
-                goBack();
-            }, 1500);
-        } else {
-            setError('אירעה שגיאה בעת מחיקת העסק, נסה שוב מאוחר יותר');
-            console.error('Error deleting business:', response.error);
-        }
+    try {
+      const response = await put('expenses/business/rename', {
+        refId: profile.expenses,
+        catName: category,
+        oldName,
+        newName: newName.trim(),
+      });
+
+      if (response.ok) {
+        await fetchCategories();
+        setSuccess('העסק שונה בהצלחה');
+        setTimeout(() => {
+          setSuccess(false);
+        }, 5000);
+      } else if (response.status === 400) {
+        setError('שם העסק כבר קיים בקטגוריה זו');
+      } else {
+        setError('אירעה שגיאה בעת עריכת שם בעל העסק, נסה שוב מאוחר יותר');
+        console.error('Error renaming business:', response.error);
+      }
+    } finally {
+      setTimeout(() => setLoading(false), 500);
+    }
+  };
+
+  const deleteBusiness = async (selectedCategory, selectedBusiness) => {
+    if (!selectedCategory) {
+      setError('אנא בחר קטגוריה');
+      return;
+    }
+    if (!selectedBusiness) {
+      setError('אנא בחר עסק');
+      return;
     }
 
-    const getBusinessesByCategory = (category) => {
-        if (!businesses || businesses.length === 0) {
-            return [];
-        }
-        const categoryBusinesses = businesses.find(b => b.category === category);
-        return categoryBusinesses ? categoryBusinesses.businesses : [];
-    };
+    setError(null);
+    setSuccess(false);
+    setLoading(true);
 
-    const getAllBusinesses = () => {
-        if (!businesses) return [];
+    try {
+      const response = await del(
+        `expenses/business/delete/${profile.expenses}/${selectedCategory}/${selectedBusiness}`
+      );
 
-        return businesses.reduce((acc, item) => {
-            return [...acc, ...item.businesses.map(b => ({
-                name: b,
-                category: item.category
-            }))];
-        }, []);
-    };
+      if (response.ok) {
+        await fetchCategories();
+        setSuccess('העסק נמחק בהצלחה');
+        setTimeout(() => {
+          setSuccess(false);
+        }, 1500);
+      } else {
+        setError('אירעה שגיאה בעת מחיקת העסק, נסה שוב מאוחר יותר');
+        console.error('Error deleting business:', response.error);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return {
-        error,
-        success,
-        loading,
-        businessesLoading: getBusinessesLoading,
-        businessesError,
-        businesses,
-        addBusiness,
-        renameBusiness,
-        deleteBusiness,
-        resetState,
-        getBusinessesByCategory,
-        getAllBusinesses
-    };
+  const getBusinessesByCategory = category => {
+    if (!businesses || businesses.length === 0) return [];
+    const categoryBusinesses = businesses.find(b => b.category === category);
+    return categoryBusinesses ? categoryBusinesses.businesses : [];
+  };
+
+  const getAllBusinesses = () => {
+    if (!businesses) return [];
+    return businesses.flatMap(item =>
+      item.businesses.map(b => ({
+        name: b,
+        category: item.category,
+      }))
+    );
+  };
+
+  return {
+    error,
+    success,
+    loading,
+
+    businesses,
+    businessesLoading: getBusinessesLoading,
+    businessesErrors,
+
+    categories,
+    categoriesLoading: getCategoriesLoading,
+    categoriesErrors,
+
+    addBusiness,
+    renameBusiness,
+    deleteBusiness,
+    resetState,
+    getBusinessesByCategory,
+    getAllBusinesses,
+    goBack,
+  };
 }

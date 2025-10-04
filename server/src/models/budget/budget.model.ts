@@ -56,42 +56,9 @@ export default class BudgetModel {
         }
     }
 
-    static async pullChildBudget(username: string, profileName: string, startDate: Date, endDate: Date) {
-        try {
-            const markResult = await db.UpdateDocument(
-                this.profileCollection,
-                { username, profileName },
-                { $set: { "newBudgets.$[budget]": null } },
-                {
-                    arrayFilters: [
-                        {
-                            "$and": [
-                                { "budget.startDate": new Date(startDate).toISOString() },
-                                { "budget.endDate": new Date(endDate).toISOString() }
-                            ]
-                        }
-                    ]
-                }
-            );
-            const pullResult = await db.UpdateDocument(
-                this.profileCollection,
-                { username, profileName },
-                { $pull: { newBudgets: null } }
-            );
-
-            if ((!markResult || markResult.modifiedCount === 0) &&
-                (!pullResult || pullResult.modifiedCount === 0)) {
-                return { success: false, message: "Budget not found with the specified dates" };
-            }
-
-            return { success: true, message: "Child budget removed successfully" };
-        } catch (error) {
-            console.error("Error in ProfileModel.pullChildBudget", error);
-            throw new Error("Failed to pull child budget");
-        }
-    }
-
-    static async createBudget(username: string, profileName: string, refId: string, profileBudget: ProfileBudget, categoriesBudgets: CategoryBudget[]) {
+    static async createBudget(username: string, profileName: string,
+        refId: string, profileBudget: ProfileBudget,
+        categoriesBudgets: CategoryBudget[], childProfile: boolean) {
         try {
             const operations = [
                 {
@@ -104,7 +71,23 @@ export default class BudgetModel {
                     query: { _id: new ObjectId(refId), "categories.name": categoryName },
                     update: { $addToSet: { "categories.$.budgets": catBudget } }
                 }))
-            ];
+            ] as any[];
+            if (childProfile) {
+                console.log("Removing newBudget from child profile");
+                operations.push({
+                    collection: this.profileCollection,
+                    query: { username, profileName },
+                    update: {
+                        $pull: {
+                            newBudgets: {
+                                startDate: profileBudget.startDate,
+                                endDate: profileBudget.endDate,
+                                amount: profileBudget.amount
+                            }
+                        }
+                    }
+                });
+            }
             const transactionResult = await db.TransactionUpdateMany(operations);
             if (!transactionResult || !transactionResult.success) {
                 return { success: false, message: transactionResult?.message || "Failed to create budget" };

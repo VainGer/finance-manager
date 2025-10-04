@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState, memo } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
-import CategorySelect from '../../components/categories/categorySelect.jsx';
+import CategorySelect from '../categories/categorySelect.jsx';
 
 const CreateBusiness = ({ goBack, refId, error, success, addBusiness, onBusinessAdded,
     categories, getCategoriesLoading, getCategoriesError, inOverlay = false }) => {

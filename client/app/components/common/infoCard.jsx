@@ -9,13 +9,13 @@ export default function InfoCard({ children, header, bg }) {
         blue: 'bg-blue-100 border-blue-400',
         pink: 'bg-pink-100 border-pink-400',
         gray: 'bg-gray-100 border-gray-400',
-        white: 'bg-white'
+        white: 'bg-white border-gray-400',
     };
 
     const cardStyle = colorVariants[bg] || 'bg-gray-100 border-gray-400';
 
     return (
-        <View className="flex w-full mx-auto my-4 bg-white p-4 rounded-lg shadow-lg shadow-black">
+        <View className="flex w-full mx-auto my-4 bg-white p-4 rounded-lg">
             <Text className="text-lg font-bold mb-2">{header}</Text>
             <View className={`${cardStyle} border rounded-lg p-2 w-full`}>
                 {children}

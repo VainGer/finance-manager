@@ -6,36 +6,54 @@ import { AuthProvider } from "../context/AuthContext.jsx";
 import { ProfileDataProvider } from "../context/ProfileDataContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useRouter } from 'expo-router';
-import { useProfileData } from "../context/ProfileDataContext.jsx";
 import Overlay from "../components/common/Overlay.jsx";
 import Button from "../components/common/button.jsx";
-
+import { usePathname } from "expo-router";
 
 function RootLayoutNav() {
-
-  const { isExpiredToken } = useAuth();
+  const { account, profile, isExpiredToken, storageChecked } = useAuth();
   const [showSessionExpired, setShowSessionExpired] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+
   useEffect(() => {
     if (isExpiredToken) {
       setShowSessionExpired(true);
     }
   }, [isExpiredToken]);
 
+  const allowedWithoutAccount = ['/', '/login', '/register'];
+  const allowedWithoutProfile = allowedWithoutAccount.concat(['/authProfile']);
+
+  useEffect(() => {
+    if (!storageChecked) return;
+
+    if (!account && !allowedWithoutAccount.includes(pathname)) {
+      router.replace('/login');
+    } else if (account && !profile && !allowedWithoutProfile.includes(pathname)) {
+      router.replace('/authProfile');
+    }
+  }, [account, profile, storageChecked, pathname]);
+
   if (showSessionExpired) {
-    return <View className="flex-1 justify-center items-center bg-white">
-      <Overlay >
-        <Text className="text-lg mb-4 mx-auto">הסשן שלך פג תוקף, אנא התחבר שוב</Text>
-        <Button onPress={() => { router.replace('/'); setShowSessionExpired(false); }}>לכניסה</Button>
-      </Overlay>
-    </View>;
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <Overlay>
+          <Text className="text-lg mb-4 mx-auto">הסשן שלך פג תוקף, אנא התחבר שוב</Text>
+          <Button
+            onPress={() => {
+              router.replace('/login');
+              setShowSessionExpired(false);
+            }}
+          >
+            לכניסה
+          </Button>
+        </Overlay>
+      </View>
+    );
   }
 
-
-
-  return (
-    <Stack screenOptions={{ headerShown: false }} />
-  );
+  return <Stack screenOptions={{ headerShown: false }} />;
 }
 
 export default function RootLayout() {

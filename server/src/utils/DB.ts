@@ -102,7 +102,7 @@ export default class DB {
     }
 
     async TransactionUpdateMany(
-        operations: { collection: string; query: any; update: any; options?: any }[]
+        operations: { collection: string; query: any; update: Record<string, any>; options?: any }[]
     ) {
         const session = this.client?.startSession();
         if (!session) throw new Error("No Mongo client available");

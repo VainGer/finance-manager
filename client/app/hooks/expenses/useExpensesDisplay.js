@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useProfileData } from '../../context/ProfileDataContext';
 import { monthToHebrewName } from '../../utils/formatters';
+import useChildrenData from './useChildrenData';
 
 export default function useExpensesDisplay() {
     const { profile } = useAuth();
@@ -10,6 +11,15 @@ export default function useExpensesDisplay() {
         expensesLoading,
         errors: contextErrors,
     } = useProfileData();
+
+    const { children,
+        loading: childrenLoading,
+        error: childrenError,
+        childrenExpenses,
+        selectedChild,
+        setSelectedChild,
+        childrenCategories,
+        childrenBusinesses, } = useChildrenData();
 
     const [allExpenses, setAllExpenses] = useState(null);
     const [monthlyExpenses, setMonthlyExpenses] = useState({});
@@ -41,37 +51,18 @@ export default function useExpensesDisplay() {
 
     const processExpensesData = useCallback(() => {
         setLoading(true);
-        if (!profile || !contextExpenses?.categories) {
+        if (!profile || !contextExpenses) {
             setAllExpenses([]);
             setLoading(false);
             return;
         }
 
         try {
-            const realExpenses = [];
-            const monthlyExpenses = {};
-            const datesSet = new Set();
-            contextExpenses?.categories?.forEach(category =>
-                category.Businesses?.forEach(business =>
-                    business.transactionsArray?.forEach(({ dateYM, transactions }) => {
-                        transactions?.forEach(transaction => {
-                            const processed = {
-                                _id: transaction._id,
-                                amount: Number(transaction.amount),
-                                date: new Date(transaction.date),
-                                description: transaction.description,
-                                category: category.name,
-                                business: business.name,
-                                dateYM,
-                            };
-
-                            realExpenses.push(processed);
-                            (monthlyExpenses[dateYM] ??= []).push(processed);
-                            datesSet.add(dateYM);
-                        });
-                    })
-                )
-            );
+            const {
+                expensesFlat: realExpenses,
+                monthlyMap: monthlyExpenses,
+                dates: datesSet
+            } = flattenExpenses(contextExpenses);
             sortAvailableDates(datesSet);
             setAllExpenses(realExpenses);
             setMonthlyExpenses(monthlyExpenses);
@@ -82,12 +73,38 @@ export default function useExpensesDisplay() {
         }
     }, [contextExpenses, profile]);
 
+    const flattenExpenses = (expenses) => {
+        const expensesFlat = [];
+        const monthlyMap = {};
+        const dates = new Set();
+        expenses.forEach((category) =>
+            category.Businesses?.forEach((business) =>
+                business.transactionsArray?.forEach(({ dateYM, transactions }) => {
+                    transactions?.forEach((transaction) => {
+                        const processed = {
+                            _id: transaction._id,
+                            amount: Number(transaction.amount),
+                            date: new Date(transaction.date),
+                            description: transaction.description,
+                            category: category.name,
+                            business: business.name,
+                            dateYM,
+                        };
+                        expensesFlat.push(processed);
+                        (monthlyMap[dateYM] ??= []).push(processed);
+                        dates.add(dateYM);
+                    });
+                })
+            )
+        );
+        return { expensesFlat, monthlyMap, dates };
+    };
+
     const applyAllFilters = useCallback(() => {
         if (!sortedExpenses) return;
 
-        // Apply the staged filters
-        setAppliedFilters({...stagedFilters});
-        
+        setAppliedFilters({ ...stagedFilters });
+
         const { month, category, business } = stagedFilters;
         let result;
         if (month && monthlyExpenses[month]) {
@@ -204,7 +221,7 @@ export default function useExpensesDisplay() {
             }).map(({ year, month, dateYM }) => ({
                 year: year.toString(),
                 month,
-                dateYM 
+                dateYM
             }))
         setAvailableDates(sortedDates);
     }

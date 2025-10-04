@@ -14,12 +14,16 @@ import useAuthProfile from '../hooks/auth/useAuthProfile.js';
 
 
 export default function AuthProfile() {
-    const { account, rememberMe, setRememberMe, setProfile, setStoreProfile, setLoggedIn } = useAuth();
+    const { account, rememberMe, setRememberMe,
+        setProfile, setStoreProfile, setLoggedIn,
+        setIsExpiredToken, setAccessTokenReady } = useAuth();
     const { profiles, loading, error, authProfile } = useAuthProfile({
         account,
         setProfile,
         setStoreProfile,
-        setLoggedIn
+        setLoggedIn,
+        setIsExpiredToken,
+        setAccessTokenReady
     });
     const [selectedProfile, setSelectedProfile] = useState(null);
     const [onCreateLoading, setOnCreateLoading] = useState(false);

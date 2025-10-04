@@ -68,15 +68,10 @@ export default function useAuthProfile({ account, setProfile, setLoggedIn }) {
             
             if (response.ok) {
                 setProfile(response.profile);
-                // שמירת טוקנים
-                console.log('Profile response tokens:', response.tokens);
                 if (response.tokens && response.tokens.accessToken) {
-                    await setAccessToken(response.tokens.accessToken);
-                    console.log('Access token saved:', response.tokens.accessToken);
-                }
+                    await setAccessToken(response.tokens.accessToken);           }
                 if (response.tokens && response.tokens.refreshToken && remember) {
                     await setRefreshToken(response.tokens.refreshToken);
-                    console.log('Refresh token saved:', response.tokens.refreshToken);
                 }
                 setLoggedIn(true);
                 navigate('/dashboard');

@@ -153,38 +153,48 @@ export default class ExpensesController {
             ExpensesController.handleError(error, res);
         }
     }
-    
+
     static async getAllTransactions(req: Request, res: Response) {
         try {
             const { refId, catName, busName } = req.params;
             const result = await TransactionService.getAll(refId, catName, busName);
-            res.status(200).json({ 
+            res.status(200).json({
                 transactions: result.transactions,
-                message: result.message 
-            });
-        } catch (error) {
-            ExpensesController.handleError(error, res);
-        }
-    }
-    
-    static async getAllTransactionsByMonth(req: Request, res: Response) {
-        try {
-            const { refId, catName, busName } = req.params;
-            const result = await TransactionService.getAllByMonth(refId, catName, busName);
-            res.status(200).json({ 
-                monthlyTransactions: result.monthlyTransactions,
-                message: result.message 
+                message: result.message
             });
         } catch (error) {
             ExpensesController.handleError(error, res);
         }
     }
 
-    static async getProfileExpenses(req: Request, res: Response) {
+    static async getAllTransactionsByMonth(req: Request, res: Response) {
+        try {
+            const { refId, catName, busName } = req.params;
+            const result = await TransactionService.getAllByMonth(refId, catName, busName);
+            res.status(200).json({
+                monthlyTransactions: result.monthlyTransactions,
+                message: result.message
+            });
+        } catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
+
+    static async getProfileExpensesByRef(req: Request, res: Response) {
         try {
             const { refId } = req.params;
             const expenses = await CategoryService.getProfileExpenses(refId);
             res.status(200).json({ expenses, message: "Profile expenses fetched successfully" });
+        } catch (error) {
+            this.handleError(error, res);
+        }
+    }
+
+    static async getProfileExpensesByChild(req: Request, res: Response) {
+        try {
+            const { username, childId } = req.params;
+            const expenses = await CategoryService.getChildProfileExpenses(username, childId);
+            res.status(200).json({ expenses, message: "Child profile expenses fetched successfully" });
         } catch (error) {
             this.handleError(error, res);
         }

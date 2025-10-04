@@ -16,7 +16,7 @@ export default function LineChartComparison({ monthlyData }) {
             </View>
         );
     }
-    // Validate and sort data with safety checks
+
     const sortedData = Array.isArray(monthlyData) ? 
         [...monthlyData]
             .filter(item => item && item.month && item.month.includes('/'))
@@ -26,7 +26,7 @@ export default function LineChartComparison({ monthlyData }) {
                     const [monthB, yearB] = b.month.split('/');
                     
                     if (!monthA || !yearA || !monthB || !yearB) {
-                        return 0; // Can't sort invalid data
+                        return 0;
                     }
                     
                     return new Date(yearA, monthA - 1) - new Date(yearB, monthB - 1);
@@ -36,19 +36,18 @@ export default function LineChartComparison({ monthlyData }) {
                 }
             }) : [];
 
-    // Take last 6 months or whatever is available
+
     const recentMonths = sortedData.length > 0 ? sortedData.slice(-Math.min(6, sortedData.length)) : [];
 
     const formatMonthLabel = (monthStr) => {
         if (!monthStr || typeof monthStr !== 'string') {
-            return ''; // Return empty string for invalid input
+            return ''; 
         }
         
         try {
             const [month, year] = monthStr.split('/');
-            // Check if both parts exist and year has enough characters
             if (!month || !year || year.length < 2) {
-                return monthStr; // Return original if format is unexpected
+                return monthStr;
             }
             return `${month}/${year.slice(2)}`;
         } catch (err) {
@@ -57,7 +56,6 @@ export default function LineChartComparison({ monthlyData }) {
         }
     };
 
-    // Safely create chart data with validation
     const chartData = {
         labels: recentMonths.map(item => formatMonthLabel(item?.month || '')),
         datasets: [
@@ -95,7 +93,6 @@ export default function LineChartComparison({ monthlyData }) {
         formatYLabel: (value) => `₪${Math.round(Number(value) / 100)}k`
     };
 
-    // Safely calculate max/min with default values and validation
     const maxMonth = recentMonths.length > 0 ?
         recentMonths.reduce(
             (max, item) => 

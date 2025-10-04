@@ -13,18 +13,18 @@ import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
 import { formatDate } from '../../../utils/formatters';
 export default function BudgetSummary() {
     const { profile } = useAuth();
-    // Initialize with false and update after profile is confirmed loaded
+
     const [showNewBudgetsOverlay, setShowNewBudgetsOverlay] = useState(false);
 
 
-    // Set the overlay state once profile is definitely loaded
+
     useEffect(() => {
         if (profile) {
             setShowNewBudgetsOverlay(!profile.parentProfile && profile.newBudgets && profile.newBudgets.length > 0);
         }
     }, [profile]);
 
-    
+
     const {
         loading,
         error,
@@ -52,21 +52,18 @@ export default function BudgetSummary() {
     if (showNewBudgetsOverlay) {
         return (
             <Overlay onClose={() => { setShowNewBudgetsOverlay(false); }}>
-                <View className="w-full max-w-md bg-white rounded-xl p-5 shadow-lg">
-                    <View className="flex-row items-start justify-between mb-3">
-                        <View className="flex-1">
-                            <Text className="text-lg font-bold">עדכון תקציב חדש</Text>
-                            <Text className="text-sm text-slate-600 mt-1">היי {profile.profileName} — קיבלת עדכון תקציב חדש, כנס ליצירת תקציב למימוש</Text>
-                        </View>
+                <View className="w-full max-w-md">
+                    <View className="flex items-center justify-center">
+                        <Text className="text-lg font-extrabold mb-4">עדכון תקציב חדש</Text>
+                        <Text className=" w-3/4 text-center">היי {profile.profileName} — קיבלת עדכון תקציב חדש, כנס ליצירת תקציב למימוש</Text>
                     </View>
-
-                    <View className="mb-3">
-                        <Text className="font-medium mb-2">פירוט התקציב:</Text>
+                    <View>
+                        <Text className="font-semibold text-center mb-2">פירוט התקציב:</Text>
                         <View className="space-y-2">
                             {Array.isArray(profile.newBudgets) && profile.newBudgets.map((budget) => (
-                                <View key={budget.amount} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                                    <Text className="text-slate-800">תקציב חדש בסך <Text className="font-semibold">₪{budget.amount}</Text></Text>
-                                    <Text className="text-slate-600 text-sm">לתקופה {formatDate(budget.startDate)} עד {formatDate(budget.endDate)}</Text>
+                                <View key={budget.amount} className="p-3 bg-slate-100 rounded-lg border border-slate-300 my-4">
+                                    <Text className=" text-center mb-4">תקציב חדש בסך <Text className="font-semibold">₪{budget.amount}</Text></Text>
+                                    <Text className=" text-center">לתקופה {formatDate(budget.startDate)} עד {formatDate(budget.endDate)}</Text>
                                 </View>
                             ))}
                         </View>

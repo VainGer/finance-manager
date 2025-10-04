@@ -51,15 +51,23 @@ export default function DeleteProfile() {
     }
 
     return (
-        <ScrollView className="flex-1 bg-slate-50 p-4">
-            <View className="bg-white rounded-2xl border border-red-200 shadow-lg overflow-hidden">
+        <ScrollView contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        }}
+            className="flex-1 bg-slate-50 p-4">
+            <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />
+            <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
+            <View pointerEvents="none" className="absolute top-1/3 right-10 h-24 w-24 rounded-full bg-white/20 blur-md" />
+            <View className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden w-full max-w-md">
                 {/* Header */}
                 <View className="bg-red-600 p-6">
-                    <View className="flex-row items-center" style={{ gap: 12 }}>
+                    <View className="flex-row items-center w-max mx-auto" style={{ gap: 12 }}>
                         <View className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                             <Ionicons name="warning" size={24} color="white" />
                         </View>
-                        <Text className="text-xl font-bold text-white">מחיקת פרופיל</Text>
+                        <Text className="text-xl font-bold text-white text-center">מחיקת פרופיל</Text>
                     </View>
                 </View>
 
@@ -69,21 +77,21 @@ export default function DeleteProfile() {
                         <View style={{ gap: 24 }}>
                             {/* Warning Section */}
                             <View className="bg-red-50 rounded-xl p-6 border border-red-200">
-                                <View className="flex-row items-start" style={{ gap: 16 }}>
+                                <View className="flex items-center" style={{ gap: 16 }}>
                                     <View className="w-10 h-10 bg-red-100 rounded-lg items-center justify-center flex-shrink-0">
                                         <Ionicons name="alert-circle-outline" size={28} color="#DC2626" />
                                     </View>
                                     <View className="flex-1">
-                                        <Text className="text-lg font-bold text-red-800 mb-2 text-right">אזהרה חמורה</Text>
+                                        <Text className="text-lg font-bold text-red-800 mb-2 text-center">אזהרה חמורה</Text>
                                         <View className="space-y-2">
-                                            <Text className="text-red-700 text-right">מחיקת הפרופיל תמחק לצמיתות את כל הנתונים הבאים:</Text>
+                                            <Text className="text-red-700 text-center">מחיקת הפרופיל תמחק לצמיתות את כל הנתונים הבאים:</Text>
                                             <View className="pr-4 space-y-1">
-                                                <Text className="text-sm text-red-700 text-right">• כל ההוצאות והעסקאות</Text>
-                                                <Text className="text-sm text-red-700 text-right">• קטגוריות מותאמות אישית</Text>
-                                                <Text className="text-sm text-red-700 text-right">• היסטוריית תקציבים</Text>
-                                                <Text className="text-sm text-red-700 text-right">• הגדרות פרופיל אישיות</Text>
+                                                <Text className="text-sm text-red-700 text-center">• כל ההוצאות והעסקאות</Text>
+                                                <Text className="text-sm text-red-700 text-center">• קטגוריות מותאמות אישית</Text>
+                                                <Text className="text-sm text-red-700 text-center">• היסטוריית תקציבים</Text>
+                                                <Text className="text-sm text-red-700 text-center">• הגדרות פרופיל אישיות</Text>
                                             </View>
-                                            <Text className="font-bold text-red-800 mt-3 text-right">
+                                            <Text className="font-bold text-red-800 mt-3 text-center">
                                                 ⚠️ פעולה זו אינה ניתנת לביטול!
                                             </Text>
                                         </View>
@@ -109,11 +117,11 @@ export default function DeleteProfile() {
                                     <View className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <Ionicons name="warning" size={32} color="#DC2626" />
                                     </View>
-                                    <Text className="text-xl font-bold text-red-800 mb-2">אישור מחיקה סופי</Text>
-                                    <Text className="text-red-700 text-lg font-semibold mb-1">
+                                    <Text className="text-xl font-bold text-red-800 mb-2 text-center">אישור מחיקה סופי</Text>
+                                    <Text className="text-red-700 text-lg font-semibold mb-1 text-center">
                                         אתה עומד למחוק את הפרופיל "{profile.profileName}"
                                     </Text>
-                                    <Text className="text-red-600 text-sm">
+                                    <Text className="text-red-600 text-sm text-center">
                                         כל הנתונים יימחקו לצמיתות ולא ניתן יהיה לשחזר אותם!
                                     </Text>
                                 </View>
@@ -121,7 +129,7 @@ export default function DeleteProfile() {
 
                             {/* PIN Input */}
                             <View style={{ gap: 8 }}>
-                                <Text className="text-sm font-semibold text-slate-700 text-right">הזן את קוד הפרופיל לאישור המחיקה</Text>
+                                <Text className="text-sm font-semibold text-slate-700 text-center">הזן את קוד הפרופיל לאישור המחיקה</Text>
                                 <TextInput
                                     className="w-full p-4 text-center text-2xl border-2 border-red-300 rounded-xl bg-white shadow-sm"
                                     placeholder="●●●●"

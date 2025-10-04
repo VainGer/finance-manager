@@ -18,8 +18,6 @@ export async function setAccessToken(token) {
 }
 
 export async function removeAccessToken() {
-    console.log('REMOVING ACCESS TOKEN');
-    console.trace();
     localStorage.removeItem('accessToken');
 }
 

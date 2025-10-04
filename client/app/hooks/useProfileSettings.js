@@ -2,11 +2,9 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { post } from '../utils/api';
 import { prepareImage } from '../utils/imageProcessing';
-import { useRouter } from 'expo-router';
 
 export default function useProfileSettings({ setLoading }) {
-    const { account, profile, setAccount, setProfile, logout, clearProfile } = useAuth();
-    const router = useRouter();
+    const { account, profile, setProfile, logout, clearProfile } = useAuth();
     const resetMessages = () => {
         setErrors([]);
         setSuccesses([]);
@@ -41,7 +39,6 @@ export default function useProfileSettings({ setLoading }) {
             }
 
             setLoading(true);
-            resetMessages();
 
             const response = await post("profile/rename-profile", {
                 username: account.username,
@@ -313,12 +310,10 @@ export default function useProfileSettings({ setLoading }) {
 
     const handleLogout = async () => {
         await logout();
-        router.replace('/');
     }
 
     const handleClearProfile = async () => {
         await clearProfile();
-        router.replace('/authProfile');
     }
 
     return {

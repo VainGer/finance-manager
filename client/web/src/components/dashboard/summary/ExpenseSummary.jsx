@@ -22,12 +22,9 @@ export default function ExpenseSummary({ profile }) {
             const response = await get(`expenses/profile-expenses/${expensesId}`);
             
             if (response.ok && response.expenses) {
-                // Parse the real data from your API
                 const realExpenses = [];
                 const expensesData = response.expenses;
             } else if (response.status === 404) {
-                // New profile - no expenses yet
-                console.log('No expenses found for new profile');
                 setExpenses([]);
                 setLoading(false);
                 return;
@@ -39,7 +36,6 @@ export default function ExpenseSummary({ profile }) {
             }
             
             if (response.ok && response.expenses) {
-                // Parse the real data from your API
                 const realExpenses = [];
                 const expensesData = response.expenses;
                 

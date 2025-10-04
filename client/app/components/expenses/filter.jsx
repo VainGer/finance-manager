@@ -143,7 +143,6 @@ export default function Filter({
                         onSelect={(value) => {
                             const newSortConfig = { ...sortConfig, sortBy: value };
                             setSortConfig(newSortConfig);
-                            // Store the sort type but don't apply immediately
                         }}
                         placeholder="בחר שדה למיון"
                         title="מיון לפי"
@@ -165,7 +164,6 @@ export default function Filter({
                         onSelect={(value) => {
                             const newSortConfig = { ...sortConfig, sortOrder: value };
                             setSortConfig(newSortConfig);
-                            // Store the sort direction but don't apply immediately
                         }}
                         placeholder="בחר כיוון מיון"
                         title="כיוון מיון"

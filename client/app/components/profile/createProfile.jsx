@@ -62,7 +62,7 @@ export default function CreateProfile({ username, firstProfile, setOnCreateLoadi
             </Button>
             <Modal visible={openColorPicker} transparent={true} animationType="fade">
                 <View className="flex-1 justify-center items-center bg-black/50 h-max">
-                    <View className="bg-white p-4 rounded-lg w-5/6 h-2/3 m-4">
+                    <View className="bg-white p-4 rounded-lg w-5/6 m-4">
                         <Text className="text-lg font-bold text-center mb-2">בחר צבע פרופיל</Text>
                         <ColorPicker setColor={setColor} />
                         <Button 

@@ -88,14 +88,9 @@ export default function ProfileAuth() {
                 device: navigator.userAgent,
                 remember: true
             });
-            
-        console.log('PIN validation response:', response); // Debug log
         
         if (response.ok) {
-            console.log('Server returned profile:', response.profile);
-            console.log('Profile ID from server:', response.profile?._id);
             setProfile(response.profile);
-            // שמירת טוקנים אם יש
             if (response.tokens && response.tokens.accessToken) {
                 localStorage.setItem('accessToken', response.tokens.accessToken);
             }
@@ -103,16 +98,8 @@ export default function ProfileAuth() {
                 localStorage.setItem('refreshToken', response.tokens.refreshToken);
             }
             navigate('/dashboard');
-        } else {
-            // בדיקה מפורטת של תגובת השרת
-            console.log('PIN validation failed:', {
-                status: response.status,
-                message: response.message,
-                error: response.error
-            });
-            
+        } else {    
             if (response.status === 400 || response.status === 401) {
-                // בדיקת הודעת השגיאה המדויקת מהשרת
                 if (response.message && response.message.includes('PIN') || 
                     response.message && response.message.includes('pin') ||
                     response.message && response.message.includes('קוד') ||
@@ -127,7 +114,6 @@ export default function ProfileAuth() {
             } else if (response.status >= 500) {
                 setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
             } else {
-                // הודעה כללית עם פרטי השגיאה
                 setError(`שגיאה: ${response.message || response.error || 'הקוד הסודי שגוי'}`);
             }
         }

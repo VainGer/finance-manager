@@ -66,6 +66,7 @@ export default function Button({
         ${style !== "link" ? getSizeClasses(size) : ""}
         items-center justify-center
         font-medium
+        ${className.includes("py") ? "" : "py-2"}
         ${className.includes("w-") ? "" : "w-full"}
         ${disabled ? "opacity-50" : ""}
         ${className}

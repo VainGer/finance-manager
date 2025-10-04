@@ -1,4 +1,4 @@
-import { Picker } from '@react-native-picker/picker';
+
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import LineChartComparison from '../../../components/charts/lineChartComparison';
@@ -7,7 +7,7 @@ import Button from '../../../components/common/button';
 import LoadingSpinner from '../../../components/common/loadingSpinner';
 import useExpensesCharts from '../../../hooks/expenses/useExpensesCharts';
 import { formatAmount, formatYearMonth } from '../../../utils/formatters';
-
+import Select from '../../../components/common/Select';
 const ExpensesDetails = ({ data }) => {
     return (<View className="mt-8">
         <Text className="text-md font-semibold mb-2">פירוט הוצאות:</Text>
@@ -30,112 +30,113 @@ const ExpensesDetails = ({ data }) => {
 const DateFilterButtons = ({ dateFilter, setDateFilter, selectedMonth, setSelectedMonth, availableMonths }) => {
     return (
         <View className="mb-4">
-            <Text className="text-sm font-medium text-gray-700 mb-2">מסנן תאריך:</Text>
-            <View className="flex-row flex-wrap">
-                <Button
-                    onPress={() => {
-                        setDateFilter('week');
-                        setSelectedMonth('');
-                    }}
-                    style={dateFilter === 'week' ? 'primary' : 'secondary'}
-                    size="small"
-                    className="mr-2 w-auto"
-                    textSize="sm"
-                >
-                    שבוע אחרון
-                </Button>
-                <Button
-                    onPress={() => {
-                        setDateFilter('month');
-                        setSelectedMonth('');
-                    }}
-                    style={dateFilter === 'month' ? 'primary' : 'secondary'}
-                    size="small"
-                    className="mr-2 w-auto"
-                    textSize="sm"
-                >
-                    חודש אחרון
-                </Button>
-                <Button
-                    onPress={() => {
-                        setDateFilter('year');
-                        setSelectedMonth('');
-                    }}
-                    style={dateFilter === 'year' ? 'primary' : 'secondary'}
-                    size="small"
-                    className="mr-2 w-auto"
-                    textSize="sm"
-                >
-                    שנה אחרונה
-                </Button>
-                <Button
-                    onPress={() => {
-                        setDateFilter('all');
-                        setSelectedMonth('');
-                    }}
-                    style={dateFilter === 'all' ? 'primary' : 'secondary'}
-                    size="small"
-                    className="mr-2 w-auto"
-                    textSize="sm"
-                >
-                    הכל
-                </Button>
+            <Text className="text-xl font-medium text-gray-700 mb-4 text-center">מסנן תאריך</Text>
+
+            <View className="flex-row flex-wrap justify-center">
+                {/* First row */}
+                <View className="flex-row w-full justify-center mb-2">
+                    <Button
+                        onPress={() => {
+                            setDateFilter('week');
+                            setSelectedMonth('');
+                        }}
+                        style={dateFilter === 'week' ? 'primary' : 'secondary'}
+                        className="flex-1 mx-1"
+                        textSize="sm"
+                    >
+                        שבוע אחרון
+                    </Button>
+                    <Button
+                        onPress={() => {
+                            setDateFilter('month');
+                            setSelectedMonth('');
+                        }}
+                        style={dateFilter === 'month' ? 'primary' : 'secondary'}
+                        className="flex-1 mx-1"
+                        textSize="sm"
+                    >
+                        חודש אחרון
+                    </Button>
+                </View>
+
+                {/* Second row */}
+                <View className="flex-row w-full justify-center">
+                    <Button
+                        onPress={() => {
+                            setDateFilter('year');
+                            setSelectedMonth('');
+                        }}
+                        style={dateFilter === 'year' ? 'primary' : 'secondary'}
+                        className="flex-1 mx-1"
+                        textSize="sm"
+                    >
+                        שנה אחרונה
+                    </Button>
+                    <Button
+                        onPress={() => {
+                            setDateFilter('all');
+                            setSelectedMonth('');
+                        }}
+                        style={dateFilter === 'all' ? 'primary' : 'secondary'}
+                        className="flex-1 mx-1"
+                        textSize="sm"
+                    >
+                        הכל
+                    </Button>
+                </View>
             </View>
 
-            {availableMonths && availableMonths.length > 0 && (
-                <View className="mt-3 flex-row items-center">
-                    <Text className="text-sm font-medium text-gray-700 mr-2">חודש ספציפי:</Text>
-                    <View className="flex-1 border border-gray-300 rounded">
-                        <Picker
+            {
+                availableMonths && availableMonths.length > 0 && (
+                    <View className="my-4">
+                        <Text className="text-xl font-medium text-gray-700 mb-8 text-center">
+                            לפי חודש
+                        </Text>
+                        <Select
+                            items={availableMonths.map(month => {
+                                const [year, monthNum] = month.split("-");
+                                return {
+                                    label: formatYearMonth(month),
+                                    value: month
+                                };
+                            })}
                             selectedValue={selectedMonth}
-                            onValueChange={(value) => {
+                            onSelect={(value) => {
                                 setSelectedMonth(value);
                                 if (value) {
-                                    setDateFilter('specific');
+                                    setDateFilter("specific");
                                 }
                             }}
-                        >
-                            <Picker.Item label="בחר חודש..." value="" />
-                            {availableMonths.map(month => {
-                                const [year, monthNum] = month.split('-');
-                                const monthName = formatYearMonth(month);
-
-                                return (
-                                    <Picker.Item
-                                        key={month}
-                                        label={monthName}
-                                        value={month}
-                                    />
-                                );
-                            })}
-                        </Picker>
+                            placeholder="בחר חודש..."
+                            title="בחר חודש"
+                            iconName="calendar-outline"
+                        />
                     </View>
-                </View>
-            )}
-        </View>
+                )
+            }
+
+        </View >
     );
 };
 
 const ChartTypeSelector = ({ chartType, setChartType }) => {
     return (
         <View className="mb-4">
-            <Text className="text-sm font-medium text-gray-700 mb-2">סוג גרף:</Text>
-            <View className="flex-row flex-wrap">
+            <Text className="text-xl font-medium text-gray-700 mb-4 text-center">סוג גרף</Text>
+            <View className="flex-row flex-wrap mx-auto">
                 <Button
                     onPress={() => setChartType('pie')}
                     style={chartType === 'pie' ? 'info' : 'secondary'}
-                    size="small"
                     className="mr-2 mb-2 w-auto"
-                    textSize="sm"
+                    size='small'
                 >
-                    🥧 עוגה
+                    🥧 פילוח לפי קטגוריות
                 </Button>
                 <Button
                     onPress={() => setChartType('line')}
                     style={chartType === 'line' ? 'info' : 'secondary'}
-                    size="small"
                     className="mr-2 mb-2 w-auto"
-                    textSize="sm"
+                    size='small'
                 >
                     📈 מגמות חודשיות
                 </Button>
@@ -178,8 +179,10 @@ export default function Charts() {
 
     return (
         <ScrollView key={expenses ? expenses.length : 'no-expenses'} className="flex-1">
+            <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />
+            <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
+            <Text className="text-xl font-bold text-gray-800 my-8 text-center">📊 גרפים</Text>
             <View className="bg-white rounded-lg p-4 m-2">
-                <Text className="text-2xl font-bold text-gray-800 mb-4">📊 גרפים</Text>
 
                 <ChartTypeSelector
                     chartType={chartType}

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, Pressable, Text, TouchableOpacity, View, } from 'react-native';
 
 
 export default function Select({
@@ -21,7 +21,7 @@ export default function Select({
     onCreateNew = null,
 }) {
     const [modalVisible, setModalVisible] = useState(false);
-    
+
     const selectedItem = items.find(item => valueExtractor(item) === selectedValue);
     const selectedLabel = selectedItem ? labelExtractor(selectedItem) : '';
 
@@ -50,15 +50,15 @@ export default function Select({
                 }}
                 disabled={isDisabled}
                 activeOpacity={0.7}
-                style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' }}
+                style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
             >
                 <View style={{ flexDirection: 'row-reverse', alignItems: 'center' }}>
                     {itemIconName && (
-                        <Ionicons 
-                            name={itemIconName} 
-                            size={20} 
-                            color="#64748b" 
-                            style={{ marginLeft: 8 }} 
+                        <Ionicons
+                            name={itemIconName}
+                            size={20}
+                            color="#64748b"
+                            style={{ marginLeft: 16 }}
                         />
                     )}
                     <Text
@@ -127,10 +127,10 @@ export default function Select({
                                 const itemValue = valueExtractor(item);
                                 const itemLabel = labelExtractor(item);
                                 const isSelected = itemValue === selectedValue;
-                                
+
                                 return (
                                     <TouchableOpacity
-                                        className={`p-4 border-b border-slate-100 flex-row-reverse items-center ${isSelected ? 'bg-blue-50' : ''}`}
+                                        className={`p-4 border-b border-slate-100 flex-row-reverse ${isSelected ? 'bg-blue-50' : ''}`}
                                         onPress={() => handleSelectItem(item)}
                                     >
                                         {itemIconName && (
@@ -142,7 +142,7 @@ export default function Select({
                                             />
                                         )}
                                         <Text
-                                            className={`text-right flex-1 ${isSelected ? 'text-blue-600 font-bold' : 'text-slate-800'}`}
+                                            className={`flex-1 ${isSelected ? 'text-blue-600 font-bold' : 'text-slate-800'}`}
                                         >
                                             {itemLabel}
                                         </Text>

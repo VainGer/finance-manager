@@ -1,16 +1,25 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { getRefreshToken, refreshAccessToken, removeAccessToken, removeRefreshToken, getDeviceInfo, setAccessToken, setRefreshToken } from '../utils/tokenUtils';
+import { createContext, useCallback, useContext, useEffect, useState, useRef } from 'react';
+import {
+    getRefreshToken,
+    removeAccessToken,
+    removeRefreshToken,
+    getDeviceInfo,
+    setAccessToken,
+    setRefreshToken,
+    getAccessToken,
+    getExpiration
+} from '../utils/tokenUtils';
 import { post } from '../utils/api';
-import { usePathname } from 'expo-router';
+import { useRouter } from 'expo-router';
+
 const AuthContext = createContext();
 
 const safeJsonParse = (str, fallback = null) => {
     if (!str) return fallback;
     try {
         return JSON.parse(str);
-    } catch (e) {
-        console.error('JSON parse error:', e);
+    } catch {
         return fallback;
     }
 };
@@ -19,55 +28,46 @@ export const AuthProvider = ({ children }) => {
     const [account, setAccount] = useState(null);
     const [profile, setProfile] = useState(null);
     const [storeUser, setStoreUser] = useState(true);
-    const [storeProfile, setStoreProfile] = useState(true);
+    const [storeProfile, setStoreProfile] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [storageChecked, setStorageChecked] = useState(false);
     const [accessTokenReady, setAccessTokenReady] = useState(false);
     const [isExpiredToken, setIsExpiredToken] = useState(false);
-    const [rememberMe, setRememberMe] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
-    const refreshTimeOut = 25 * 60 * 1000; // 25 minutes
-    const restrictedPaths = ['/', '/login', '/authProfile', '/register'];
-    const pathname = usePathname();
 
-    const checkStorage = async () => {
-        try {
-            const keys = await AsyncStorage.getAllKeys();
-            return keys;
-        } catch (e) {
-            console.error('Error checking storage:', e);
-            return [];
-        }
-    };
-
+    const router = useRouter();
+    const refreshTimerRef = useRef(null);
+    const REFRESH_OFFSET = 3 * 60 * 1000;
 
     const loadStorage = async () => {
-        const rawAccount = await AsyncStorage.getItem('account');
-        const rawProfile = await AsyncStorage.getItem('profile');
-        if (rawProfile) {
-            const parsedProfile = safeJsonParse(rawProfile);
-            if (parsedProfile) {
-                setProfile(parsedProfile);
-                setStoreProfile(true);
+        try {
+            const rawAccount = await AsyncStorage.getItem('account');
+            const rawProfile = await AsyncStorage.getItem('profile');
+
+            if (rawAccount) {
+                const parsedAccount = safeJsonParse(rawAccount);
+                if (parsedAccount) {
+                    setAccount(parsedAccount);
+                    setStoreUser(true);
+                }
             }
-        }
-        if (rawAccount) {
-            const parsedAccount = safeJsonParse(rawAccount);
-            if (parsedAccount) {
-                setAccount(parsedAccount);
-                setStoreUser(true);
+
+            if (rawProfile) {
+                const parsedProfile = safeJsonParse(rawProfile);
+                if (parsedProfile) {
+                    setProfile(parsedProfile);
+                }
             }
-        }
-        if (rawAccount && rawProfile) {
+
             setStorageChecked(true);
+        } catch (err) {
+            console.error("Error loading storage:", err);
         }
     };
 
     useEffect(() => {
         loadStorage();
     }, []);
-
-
 
     const autoLogin = useCallback(async () => {
         let logged = false;
@@ -76,6 +76,7 @@ export const AuthProvider = ({ children }) => {
             const parsedProfile = safeJsonParse(await AsyncStorage.getItem('profile'));
             setIsLoading(true);
             const refreshToken = await getRefreshToken();
+
             if (parsedAccount && parsedProfile && refreshToken) {
                 const res = await rememberLogin(
                     parsedAccount.username,
@@ -84,13 +85,8 @@ export const AuthProvider = ({ children }) => {
                     setAccount,
                     setProfile
                 );
-                if (res.ok) {
-                    logged = true;
-                    setIsExpiredToken(false);
-                    setAccessTokenReady(true);
-                } else {
-                    return false;
-                }
+                if (res.ok) logged = true;
+                else return false;
             }
         } catch (err) {
             console.error('Error loading auth data:', err);
@@ -100,6 +96,95 @@ export const AuthProvider = ({ children }) => {
             return logged;
         }
     }, []);
+
+    useEffect(() => {
+        const storeAccountData = async () => {
+            try {
+                if (account && storeUser) {
+                    await AsyncStorage.setItem('account', JSON.stringify(account));
+                }
+            } catch (err) {
+                console.error('Error saving account:', err);
+            }
+        };
+        storeAccountData();
+    }, [account, storeUser]);
+
+    useEffect(() => {
+        const storeProfileData = async () => {
+            try {
+                if (profile && storeProfile) {
+                    await AsyncStorage.setItem('profile', JSON.stringify(profile));
+                }
+            } catch (err) {
+                console.error('Error saving profile:', err);
+            }
+        };
+        storeProfileData();
+    }, [profile, storeProfile]);
+
+
+    const clearRefreshTimer = () => {
+        if (refreshTimerRef.current) {
+            clearTimeout(refreshTimerRef.current);
+            refreshTimerRef.current = null;
+        }
+    };
+
+    const scheduleTokenRefresh = async () => {
+        try {
+            const token = await getAccessToken();
+            if (!token) return;
+
+            const expDate = getExpiration(token);
+            if (!expDate) return;
+
+            const now = Date.now();
+            const refreshAt = expDate.getTime() - REFRESH_OFFSET;
+            const delay = Math.max(refreshAt - now, 0);
+
+            clearRefreshTimer();
+
+            refreshTimerRef.current = setTimeout(async () => {
+                await handleTokenRefresh();
+            }, delay);
+        } catch (err) {
+            console.error('Error scheduling token refresh:', err);
+        }
+    };
+
+    const handleTokenRefresh = async () => {
+        if (account && profile && !isExpiredToken && loggedIn) {
+            try {
+                const result = await post('profile/refresh-access-token', { profileId: profile._id });
+                if (!result.ok) {
+                    setAccessTokenReady(false);
+                    setIsExpiredToken(true);
+                    setLoggedIn(false);
+                } else {
+                    setIsExpiredToken(false);
+                    setAccessTokenReady(true);
+                    await setAccessToken(result.tokens.accessToken);
+                    await setRefreshToken(result.tokens.refreshToken);
+                    scheduleTokenRefresh();
+                }
+            } catch (err) {
+                console.error('Error refreshing token:', err);
+                setIsExpiredToken(true);
+                setAccessTokenReady(false);
+                setLoggedIn(false);
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (account && profile && loggedIn && accessTokenReady && !isExpiredToken) {
+            scheduleTokenRefresh();
+        } else {
+            clearRefreshTimer();
+        }
+        return () => clearRefreshTimer();
+    }, [account, profile, loggedIn, accessTokenReady, isExpiredToken]);
 
 
     const clearAllAuthData = async () => {
@@ -119,87 +204,24 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    useEffect(() => {
-        const storeAccount = async () => {
-            try {
-                if (account && storeUser && profile) {
-                    await AsyncStorage.setItem('account', JSON.stringify(account));
-                }
-            } catch (err) {
-                console.error('Error saving account:', err);
-            }
-        };
-        storeAccount();
-    }, [account, profile, storeUser, storageChecked]);
-
-
-    useEffect(() => {
-        const saveProfile = async () => {
-            try {
-                if (profile && storeProfile) {
-                    if (typeof profile === 'object' && profile !== null) {
-                        const profileJson = JSON.stringify(profile);
-                        await AsyncStorage.setItem('profile', profileJson);
-                    }
-                }
-            } catch (err) {
-                console.error('Error saving profile:', err);
-            }
-        };
-
-        saveProfile();
-    }, [profile, storeProfile, storageChecked]);
-
-
-    useEffect(() => {
-        const refresh = async () => {
-            if (account && profile && !isExpiredToken && loggedIn) {
-                try {
-                    const result = await refreshAccessToken(profile.id);
-                    if (!result.ok) {
-                        setAccessTokenReady(false);
-                        setIsExpiredToken(true);
-                        setAccessTokenReady(false);
-                        setLoggedIn(false);
-                    } else {
-                        setIsExpiredToken(false);
-                        setAccessTokenReady(true);
-                    }
-                } catch (err) {
-                    console.error('Error refreshing token:', err);
-                    setIsExpiredToken(true);
-                    setAccessTokenReady(false);
-                    setLoggedIn(false);
-                }
-            }
-        };
-
-        let interval;
-        if (account && profile) {
-            interval = setInterval(() => {
-                refresh();
-            }, refreshTimeOut);
-        }
-
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [account, profile, loggedIn]);
-
-
     const logout = useCallback(async () => {
         setIsExpiredToken(false);
         await clearAllAuthData();
+        requestIdleCallback(() => {
+            router.replace('/login');
+        });
     }, []);
 
-
     const clearProfile = useCallback(async () => {
-        setAccessTokenReady(false);
-        setProfile(null);
-        setIsExpiredToken(false);
-        setLoggedIn(false);
         try {
             await removeAccessToken();
+            setAccessTokenReady(false);
+            setProfile(null);
+            setIsExpiredToken(false);
+            setLoggedIn(false);
+            requestIdleCallback(() => {
+                router.replace('/authProfile');
+            });
         } catch (err) {
             console.error('Error clearing profile:', err);
         }
@@ -208,17 +230,21 @@ export const AuthProvider = ({ children }) => {
     async function rememberLogin(username, profileId, isAutoLogin, setAccount, setProfile) {
         const device = getDeviceInfo();
         const refreshToken = await getRefreshToken();
-        const res = await post("account/validate-token", { username, profileId, refreshToken, device, isAutoLogin });
+        const res = await post("account/validate-token", {
+            username, profileId, refreshToken, device, isAutoLogin
+        });
+
         if (res.ok) {
             setAccount(res.account);
             setProfile(res.profile);
             await setAccessToken(res.tokens.accessToken);
             await setRefreshToken(res.tokens.refreshToken);
+            setIsExpiredToken(false);
+            setAccessTokenReady(true);
             return { status: res.status, ok: true };
         }
         return { status: res.status, ok: false };
     }
-
 
     return (
         <AuthContext.Provider value={{
@@ -229,19 +255,18 @@ export const AuthProvider = ({ children }) => {
             autoLogin,
             isAuthenticated: !!account,
             hasActiveProfile: !!profile,
-            storeUser,
-            setStoreUser,
-            storeProfile,
-            setStoreProfile,
-            setAccount,
-            setProfile,
+            storeUser, setStoreUser,
+            storeProfile, setStoreProfile,
+            setAccount, setProfile,
             isLoading,
-            checkStorage,
-            rememberMe,
-            setRememberMe,
+            rememberMe: storeProfile,
+            setRememberMe: setStoreProfile,
             isTokenReady: accessTokenReady,
             isExpiredToken,
             setLoggedIn,
+            setIsExpiredToken,
+            setAccessTokenReady,
+            storageChecked
         }}>
             {children}
         </AuthContext.Provider>
@@ -250,8 +275,6 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
+    if (!context) throw new Error('useAuth must be used within an AuthProvider');
     return context;
 };

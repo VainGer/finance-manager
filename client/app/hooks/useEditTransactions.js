@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { del, post, put } from '../utils/api.js';
-
 import { useAuth } from '../context/AuthContext';
 import { useProfileData } from '../context/ProfileDataContext';
 
@@ -14,14 +13,11 @@ export default function useEditTransactions(props = {}) {
         getBusinessesLoading,
         fetchBudgets: refetchBudgets,
         fetchExpenses: refetchExpenses,
-        errors
+        errors,
     } = useProfileData();
 
     const router = useRouter();
-
     const profile = props.profile || authContext.profile;
-
-    const goBack = props.goBack || (() => router.back());
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -40,91 +36,159 @@ export default function useEditTransactions(props = {}) {
     useEffect(() => {
         if (errors) {
             const categoriesErrors = errors.find(e => e.categoriesErrors)?.categoriesErrors;
-            if (categoriesErrors && categoriesErrors.length > 0) {
-                setCategoryError(categoriesErrors[0]);
-            } else {
-                setCategoryError(null);
-            }
+            setCategoryError(categoriesErrors?.[0] || null);
 
             const businessErrors = errors.find(e => e.businessesErrors)?.businessesErrors;
-            if (businessErrors && businessErrors.length > 0) {
-                setBusinessError(businessErrors[0]);
-            } else {
-                setBusinessError(null);
-            }
+            setBusinessError(businessErrors?.[0] || null);
         }
     }, [errors]);
 
+    const changeTransactionAmount = async (transaction, newAmount, options = {}) => {
+        if (!transaction || !transaction._id) {
+            setError('שגיאה: עסקה לא תקינה');
+            return { ok: false };
+        }
 
-    const addTransaction = async (transactionData, setters) => {
         if (!profile || !profile.expenses) {
-            console.error('Profile or expenses reference missing:', profile);
             setError('שגיאה: פרופיל לא תקין');
-            return;
+            return { ok: false };
         }
 
-        const { selectedCategory, selectedBusiness, amount, date, description } = transactionData;
-        const { setSelectedCategory, setSelectedBusiness, setAmount, setDate, setDescription } = setters;
-
-        if (!selectedCategory || !selectedBusiness || !amount || !date) {
-            setError('אנא מלא את כל השדות');
-            return;
+        if (!newAmount || isNaN(newAmount) || Number(newAmount) <= 0) {
+            setError('אנא הזן סכום תקין');
+            return { ok: false };
         }
+
+        const updateData = {
+            refId: profile.expenses,
+            catName: transaction.category,
+            busName: transaction.business,
+            transactionId: transaction._id,
+            newAmount: Number(newAmount),
+        };
 
         setLoading(true);
-        setError(null);
-        setSuccess(null);
-
-        const transaction = {
-            amount: Number(amount),
-            date: new Date(date),
-            description: description
-        }
 
         try {
-            const response = await post('expenses/transaction/create', {
-                refId: profile.expenses,
-                catName: selectedCategory,
-                busName: selectedBusiness,
-                transaction
-            });
-
+            const response = await put('expenses/transaction/change-amount', updateData);
             setLoading(false);
-            if (response.ok || response.success) {
-                try {
-                    await Promise.all([refetchExpenses(), refetchBudgets()]);
-                } catch (err) {
-                    console.error('Error refreshing data:', err);
-                }
-                setSuccess('העסקה נוספה בהצלחה!');
-                setSelectedCategory('');
-                setSelectedBusiness('');
-                setAmount('');
-                setDate(null);
-                setDescription('');
+
+            if (response.ok) {
+                await Promise.all([refetchExpenses(), refetchBudgets()]);
+                if (!options.silent) setSuccess('סכום העסקה עודכן בהצלחה!');
+                return { ok: true };
             } else {
-                setError('שגיאה בהוספת העסקה');
+                setError('שגיאה בעדכון סכום העסקה');
+                return { ok: false };
             }
-            setTimeout(() => { resetState(); }, 2000);
-        } catch (error) {
-            console.error('Error adding transaction:', error);
+        } catch (err) {
+            console.error('Error updating transaction amount:', err);
             setLoading(false);
-            setError('שגיאה בהוספת העסקה: בעיית תקשורת');
-            setTimeout(() => { resetState(); }, 2000);
+            setError('שגיאה בעדכון סכום העסקה: בעיית תקשורת');
+            return { ok: false };
         }
-    }
+    };
 
-    const deleteTransaction = async (transaction) => {
+
+    const changeTransactionDate = async (transaction, newDate, options = {}) => {
         if (!transaction || !transaction._id) {
-            console.error('Invalid transaction object:', transaction);
             setError('שגיאה: עסקה לא תקינה');
-            return;
+            return { ok: false };
         }
 
         if (!profile || !profile.expenses) {
-            console.error('Profile or expenses reference missing:', profile);
             setError('שגיאה: פרופיל לא תקין');
-            return;
+            return { ok: false };
+        }
+
+        if (!newDate || isNaN(newDate.getTime())) {
+            setError('אנא הזן תאריך תקין');
+            return { ok: false };
+        }
+
+        const updateData = {
+            refId: profile.expenses,
+            catName: transaction.category,
+            busName: transaction.business,
+            transactionId: transaction._id,
+            newDate: new Date(newDate),
+        };
+
+        setLoading(true);
+        try {
+            const response = await put('expenses/transaction/change-date', updateData);
+            setLoading(false);
+            if (response.ok) {
+                await Promise.all([refetchExpenses(), refetchBudgets()]);
+                if (!options.silent) setSuccess('תאריך העסקה עודכן בהצלחה!');
+                return { ok: true };
+            } else {
+                setError('שגיאה בעדכון תאריך העסקה');
+                return { ok: false };
+            }
+        } catch (err) {
+            console.error('Error updating transaction date:', err);
+            setLoading(false);
+            setError('שגיאה בעדכון תאריך העסקה: בעיית תקשורת');
+            return { ok: false };
+        }
+    };
+
+    const changeTransactionDescription = async (transaction, newDescription, options = {}) => {
+        if (!transaction || !transaction._id) {
+            setError('שגיאה: עסקה לא תקינה');
+            return { ok: false };
+        }
+
+        if (!profile || !profile.expenses) {
+            setError('שגיאה: פרופיל לא תקין');
+            return { ok: false };
+        }
+
+        if (!newDescription || typeof newDescription !== 'string') {
+            setError('אנא הזן תיאור תקין');
+            return { ok: false };
+        }
+
+        const updateData = {
+            refId: profile.expenses,
+            catName: transaction.category,
+            busName: transaction.business,
+            transactionId: transaction._id,
+            newDescription,
+        };
+
+        setLoading(true);
+        try {
+            const response = await put('expenses/transaction/change-description', updateData);
+            setLoading(false);
+
+            if (response.ok) {
+                await Promise.all([refetchExpenses(), refetchBudgets()]);
+                if (!options.silent) setSuccess('תיאור העסקה עודכן בהצלחה!');
+                return { ok: true };
+            } else {
+                setError('שגיאה בעדכון תיאור העסקה');
+                return { ok: false };
+            }
+        } catch (err) {
+            console.error('Error updating transaction description:', err);
+            setLoading(false);
+            setError('שגיאה בעדכון תיאור העסקה: בעיית תקשורת');
+            return { ok: false };
+        }
+    };
+
+
+    const deleteTransaction = async (transaction, options = {}) => {
+        if (!transaction || !transaction._id) {
+            setError('שגיאה: עסקה לא תקינה');
+            return { ok: false };
+        }
+
+        if (!profile || !profile.expenses) {
+            setError('שגיאה: פרופיל לא תקין');
+            return { ok: false };
         }
 
         const deleteData = {
@@ -133,202 +197,34 @@ export default function useEditTransactions(props = {}) {
             busName: transaction.business,
             transactionId: transaction._id
         };
+
         setLoading(true);
 
         try {
             const response = await del('expenses/transaction/delete-transaction', deleteData);
             setLoading(false);
+
             if (response.ok) {
-                try {
-                    await Promise.all([refetchExpenses(), refetchBudgets()]);
-                } catch (err) {
-                    console.error('Error refreshing data after delete:', err);
+                await Promise.all([refetchExpenses(), refetchBudgets()]);
+                if (!options.silent) {
+                    setSuccess('העסקה נמחקה בהצלחה!');
                 }
-                setSuccess('העסקה נמחקה בהצלחה!');
-                setTimeout(() => {
-                    setSuccess(null);
-                    if (goBack) goBack();
-                }, 1500);
+                return { ok: true };
             } else {
-                console.error('Delete failed:', response);
                 setError('שגיאה במחיקת העסקה');
-                alert(`שגיאה במחיקת העסקה`);
+                return { ok: false };
             }
-        } catch (error) {
-            console.error('Error in deleteTransaction:', error);
+        } catch (err) {
+            console.error('Error in deleteTransaction:', err);
             setLoading(false);
             setError('שגיאה במחיקת העסקה: בעיית תקשורת');
-            alert(`שגיאה במחיקת העסקה: בעיית תקשורת`);
+            return { ok: false };
         }
     };
 
-    const changeTransactionAmount = async (transaction, newAmount) => {
-        if (!transaction || !transaction._id) {
-            console.error('Invalid transaction object:', transaction);
-            setError('שגיאה: עסקה לא תקינה');
-            return;
-        }
-
-        if (!profile || !profile.expenses) {
-            console.error('Profile or expenses reference missing:', profile);
-            setError('שגיאה: פרופיל לא תקין');
-            return;
-        }
-
-        if (!newAmount || isNaN(newAmount) || Number(newAmount) <= 0) {
-            setError('אנא הזן סכום תקין');
-            return;
-        }
-        const updateData = {
-            refId: profile.expenses,
-            catName: transaction.category,
-            busName: transaction.business,
-            transactionId: transaction._id,
-            newAmount: Number(newAmount)
-        };
-        setLoading(true);
-
-        try {
-            const response = await put('expenses/transaction/change-amount', { ...updateData });
-            setLoading(false);
-            if (response.ok) {
-                try {
-                    await Promise.all([refetchExpenses(), refetchBudgets()]);
-                } catch (err) {
-                    console.error('Error refreshing data after amount change:', err);
-                }
-                setSuccess('סכום העסקה עודכן בהצלחה!');
-                setTimeout(() => {
-                    setSuccess(null);
-                    if (goBack) goBack();
-                }, 2000);
-            } else {
-                console.error('Update failed:', response);
-                setError('שגיאה בעדכון סכום העסקה');
-                alert(`שגיאה בעדכון סכום העסקה`);
-            }
-        } catch (error) {
-            console.error('Error updating transaction amount:', error);
-            setLoading(false);
-            setError('שגיאה בעדכון סכום העסקה: בעיית תקשורת');
-            alert(`שגיאה בעדכון סכום העסקה: בעיית תקשורת`);
-        }
-    }
-
-    const changeTransactionDate = async (transaction, newDate) => {
-        if (!transaction || !transaction._id) {
-            console.error('Invalid transaction object:', transaction);
-            setError('שגיאה: עסקה לא תקינה');
-            return;
-        }
-
-        if (!profile || !profile.expenses) {
-            console.error('Profile or expenses reference missing:', profile);
-            setError('שגיאה: פרופיל לא תקין');
-            return;
-        }
-
-        if (!newDate || isNaN(newDate.getTime())) {
-            setError('אנא הזן תאריך תקין');
-            return;
-        }
-        const updateData = {
-            refId: profile.expenses,
-            catName: transaction.category,
-            busName: transaction.business,
-            transactionId: transaction._id,
-            newDate: new Date(newDate)
-        };
-        setLoading(true);
-
-        try {
-            const response = await put('expenses/transaction/change-date', { ...updateData });
-            setLoading(false);
-            if (response.ok) {
-                try {
-                    await Promise.all([refetchExpenses(), refetchBudgets()]);
-                } catch (err) {
-                    console.error('Error refreshing data after date change:', err);
-                }
-                setSuccess('תאריך העסקה עודכן בהצלחה!');
-                setTimeout(() => {
-                    setSuccess(null);
-                    if (goBack) {
-                        goBack();
-                    }
-                }, 2000);
-            } else {
-                console.error('Update failed:', response);
-                setError('שגיאה בעדכון תאריך העסקה');
-                alert(`שגיאה בעדכון תאריך העסקה`);
-            }
-        } catch (error) {
-            console.error('Error updating transaction date:', error);
-            setLoading(false);
-            setError('שגיאה בעדכון תאריך העסקה: בעיית תקשורת');
-            alert(`שגיאה בעדכון תאריך העסקה: בעיית תקשורת`);
-        }
-    }
-
-    const changeTransactionDescription = async (transaction, newDescription) => {
-        if (!transaction || !transaction._id) {
-            console.error('Invalid transaction object:', transaction);
-            setError('שגיאה: עסקה לא תקינה');
-            return;
-        }
-
-        if (!profile || !profile.expenses) {
-            console.error('Profile or expenses reference missing:', profile);
-            setError('שגיאה: פרופיל לא תקין');
-            return;
-        }
-
-        if (newDescription === undefined) {
-            setError('אנא הזן תיאור תקין');
-            return;
-        }
-
-        const updateData = {
-            refId: profile.expenses,
-            catName: transaction.category,
-            busName: transaction.business,
-            transactionId: transaction._id,
-            newDescription
-        };
-        setLoading(true);
-
-        try {
-            const response = await put('expenses/transaction/change-description', { ...updateData });
-            setLoading(false);
-            if (response.ok) {
-                try {
-                    await Promise.all([refetchExpenses(), refetchBudgets()]);
-                } catch (err) {
-                    console.error('Error refreshing data after description change:', err);
-                }
-                setSuccess('תיאור העסקה עודכן בהצלחה!');
-                setTimeout(() => {
-                    setSuccess(null);
-                    if (goBack) goBack();
-                }, 2000);
-            } else {
-                console.error('Update failed:', response);
-                setError('שגיאה בעדכון תיאור העסקה');
-                alert(`שגיאה בעדכון תיאור העסקה`);
-            }
-        } catch (error) {
-            console.error('Error updating transaction description:', error);
-            setLoading(false);
-            setError('שגיאה בעדכון תיאור העסקה: בעיית תקשורת');
-            alert(`שגיאה בעדכון תיאור העסקה: בעיית תקשורת`);
-        }
-    }
 
     const getBusinessesByCategory = (category) => {
-        if (!contextBusinesses || contextBusinesses.length === 0) {
-            return [];
-        }
-
+        if (!contextBusinesses?.length) return [];
         const categoryBusinesses = contextBusinesses.find(b => b.category === category);
         return categoryBusinesses ? categoryBusinesses.businesses : [];
     };
@@ -343,12 +239,11 @@ export default function useEditTransactions(props = {}) {
         businessesLoading: getBusinessesLoading,
         categoryError,
         businessError,
-        addTransaction,
-        deleteTransaction,
         changeTransactionAmount,
         changeTransactionDate,
         changeTransactionDescription,
+        deleteTransaction,
         resetState,
-        getBusinessesByCategory
+        getBusinessesByCategory,
     };
 }

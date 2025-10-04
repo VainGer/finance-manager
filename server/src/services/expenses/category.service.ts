@@ -1,6 +1,7 @@
 import { Business, Category, CategoryBudget, CategoryBudgetWithoutId } from "../../types/expenses.types";
 import * as AppErrors from "../../errors/AppError";
 import CategoriesModel from "../../models/expenses/categories.model";
+import ProfileModel from "../../models/profile/profile.model";
 
 export default class CategoryService {
 
@@ -20,11 +21,11 @@ export default class CategoryService {
 
         const category: Category = { name, budgets: [], Businesses: [] };
         const result = await CategoriesModel.createCategory(refId, category);
-        
+
         if (!result?.success) {
             throw new AppErrors.DatabaseError(`Failed to create category '${name}'.`);
         }
-        
+
         return result;
     }
 
@@ -32,7 +33,7 @@ export default class CategoryService {
         if (!refId) {
             throw new AppErrors.ValidationError("Reference ID is required.");
         }
-        
+
         const categories = await CategoriesModel.getCategories(refId);
         if (!categories) {
             throw new AppErrors.NotFoundError("Categories not found.");
@@ -50,7 +51,7 @@ export default class CategoryService {
         if (oldName === newName) {
             throw new AppErrors.ValidationError("Old name and new name cannot be the same.");
         }
-        
+
         const existingCategories = await CategoriesModel.getCategories(refId);
         if (!existingCategories) {
             throw new AppErrors.NotFoundError("Categories not found.");
@@ -64,7 +65,7 @@ export default class CategoryService {
         if (!result || !result.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to rename category from '${oldName}' to '${newName}'.`);
         }
-        
+
         return result;
     }
 
@@ -77,20 +78,29 @@ export default class CategoryService {
         if (!result || !result.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to delete category '${catName}'.`);
         }
-        
+
         return result;
     }
 
     static async getProfileExpenses(refId: string) {
-        if (!refId) {
-            throw new AppErrors.ValidationError("Reference ID is required.");
-        }
-        
+        if (!refId) throw new AppErrors.ValidationError("Reference ID is required.");
         const categories = await CategoriesModel.getCategories(refId);
-        if (!categories) {
-            throw new AppErrors.NotFoundError("Categories not found.");
+        if (!categories) throw new AppErrors.NotFoundError("Categories not found.");
+        return categories.categories;
+    }
+
+    static async getChildProfileExpenses(username: string, childId: string) {
+        if (!username || !childId) {
+            throw new AppErrors.ValidationError("Username and child ID are required.");
         }
-        
-        return { success: true, categories: categories.categories };
+
+        const profile = await ProfileModel.findProfileById(username, childId);
+        if (!profile) {
+            throw new AppErrors.NotFoundError(`Child profile not found for ${username}:${childId}`);
+        }
+
+        const categories = await CategoriesModel.getCategories(profile.expenses);
+        if (!categories) throw new AppErrors.NotFoundError("Categories not found.");
+        return categories.categories;
     }
 }

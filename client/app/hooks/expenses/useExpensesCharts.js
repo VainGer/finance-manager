@@ -20,7 +20,6 @@ export default function useExpensesCharts() {
         const now = new Date();
 
         if (dateFilter === 'specific' && selectedMonth) {
-            // Safely access monthlyExpenses with fallbacks
             return monthlyExpenses && monthlyExpenses[selectedMonth] ? 
                 [...monthlyExpenses[selectedMonth]] : [];
         }
@@ -105,21 +104,18 @@ export default function useExpensesCharts() {
 
     const availableMonths = useMemo(() => {
         if (!availableDates || !Array.isArray(availableDates) || availableDates.length <= 1) return [];
-        // Safely map dateYM with validation
         return availableDates
             .filter(dateObj => dateObj && typeof dateObj === 'object' && dateObj.dateYM)
             .map(dateObj => dateObj.dateYM);
     }, [availableDates]);
 
     const monthlyChartData = useMemo(() => {
-        // Validate monthlyExpenses exists and has entries
         if (!monthlyExpenses || typeof monthlyExpenses !== 'object' || Object.keys(monthlyExpenses).length === 0) {
             return [];
         }
         
         try {
             const monthlyData = Object.entries(monthlyExpenses).map(([monthKey, monthTransactions]) => {
-                // Validate monthKey format and transactions array
                 if (!monthKey || !monthKey.includes('-') || !Array.isArray(monthTransactions)) {
                     return null;
                 }
@@ -130,7 +126,6 @@ export default function useExpensesCharts() {
                 }
                 
                 const formattedKey = `${month}/${year}`;
-                // Safely reduce with validation for each transaction
                 const amount = monthTransactions.reduce((sum, tx) => {
                     return sum + (tx && typeof tx.amount === 'number' ? tx.amount : 0);
                 }, 0);
@@ -141,10 +136,8 @@ export default function useExpensesCharts() {
                     originalKey: monthKey
                 };
             })
-            // Filter out any null entries from invalid data
             .filter(item => item !== null);
 
-            // Only sort if we have valid data
             if (monthlyData.length > 0) {
                 return monthlyData.sort((a, b) => {
                     return a.originalKey.localeCompare(b.originalKey);

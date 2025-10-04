@@ -46,10 +46,12 @@ export default function AddTransaction() {
       start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
+      <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />
+      <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
+      <View pointerEvents="none" className="absolute top-1/3 right-10 h-24 w-24 rounded-full bg-white/20 blur-md" />
       <ScrollView
         className="flex-1 px-4 pt-6"
         contentContainerStyle={{ paddingBottom: 24 }}
-        // android: כיוון פריסה לרכיבים פנימיים כמו pickers/custom views
         style={{ direction: isRTL ? 'rtl' : 'ltr' }}
       >
         {/* Title */}
@@ -73,7 +75,7 @@ export default function AddTransaction() {
 
         {success && (
           <View className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-            <View className="flex-row-reverse items-center">
+            <View className="flex-row-reverse items-center w-max mx-auto">
               <Ionicons name="checkmark-circle" size={20} color="#059669" />
               <Text className="text-green-600 mr-2" style={{ writingDirection: 'rtl', textAlign: 'right' }}>
                 {success}
@@ -177,7 +179,10 @@ export default function AddTransaction() {
               placeholder="סכום"
               keyboardType="numeric"
               value={amount}
-              onChangeText={setAmount}
+              onChangeText={(text) => {
+                const sanitized = text.replace(/[^0-9]/g, '');
+                setAmount(sanitized);
+              }}
               className="flex-1"
               style={{ textAlign: 'right', writingDirection: 'rtl' }}
             />

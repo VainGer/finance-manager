@@ -194,6 +194,9 @@ export default function UploadTransactionsFromFile() {
 
     return (
         <View className="h-full">
+            <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />
+            <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
+            <View pointerEvents="none" className="absolute top-1/3 right-10 h-24 w-24 rounded-full bg-white/20 blur-md" />
             {showSuccessMessage && (
                 <SuccessOverlay
                     isCategory={categoryCreated}
@@ -246,8 +249,8 @@ export default function UploadTransactionsFromFile() {
                 </View>
             )}
             {dataToUpload && dataToUpload.length > 0 && (
-                <ScrollView className="mt-6 mb-20 space-y-4">
-                    <View className="w-3/4 mx-auto">
+                <ScrollView className="space-y-4">
+                    <View className="w-3/4 mx-auto mt-8">
                         <Button onPress={resetState}>העלה קובץ אחר</Button>
                     </View>
                     {dataToUpload.map((transaction) => (
@@ -261,7 +264,7 @@ export default function UploadTransactionsFromFile() {
                             onCreateBusiness={() => setShowCreateBusiness(true)}
                         />
                     ))}
-                    <View className="w-3/4 mx-auto">
+                    <View className="w-3/4 mx-auto my-4">
                         <Button onPress={handleSubmitTransactions}>שמור תנועות</Button>
                     </View>
                 </ScrollView>
