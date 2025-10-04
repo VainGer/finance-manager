@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { post } from '../utils/api';
 
 const AuthContext = createContext();
 
@@ -87,11 +88,18 @@ export const AuthProvider = ({ children }) => {
     }, [profile]);
 
 
-    const logout = useCallback(() => {
-        setAccount(null);
-        setProfile(null);
-        sessionStorage.removeItem('account');
-        sessionStorage.removeItem('profile');
+    const logout = useCallback(async () => {
+        try {
+            const response = await post('profile/logout', {});
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            // Clear local state regardless of server response
+            setAccount(null);
+            setProfile(null);
+            sessionStorage.removeItem('account');
+            sessionStorage.removeItem('profile');
+        }
     }, []);
     
     const clearProfile = useCallback(() => {

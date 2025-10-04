@@ -10,6 +10,7 @@ profileRouter.post<{}, {}, { reqProfile: ProfileCreationData }>
     ("/create-first-profile", ProfileController.createProfile);
 profileRouter.post<{}, {}, { username: string, profileName: string, pin: string }>
     ("/validate-profile", ProfileController.validateProfile);
+profileRouter.post("/logout", ProfileController.logout);
 profileRouter.get<{}, {}, { username: string }>
     ("/get-profiles", ProfileController.getAllProfiles);
 

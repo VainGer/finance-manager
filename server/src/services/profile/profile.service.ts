@@ -212,6 +212,8 @@ export default class ProfileService {
                         lastUsedAt: new Date()
                     };
                     await AccountModel.storeToken(username, tokenData);
+                    // Also store in ProfileModel for easy revocation
+                    await ProfileModel.addRefreshToken(profile._id.toString(), refreshToken);
                 }
             }
             const { pin: _, budgets: __, ...safeProfile } = profile;
@@ -351,6 +353,29 @@ export default class ProfileService {
             return { success: true, message: "Access token refreshed successfully.", accessToken: newAccessToken };
         } catch (error) {
             throw new AppErrors.AppError(`Error refreshing access token: ${(error as Error).message}`, 500);
+        }
+    }
+
+    static async revokeRefreshToken(refreshToken: string) {
+        try {
+            // Verify token to get profileId
+            const decoded = JWT.verifyRefreshToken(refreshToken);
+            if (!decoded || !decoded.profileId) {
+                throw new AppErrors.UnauthorizedError("Invalid refresh token");
+            }
+
+            // Remove refresh token from the database
+            const result = await ProfileModel.removeRefreshToken(decoded.profileId, refreshToken);
+            if (!result) {
+                throw new AppErrors.DatabaseError("Failed to revoke refresh token");
+            }
+
+            return { success: true, message: "Refresh token revoked successfully" };
+        } catch (error) {
+            if (error instanceof AppErrors.AppError) {
+                throw error;
+            }
+            throw new AppErrors.AppError(`Error revoking refresh token: ${(error as Error).message}`, 500);
         }
     }
 

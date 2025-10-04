@@ -14,15 +14,19 @@ declare global {
 
 export const accessTokenVerification = (req: Request, res: Response, next: NextFunction): void => {
   try {
-    const authHeader = req.headers.authorization;
-    const tokenFromHeader = req.headers['x-access-token'] as string;
+    // First try to get token from cookies (new method)
+    let token: string | null = req.cookies?.accessToken || null;
     
-    let token: string | null = null;// hjsdafklahsdfkjldshfkjhsadfjkldshfjklasdhfjksdafhjkdsahfjksdalf --> signature + profileId + expiration
-    
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.split(' ')[1];
-    } else if (tokenFromHeader) {
-      token = tokenFromHeader;
+    // Fallback to headers for backward compatibility
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      const tokenFromHeader = req.headers['x-access-token'] as string;
+      
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+      } else if (tokenFromHeader) {
+        token = tokenFromHeader;
+      }
     }
     
     if (!token) {
@@ -56,7 +60,13 @@ export const accessTokenVerification = (req: Request, res: Response, next: NextF
 
 export const refreshTokenVerification = (req: Request, res: Response, next: NextFunction): void => {
   try {
-    const token = req.body.refreshToken || req.headers['x-refresh-token'] as string;
+    // First try to get token from cookies (new method)
+    let token: string | null = req.cookies?.refreshToken || null;
+    
+    // Fallback to request body/headers for backward compatibility
+    if (!token) {
+      token = req.body.refreshToken || req.headers['x-refresh-token'] as string;
+    }
     
     if (!token) {
       throw new AppErrors.UnauthorizedError('Refresh token is required');

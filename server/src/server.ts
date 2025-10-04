@@ -1,6 +1,7 @@
 import Express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import path from "path";
 import routerV1 from "./routes/v1";
 import { v2 as cloudinary } from "cloudinary";
@@ -17,7 +18,18 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-server.use(cors());
+server.use(cors({
+    origin: [
+        'http://localhost:5173',  // Vite dev server
+        'http://localhost:3000',  // Alternative dev port
+        'https://finance-manager-web.vercel.app', // Production web app
+    ],
+    credentials: true, // Allow cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+server.use(cookieParser());
 server.use(Express.json({ limit: '50mb' }));
 server.use(Express.urlencoded({ limit: '50mb', extended: true }));
 

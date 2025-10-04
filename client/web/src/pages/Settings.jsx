@@ -15,7 +15,7 @@ import PasswordChange from '../components/settings/PasswordChange';
 import Button from '../components/common/Button';
 
 export default function Settings() {
-    const { account, profile, setAccount, setProfile } = useAuth();
+    const { account, profile, setAccount, setProfile, logout } = useAuth();
     const navigate = useNavigate();
     const {
         state: {
@@ -52,7 +52,7 @@ export default function Settings() {
             confirmDeleteProfile,
             cancelDeleteProfile
         }
-    } = useSettingsState({ account, profile, setAccount, setProfile, navigate });
+    } = useSettingsState({ account, profile, setAccount, setProfile, navigate, logout });
 
     const renderProfileSection = () => (
         <div className="space-y-6">

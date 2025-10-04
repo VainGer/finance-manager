@@ -12,7 +12,7 @@ export default function NavigationHeader({
     className = ""
 }) {
     const navigate = useNavigate();
-    const { account, profile, setAccount, setProfile } = useAuth();
+    const { account, profile, setAccount, setProfile, logout } = useAuth();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     // Close dropdown with ESC key
@@ -42,10 +42,8 @@ export default function NavigationHeader({
         }
     };
 
-    const handleLogout = () => {
-        setAccount(null);
-        setProfile(null);
-        sessionStorage.clear();
+    const handleLogout = async () => {
+        await logout(); // This will call the server and clear cookies
         navigate('/');
     };
 

@@ -250,6 +250,55 @@ export default class ProfileModel {
     }
 
 
+    static async addRefreshToken(profileId: string, refreshToken: string) {
+        try {
+            const result = await db.UpdateDocument(this.profileCollection, {
+                _id: new ObjectId(profileId)
+            }, { 
+                $addToSet: { 
+                    refreshTokens: {
+                        token: refreshToken,
+                        createdAt: new Date()
+                    }
+                } 
+            });
+            return result !== null;
+        } catch (error) {
+            console.error("Error adding refresh token:", error);
+            return false;
+        }
+    }
+
+    static async removeRefreshToken(profileId: string, refreshToken: string) {
+        try {
+            const result = await db.UpdateDocument(this.profileCollection, {
+                _id: new ObjectId(profileId)
+            }, { 
+                $pull: { 
+                    refreshTokens: { token: refreshToken }
+                } 
+            });
+            return result !== null;
+        } catch (error) {
+            console.error("Error removing refresh token:", error);
+            return false;
+        }
+    }
+
+    static async clearAllRefreshTokens(profileId: string) {
+        try {
+            const result = await db.UpdateDocument(this.profileCollection, {
+                _id: new ObjectId(profileId)
+            }, { 
+                $unset: { refreshTokens: "" }
+            });
+            return result !== null;
+        } catch (error) {
+            console.error("Error clearing refresh tokens:", error);
+            return false;
+        }
+    }
+
     private static extractPublicId(avatarUrl: string) {
         const urlParts = avatarUrl.split('/');
         const uploadIndex = urlParts.findIndex(part => part === 'upload');

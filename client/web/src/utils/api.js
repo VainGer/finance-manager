@@ -5,19 +5,15 @@
 import { getAccessToken } from './tokenUtils.js';
 
 //render url
-const baseUrl = "https://finance-manager-m3au.onrender.com/api";
+//const baseUrl = "https://finance-manager-m3au.onrender.com/api";
 //local url
-//const baseUrl = "http://localhost:5500/api";
+const baseUrl = "http://localhost:5500/api";
 
 const getHeaders = async (secure = true) => {
     const headers = {
         'Content-Type': 'application/json',
     };
-    const accessToken = await getAccessToken();
-
-    if (accessToken && secure) {
-        headers['Authorization'] = `Bearer ${accessToken}`;
-    }
+    // No need to add Authorization header anymore - cookies handle this
     return headers;
 };
 
@@ -25,7 +21,8 @@ export async function get(endpoint, secure = true) {
     try {
         const response = await fetch(`${baseUrl}/${endpoint}`, {
             method: 'GET',
-            headers: await getHeaders(secure)
+            headers: await getHeaders(secure),
+            credentials: 'include' // Include cookies in requests
         });
         const result = await response.json();
         return {
@@ -45,6 +42,7 @@ export async function post(endpoint, data, secure = true) {
             method: 'POST',
             headers: await getHeaders(secure),
             body: JSON.stringify(data),
+            credentials: 'include' // Include cookies in requests
         });
         const result = await response.json();
 
@@ -65,6 +63,7 @@ export async function put(endpoint, data, secure = true) {
             method: 'PUT',
             headers: await getHeaders(secure),
             body: JSON.stringify(data),
+            credentials: 'include' // Include cookies in requests
         });
         const result = await response.json();
         return {
@@ -83,6 +82,7 @@ export async function del(endpoint, data = null, secure = true) {
         const options = {
             headers: await getHeaders(secure),
             method: 'DELETE',
+            credentials: 'include' // Include cookies in requests
         };
 
         if (data) {

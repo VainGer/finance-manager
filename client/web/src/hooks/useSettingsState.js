@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { post } from '../utils/api';
 
-export default function useSettingsState({ account, profile, setAccount, setProfile, navigate }) {
+export default function useSettingsState({ account, profile, setAccount, setProfile, navigate, logout }) {
   const [activeSection, setActiveSection] = useState('profile');
   const [editMode, setEditMode] = useState({ profile: false, password: false, pin: false });
   const [profileForm, setProfileForm] = useState({ profileName: profile?.profileName || '', color: profile?.color || '#3B82F6' });
@@ -11,7 +11,10 @@ export default function useSettingsState({ account, profile, setAccount, setProf
   const [pinForm, setPinForm] = useState({ currentPin: '', newPin: '', confirmPin: '' });
   const [message, setMessage] = useState('');
 
-  const handleLogout = () => { setAccount(null); setProfile(null); navigate('/'); };
+  const handleLogout = async () => { 
+    await logout(); // This will call the server and clear cookies
+    navigate('/'); 
+  };
   const handleSwitchProfile = () => { setProfile(null); navigate('/profiles'); };
 
   const handleProfileEdit = async () => {

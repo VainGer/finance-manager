@@ -52,6 +52,11 @@ export default function ProfileAuth() {
     useEffect(() => {
 
         const fetchProfilesData = async () => {
+            if (!account?.username) {
+                setLoading(false);
+                return;
+            }
+            
             setLoading(true);
             const response = await get('profile/get-profiles?username=' + account.username);
             setProfiles(response.profiles || []);
@@ -61,6 +66,10 @@ export default function ProfileAuth() {
     }, [account, navigate]);
 
     const refreshProfiles = async () => {
+        if (!account?.username) {
+            return;
+        }
+        
         const response = await get('profile/get-profiles?username=' + account.username);
         setProfiles(response.profiles || []);
         setShowCreateProfile(false);
@@ -91,12 +100,7 @@ export default function ProfileAuth() {
         
         if (response.ok) {
             setProfile(response.profile);
-            if (response.tokens && response.tokens.accessToken) {
-                localStorage.setItem('accessToken', response.tokens.accessToken);
-            }
-            if (response.tokens && response.tokens.refreshToken) {
-                localStorage.setItem('refreshToken', response.tokens.refreshToken);
-            }
+            // Tokens are now automatically set as httpOnly cookies by the server
             navigate('/dashboard');
         } else {    
             if (response.status === 400 || response.status === 401) {
