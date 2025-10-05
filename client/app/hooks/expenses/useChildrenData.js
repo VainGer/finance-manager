@@ -18,7 +18,6 @@ export default function useChildrenData() {
 
     useEffect(() => {
         if (selectedChild) {
-            console.log(selectedChild);
             fetchChildrenExpenses(selectedChild);
             fetchChildrenBudgets(selectedChild);
         }

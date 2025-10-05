@@ -1,4 +1,5 @@
 import { prompt } from "./prompts/categorizing_prompt";
+import { coachPrompt } from "./prompts/coach_prompt";
 import dotenv from "dotenv";
 import path from "path";
 dotenv.config({ path: path.join(__dirname, '../dotenv/.env') });
@@ -43,7 +44,7 @@ export default class LLM {
             const systemPrompt = this.TRANSACTION_CATEGORIZER_SYSTEM_PROMPT
                 .replace('{categories_json_string}', categoriesJsonString)
                 .replace('{transactions_json_string}', transactionsJsonString);
-            
+
             const response = await this.getResponse(systemPrompt);
             if (response.content) {
                 const parsedResult = this.parseJsonFromResponse(response.content);
@@ -52,6 +53,20 @@ export default class LLM {
             throw new Error("No content in response from LLM");
         } catch (error) {
             console.error("Error categorizing transactions: ", error);
+            throw error;
+        }
+    }
+
+    static async generateCoachAdvice(budgetDataJson: string) {
+        try {
+            const prompt = coachPrompt.replace("{budget_json}", budgetDataJson);
+            const response = await this.getResponse(prompt);
+            if (response.content) {
+                return this.parseJsonFromResponse(response.content);
+            }
+            throw new Error("No content in response from LLM");
+        } catch (error) {
+            console.error("Error generating coach advice: ", error);
             throw error;
         }
     }

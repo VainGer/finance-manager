@@ -11,6 +11,8 @@ import Overlay from '../../../components/common/Overlay';
 import { useAuth } from '../../../context/AuthContext';
 import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
 import { formatDate } from '../../../utils/formatters';
+import ProfileScopeSwitcher from '../../../components/expenses/profileScopeSwitcher';
+
 export default function BudgetSummary() {
     const { profile } = useAuth();
 
@@ -34,20 +36,18 @@ export default function BudgetSummary() {
         currentProfileBudget,
         currentCategoryBudgets,
         setSelectedPeriod,
+        childrenProps
     } = useBudgetSummary({ profile });
 
+    const { children, selectedChild, setSelectedChild } = childrenProps;
 
-    useEffect(() => {
-        if (availablePeriods?.length && !selectedPeriod) {
-            const now = new Date();
-            const currentPeriod = availablePeriods.find(p => {
-                const startDate = new Date(p.startDate);
-                const endDate = new Date(p.endDate);
-                return startDate <= now && now <= endDate;
-            });
-            setSelectedPeriod(currentPeriod || availablePeriods[0]);
-        }
-    }, [availablePeriods, selectedPeriod]);
+    const BackToMainBtn = () => {
+        return (
+            <Button onPress={() => { setSelectedChild(null); }} className="mb-4 bg-blue-500 px-4 py-4 rounded-full w-3/4 mx-auto">
+                <Text className="text-white font-semibold">חזרה לפרופיל הראשי</Text>
+            </Button>
+        );
+    };
 
     if (showNewBudgetsOverlay) {
         return (
@@ -87,7 +87,8 @@ export default function BudgetSummary() {
                         <View className="items-center mb-3">
                             <Ionicons name="alert-circle-outline" size={36} color="#DC2626" />
                         </View>
-                        <Text className="text-red-600 text-center font-medium">{error}</Text>
+                        <Text className="text-red-600 text-center font-medium mb-4">{error}</Text>
+                        {selectedChild && <BackToMainBtn />}
                     </View>
                 </View>
             </LinearGradient>
@@ -122,7 +123,8 @@ export default function BudgetSummary() {
                         <View className="items-center mb-3">
                             <Ionicons name="wallet-outline" size={36} color="#64748B" />
                         </View>
-                        <Text className="text-slate-600 text-center text-lg">לא נמצאו תקציבים לפרופיל זה.</Text>
+                        <Text className="text-slate-600 text-center text-lg mb-4">לא נמצאו תקציבים לפרופיל זה.</Text>
+                        {selectedChild && <BackToMainBtn />}
                     </View>
                 </View>
             </LinearGradient>
@@ -139,7 +141,6 @@ export default function BudgetSummary() {
             {/* אלמנטים דקורטיביים עדינים ברקע */}
             <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />
             <View pointerEvents="none" className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-300/20" />
-
             <View className="flex-1">
                 <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
                     {/* כותרת הדף */}
@@ -156,7 +157,15 @@ export default function BudgetSummary() {
                         </View>
 
                         {/* בוחר תקופה */}
-                        <View className="mb-4">
+                        <View className="mb-4 bg-white rounded-xl">
+                            <View className="px-4 pt-4">
+                                <ProfileScopeSwitcher
+                                    loading={loading}
+                                    selectedChild={selectedChild}
+                                    setSelectedChild={setSelectedChild}
+                                    children={children}
+                                />
+                            </View>
                             {availablePeriods.length > 0 && (
                                 <BudgetPeriodSelector
                                     periods={availablePeriods}

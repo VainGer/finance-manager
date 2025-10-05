@@ -44,4 +44,6 @@ export type GroupedTransactions = {
     transactions: Transaction[];
 };
 
+export type CategoryForAI = Omit<Category, "budgets">;
+
 export type TransactionWithoutId = Omit<Transaction, '_id'>;

@@ -3,9 +3,8 @@ import { Text, View } from 'react-native';
 import { formatAmount, formatDate } from "../../utils/formatters";
 import Button from '../common/button';
 
-const ExpenseCard = ({ expense, onOpenEditor }) => {
+const ExpenseCard = ({ expense, onOpenEditor, childrenExpenses }) => {
   if (!expense) return null;
-
   const { amount, date, description, category, business } = expense;
 
   return (
@@ -28,39 +27,45 @@ const ExpenseCard = ({ expense, onOpenEditor }) => {
 
       {/* Description */}
       <Text
-        className="text-gray-800 font-medium mb-2 border-b border-gray-200"
+        className="text-gray-800 font-medium mb-2"
         numberOfLines={2}
       >
         {description}
       </Text>
 
       {/* Actions */}
-      <View className="flex-row justify-between mt-2">
-        <Button
-          textClass="text-sm"
-          size="small"
-          className="flex-1 mx-1"
-          onPress={() => onOpenEditor('editMenu', expense)}
-        >
-          עריכה
-        </Button>
-        <Button
-          textClass="text-sm"
-          size="small"
-          className="flex-1 mx-1"
-          style="danger"
-          onPress={() => onOpenEditor('delete', expense)}
-        >
-          מחיקה
-        </Button>
-      </View>
+      {!childrenExpenses &&
+        <View className="mt-2 border-t-2 pt-2 border-gray-200">
+          <View className="flex-row justify-between mt-2">
+
+            <Button
+              textClass="text-sm"
+              size="small"
+              className="flex-1 mx-1"
+              onPress={() => onOpenEditor('editMenu', expense)}
+            >
+              עריכה
+            </Button>
+            <Button
+              textClass="text-sm"
+              size="small"
+              className="flex-1 mx-1"
+              style="danger"
+              onPress={() => onOpenEditor('delete', expense)}
+            >
+              מחיקה
+            </Button>
+          </View>
+        </View>
+      }
     </View>
+
   );
 };
 
 const MemoizedExpenseCard = memo(ExpenseCard);
 
-export default function ExpensesTable({ filteredExpenses, onOpenEditor }) {
+export default function ExpensesTable({ filteredExpenses, onOpenEditor, childrenExpenses = false }) {
   const expenses = Array.isArray(filteredExpenses) ? filteredExpenses : [];
 
   if (expenses.length === 0) {
@@ -74,7 +79,7 @@ export default function ExpensesTable({ filteredExpenses, onOpenEditor }) {
   return (
     <View style={{ padding: 2 }}>
       {expenses.map(expense => (
-        <MemoizedExpenseCard key={expense._id || `exp-${expense.date}-${expense.amount}`} expense={expense} onOpenEditor={onOpenEditor} />
+        <MemoizedExpenseCard key={expense._id || `exp-${expense.date}-${expense.amount}`} expense={expense} onOpenEditor={onOpenEditor} childrenExpenses={childrenExpenses} />
       ))}
     </View>
   );

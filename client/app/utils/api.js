@@ -3,7 +3,7 @@ import { getAccessToken } from './tokenUtils.js';
 //render url
 //const baseUrl = "https://finance-manager-m3au.onrender.com/api";
 //local url
-const baseUrl = "http://10.213.84.192:5500/api";
+const baseUrl = "http://192.168.0.151:5500/api";
 
 const getHeaders = async (secure = true) => {
     const headers = {

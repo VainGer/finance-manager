@@ -15,7 +15,6 @@ import ChangeTransactionDescription from '../../../components/transactions/chang
 import DeleteTransaction from '../../../components/transactions/deleteTransaction.jsx';
 import { LinearGradient } from "expo-linear-gradient";
 import ProfileScopeSwitcher from '../../../components/expenses/profileScopeSwitcher';
-import useChildrenData from '../../../hooks/expenses/useChildrenData.js';
 
 const TransactionsSummary = ({ filteredExpenses }) => {
     const expenses = filteredExpenses || [];
@@ -60,10 +59,18 @@ export default function ExpensesDisplay() {
         filterByBusiness,
         clearFilters,
         applyFilters: applyAllFilters,
+        childrenProps
     } = useExpensesDisplay();
 
-    const { childrenCategories, childrenBusinesses, selectedChild } = useChildrenData();
-
+    const {
+        loading: childrenLoading,
+        error: childrenError,
+        childrenCategories,
+        childrenBusinesses,
+        children,
+        selectedChild,
+        setSelectedChild
+    } = childrenProps;
 
     const { categories, businesses } = useProfileData();
 
@@ -100,12 +107,8 @@ export default function ExpensesDisplay() {
         setSuccessMessage(message);
     };
 
-    useEffect(() => {
-        console.log(selectedChild);
-    }, [selectedChild]);
-
     const renderEditor = () => {
-        if (!currentExpense) return null;
+        if (!currentExpense || selectedChild) return null;
 
         switch (editDisplay) {
             case 'delete':
@@ -153,14 +156,14 @@ export default function ExpensesDisplay() {
 
 
 
-    if (isLoading) return <LoadingSpinner />;
+    if (isLoading || childrenLoading) return <LoadingSpinner />;
 
-    if (error) {
+    if (error || childrenError) {
         return (
             <View className="bg-white rounded-lg shadow-lg p-6 m-4">
                 <View className="items-center py-8">
                     <Text className="text-red-500 text-lg mb-2">❌ שגיאה</Text>
-                    <Text className="text-gray-600">{error}</Text>
+                    <Text className="text-gray-600">{error || childrenError}</Text>
                 </View>
             </View>
         );
@@ -202,11 +205,17 @@ export default function ExpensesDisplay() {
                 </View>
                 <View className="bg-white rounded-lg shadow-lg p-6 m-4">
 
-                    <ProfileScopeSwitcher />
+                    <ProfileScopeSwitcher
+                        children={children}
+                        loading={childrenLoading}
+                        selectedChild={selectedChild}
+                        setSelectedChild={setSelectedChild}
+                        error={childrenError}
+                    />
 
                     <View className="border-b border-gray-300 mb-4" />
 
-                    <Filter
+                    <Filter key={selectedChild ? selectedChild.id : 'parent'}
                         applyFilters={applyAllFilters}
                         availableDates={availableDates}
                         availableBusinesses={availableBusinesses}
@@ -222,7 +231,7 @@ export default function ExpensesDisplay() {
 
                     <TransactionsSummary filteredExpenses={displayExpenses} />
 
-                    <ExpensesTable filteredExpenses={displayExpenses} onOpenEditor={handleOpenEditor} />
+                    <ExpensesTable filteredExpenses={displayExpenses} onOpenEditor={handleOpenEditor} childrenExpenses={!!selectedChild} />
                 </View>
             </ScrollView >
         </LinearGradient>

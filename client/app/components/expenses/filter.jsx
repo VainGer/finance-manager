@@ -72,7 +72,8 @@ export default function Filter({
     }, [selectedCategory]);
 
     return (
-        <View className="bg-gray-50 rounded-lg p-4 mb-6">
+        <View
+            className="bg-gray-50 rounded-lg p-4 mb-6">
             <Text className="text-lg font-semibold mb-4">🔍 סינון וחיפוש</Text>
 
             <ScrollView>
@@ -81,7 +82,7 @@ export default function Filter({
                     <Text className="text-sm font-medium text-gray-700 mb-2">
                         קטגוריה
                     </Text>
-                    <CategorySelect key={selectedCategory}
+                    <CategorySelect key={selectedCategory + categories.length}
                         categories={categories}
                         setSelectedCategory={handleCategorySelect}
                         initialValue={selectedCategory || ''}
@@ -93,7 +94,7 @@ export default function Filter({
                     <Text className="text-sm font-medium text-gray-700 mb-2">
                         עסק
                     </Text>
-                    <BusinessSelect key={selectedBusiness}
+                    <BusinessSelect key={selectedBusiness + businessList.length}
                         selectedCategory={selectedCategory}
                         businesses={businessList}
                         setSelectedBusiness={handleBusinessSelect}

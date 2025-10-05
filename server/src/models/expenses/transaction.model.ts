@@ -1,6 +1,6 @@
 import db from "../../server";
 import { ObjectId } from "mongodb";
-import { MonthlyTransactions, Transaction, GroupedTransactions } from "../../types/expenses.types";
+import { MonthlyTransactions, Transaction, GroupedTransactions, CategoryForAI } from "../../types/expenses.types";
 import { formatDateYM } from "../../utils/date.utils";
 
 export default class TransactionModel {
@@ -206,6 +206,129 @@ export default class TransactionModel {
         } catch (error) {
             console.error("Error in TransactionModel.getById", error);
             throw new Error("Failed to get transaction");
+        }
+    }
+
+    static async getTransactionsInDateRange(refId: string, startDate: string, endDate: string) {
+        try {
+            const pipeline = [
+                { $match: { _id: new ObjectId(refId) } },
+                { $unwind: "$categories" },
+                { $unwind: "$categories.Businesses" },
+                { $unwind: "$categories.Businesses.transactionsArray" },
+                { $unwind: "$categories.Businesses.transactionsArray.transactions" },
+
+                {
+                    $match: {
+                        "categories.Businesses.transactionsArray.transactions.date": {
+                            $gte: startDate,
+                            $lte: endDate
+                        }
+                    }
+                },
+
+                {
+                    $project: {
+                        category: "$categories.name",
+                        business: "$categories.Businesses.name",
+                        bankNames: "$categories.Businesses.bankNames",
+                        txId: "$categories.Businesses.transactionsArray.transactions._id",
+                        amount: "$categories.Businesses.transactionsArray.transactions.amount",
+                        date: "$categories.Businesses.transactionsArray.transactions.date",
+                        description: "$categories.Businesses.transactionsArray.transactions.description",
+                        dateYM: {
+                            $substr: [
+                                "$categories.Businesses.transactionsArray.transactions.date",
+                                0,
+                                7
+                            ]
+                        }
+                    }
+                },
+
+                {
+                    $group: {
+                        _id: {
+                            category: "$category",
+                            business: "$business",
+                            bankNames: "$bankNames",
+                            dateYM: "$dateYM"
+                        },
+                        transactions: {
+                            $push: {
+                                _id: "$txId",
+                                amount: "$amount",
+                                date: "$date",
+                                description: "$description"
+                            }
+                        }
+                    }
+                },
+
+                {
+                    $project: {
+                        _id: 0,
+                        category: "$_id.category",
+                        business: "$_id.business",
+                        bankNames: "$_id.bankNames",
+                        dateYM: "$_id.dateYM",
+                        transactions: 1
+                    }
+                },
+                {
+                    $group: {
+                        _id: {
+                            category: "$category",
+                            business: "$business",
+                            bankNames: "$bankNames"
+                        },
+                        transactionsArray: {
+                            $push: {
+                                dateYM: "$dateYM",
+                                transactions: "$transactions"
+                            }
+                        }
+                    }
+                },
+
+                {
+                    $project: {
+                        _id: 0,
+                        category: "$_id.category",
+                        business: "$_id.business",
+                        bankNames: "$_id.bankNames",
+                        transactionsArray: 1
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$category",
+                        Businesses: {
+                            $push: {
+                                name: "$business",
+                                bankNames: "$bankNames",
+                                transactionsArray: "$transactionsArray"
+                            }
+                        }
+                    }
+                },
+
+                {
+                    $project: {
+                        _id: 0,
+                        name: "$_id",
+                        Businesses: 1
+                    }
+                },
+
+                { $sort: { name: 1 } }
+            ];
+
+            const results = await db.Aggregate(this.expenseCollection, pipeline);
+            return results || [];
+        } catch (error) {
+            console.error("Error in TransactionModel.getTransactionsInDateRange", error);
+            throw new Error("Failed to get transactions in date range");
         }
     }
 

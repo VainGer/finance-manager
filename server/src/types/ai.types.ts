@@ -1,0 +1,76 @@
+import { ObjectId } from "mongodb";
+import { ProfileBudget } from "./profile.types";
+import { CategoryBudget, CategoryForAI } from "./expenses.types";
+
+export type HistoryDoc = {
+    _id: string;
+    profileId: string | ObjectId;
+    history: AIHistoryEntry[];
+}
+
+export interface AIHistoryEntry {
+    _id?: string;
+    profileId: string | ObjectId;
+    periodLabel: string;
+    startDate: string;
+    endDate: string;
+    inputHash: string;
+    modelVersion: string;
+    coachOutput: AICoachOutput;
+    generatedAt: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface AICoachOutput {
+    summary: {
+        global: {
+            budget: number;
+            spent: number;
+            remaining: number;
+            utilizationPct: number;
+        };
+        topSignals: {
+            type: "over_budget" | "near_limit" | "anomaly" | string;
+            message: string;
+        }[];
+    };
+    categories: AICategoryInsight[];
+    nextMonthPlan: {
+        proposedBudgets: {
+            category: string;
+            current: number;
+            proposed: number;
+            rationale: string;
+        }[];
+        watchList: string[];
+        reminders: string[];
+    };
+    questions: { toConfirm: string; reason: string }[];
+    dataQuality: { issue: string; detail: string }[];
+}
+
+export interface AICategoryInsight {
+    name: string;
+    budget: number;
+    spent: number;
+    variance: number;
+    utilizationPct: number;
+    drivers: {
+        business: string;
+        amount: number;
+    }[];
+    actions: {
+        kind: "reduce" | "switch" | "cap" | string;
+        proposal: string;
+        quantifiedImpact: { monthlySave: number; oneTimeSave: number };
+        evidence: string;
+    }[];
+}
+
+export interface AICoachInput {
+    recentlyClosedGlobalBudget: ProfileBudget;
+    recentlyClosedCategoryBudgets: CategoryBudget[];
+    budgetRelevantExpenses: CategoryForAI[];
+    relevantAiHistory: AIHistoryEntry[];
+}

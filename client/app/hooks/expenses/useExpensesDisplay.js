@@ -49,14 +49,19 @@ export default function useExpensesDisplay() {
         sortByDate(true, true);
     }, [allExpenses, monthlyExpenses]);
 
-    const processExpensesData = useCallback(() => {
+    useEffect(() => {
+        if (!selectedChild && !expensesLoading) {
+            processExpensesData();
+        }
+    }, [selectedChild, contextExpenses, expensesLoading, processExpensesData]);
+
+    const processExpensesData = useCallback(async () => {
         setLoading(true);
         if (!profile || !contextExpenses) {
             setAllExpenses([]);
             setLoading(false);
             return;
         }
-
         try {
             const {
                 expensesFlat: realExpenses,
@@ -72,6 +77,27 @@ export default function useExpensesDisplay() {
             setLoading(false);
         }
     }, [contextExpenses, profile]);
+
+    useEffect(() => {
+        if (!selectedChild) return;
+        if (!childrenLoading && childrenExpenses?.length > 0) {
+            const {
+                expensesFlat: realExpenses,
+                monthlyMap: monthlyExpenses,
+                dates: datesSet
+            } = flattenExpenses(childrenExpenses);
+
+            sortAvailableDates(datesSet);
+            setAllExpenses(realExpenses);
+            setMonthlyExpenses(monthlyExpenses);
+            setLoading(false);
+        } else {
+            setLoading(true);
+        }
+    }, [selectedChild, childrenLoading, childrenExpenses]);
+
+
+
 
     const flattenExpenses = (expenses) => {
         const expensesFlat = [];
@@ -211,7 +237,7 @@ export default function useExpensesDisplay() {
                     monthNum: parseInt(month),
                     monthStr: month,
                     month: monthToHebrewName(month),
-                    dateYM: dateYM // Include the original dateYM for filtering
+                    dateYM: dateYM 
                 };
             }).sort((a, b) => {
                 if (a.year !== b.year) {
@@ -252,5 +278,15 @@ export default function useExpensesDisplay() {
         applyFilters: applyAllFilters,
         stagedFilters,
         appliedFilters,
+        childrenProps: {
+            children,
+            loading: childrenLoading,
+            error: childrenError,
+            childrenExpenses,
+            selectedChild,
+            setSelectedChild,
+            childrenCategories,
+            childrenBusinesses,
+        }
     };
 };

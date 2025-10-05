@@ -195,7 +195,6 @@ export default class ProfileController {
             const refreshToken = req.cookies?.refreshToken;
             
             if (refreshToken) {
-                // Remove refresh token from database
                 await ProfileService.revokeRefreshToken(refreshToken);
             }
             
