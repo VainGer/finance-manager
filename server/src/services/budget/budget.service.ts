@@ -49,7 +49,7 @@ export default class BudgetService {
             spent: totalSpent
         };
         const budgetResult = await BudgetModel.createBudget(username, profileName, refId,
-             profileBudgetWithSpent, preparedBudgets, !existingProfile.parentProfile);
+            profileBudgetWithSpent, preparedBudgets, !existingProfile.parentProfile);
         if (!budgetResult || !budgetResult.success) {
             throw new AppErrors.DatabaseError(budgetResult?.message || "Failed to create budget");
         }
@@ -238,6 +238,21 @@ export default class BudgetService {
         }
         const categoriesBudgets = await this.getCategoriesBudgets(profile.expenses);
         return { success: true, budgets: { profile: profileBudget, categories: categoriesBudgets.categoriesBudgets } };
+    }
+
+    static async deleteBudgets(username: string, profileName: string, budgetId: string) {
+        if (!username || !profileName || !budgetId) {
+            throw new AppErrors.ValidationError("Username, profile name and budget ID are required");
+        }
+        const profile = await ProfileModel.findProfile(username, profileName);
+        if (!profile) {
+            throw new AppErrors.NotFoundError("Profile not found");
+        }
+        const result = await BudgetModel.deleteBudget(username, profileName, budgetId);
+        if (!result || !result.success) {
+            throw new AppErrors.DatabaseError(result?.message || `Failed to delete budget with ID '${budgetId}'`);
+        }
+        return result;
     }
 
 

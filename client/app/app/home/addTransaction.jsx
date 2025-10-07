@@ -8,12 +8,10 @@ import BusinessSelect from '../../components/business/businessSelect.jsx';
 import CategorySelect from '../../components/categories/categorySelect.jsx';
 import Button from '../../components/common/button.jsx';
 import LoadingSpinner from '../../components/common/loadingSpinner.jsx';
-import { useAuth } from '../../context/AuthContext.jsx';
 import useEditTransactions from '../../hooks/useEditTransactions.js';
 import { formatDate } from '../../utils/formatters.js';
 
 export default function AddTransaction() {
-  const { profile } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedBusiness, setSelectedBusiness] = useState('');
   const [isVisibleDate, setVisibleDate] = useState(false);
@@ -25,7 +23,6 @@ export default function AddTransaction() {
     error,
     success,
     categories,
-    businesses,
     categoriesLoading,
     businessesLoading,
     categoryError,

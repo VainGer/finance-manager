@@ -41,6 +41,7 @@ export default function BudgetSummary() {
 
     const { children, selectedChild, setSelectedChild } = childrenProps;
 
+
     const BackToMainBtn = () => {
         return (
             <Button onPress={() => { setSelectedChild(null); }} className="mb-4 bg-blue-500 px-4 py-4 rounded-full w-3/4 mx-auto">
@@ -180,11 +181,11 @@ export default function BudgetSummary() {
                     {!relevantPeriod && (
                         <View className="mx-4 mb-6">
                             <View className="bg-yellow-50 rounded-xl px-4 py-3 flex-row items-center border border-yellow-200">
-                                <View className="flex-1 flex-row items-center justify-end">
-                                    <Text className="text-yellow-700 text-right ml-2">
+                                <View className="flex-row items-center w-3/4 mx-auto">
+                                    <Ionicons name="alert-circle" size={20} color="#B45309" />
+                                    <Text className="text-yellow-700 text-center ml-2">
                                         התקציב המוצג אינו פעיל לתקופה הנוכחית
                                     </Text>
-                                    <Ionicons name="alert-circle" size={20} color="#B45309" />
                                 </View>
                             </View>
                         </View>

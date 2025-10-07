@@ -28,77 +28,103 @@ export default function useEditCategories() {
 
     const addCategory = async (categoryName, setCategoryName) => {
         resetState();
-        if (!categoryName || categoryName.trim() === '') {
-            setError('אנא הזן שם קטגוריה');
-            return;
-        }
-        if (categoryName.trim().length < 2) {
-            setError('שם הקטגוריה חייב להכיל לפחות 2 תווים');
-            return;
-        }
-        setError(null);
-        setSuccess(false);
-        setLoading(true);
+        const name = categoryName?.trim();
 
+        if (!name) {
+            setError('אנא הזן שם קטגוריה');
+            return false;
+        }
+        if (name.length < 2) {
+            setError('שם הקטגוריה חייב להכיל לפחות 2 תווים');
+            return false;
+        }
+
+        setLoading(true);
         const response = await post('expenses/category/create', {
             refId: profile.expenses,
-            name: categoryName.trim(),
+            name,
         });
-
-        setTimeout(() => setLoading(false), 500);
+        setLoading(false);
 
         if (response.ok) {
-            setError(null);
-            setSuccess('הקטגוריה נוספה בהצלחה');
             setCategoryName('');
             await fetchCategories();
+            setSuccess('הקטגוריה נוספה בהצלחה');
             setTimeout(() => setSuccess(false), 5000);
-        } else if (response.status === 409) {
-            setError('שם הקטגוריה כבר קיים');
-        } else {
-            setError('אירעה שגיאה בעת הוספת הקטגוריה, נסה שוב מאוחר יותר');
-            console.error('Error adding category:', response.error);
+            return true;
         }
+
+        switch (response.status) {
+            case 400:
+                setError('שם הקטגוריה לא תקין');
+                break;
+            case 409:
+                setError('שם הקטגוריה כבר קיים');
+                break;
+            case 500:
+                setError('שגיאת שרת בעת הוספת הקטגוריה');
+                break;
+            default:
+                setError('אירעה שגיאה בעת הוספת הקטגוריה, נסה שוב מאוחר יותר');
+                console.error('Error adding category:', response.error);
+        }
+        return false;
     };
 
-    const renameCategory = async (selectedCategory, newCategoryName, setNewCategoryName, setSelectedCategory) => {
+    const renameCategory = async (
+        selectedCategory,
+        newCategoryName,
+        setNewCategoryName,
+        setSelectedCategory
+    ) => {
         resetState();
+        const newName = newCategoryName?.trim();
+
         if (!selectedCategory) {
             setError('אנא בחר קטגוריה לשינוי');
-            return;
+            return false;
         }
-        if (!newCategoryName || newCategoryName.trim() === '') {
+        if (!newName) {
             setError('אנא הזן שם חדש לקטגוריה');
-            return;
+            return false;
         }
-        if (selectedCategory === newCategoryName) {
+        if (selectedCategory === newName) {
             setError('השם החדש זהה לשם הנוכחי');
-            return;
+            return false;
         }
 
         setLoading(true);
         const response = await put('expenses/category/rename', {
             refId: profile.expenses,
             oldName: selectedCategory,
-            newName: newCategoryName.trim(),
+            newName,
         });
         setLoading(false);
 
         if (response.ok) {
-            setError(null);
-            setSuccess('הקטגוריה עודכנה בהצלחה');
             setNewCategoryName('');
             setSelectedCategory('');
             await fetchCategories();
-            setTimeout(() => {
-                setSuccess(false);
-            }, 5000);
-        } else if (response.status === 409) {
-            setError('שם הקטגוריה כבר קיים');
-        } else {
-            setError('אירעה שגיאה בעת עדכון הקטגוריה, נסה שוב מאוחר יותר');
-            console.error('Error editing category:', response.error);
+            setSuccess('הקטגוריה עודכנה בהצלחה');
+            setTimeout(() => setSuccess(false), 5000);
+            return true;
         }
+
+        switch (response.status) {
+            case 400:
+                setError('שם הקטגוריה לא תקין');
+                break;
+            case 409:
+                setError('שם הקטגוריה כבר קיים');
+                break;
+            case 500:
+                setError('שגיאת שרת בעת עדכון הקטגוריה');
+                break;
+            default:
+                setError('אירעה שגיאה בעת עדכון הקטגוריה, נסה שוב מאוחר יותר');
+                console.error('Error editing category:', response.error);
+        }
+        return false;
     };
 
     const deleteCategory = async (selectedCategory, setShowConfirm) => {
@@ -107,25 +133,37 @@ export default function useEditCategories() {
 
         try {
             const response = await del(`expenses/category/delete/${profile.expenses}/${selectedCategory}`);
+            setLoading(false);
+
             if (response.ok) {
-                setError(null);
                 await fetchCategories();
                 setSuccess('הקטגוריה נמחקה בהצלחה');
-                setTimeout(() => {
-                    setSuccess(false);
-                }, 5000);
-            } else {
-                setShowConfirm(false);
-                setError('אירעה שגיאה בעת מחיקת הקטגוריה, נסה שוב מאוחר יותר');
-                console.error('Error deleting category:', response.error);
+                setTimeout(() => setSuccess(false), 5000);
+                return true;
             }
+
+            setShowConfirm(false);
+            switch (response.status) {
+                case 400:
+                    setError('בקשה לא תקינה');
+                    break;
+                case 404:
+                    setError('הקטגוריה לא נמצאה');
+                    break;
+                case 500:
+                    setError('שגיאת שרת בעת מחיקת הקטגוריה');
+                    break;
+                default:
+                    setError('אירעה שגיאה בעת מחיקת הקטגוריה, נסה שוב מאוחר יותר');
+                    console.error('Error deleting category:', response.error);
+            }
+            return false;
         } catch (err) {
             console.error('Exception deleting category:', err);
             setError('תקשורת עם השרת נכשלה');
             setShowConfirm(false);
             setLoading(false);
-        } finally {
-            setLoading(false);
+            return false;
         }
     };
 

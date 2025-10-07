@@ -80,6 +80,19 @@ export default class BudgetController {
         }
     }
 
+    static async deleteBudget(req: Request, res: Response) {
+        try {
+            const { username, profileName, budgetId } = req.params as { username: string, profileName: string, budgetId: string };
+            const result = await BudgetService.deleteBudgets(username, profileName, budgetId);
+            res.status(200).json({
+                message: result.message || "Budget deleted successfully"
+            });
+        } catch (error) {
+            BudgetController.handleError(error, res);
+        }
+    }
+
+
 
     private static handleError(error: any, res: Response) {
         console.error("Controller error:", error);

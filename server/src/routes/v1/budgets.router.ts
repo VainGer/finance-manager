@@ -25,4 +25,8 @@ budgetRouter.post<{}, {}, { budgetData: BudgetCreationData }>(
 budgetRouter.post<{}, {}, { username: string, profileName: string, startDate: Date, endDate: Date }>(
     "/check-budget-dates", accessTokenVerification, BudgetController.validateBudgetDates);
 
+budgetRouter.delete<{}, {}, {}, { username: string, profileName: string, budgetId: string }>(
+    "/delete-budget/:username/:profileName/:budgetId", accessTokenVerification, BudgetController.deleteBudget);
+
+
 export default budgetRouter;

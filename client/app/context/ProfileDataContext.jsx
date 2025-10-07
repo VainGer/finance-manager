@@ -102,24 +102,24 @@ export function ProfileDataProvider({ children }) {
                 setCategories(response.categoriesNames || []);
                 setGetBusinessesLoading(true);
                 await fetchAllBusinesses(response.categoriesNames || []);
-            } else {
-                let errorMsg;
-                switch (response.status) {
-                    case 400:
-                        errorMsg = 'בקשה לא תקינה בטעינת קטגוריות';
-                        break;
-                    case 404:
-                        errorMsg = 'לא נמצאו קטגוריות';
-                        break;
-                    case 500:
-                        errorMsg = 'שגיאת שרת בטעינת קטגוריות';
-                        break;
-                    default:
-                        errorMsg = 'שגיאה בטעינת קטגוריות';
-                }
-                setErrors(prev => [{ categoriesErrors: [errorMsg] }, ...prev]);
-                console.error('Error fetching categories:', response.error || response.status);
+                return;
             }
+            let errorMsg;
+            switch (response.status) {
+                case 400:
+                    errorMsg = 'בקשה לא תקינה בטעינת קטגוריות';
+                    break;
+                case 404:
+                    errorMsg = 'לא נמצאו קטגוריות';
+                    break;
+                case 500:
+                    errorMsg = 'שגיאת שרת בטעינת קטגוריות';
+                    break;
+                default:
+                    errorMsg = 'שגיאה בטעינת קטגוריות';
+            }
+            setErrors(prev => [{ categoriesErrors: [errorMsg] }, ...prev]);
+            console.error('Error fetching categories:', response.error || response.status);
         } catch (error) {
             setErrors(prev => [{ categoriesErrors: ['תקשורת עם השרת נכשלה בעת טעינת קטגוריות'] }, ...prev]);
             console.error('Exception in fetchCategories:', error);
@@ -153,6 +153,7 @@ export function ProfileDataProvider({ children }) {
             }
         } catch (error) {
             console.error("Exception in getBusinesses:", error);
+            setErrors(prev => [{ businessesErrors: ['תקשורת עם השרת נכשלה בעת טעינת בעלי העסקים'] }, ...prev]);
             return [];
         }
     };

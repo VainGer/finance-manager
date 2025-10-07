@@ -9,7 +9,7 @@ export default function useCreateProfile({ username, profileName, pin, avatar, c
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const router = useRouter();
-    const { setProfile, profile } = useAuth();
+    const { setProfile, profile, setIsExpiredToken, setAccessTokenReady } = useAuth();
     const createProfile = async () => {
         try {
             setLoading(true);
@@ -72,6 +72,11 @@ export default function useCreateProfile({ username, profileName, pin, avatar, c
             switch (response.status) {
                 case 400:
                     setError('נא למלא את כל השדות בצורה תקינה');
+                    break;
+                case 401:
+                    setIsExpiredToken(false);
+                    setAccessTokenReady(true);
+                    setError('ההרשאה פגה, אנא התחבר מחדש');
                     break;
                 case 409:
                     setError('פרופיל בשם זה כבר קיים');

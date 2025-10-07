@@ -4,7 +4,7 @@ import { post } from '../utils/api';
 import { prepareImage } from '../utils/imageProcessing';
 
 export default function useProfileSettings({ setLoading }) {
-    const { account, profile, setProfile, logout, clearProfile } = useAuth();
+    const { account, profile, setProfile, logout, clearProfile, setIsExpiredToken, setAccessTokenReady } = useAuth();
     const resetMessages = () => {
         setErrors([]);
         setSuccesses([]);
@@ -55,6 +55,11 @@ export default function useProfileSettings({ setLoading }) {
             switch (response.status) {
                 case 400:
                     addError("שם הפרופיל חייב להכיל לפחות 2 תווים");
+                    break;
+                case 401:
+                    addError("ההרשאה פגה, אנא התחבר מחדש");
+                    setIsExpiredToken(true);
+                    setAccessTokenReady(false);
                     break;
                 case 404:
                     addError("הפרופיל לא נמצא");
@@ -118,7 +123,13 @@ export default function useProfileSettings({ setLoading }) {
                     }
                     break;
                 case 401:
-                    addError("הקוד הישן לא נכון");
+                    if (response.message.includes("PIN")) {
+                        addError("הקוד הישן לא נכון");
+                    } else {
+                        addError("ההרשאה פגה, אנא התחבר מחדש");
+                        setIsExpiredToken(true);
+                        setAccessTokenReady(false);
+                    }
                     break;
                 case 409:
                     addError("הקוד החדש חייב להיות שונה מהקוד הישן");
@@ -147,6 +158,11 @@ export default function useProfileSettings({ setLoading }) {
             switch (response.status) {
                 case 400:
                     addError("יש למלא את כל השדות");
+                    break;
+                case 401:
+                    addError("ההרשאה פגה, אנא התחבר מחדש");
+                    setIsExpiredToken(true);
+                    setAccessTokenReady(false);
                     break;
                 case 404:
                     addError("פרופיל לא קיים");
@@ -187,6 +203,11 @@ export default function useProfileSettings({ setLoading }) {
                 case 400:
                     addError("יש למלא את כל השדות");
                     break;
+                case 401:
+                    addError("ההרשאה פגה, אנא התחבר מחדש");
+                    setIsExpiredToken(true);
+                    setAccessTokenReady(false);
+                    break;
                 case 404:
                     addError("פרופיל לא קיים");
                     break;
@@ -215,6 +236,11 @@ export default function useProfileSettings({ setLoading }) {
                 case 400:
                     addError("יש למלא את כל השדות");
                     break;
+                case 401:
+                    addError("ההרשאה פגה, אנא התחבר מחדש");
+                    setIsExpiredToken(true);
+                    setAccessTokenReady(false);
+                    break;
                 case 404:
                     addError("פרופיל לא קיים");
                     break;
@@ -240,6 +266,15 @@ export default function useProfileSettings({ setLoading }) {
             switch (response.status) {
                 case 400:
                     addError("יש למלא את כל השדות");
+                    break;
+                case 401:
+                    if (!response.message.includes("PIN")) {
+                        addError("ההרשאה פגה, אנא התחבר מחדש");
+                        setIsExpiredToken(true);
+                        setAccessTokenReady(false);
+                    } else {
+                        addError("הקוד הסודי לא נכון");
+                    }
                     break;
                 case 404:
                     addError("פרופיל לא קיים");
