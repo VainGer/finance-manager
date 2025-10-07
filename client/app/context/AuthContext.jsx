@@ -34,10 +34,9 @@ export const AuthProvider = ({ children }) => {
     const [accessTokenReady, setAccessTokenReady] = useState(false);
     const [isExpiredToken, setIsExpiredToken] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
-
     const router = useRouter();
     const refreshTimerRef = useRef(null);
-    const REFRESH_OFFSET = 3 * 60 * 1000;
+    const REFRESH_OFFSET = 5 * 60 * 1000; // 5 minutes before expiration
 
     const loadStorage = async () => {
         try {
@@ -156,6 +155,7 @@ export const AuthProvider = ({ children }) => {
     const handleTokenRefresh = async () => {
         if (account && profile && !isExpiredToken && loggedIn) {
             try {
+
                 const result = await post('profile/refresh-access-token', { profileId: profile._id });
                 if (!result.ok) {
                     setAccessTokenReady(false);
@@ -164,8 +164,7 @@ export const AuthProvider = ({ children }) => {
                 } else {
                     setIsExpiredToken(false);
                     setAccessTokenReady(true);
-                    await setAccessToken(result.tokens.accessToken);
-                    await setRefreshToken(result.tokens.refreshToken);
+                    await setAccessToken(result.accessToken);
                     scheduleTokenRefresh();
                 }
             } catch (err) {

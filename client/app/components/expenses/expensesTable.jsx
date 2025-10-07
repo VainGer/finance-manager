@@ -43,8 +43,9 @@ const ExpenseCard = ({ expense, onOpenEditor, childrenExpenses }) => {
               size="small"
               className="flex-1 mx-1"
               onPress={() => onOpenEditor('editMenu', expense)}
-            >
-              עריכה
+            ><Text className="font-bold text-white">
+                עריכה
+              </Text>
             </Button>
             <Button
               textClass="text-sm"
@@ -52,8 +53,9 @@ const ExpenseCard = ({ expense, onOpenEditor, childrenExpenses }) => {
               className="flex-1 mx-1"
               style="danger"
               onPress={() => onOpenEditor('delete', expense)}
-            >
-              מחיקה
+            ><Text className="font-bold text-white">
+                מחיקה
+              </Text>
             </Button>
           </View>
         </View>

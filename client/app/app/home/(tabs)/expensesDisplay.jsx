@@ -213,7 +213,7 @@ export default function ExpensesDisplay() {
                         error={childrenError}
                     />
 
-                    <View className="border-b border-gray-300 mb-4" />
+
 
                     <Filter key={selectedChild ? selectedChild.id : 'parent'}
                         applyFilters={applyAllFilters}

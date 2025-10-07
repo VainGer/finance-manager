@@ -30,7 +30,7 @@ export default class AiController {
             const { analyzeStatus } = await AiService.checkHistoryStatus(profileId);
             res.status(200).json({
                 success: true,
-                status: analyzeStatus,
+                analyzeStatus,
                 message: "History status retrieved successfully"
             });
         } catch (error) {

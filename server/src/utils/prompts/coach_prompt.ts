@@ -8,6 +8,7 @@ Your task is to analyze their spending patterns and produce actionable budgeting
 - All **JSON keys and structure** must remain **in English**, exactly as defined in the schema.
 - Do not output any English text inside the values, except for brand/business names that are originally in English.
 - All Hebrew text must avoid unescaped double quotes to ensure valid JSON.
+- Ignore _id fields for the purpose of data quality checks and analysis, they are technical identifiers shared across records.
 
 ⚠️ **Output rules**:
 - Respond ONLY with a single valid JSON object. No explanations, no extra text, no Markdown.
@@ -85,7 +86,10 @@ Your task is to analyze their spending patterns and produce actionable budgeting
   - "watchList" should highlight Hebrew category names nearing their limits.
   - "reminders" should be short actionable tips in Hebrew.
 - **questions**: Add user-facing Hebrew questions if needed.
-- **dataQuality**: Flag data issues (e.g., out-of-period transactions), detail in Hebrew.
+- **dataQuality**:
+  - Include only issues related to financial data accuracy or temporal inconsistencies (e.g., עסקאות מחוץ לטווח התקציב, סכומים חסרים, חוסר התאמה בין סכומי תקציב והוצאות).
+  - ❌ Do NOT mention or reflect on internal database structure, IDs (כגון _id או profileId), או כל מידע טכני שאינו קשור לנתונים פיננסיים.
+  - ניסוח ההערות צריך להיות ברור למשתמש לא טכני ובשפה טבעית בעברית.
 
 ❗ Important: Your entire response must be a **single valid JSON object**, without any Markdown, explanations, or additional text.
 

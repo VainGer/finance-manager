@@ -2,7 +2,7 @@ import LLM from "../../utils/LLM";
 import BudgetService from "../budget/budget.service";
 import { HistoryDoc, AIHistoryEntry, AICoachOutput, AICoachInput } from "../../types/ai.types";
 import { ProfileBudget } from "../../types/profile.types";
-import { CategoryBudget, CategoryForAI } from "../../types/expenses.types";
+import { Category, CategoryBudget, CategoryForAI } from "../../types/expenses.types";
 import ProfileModel from "../../models/profile/profile.model";
 import TransactionModel from "../../models/expenses/transaction.model";
 import * as AppError from "../../errors/AppError";
@@ -21,19 +21,16 @@ export default class AiService {
             return null;
         }
         try {
+            const aiInputObj = await this.prepareInput(username, profileName, profileId);
+            if (!aiInputObj) {
+                console.warn("[AI] No valid input found for coaching generation");
+                return null;
+            }
             try {
                 await AiModel.updateHistoryStatus(profileId, "processing");
             } catch (statusErr) {
                 console.error("[AI] Failed to update history status to 'processing':", statusErr);
             }
-
-            const aiInputObj = await this.prepareInput(username, profileName, profileId);
-            if (!aiInputObj) {
-                console.warn("[AI] No valid input found for coaching generation");
-                await AiModel.updateHistoryStatus(profileId, "idle");
-                return null;
-            }
-
             const aiInputStr = JSON.stringify(aiInputObj);
             const result = (await LLM.generateCoachAdvice(aiInputStr)) as AICoachOutput | null;
 
@@ -94,11 +91,11 @@ export default class AiService {
         if (!profileId) {
             throw new AppError.BadRequestError("Profile ID is required");
         }
-        const history = await AiModel.getAllHistory(profileId) as HistoryDoc;
-        if (!history) {
-            throw new AppError.NotFoundError("History not found");
+        const status = await AiModel.getHistoryStatus(profileId);
+        if (!status) {
+            throw new AppError.NotFoundError("History status not found");
         }
-        const analyzeStatus = history.status;
+        const analyzeStatus = status;
         return { analyzeStatus, message: "History status retrieved successfully." };
     }
 
@@ -122,11 +119,15 @@ export default class AiService {
             }
 
             const profileBudgets = budgetsRes.budgets.profile as ProfileBudget[];
-            const categoriesBudgets = budgetsRes.budgets.categories as CategoryBudget[];
+            const categoriesBudgets = budgetsRes.budgets.categories as {
+                categoryName: string;
+                budgets: CategoryBudget[];
+            }[];
+
             const now = new Date();
             const THREE_MONTHS_MS = 1000 * 60 * 60 * 24 * 90;
 
-            const closedBudgets = profileBudgets.filter((b) => {
+            const closedBudgets = profileBudgets.filter(b => {
                 const end = new Date(b.endDate);
                 return end < now && now.getTime() - end.getTime() <= THREE_MONTHS_MS;
             });
@@ -135,7 +136,6 @@ export default class AiService {
                 console.info("[AI] No closed budgets in the last 3 months for:", profileId);
                 return null;
             }
-
             const aiHistory = (await AiModel.getRecentHistory(profileId)) as AIHistoryEntry[];
             const analyzedHashes = new Set(aiHistory.map(entry => entry.inputHash));
 
@@ -153,26 +153,41 @@ export default class AiService {
                 return null;
             }
 
-            const matchingCategoryBudgets = categoriesBudgets.filter(
-                cb => cb._id.toString() === targetBudget._id.toString()
-            );
-
+            const matchingCategoryBudgets: CategoryBudget[] = [];
+            for (const cb of categoriesBudgets) {
+                for (const b of cb.budgets) {
+                    if (
+                        b.startDate === targetBudget.startDate &&
+                        b.endDate === targetBudget.endDate
+                    ) {
+                        matchingCategoryBudgets.push({
+                            _id: b._id,
+                            categoryName: cb.categoryName,
+                            startDate: b.startDate,
+                            endDate: b.endDate,
+                            amount: b.amount,
+                            spent: b.spent
+                        });
+                    }
+                }
+            }
             const budgetRelevantExpenses = (await TransactionModel.getTransactionsInDateRange(
                 profile.expenses,
-                targetBudget.startDate.toISOString(),
-                targetBudget.endDate.toISOString()
+                new Date(targetBudget.startDate).toISOString(),
+                new Date(targetBudget.endDate).toISOString()
             )) as CategoryForAI[];
-
             return {
                 recentlyClosedGlobalBudget: targetBudget,
                 recentlyClosedCategoryBudgets: matchingCategoryBudgets,
                 budgetRelevantExpenses,
                 relevantAiHistory: aiHistory
             };
+
         } catch (err) {
             console.error("[AI] Error preparing input for profile:", profileId, err);
             return null;
         }
     }
+
 
 }

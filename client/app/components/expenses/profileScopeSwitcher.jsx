@@ -38,6 +38,7 @@ export default function ProfileScopeSwitcher(props = {}) {
                 itemIconName="person-outline"
                 loading={loading}
             />
+            <View className="border-b border-gray-400 mt-8 mb-4" />
         </View>
     );
 }

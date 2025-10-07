@@ -47,6 +47,13 @@ export default class ProfileController {
         try {
             const { profileId } = req.body;
             const result = await ProfileService.refreshAccessToken(profileId);
+            res.cookie('accessToken', result.accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                path: '/',
+                maxAge: 30 * 60 * 1000 // 30 minutes
+            });
             res.status(200).json({
                 message: result.message || "Access token refreshed successfully",
                 accessToken: result.accessToken

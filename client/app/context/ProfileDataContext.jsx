@@ -9,7 +9,7 @@ const ProfileDataContext = createContext();
 
 export function ProfileDataProvider({ children }) {
     const { account, profile, isTokenReady, isExpiredToken } = useAuth();
-    const { history, status, fetchHistory, startPolling, stopPolling } = useAIHistory();
+    const { history: aiData, newDataReady, startPolling } = useAIHistory();
     const [categories, setCategories] = useState([]);
     const [businesses, setBusinesses] = useState([]);
     const [profileBudgets, setProfileBudgets] = useState([]);
@@ -177,12 +177,14 @@ export function ProfileDataProvider({ children }) {
                 await fetchCategories();
             }
             fetchData();
+            startPolling();
             setDataLoaded(true);
         }
     }, [account, profile, isTokenReady, isExpiredToken, pathname, dataLoaded]);
 
     useEffect(() => {
-        if (profile?._id !== prevProfileId.current || account?.username !== prevAccountUsername.current) {
+        if (profile?._id !== prevProfileId.current ||
+            account?.username !== prevAccountUsername.current || restrictedPaths.includes(pathname)) {
             setDataLoaded(false);
             prevProfileId.current = profile?._id;
             prevAccountUsername.current = account?.username;
@@ -192,7 +194,7 @@ export function ProfileDataProvider({ children }) {
             setCategoryBudgets([]);
             setExpenses([]);
         }
-    }, [profile, account]);
+    }, [profile, account, pathname]);
 
     const loading = budgetLoading || expensesLoading || getCategoriesLoading || getBusinessesLoading;
 
@@ -209,6 +211,8 @@ export function ProfileDataProvider({ children }) {
         getBusinessesLoading,
         errors,
         dataLoaded,
+        aiData,
+        newDataReady,
         fetchBudgets,
         fetchExpenses,
         fetchCategories,
