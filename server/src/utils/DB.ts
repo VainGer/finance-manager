@@ -31,6 +31,13 @@ export default class DB {
         }
     }
 
+    getClient(): MongoClient {
+        if (!this.client) {
+            throw new Error("MongoDB client is not connected");
+        }
+        return this.client as MongoClient;
+    }
+
     async AddDocument(collection: string, document: any) {
         try {
             const res = await this.client?.db(this.dbName).collection(collection).insertOne(document);

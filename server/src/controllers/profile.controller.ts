@@ -60,8 +60,7 @@ export default class ProfileController {
         try {
             const { username, profileName, pin, device, remember } = req.body;
             const result = await ProfileService.validateProfile(username, profileName, pin, device, remember);
-            
-            // Set cookies for tokens with same expiration as JWT tokens
+
             res.cookie('accessToken', result.tokens.accessToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -69,7 +68,7 @@ export default class ProfileController {
                 path: '/',
                 maxAge: 30 * 60 * 1000 // 30 minutes
             });
-            
+
             res.cookie('refreshToken', result.tokens.refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -77,11 +76,11 @@ export default class ProfileController {
                 path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
-            
+
             res.status(200).json({
-                message: "Profile validated successfully",
-                profile: result.safeProfile
-                // Don't send tokens in response body anymore - they're in cookies
+                message: result.message,
+                profile: result.safeProfile,
+                tokens: result.tokens
             });
         } catch (error) {
             ProfileController.handleError(error, res);
@@ -193,15 +192,15 @@ export default class ProfileController {
     static async logout(req: Request, res: Response) {
         try {
             const refreshToken = req.cookies?.refreshToken;
-            
+
             if (refreshToken) {
                 await ProfileService.revokeRefreshToken(refreshToken);
             }
-            
+
             // Clear cookies
             res.clearCookie('accessToken', { path: '/', httpOnly: true });
             res.clearCookie('refreshToken', { path: '/', httpOnly: true });
-            
+
             res.cookie('accessToken', '', {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -209,7 +208,7 @@ export default class ProfileController {
                 path: '/',
                 maxAge: -1
             });
-            
+
             res.cookie('refreshToken', '', {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -217,7 +216,7 @@ export default class ProfileController {
                 path: '/',
                 maxAge: -1
             });
-            
+
             res.status(200).json({
                 message: "Logged out successfully"
             });

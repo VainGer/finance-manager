@@ -1,28 +1,78 @@
-import { Profile, ProfileBudget, ChildProfile } from "../../types/profile.types"
+import { ProfileCreationData, ChildProfileCreationData } from "../../types/profile.types"
 import db from "../../server"
 import { v2 as cloudinary } from 'cloudinary';
 import bcrypt from 'bcrypt';
 import { ObjectId } from "mongodb";
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.join(__dirname, '../../dotenv/.env') });
 export default class ProfileModel {
 
     private static profileCollection: string = 'profiles';
     private static expensesCollection: string = 'expenses';
+    private static aiCollection: string = 'ai_history';
     private static SALT_ROUNDS = 10;
+    private static dbName: string = process.env.DB_NAME as string;
 
-    static async create(profile: Profile | ChildProfile) {
+    static async create(profile: ProfileCreationData | ChildProfileCreationData) {
+        const client = db.getClient();
+        const session = client.startSession();
+
         try {
+            console.log(this.dbName);
+            session.startTransaction();
+
             const hashedPin = await bcrypt.hash(profile.pin, this.SALT_ROUNDS);
-            const newProfile = await db.AddDocument(this.profileCollection, {
-                ...profile,
-                pin: hashedPin
-            });
-            if (newProfile?.insertedId) {
-                return { success: true, insertedId: newProfile.insertedId };
-            }
-            return { success: false, insertedId: null };
+
+            const expensesResult = await client
+                .db(this.dbName)
+                .collection(this.expensesCollection)
+                .insertOne(
+                    {
+                        username: profile.username,
+                        profileName: profile.profileName,
+                        categories: []
+                    },
+                    { session }
+                );
+
+            const profileResult = await client
+                .db(this.dbName)
+                .collection(this.profileCollection)
+                .insertOne(
+                    {
+                        ...profile,
+                        expenses: expensesResult.insertedId,
+                        pin: hashedPin
+                    },
+                    { session }
+                );
+
+            await client
+                .db(this.dbName)
+                .collection(this.aiCollection)
+                .insertOne(
+                    {
+                        profileId: profileResult.insertedId,
+                        status: "idle",
+                        history: []
+                    },
+                    { session }
+                );
+
+            await session.commitTransaction();
+            console.log("Profile and related documents created successfully.");
+            return {
+                success: true,
+                profileId: profileResult.insertedId,
+                message: "Profile created successfully."
+            };
         } catch (error) {
-            console.error("Error in ProfileModel.createProfile", error);
+            console.error("Error in ProfileModel.create:", error);
+            await session.abortTransaction();
             throw new Error("Profile creation failed");
+        } finally {
+            await session.endSession();
         }
     }
 
@@ -88,20 +138,6 @@ export default class ProfileModel {
         } catch (error) {
             console.error("Error in ProfileModel.findProfileById", error);
             throw new Error("Failed to find profile");
-        }
-    }
-
-    static async createExpensesDocument(username: string, profileName: string) {
-        try {
-            const res = await db.AddDocument(ProfileModel.expensesCollection, {
-                username,
-                profileName,
-                categories: []
-            });
-            return res?.insertedId ?? null;
-        } catch (error) {
-            console.error("Error in ProfileModel.createExpenses", error);
-            throw new Error("Failed to create expenses");
         }
     }
 
@@ -254,13 +290,13 @@ export default class ProfileModel {
         try {
             const result = await db.UpdateDocument(this.profileCollection, {
                 _id: new ObjectId(profileId)
-            }, { 
-                $addToSet: { 
+            }, {
+                $addToSet: {
                     refreshTokens: {
                         token: refreshToken,
                         createdAt: new Date()
                     }
-                } 
+                }
             });
             return result !== null;
         } catch (error) {
@@ -273,10 +309,10 @@ export default class ProfileModel {
         try {
             const result = await db.UpdateDocument(this.profileCollection, {
                 _id: new ObjectId(profileId)
-            }, { 
-                $pull: { 
+            }, {
+                $pull: {
                     refreshTokens: { token: refreshToken }
-                } 
+                }
             });
             return result !== null;
         } catch (error) {
@@ -289,7 +325,7 @@ export default class ProfileModel {
         try {
             const result = await db.UpdateDocument(this.profileCollection, {
                 _id: new ObjectId(profileId)
-            }, { 
+            }, {
                 $unset: { refreshTokens: "" }
             });
             return result !== null;

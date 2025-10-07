@@ -60,15 +60,34 @@ export default class AccountController {
         try {
             const { username, profileId, refreshToken, device, isAutoLogin } = req.body;
             const isAutoLoginAttempt = isAutoLogin === true;
+
             if (!username || !profileId || !refreshToken || !device) {
                 throw new AppErrors.ValidationError('Missing required fields for token validation');
             }
+
             const account = await AccountModel.findByUsername(username);
             if (!account) {
                 throw new AppErrors.NotFoundError(`Account with username '${username}' not found`);
             }
+
             const { tokens: _, password: __, ...safeAccount } = account;
             const result = await ProfileService.validateByRefreshToken(username, profileId, refreshToken, device);
+
+            res.cookie('accessToken', result.tokens.accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                path: '/',
+                maxAge: 30 * 60 * 1000 // 30 minutes
+            });
+
+            res.cookie('refreshToken', result.tokens.refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                path: '/',
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            });
 
             res.status(200).json({
                 success: true,
@@ -77,6 +96,7 @@ export default class AccountController {
                 profile: result.safeProfile,
                 account: safeAccount
             });
+
         } catch (error) {
             const isAutoLoginAttempt = req.body.isAutoLogin === true;
             console.error(isAutoLoginAttempt ? "Auto login failed:" : "Token validation failed:", error);
@@ -90,6 +110,9 @@ export default class AccountController {
                 statusCode = error.statusCode;
                 message = error.message;
             }
+
+            res.clearCookie('accessToken');
+            res.clearCookie('refreshToken');
 
             res.status(statusCode).json({
                 success: false,

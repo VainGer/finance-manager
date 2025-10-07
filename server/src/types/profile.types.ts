@@ -18,7 +18,7 @@ export type Profile = {
 }
 
 export type ChildProfile = Profile & {
-  newBudgets: {
+  newBudgets?: {
     startDate: Date;
     endDate: Date;
     amount: number;
@@ -56,4 +56,4 @@ export type CategorizedFile = {
 export type SafeProfile = Pick<Profile, 'profileName' | 'avatar' | 'color' | 'parentProfile'>;
 
 export type ProfileCreationData = Omit<Profile, 'expenses'>
-export type ChildProfileCreationData = Omit<ChildProfile, 'newBudgets' | 'expenses'>
+export type ChildProfileCreationData = Omit<ChildProfile, 'expenses'>

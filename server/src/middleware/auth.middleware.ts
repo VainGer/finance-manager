@@ -16,7 +16,6 @@ export const accessTokenVerification = (req: Request, res: Response, next: NextF
   try {
     // First try to get token from cookies (new method)
     let token: string | null = req.cookies?.accessToken || null;
-    
     // Fallback to headers for backward compatibility
     if (!token) {
       const authHeader = req.headers.authorization;

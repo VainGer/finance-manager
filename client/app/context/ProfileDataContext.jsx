@@ -2,11 +2,14 @@ import { usePathname } from 'expo-router';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { get } from '../utils/api';
 import { useAuth } from './AuthContext';
+import useAIHistory from '../hooks/useAiHistory';
+
 const ProfileDataContext = createContext();
 
 
 export function ProfileDataProvider({ children }) {
-    const { account, profile, isTokenReady, isExpiredToken, loggedIn } = useAuth();
+    const { account, profile, isTokenReady, isExpiredToken } = useAuth();
+    const { history, status, fetchHistory, startPolling, stopPolling } = useAIHistory();
     const [categories, setCategories] = useState([]);
     const [businesses, setBusinesses] = useState([]);
     const [profileBudgets, setProfileBudgets] = useState([]);

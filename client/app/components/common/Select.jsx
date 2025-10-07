@@ -31,7 +31,7 @@ export default function Select({
         setModalVisible(false);
     };
 
-    const isDisabled = disabled || loading || !items || items.length === 0;
+    const isDisabled = (disabled || loading || !items || items.length === 0) && !showCreateNew;
 
     return (
         <View className="w-full" style={style}>

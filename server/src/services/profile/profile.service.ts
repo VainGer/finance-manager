@@ -2,8 +2,8 @@ import * as AppErrors from "../../errors/AppError";
 import ProfileModel from "../../models/profile/profile.model";
 import AccountModel from "../../models/account/account.model";
 import CategoryService from "../expenses/category.service";
-import { CategoryBudget, Transaction, GroupedTransactions } from "../../types/expenses.types";
-import { ProfileCreationData, Profile, SafeProfile, CategorizedFile, ChildProfile, ChildProfileCreationData, ProfileBudget } from "../../types/profile.types";
+import { CategoryBudget, GroupedTransactions } from "../../types/expenses.types";
+import { ProfileCreationData, SafeProfile, CategorizedFile, ChildProfileCreationData, ProfileBudget } from "../../types/profile.types";
 import { ObjectId } from "mongodb";
 import LLM from "../../utils/LLM";
 import BusinessModel from "../../models/expenses/business.model";
@@ -12,6 +12,7 @@ import { Account, Token } from "../../types/account.types";
 import BudgetService from "../budget/budget.service";
 import { formatDateYM } from "../../utils/date.utils";
 import TransactionModel from "../../models/expenses/transaction.model";
+import AiService from "../ai/ai.service";
 export default class ProfileService {
 
 
@@ -19,17 +20,10 @@ export default class ProfileService {
         if (!profileData.username || !profileData.profileName || !profileData.pin) {
             throw new AppErrors.ValidationError("Username, profile name and PIN are required.");
         }
-
         const profileExist = await ProfileModel.findProfile(profileData.username, profileData.profileName);
         if (profileExist) {
             throw new AppErrors.ConflictError(`Profile '${profileData.profileName}' already exists.`);
         }
-
-        const expensesId = await ProfileModel.createExpensesDocument(profileData.username, profileData.profileName);
-        if (!expensesId) {
-            throw new AppErrors.DatabaseError("Failed to create expenses for the profile.");
-        }
-
         let avatarUrl = null;
         if (profileData.avatar) {
             avatarUrl = await ProfileModel.uploadAvatar(profileData.avatar);
@@ -39,14 +33,12 @@ export default class ProfileService {
         }
         let allProfiles = await ProfileModel.getAllProfiles(profileData.username);
         let childrenArr: { profileName: string; id: ObjectId }[] = [];
-        if (allProfiles && allProfiles.length > 1) {
-            allProfiles = allProfiles.filter(p => profileData.profileName !== p.profileName && !p.parentProfile);
-            childrenArr = allProfiles.map(p => ({
-                profileName: p.profileName,
-                id: p._id
-            }));
+        if (allProfiles?.length) {
+            childrenArr = allProfiles
+                .filter(p => p.profileName !== profileData.profileName && !p.parentProfile)
+                .map(p => ({ profileName: p.profileName, id: p._id }));
         }
-        const profile: Profile = {
+        const profile: ProfileCreationData = {
             username: profileData.username,
             profileName: profileData.profileName,
             pin: profileData.pin,
@@ -56,15 +48,14 @@ export default class ProfileService {
             createdAt: new Date(),
             updatedAt: new Date(),
             budgets: [],
-            expenses: expensesId,
             children: childrenArr
         }
         try {
             const result = await ProfileModel.create(profile);
-            if (!result.insertedId || !result.success) {
+            if (!result.profileId || !result.success) {
                 throw new AppErrors.DatabaseError("Failed to create profile. Database operation unsuccessful.");
             }
-            return { success: true, profileId: result.insertedId, message: "Profile created successfully." };
+            return { success: true, profileId: result.profileId, message: "Profile created successfully." };
         } catch (error) {
             if (error instanceof AppErrors.AppError) {
                 throw error;
@@ -73,79 +64,74 @@ export default class ProfileService {
         }
     }
 
-    static async createChildProfile(childProfileCreation: ChildProfileCreationData) {
-        if (!childProfileCreation.username || !childProfileCreation.profileName || !childProfileCreation.pin) {
+    static async createChildProfile(childProfileData: ChildProfileCreationData) {
+
+        if (!childProfileData.username || !childProfileData.profileName || !childProfileData.pin) {
             throw new AppErrors.ValidationError("Username, profile name and PIN are required.");
         }
 
-        const profileExist = await ProfileModel.findProfile(childProfileCreation.username, childProfileCreation.profileName);
+        const profileExist = await ProfileModel.findProfile(
+            childProfileData.username,
+            childProfileData.profileName
+        );
         if (profileExist) {
-            throw new AppErrors.ConflictError(`Profile '${childProfileCreation.profileName}' already exists.`);
+            throw new AppErrors.ConflictError(
+                `Profile '${childProfileData.profileName}' already exists.`
+            );
         }
 
-        const expensesId = await ProfileModel.createExpensesDocument(childProfileCreation.username, childProfileCreation.profileName);
-        if (!expensesId) {
-            throw new AppErrors.DatabaseError("Failed to create expenses for the child profile.");
-        }
-
-        let avatarUrl = null;
-        if (childProfileCreation.avatar) {
-            avatarUrl = await ProfileModel.uploadAvatar(childProfileCreation.avatar);
+        let avatarUrl: string | null = null;
+        if (childProfileData.avatar) {
+            avatarUrl = await ProfileModel.uploadAvatar(childProfileData.avatar);
             if (!avatarUrl) {
-                throw new AppErrors.ServiceUnavailableError("Failed to upload avatar. Please try again later.");
+                throw new AppErrors.ServiceUnavailableError(
+                    "Failed to upload avatar. Please try again later."
+                );
             }
         }
-        const profile: ChildProfile = {
-            username: childProfileCreation.username,
-            profileName: childProfileCreation.profileName,
+
+        const childProfile: ChildProfileCreationData = {
+            ...childProfileData,
             avatar: avatarUrl,
-            color: childProfileCreation.color,
-            pin: childProfileCreation.pin,
             parentProfile: false,
             createdAt: new Date(),
             updatedAt: new Date(),
             budgets: [],
-            expenses: expensesId,
             newBudgets: []
-        }
+        };
 
+        let createdProfileId: ObjectId;
         try {
-            const createdProfile = await ProfileModel.create(profile);
-            if (!createdProfile.insertedId || !createdProfile.success) {
-                throw new AppErrors.DatabaseError("Failed to create child profile. Database operation unsuccessful.");
+            const result = await ProfileModel.create(childProfile);
+            if (!result.profileId || !result.success) {
+                throw new AppErrors.DatabaseError("Failed to create child profile. Transaction unsuccessful.");
             }
-
-            const allProfiles = await ProfileModel.getAllProfiles(childProfileCreation.username);
-            if (!allProfiles || allProfiles.length === 0) {
-                throw new AppErrors.NotFoundError("No profiles found for updating parent-child relationships.");
-            }
-
-            const promises = await Promise.all(allProfiles.map(async (profile) => {
-                if (profile.parentProfile) {
-                    return ProfileModel.addChildToProfile(profile.username, profile.profileName, {
-                        name: childProfileCreation.profileName,
-                        id: createdProfile.insertedId
-                    });
-                } else {
-                    return { success: true };
-                }
-            }));
-
-            if (promises.some(result => !result.success)) {
-                throw new AppErrors.DatabaseError("Failed to add child to parent profiles. Relationship update unsuccessful.");
-            }
-
-            return {
-                success: true,
-                profileId: createdProfile.insertedId,
-                message: "Child profile created successfully."
-            };
+            createdProfileId = result.profileId;
         } catch (error) {
-            if (error instanceof AppErrors.AppError) {
-                throw error;
-            }
+            if (error instanceof AppErrors.AppError) throw error;
             throw new AppErrors.DatabaseError(`Failed to create child profile: ${(error as Error).message}`);
         }
+        const allProfiles = await ProfileModel.getAllProfiles(childProfileData.username);
+        if (!allProfiles || allProfiles.length === 0) {
+            throw new AppErrors.NotFoundError("No parent profiles found for linking child.");
+        }
+        const parentProfiles = allProfiles.filter(p => p.parentProfile);
+        const updateResults = await Promise.all(
+            parentProfiles.map(parent =>
+                ProfileModel.addChildToProfile(parent.username, parent.profileName, {
+                    name: childProfileData.profileName,
+                    id: createdProfileId
+                })
+            )
+        );
+        if (updateResults.some(r => !r.success)) {
+            throw new AppErrors.DatabaseError("Failed to add child to one or more parent profiles.");
+        }
+        return {
+            success: true,
+            profileId: createdProfileId,
+            message: "Child profile created successfully."
+        };
     }
 
     static async updateProfile(username: string, profileName: string) {
@@ -212,11 +198,11 @@ export default class ProfileService {
                         lastUsedAt: new Date()
                     };
                     await AccountModel.storeToken(username, tokenData);
-                    // Also store in ProfileModel for easy revocation
                     await ProfileModel.addRefreshToken(profile._id.toString(), refreshToken);
                 }
             }
             const { pin: _, budgets: __, ...safeProfile } = profile;
+            AiService.generateCoachingReport(profile.username, profile.profileName, profile._id.toString());
             return {
                 success: true,
                 safeProfile,
@@ -332,6 +318,11 @@ export default class ProfileService {
             const tokensToReturn = { accessToken, refreshToken: newRefreshToken };
             const { pin: _, budgets: __, ...safeProfile } = profile;
             const { password: ___, tokens: ____, ...safeAccount } = await AccountModel.findByUsername(username) as Account;
+            try {
+                AiService.generateCoachingReport(profile.username, profile.profileName, profile._id.toString());
+            } catch (err) {
+                console.error("AI Coaching report generation failed:", err);
+            }
             return {
                 success: true,
                 safeProfile,
@@ -680,7 +671,7 @@ export default class ProfileService {
             throw new AppErrors.BadRequestError("Reference ID and transactions data are required");
         }
         const categories = await CategoryService.getProfileExpenses(refId);
-        const categoriesAndBusinesses = categories.categories.map((category: any) => {
+        const categoriesAndBusinesses = categories.map((category: any) => {
             return {
                 categoryName: category.name,
                 businesses: category.Businesses.map((business: any) => ({ name: business.name, bankNames: business.bankNames }))

@@ -3,8 +3,8 @@ import { ProfileBudget } from "./profile.types";
 import { CategoryBudget, CategoryForAI } from "./expenses.types";
 
 export type HistoryDoc = {
-    _id: string;
     profileId: string | ObjectId;
+    status: string;
     history: AIHistoryEntry[];
 }
 
@@ -15,7 +15,6 @@ export interface AIHistoryEntry {
     startDate: string;
     endDate: string;
     inputHash: string;
-    modelVersion: string;
     coachOutput: AICoachOutput;
     generatedAt: string;
     createdAt?: string;
