@@ -9,10 +9,11 @@ export default function Home() {
 
     const handleLogin = async () => {
         const success = await autoLogin();
-        if (!success) {
+        if (success) {
+            navigate('/dashboard');
+        } else {
             navigate('/login');
         }
-        navigate('/dashboard');
     };
 
     return (

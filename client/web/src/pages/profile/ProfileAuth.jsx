@@ -12,13 +12,15 @@ import CreateProfile from '../../components/profile/CreateProfile';
 
 export default function ProfileAuth() {
     const navigate = useNavigate();
-    const { account, setProfile, scheduleTokenRefresh, rememberProfile, setRememberProfile } = useAuth();
+    const { account, setProfile, scheduleTokenRefresh, rememberProfile, setRememberProfile, setIsTokenReady, setIsExpiredToken, logout } = useAuth();
 
     const { profiles, loading, error, authProfile, fetchProfilesData } = useAuthProfile({
         account,
         setProfile,
         scheduleTokenRefresh,
-        setRememberProfile
+        setRememberProfile,
+        setIsTokenReady,
+        setIsExpiredToken
     });
 
     const [selectedProfile, setSelectedProfile] = useState(null);

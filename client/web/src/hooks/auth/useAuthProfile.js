@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { get, post } from '../../utils/api';
 import { getDeviceInfo, getExpiration } from '../../utils/tokenUtils';
 
-export default function useAuthProfile({ account, setProfile, scheduleTokenRefresh, setRememberProfile }) {
+export default function useAuthProfile({ account, setProfile, scheduleTokenRefresh, setRememberProfile, setIsTokenReady, setIsExpiredToken }) {
     const [profiles, setProfiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -68,10 +68,16 @@ export default function useAuthProfile({ account, setProfile, scheduleTokenRefre
                 setRememberProfile(remember);
 
                 if (response.tokens?.accessToken) {
+                    // שמירת הטוקנים עבור API calls
+                    localStorage.setItem('tokens', JSON.stringify(response.tokens));
+                    sessionStorage.setItem('tokens', JSON.stringify(response.tokens));
+                    
                     const expDate = getExpiration(response.tokens.accessToken);
                     if (expDate) scheduleTokenRefresh(expDate);
                 }
 
+                setIsTokenReady(true);
+                setIsExpiredToken(false);
                 navigate('/dashboard');
                 return;
             } else {

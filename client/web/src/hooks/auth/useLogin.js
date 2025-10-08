@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { post } from '../../utils/api.js';
 
 export default function useLogin({ setPassword }) {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
     const { setAccount } = useAuth();
 
 
@@ -23,7 +25,7 @@ export default function useLogin({ setPassword }) {
             if (response.ok) {
                 setAccount(response.account);
                 setLoading(false);
-                window.location.href = '/profiles';
+                navigate('/profiles');
                 return true
             } else {
                 switch (response.status) {

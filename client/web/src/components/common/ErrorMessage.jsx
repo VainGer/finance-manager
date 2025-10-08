@@ -7,7 +7,9 @@ export default function ErrorMessage({ message, onRetry }) {
                 </svg>
                 <h3 className="text-lg font-medium text-red-800">שגיאה</h3>
             </div>
-            <p className="text-red-700 mb-4">{message}</p>
+            <p className="text-red-700 mb-4">
+                {typeof message === 'string' ? message : JSON.stringify(message)}
+            </p>
             {onRetry && (
                 <button 
                     onClick={onRetry}

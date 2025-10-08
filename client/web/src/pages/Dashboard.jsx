@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useProfileData } from '../context/ProfileDataContext';
 import ChildrenBudgetUpdate from '../components/dashboard/budget/ChildrenBudgetUpdate';
 import ProfileBudgetDisplay from '../components/dashboard/budget/ProfileBudgetDisplay';
 import ExpensesDisplay from '../components/dashboard/expenses/expenses_display/ExpensesDisplay';
 import ExpenseSummary from '../components/dashboard/summary/ExpenseSummary';
 import InteractiveCharts from '../components/dashboard/charts/InteractiveCharts';
+import AIInsight from '../components/dashboard/ai/AIInsight';
 import SideMenu from '../components/dashboard/menu/SideMenu';
 import DisplaySelector from '../components/dashboard/DisplaySelector';
 import NavigationHeader from '../components/layout/NavigationHeader';
@@ -13,10 +15,18 @@ import FloatingActionButton from '../components/common/FloatingActionButton';
 
 export default function Dashboard() {
     const { profile, account } = useAuth();
-    const [display, setDisplay] = useState(<ProfileBudgetDisplay profile={profile} key="budget-initial" />);
+    const { dataLoaded, budgetLoading, expensesLoading } = useProfileData();
+    const [display, setDisplay] = useState(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [currentDisplayType, setCurrentDisplayType] = useState('budget');
     const [showFloatingMenu, setShowFloatingMenu] = useState(false);
+
+    // Set initial display when profile is ready
+    useEffect(() => {
+        if (profile) {
+            setDisplay(<ProfileBudgetDisplay profile={profile} key="budget-initial" />);
+        }
+    }, [profile]);
 
     // Function to trigger refresh of current display
     const triggerRefresh = useCallback(() => {
@@ -35,6 +45,9 @@ export default function Dashboard() {
                 break;
             case 'charts':
                 setDisplay(<InteractiveCharts profile={profile} refreshTrigger={refreshTrigger} key={`charts-${refreshTrigger + 1}`} />);
+                break;
+            case 'ai':
+                setDisplay(<AIInsight profile={profile} key={`ai-${refreshTrigger + 1}`} />);
                 break;
         }
     }, [profile, refreshTrigger, currentDisplayType]);
@@ -86,7 +99,12 @@ export default function Dashboard() {
                         {/* Enhanced Main Display Area */}
                         <div className="xl:col-span-5">
                             <div className="bg-white/60 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl overflow-hidden">
-                                {display}
+                                {display || (
+                                    <div className="p-8 text-center">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto mb-4"></div>
+                                        <p className="text-slate-600">טוען נתונים...</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

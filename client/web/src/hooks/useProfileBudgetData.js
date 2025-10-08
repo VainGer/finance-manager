@@ -1,53 +1,19 @@
 import { useState, useEffect, useMemo } from 'react';
-import { get } from '../utils/api';
-import { useAuth } from '../context/AuthContext';
+import { useProfileData } from '../context/ProfileDataContext';
 
 export function useProfileBudgetData(profile) {
-    const { account } = useAuth();
-    const [profileBudgets, setProfileBudgets] = useState([]);
-    const [expensesData, setExpensesData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const { 
+        profileBudgets, 
+        expenses: expensesData, 
+        budgetLoading, 
+        expensesLoading,
+        errors 
+    } = useProfileData();
+    
     const [selectedPeriod, setSelectedPeriod] = useState(null);
-
-    useEffect(() => {
-        if (!profile || !account) {
-            setLoading(false);
-            return;
-        }
-        
-        setLoading(true);
-        setError(null);
-        const fetchData = async () => {
-            // זהות נכונה מבסיס הנתונים
-                        // Use expenses field if available, otherwise fall back to profile ID
-            const expensesId = profile?.expenses || profile?._id;
-            const [budgetsResponse, expensesResponse] = await Promise.all([
-                get(`budgets/get-profile-budgets?username=${account?.username}&profileName=${profile.profileName}`),
-                get(`expenses/profile-expenses/${expensesId}`)
-            ]);
-            
-            // Handle budgets
-            if (budgetsResponse.ok) {
-                const budgets = budgetsResponse.budgets.budgets || [];
-                setProfileBudgets(budgets);
-            } else {
-                console.error('Failed to fetch budgets:', budgetsResponse);
-                setProfileBudgets([]);
-            }
-            if (expensesResponse.ok) {
-                const expenses = expensesResponse.expenses.categories || [];
-                setExpensesData(expenses);
-            } else if (expensesResponse.status === 404) {
-                setExpensesData([]);
-            } else {
-                console.error('Failed to fetch expenses:', expensesResponse);
-                setExpensesData([]);
-            }
-            setLoading(false);
-        };
-        fetchData();
-    }, [profile, account]);
+    
+    const loading = budgetLoading || expensesLoading;
+    const error = errors.find(e => e.budgetErrors || e.expensesErrors);
 
     const availablePeriods = useMemo(() => {
         if (!profileBudgets || !Array.isArray(profileBudgets) || profileBudgets.length === 0) return [];

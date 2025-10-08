@@ -1,12 +1,18 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { get } from '../utils/api';
+import { useProfileData } from '../context/ProfileDataContext';
 
 export default function useExpensesDisplay(profile) {
+    const { 
+        expenses: expensesFromContext, 
+        expensesLoading, 
+        errors 
+    } = useProfileData();
+    
     const [expenses, setExpenses] = useState([]);
     const [filteredExpenses, setFilteredExpenses] = useState([]);
     const [dateFilteredExpenses, setDateFilteredExpenses] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const loading = expensesLoading;
+    const error = errors.find(e => e.expensesErrors)?.expensesErrors?.[0];
     const [filters, setFilters] = useState({
         category: 'all',
         business: 'all',
@@ -16,60 +22,37 @@ export default function useExpensesDisplay(profile) {
     const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
     const [showDateFilter, setShowDateFilter] = useState(false);
 
-    const fetchExpenses = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            // Use expenses field if available, otherwise fall back to profile ID  
-            const expensesId = profile?.expenses || profile._id;
-            const response = await get(`expenses/profile-expenses/${expensesId}`);
-
-            if (response.ok && response.expenses) {
-                const realExpenses = [];
-                const expensesData = response.expenses;
-                if (expensesData.categories) {
-                    expensesData.categories.forEach(category => {
-                        if (category.Businesses) {
-                            category.Businesses.forEach(business => {
-                                if (business.transactionsArray) {
-                                    business.transactionsArray.forEach(transactionGroup => {
-                                        if (transactionGroup.transactions) {
-                                            transactionGroup.transactions.forEach(transaction => {
-                                                realExpenses.push({
-                                                    _id: transaction._id,
-                                                    amount: Number(transaction.amount),
-                                                    date: transaction.date,
-                                                    description: transaction.description,
-                                                    category: category.name,
-                                                    business: business.name
-                                                });
-                                            });
-                                        }
+    // Process expenses from context
+    useEffect(() => {
+        if (expensesFromContext && expensesFromContext.length > 0) {
+            const realExpenses = [];
+            expensesFromContext.forEach(category => {
+                if (category.Businesses) {
+                    category.Businesses.forEach(business => {
+                        if (business.transactionsArray) {
+                            business.transactionsArray.forEach(transactionGroup => {
+                                if (transactionGroup.transactions) {
+                                    transactionGroup.transactions.forEach(transaction => {
+                                        realExpenses.push({
+                                            _id: transaction._id,
+                                            amount: Number(transaction.amount),
+                                            date: transaction.date,
+                                            description: transaction.description,
+                                            category: category.name,
+                                            business: business.name
+                                        });
                                     });
                                 }
                             });
                         }
                     });
                 }
-
-                setExpenses(realExpenses);
-            } else if (response.status === 404) {
-                setExpenses([]);
-            } else {
-                setError(response.message || 'שגיאה בטעינת הנתונים');
-            }
-        } catch (err) {
-            console.error('Error fetching expenses:', err);
-            setError('שגיאה בחיבור למסד הנתונים');
-        } finally {
-            setLoading(false);
+            });
+            setExpenses(realExpenses);
+        } else {
+            setExpenses([]);
         }
-    }, [profile]);
-
-    useEffect(() => {
-        fetchExpenses();
-    }, [fetchExpenses]);
+    }, [expensesFromContext]);
 
     useEffect(() => {
         let filtered = [...expenses];
@@ -228,7 +211,7 @@ export default function useExpensesDisplay(profile) {
         setFilters,
         categories,
         businesses,
-        refetchExpenses: fetchExpenses,
+        refetchExpenses: () => {}, // No longer needed since data comes from context
 
         expenses,
         dateRange,

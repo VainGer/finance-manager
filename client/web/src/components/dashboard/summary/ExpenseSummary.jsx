@@ -1,81 +1,49 @@
 import { useState, useEffect } from 'react';
-import { get } from '../../../utils/api';
+import { useProfileData } from '../../../context/ProfileDataContext';
 import LoadingSpinner from '../../common/LoadingSpinner';
 
 export default function ExpenseSummary({ profile }) {
+    const { 
+        expenses: expensesFromContext, 
+        expensesLoading: loading, 
+        errors 
+    } = useProfileData();
+    
     const [expenses, setExpenses] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const error = errors.find(e => e.expensesErrors)?.expensesErrors?.[0];
     const [breakdownView, setBreakdownView] = useState('category'); 
 
+    // Process expenses from context
     useEffect(() => {
-        fetchExpenses();
-    }, [profile]);
-
-    const fetchExpenses = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            
-            // Use expenses field if available, otherwise fall back to profile ID
-            const expensesId = profile?.expenses || profile?._id;
-            const response = await get(`expenses/profile-expenses/${expensesId}`);
-            
-            if (response.ok && response.expenses) {
-                const realExpenses = [];
-                const expensesData = response.expenses;
-            } else if (response.status === 404) {
-                setExpenses([]);
-                setLoading(false);
-                return;
-            } else {
-                console.error('Failed to fetch expenses:', response);
-                setError('לא ניתן לטעון הוצאות');
-                setLoading(false);
-                return;
-            }
-            
-            if (response.ok && response.expenses) {
-                const realExpenses = [];
-                const expensesData = response.expenses;
-                
-                if (expensesData.categories) {
-                    expensesData.categories.forEach(category => {
-                        if (category.Businesses) {
-                            category.Businesses.forEach(business => {
-                                if (business.transactionsArray) {
-                                    business.transactionsArray.forEach(transactionGroup => {
-                                        if (transactionGroup.transactions) {
-                                            transactionGroup.transactions.forEach(transaction => {
-                                                realExpenses.push({
-                                                    _id: transaction._id,
-                                                    amount: Number(transaction.amount),
-                                                    date: transaction.date,
-                                                    description: transaction.description,
-                                                    category: category.name,
-                                                    business: business.name
-                                                });
-                                            });
-                                        }
+        if (expensesFromContext && expensesFromContext.length > 0) {
+            const realExpenses = [];
+            expensesFromContext.forEach(category => {
+                if (category.Businesses) {
+                    category.Businesses.forEach(business => {
+                        if (business.transactionsArray) {
+                            business.transactionsArray.forEach(transactionGroup => {
+                                if (transactionGroup.transactions) {
+                                    transactionGroup.transactions.forEach(transaction => {
+                                        realExpenses.push({
+                                            _id: transaction._id,
+                                            amount: Number(transaction.amount),
+                                            date: transaction.date,
+                                            description: transaction.description,
+                                            category: category.name,
+                                            business: business.name
+                                        });
                                     });
                                 }
                             });
                         }
                     });
                 }
-
-                
-                setExpenses(realExpenses);
-            } else {
-                setError(response.message || 'שגיאה בטעינת הנתונים');
-            }
-        } catch (err) {
-            console.error('Error fetching expenses:', err);
-            setError('שגיאה בחיבור למסד הנתונים');
-        } finally {
-            setLoading(false);
+            });
+            setExpenses(realExpenses);
+        } else {
+            setExpenses([]);
         }
-    };
+    }, [expensesFromContext]);
 
     const calculateSummary = () => {
         const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);

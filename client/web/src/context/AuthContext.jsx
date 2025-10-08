@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
         if (profile) {
             if (rememberProfile) {
                 localStorage.setItem('profile', JSON.stringify(profile));
-                sessionStorage.removeItem('profile');
+                sessionStorage.setItem('profile', JSON.stringify(profile));
             } else {
                 sessionStorage.setItem('profile', JSON.stringify(profile));
                 localStorage.removeItem('profile');
@@ -78,11 +78,24 @@ export const AuthProvider = ({ children }) => {
                 safeJsonParse(sessionStorage.getItem('profile'));
 
             if (storedAccount && storedProfile) {
-                const res = await rememberLogin(storedAccount.username, storedProfile._id, true);
-                if (res.ok && res.tokens?.accessToken) {
+                const rememberFromStorage = !!localStorage.getItem('profile');
+                
+                if (rememberFromStorage) {
+                    // יש remember - נשתמש ב-validate-token
+                    const res = await rememberLogin(storedAccount.username, storedProfile._id, true);
+                    
+                    if (res.ok && res.tokens?.accessToken) {
+                        logged = true;
+                        const expDate = getExpiration(res.tokens.accessToken);
+                        if (expDate) scheduleTokenRefresh(expDate);
+                    }
+                } else {
+                    // אין remember אבל יש בסשן - פשוט נשחזר את המצב
+                    setAccount(storedAccount);
+                    setProfile(storedProfile);
+                    setIsTokenReady(true);
+                    setIsExpiredToken(false);
                     logged = true;
-                    const expDate = getExpiration(res.tokens.accessToken);
-                    if (expDate) scheduleTokenRefresh(expDate);
                 }
             }
         } catch (err) {
@@ -222,6 +235,8 @@ export const AuthProvider = ({ children }) => {
             isLoading,
             rememberProfile,
             setRememberProfile,
+            setIsTokenReady,
+            setIsExpiredToken,
             autoLogin,
             logout,
             clearProfile,
