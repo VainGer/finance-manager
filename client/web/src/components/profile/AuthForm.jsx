@@ -2,15 +2,24 @@ import Button from '../common/Button';
 import FormInput from '../common/FormInput';
 import ErrorAlert from '../common/ErrorAlert';
 import SecurityBadge from '../common/SecurityBadge';
+import { useState } from 'react';
 
 export default function AuthForm({
     selectedProfile,
     error,
     onSubmit,
-    setPinInput,
     onCancel,
-    loading
+    loading,
+    remember,
+    setRemember
 }) {
+    const [pinInput, setPinInput] = useState('');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSubmit(selectedProfile.profileName, pinInput, remember);
+    };
+
     return (
         <div className="flex justify-center">
             <div className="w-full max-w-md">
@@ -31,8 +40,8 @@ export default function AuthForm({
                     </div>
 
                     {error && <ErrorAlert message={error} className="mb-6" />}
-                    
-                    <form className='space-y-6' onSubmit={onSubmit}>
+
+                    <form className='space-y-6' onSubmit={handleSubmit}>
                         <FormInput
                             type="password"
                             placeholder="הזן את הקוד הסודי (4 ספרות)"
@@ -41,7 +50,21 @@ export default function AuthForm({
                             className="text-center text-lg tracking-widest"
                             required
                         />
-                        
+
+                        {/* Remember me checkbox */}
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="rememberProfile"
+                                checked={remember}
+                                onChange={(e) => setRemember(e.target.checked)}
+                                className="w-4 h-4 accent-slate-700"
+                            />
+                            <label htmlFor="rememberProfile" className="text-slate-700 text-sm">
+                                זכור פרופיל זה במכשיר זה
+                            </label>
+                        </div>
+
                         <div className="flex gap-4">
                             <Button
                                 type="button"

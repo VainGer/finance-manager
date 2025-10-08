@@ -1,9 +1,19 @@
 import Button from '../components/common/Button';
 import Footer from '../components/common/Footer';
 import { useNavigate } from 'react-router-dom';
-
+import { useAuth } from '../context/AuthContext';
 export default function Home() {
+
     const navigate = useNavigate();
+    const { autoLogin } = useAuth();
+
+    const handleLogin = async () => {
+        const success = await autoLogin();
+        if (!success) {
+            navigate('/login');
+        }
+        navigate('/dashboard');
+    };
 
     return (
         <div className='min-h-screen bg-gradient-to-b from-slate-50 to-gray-100' dir="rtl">
@@ -21,7 +31,7 @@ export default function Home() {
                         </div>
                         <div className="flex gap-3">
                             <Button
-                                onClick={() => navigate('/login')}
+                                onClick={() => handleLogin()}
                                 style="outline"
                                 size="small"
                                 className="min-w-[80px] border-slate-400 text-slate-700 hover:bg-slate-100 hover:border-slate-500 transition-all duration-300"

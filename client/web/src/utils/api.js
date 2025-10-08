@@ -2,8 +2,6 @@
 // Date: 2025-10-01
 // Status: WORKING - All API calls functional, profile data loading works
 
-import { getAccessToken } from './tokenUtils.js';
-
 //render url
 //const baseUrl = "https://finance-manager-m3au.onrender.com/api";
 //local url

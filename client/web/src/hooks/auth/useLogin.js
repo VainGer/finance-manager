@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { post } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { post } from '../../utils/api.js';
 
 export default function useLogin({ setPassword }) {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
     const { setAccount } = useAuth();
+
 
     const login = async (username, password) => {
         try {
@@ -15,19 +14,17 @@ export default function useLogin({ setPassword }) {
             password = password.trim();
             setLoading(true);
             setError(null);
-            
             if (!username || !password) {
                 setError('נא למלא את כל השדות');
                 setLoading(false);
                 return;
             }
-            
-            const response = await post('account/validate', { username, password }, false); // לא secure
-            
+            const response = await post('account/validate', { username, password }, false);
             if (response.ok) {
                 setAccount(response.account);
                 setLoading(false);
-                navigate('/profiles');
+                window.location.href = '/profiles';
+                return true
             } else {
                 switch (response.status) {
                     case 400:
@@ -40,8 +37,6 @@ export default function useLogin({ setPassword }) {
                     case 500:
                         setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
                         break;
-                    default:
-                        setError('התחברות נכשלה');
                 }
                 setLoading(false);
                 return false;
@@ -51,7 +46,10 @@ export default function useLogin({ setPassword }) {
             setLoading(false);
             return false;
         }
-    };
+    }
+
+
 
     return { error, loading, login };
+
 }

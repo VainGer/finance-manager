@@ -1,47 +1,28 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { post } from '../../utils/api';
-import Button from '../../components/common/Button';
+import useLogin from '../../hooks/auth/useLogin';
 import PageLayout from '../../components/layout/PageLayout';
 import NavigationHeader from '../../components/layout/NavigationHeader';
 import AuthFormContainer from '../../components/layout/AuthFormContainer';
 import FormInput from '../../components/common/FormInput';
+import Button from '../../components/common/Button';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import SecurityBadge from '../../components/common/SecurityBadge';
 
 export default function Login() {
-    const { setAccount } = useAuth();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogin = async (e) => {
+    const { error, loading, login } = useLogin({ setPassword });
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!username || !password || username.trim() === '' || password.trim() === '') {
-            setError('אנא מלא את כל השדות');
-            return;
+        const success = await login(username, password);
+        if (success !== false) {
+            navigate('/profiles');
         }
-        setLoading(true);
-        try {
-            const response = await post('account/validate', { username, password });
-            if (response.ok) {
-                setAccount(response.account);
-                navigate('/profiles');
-            } else if (response.status === 500) {
-                setError('תקלה בשרת, אנא נסה שוב מאוחר יותר');
-            } else {
-                setError('שם משתמש או סיסמא שגויים');
-                setPassword('');
-            }
-        } catch (error) {
-            setError('תקשורת עם השרת נכשלה');
-        } finally {
-            setLoading(false);
-        }
-    }
+    };
 
     const navigationButtons = [
         {
@@ -61,34 +42,28 @@ export default function Login() {
     return (
         <PageLayout>
             <NavigationHeader leftButtons={navigationButtons} />
-            
-            <AuthFormContainer 
+
+            <AuthFormContainer
                 title="התחברות לחשבון"
                 subtitle="ברוך הבא חזרה למנהל הכספים שלך"
             >
                 <ErrorAlert message={error} />
 
-                <form className="space-y-6" onSubmit={handleLogin}>
+                <form className="space-y-6" onSubmit={handleSubmit}>
                     <FormInput
                         label="שם משתמש"
                         placeholder="הזן את שם המשתמש שלך"
                         value={username}
-                        onChange={(e) => {
-                            setUsername(e.target.value);
-                            if (error) setError('');
-                        }}
+                        onChange={(e) => setUsername(e.target.value)}
                         required
                     />
-                    
+
                     <FormInput
                         label="סיסמא"
                         type="password"
                         placeholder="הזן את הסיסמא שלך"
                         value={password}
-                        onChange={(e) => {
-                            setPassword(e.target.value);
-                            if (error) setError('');
-                        }}
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                     />
 
@@ -118,7 +93,6 @@ export default function Login() {
                     </Button>
                 </form>
 
-                {/* Register Link */}
                 <div className="mt-6 text-center">
                     <p className="text-slate-600 text-sm">
                         עדיין אין לך חשבון?{' '}

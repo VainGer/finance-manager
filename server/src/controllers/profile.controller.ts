@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import ProfileService from "../services/profile/profile.service";
 import * as AppErrors from "../errors/AppError";
 import { ChildProfileCreationData } from "../types/profile.types";
+import { cookieOptions } from "../utils/cookies";
 
 export default class ProfileController {
 
@@ -46,62 +47,72 @@ export default class ProfileController {
     static async refreshAccessToken(req: Request, res: Response) {
         try {
             const { profileId } = req.body;
+            if (!profileId) {
+                throw new AppErrors.ValidationError("Missing profileId for access token refresh");
+            }
+
             const result = await ProfileService.refreshAccessToken(profileId);
-            res.cookie('accessToken', result.accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 30 * 60 * 1000 // 30 minutes
-            });
+
+            res.cookie("accessToken", result.accessToken, cookieOptions(30 * 60 * 1000));
+
             res.status(200).json({
                 message: result.message || "Access token refreshed successfully",
-                accessToken: result.accessToken
+                accessToken: result.accessToken,
             });
         } catch (error) {
-            ProfileController.handleError(error, res);
+            console.error("Error refreshing access token:", error);
+            res.clearCookie("accessToken", { path: "/" });
+
+            if (error instanceof AppErrors.AppError) {
+                res.status(error.statusCode).json({ message: error.message });
+            } else {
+                res.status(500).json({ message: "Internal server error" });
+            }
         }
     }
 
     static async validateProfile(req: Request, res: Response) {
         try {
             const { username, profileName, pin, device, remember } = req.body;
-            const result = await ProfileService.validateProfile(username, profileName, pin, device, remember);
+            if (!username || !profileName || !pin || !device) {
+                throw new AppErrors.ValidationError("Missing required fields for profile validation");
+            }
 
-            res.cookie('accessToken', result.tokens.accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 30 * 60 * 1000 // 30 minutes
-            });
+            const result = await ProfileService.validateProfile(
+                username,
+                profileName,
+                pin,
+                device,
+                remember
+            );
 
-            res.cookie('refreshToken', result.tokens.refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-            });
+            res.cookie("accessToken", result.tokens.accessToken, cookieOptions(30 * 60 * 1000));
+            res.cookie("refreshToken", result.tokens.refreshToken, cookieOptions(7 * 24 * 60 * 60 * 1000));
 
             res.status(200).json({
                 message: result.message,
                 profile: result.safeProfile,
-                tokens: result.tokens
+                tokens: result.tokens,
             });
         } catch (error) {
-            ProfileController.handleError(error, res);
+            console.error("Profile validation error:", error);
+
+            res.clearCookie("accessToken", { path: "/" });
+            res.clearCookie("refreshToken", { path: "/" });
+
+            if (error instanceof AppErrors.AppError) {
+                res.status(error.statusCode).json({ message: error.message });
+            } else {
+                res.status(500).json({ message: "Internal server error" });
+            }
         }
     }
-
 
     static async changeProfilePin(req: Request, res: Response) {
         try {
             const { username, profileName, oldPin, newPin } = req.body;
             const result = await ProfileService.changeProfilePin(username, profileName, oldPin, newPin);
-            res.status(200).json({
-                message: result.message || "Profile PIN changed successfully"
-            });
+            res.status(200).json({ message: result.message || "Profile PIN changed successfully" });
         } catch (error) {
             ProfileController.handleError(error, res);
         }
@@ -111,9 +122,7 @@ export default class ProfileController {
         try {
             const { username, oldProfileName, newProfileName } = req.body;
             const result = await ProfileService.renameProfile(username, oldProfileName, newProfileName);
-            res.status(200).json({
-                message: result.message || "Profile renamed successfully"
-            });
+            res.status(200).json({ message: result.message || "Profile renamed successfully" });
         } catch (error) {
             ProfileController.handleError(error, res);
         }
@@ -123,9 +132,7 @@ export default class ProfileController {
         try {
             const { username, profileName, pin } = req.body;
             const result = await ProfileService.deleteProfile(username, profileName, pin);
-            res.status(200).json({
-                message: result.message || "Profile deleted successfully"
-            });
+            res.status(200).json({ message: result.message || "Profile deleted successfully" });
         } catch (error) {
             ProfileController.handleError(error, res);
         }
@@ -148,28 +155,21 @@ export default class ProfileController {
         try {
             const { username, profileName, avatar } = req.body;
             const result = await ProfileService.setAvatar(username, profileName, avatar);
-            res.status(200).json({
-                message: result.message || "Profile avatar set successfully"
-            });
+            res.status(200).json({ message: result.message || "Profile avatar set successfully" });
         } catch (error) {
             ProfileController.handleError(error, res);
         }
     }
-
 
     static async setColor(req: Request, res: Response) {
         try {
             const { username, profileName, color } = req.body;
             const result = await ProfileService.setColor(username, profileName, color);
-            res.status(200).json({
-                message: result.message || "Profile color set successfully"
-            });
+            res.status(200).json({ message: result.message || "Profile color set successfully" });
         } catch (error) {
             ProfileController.handleError(error, res);
         }
     }
-
-    // Budget-related methods have been moved to BudgetController
 
     static async categorizeTransactions(req: Request, res: Response) {
         try {
@@ -187,10 +187,8 @@ export default class ProfileController {
     static async uploadTransactions(req: Request, res: Response) {
         try {
             const { username, profileName, refId, transactionsToUpload } = req.body;
-            const result = await ProfileService.uploadTransactions(username, profileName, refId, transactionsToUpload);
-            res.status(200).json({
-                message: "Transactions uploaded successfully",
-            });
+            await ProfileService.uploadTransactions(username, profileName, refId, transactionsToUpload);
+            res.status(200).json({ message: "Transactions uploaded successfully" });
         } catch (error) {
             ProfileController.handleError(error, res);
         }
@@ -199,34 +197,14 @@ export default class ProfileController {
     static async logout(req: Request, res: Response) {
         try {
             const refreshToken = req.cookies?.refreshToken;
-
             if (refreshToken) {
                 await ProfileService.revokeRefreshToken(refreshToken);
             }
 
-            // Clear cookies
-            res.clearCookie('accessToken', { path: '/', httpOnly: true });
-            res.clearCookie('refreshToken', { path: '/', httpOnly: true });
+            res.clearCookie("accessToken", { path: "/" });
+            res.clearCookie("refreshToken", { path: "/" });
 
-            res.cookie('accessToken', '', {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                path: '/',
-                maxAge: -1
-            });
-
-            res.cookie('refreshToken', '', {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                path: '/',
-                maxAge: -1
-            });
-
-            res.status(200).json({
-                message: "Logged out successfully"
-            });
+            res.status(200).json({ message: "Logged out successfully" });
         } catch (error) {
             ProfileController.handleError(error, res);
         }
@@ -239,4 +217,4 @@ export default class ProfileController {
         }
         return res.status(500).json({ message: "Internal server error" });
     }
-} 
+}
