@@ -1,8 +1,8 @@
 import LLM from "../../utils/LLM";
 import BudgetService from "../budget/budget.service";
-import { HistoryDoc, AIHistoryEntry, AICoachOutput, AICoachInput } from "../../types/ai.types";
+import { HistoryDoc, AIHistoryEntry, AICoachOutput, AICoachInput, CategoryBudgetForAI } from "../../types/ai.types";
 import { ProfileBudget } from "../../types/profile.types";
-import { Category, CategoryBudget, CategoryForAI } from "../../types/expenses.types";
+import { CategoryBudget, CategoryForAI } from "../../types/expenses.types";
 import ProfileModel from "../../models/profile/profile.model";
 import TransactionModel from "../../models/expenses/transaction.model";
 import * as AppError from "../../errors/AppError";
@@ -15,17 +15,23 @@ export default class AiService {
         username: string,
         profileName: string,
         profileId: string
-    ): Promise<AICoachOutput | null> {
+    ) {
         if (!username || !profileName || !profileId) {
             console.error("[AI] Missing required parameters in generateCoachingReport");
             return null;
         }
         try {
+            const currentStatus = await AiModel.getHistoryStatus(profileId);
+            if (currentStatus === "processing") {
+                console.info("[AI] Coaching generation already in progress for profile:", profileId);
+                return null;
+            }
             const aiInputObj = await this.prepareInput(username, profileName, profileId);
             if (!aiInputObj) {
                 console.warn("[AI] No valid input found for coaching generation");
                 return null;
             }
+
             try {
                 await AiModel.updateHistoryStatus(profileId, "processing");
             } catch (statusErr) {
@@ -62,7 +68,7 @@ export default class AiService {
                 console.error("[AI] Failed to save history entry:", saveErr);
             }
 
-            return result;
+            return true;
 
         } catch (err) {
             console.error("[AI] Unexpected error in generateCoachingReport:", err);
@@ -120,7 +126,7 @@ export default class AiService {
 
             const profileBudgets = budgetsRes.budgets.profile as ProfileBudget[];
             const categoriesBudgets = budgetsRes.budgets.categories as {
-                categoryName: string;
+                name: string;
                 budgets: CategoryBudget[];
             }[];
 
@@ -153,7 +159,7 @@ export default class AiService {
                 return null;
             }
 
-            const matchingCategoryBudgets: CategoryBudget[] = [];
+            const matchingCategoryBudgets: CategoryBudgetForAI[] = [];
             for (const cb of categoriesBudgets) {
                 for (const b of cb.budgets) {
                     if (
@@ -162,7 +168,7 @@ export default class AiService {
                     ) {
                         matchingCategoryBudgets.push({
                             _id: b._id,
-                            categoryName: cb.categoryName,
+                            categoryName: cb.name,
                             startDate: b.startDate,
                             endDate: b.endDate,
                             amount: b.amount,
@@ -171,6 +177,7 @@ export default class AiService {
                     }
                 }
             }
+
             const budgetRelevantExpenses = (await TransactionModel.getTransactionsInDateRange(
                 profile.expenses,
                 new Date(targetBudget.startDate).toISOString(),

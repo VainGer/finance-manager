@@ -67,9 +67,18 @@ export interface AICategoryInsight {
     }[];
 }
 
+export interface CategoryBudgetForAI {
+    _id: ObjectId | string;
+    categoryName: string;
+    startDate: string | Date;
+    endDate: string | Date;
+    amount: number;
+    spent: number;
+}
+
 export interface AICoachInput {
     recentlyClosedGlobalBudget: ProfileBudget;
-    recentlyClosedCategoryBudgets: CategoryBudget[];
+    recentlyClosedCategoryBudgets: CategoryBudgetForAI[];
     budgetRelevantExpenses: CategoryForAI[];
     relevantAiHistory: AIHistoryEntry[];
 }
