@@ -7,6 +7,7 @@ import ExpensesDisplay from '../components/dashboard/expenses/expenses_display/E
 import ExpenseSummary from '../components/dashboard/summary/ExpenseSummary';
 import InteractiveCharts from '../components/dashboard/charts/InteractiveCharts';
 import AIInsight from '../components/dashboard/ai/AIInsight';
+import SimpleAINotification from '../components/dashboard/ai/SimpleAINotification';
 import SideMenu from '../components/dashboard/menu/SideMenu';
 import DisplaySelector from '../components/dashboard/DisplaySelector';
 import NavigationHeader from '../components/layout/NavigationHeader';
@@ -130,6 +131,7 @@ export default function Dashboard() {
                     />
                 </div>
             </PageLayout>
+            <SimpleAINotification />
         </>
     );
 }
