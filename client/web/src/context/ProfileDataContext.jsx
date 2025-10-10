@@ -6,7 +6,6 @@ import useAIHistory from '../hooks/useAiHistory';
 
 const ProfileDataContext = createContext();
 
-// Hook to safely use location
 function useSafeLocation() {
     try {
         return useLocation();

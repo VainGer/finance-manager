@@ -14,17 +14,13 @@ export default function useUploadTransactionFile() {
     const processTransactions = async () => {
         if (!transactionsData) return;
         try {
-            if (!localStorage.getItem('categorizedTransactions')) {
-                const response = await post("profile/categorize-transactions", {
-                    refId: profile.expenses,
-                    transactionsData
-                });
-                setCategorizedTransactions(response.categories.transactions);
-                localStorage.setItem('categorizedTransactions', JSON.stringify(response.categories.transactions));
-            }
-            else {
-                setCategorizedTransactions(JSON.parse(localStorage.getItem('categorizedTransactions')));
-            }
+            const response = await post("profile/categorize-transactions", {
+                refId: profile.expenses,
+                transactionsData
+            });
+            setCategorizedTransactions(response.categories.transactions);
+            localStorage.setItem('categorizedTransactions', JSON.stringify(response.categories.transactions));
+
         } catch (error) {
             console.error("Error uploading transactions:", error);
         }

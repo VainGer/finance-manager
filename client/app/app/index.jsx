@@ -2,19 +2,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { I18nManager, Text, View } from "react-native";
+import { Text, View, Image } from "react-native";
 import Button from "../components/common/button.jsx";
 import FeatureCarousel from "../components/common/FeatureCarousel.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import LoadingSpinner from "../components/common/loadingSpinner.jsx";
-
 import "../global.css";
 
 
 
 export default function Index() {
   const router = useRouter();
-  const isRTL = I18nManager.isRTL;
   const { autoLogin, isLoading } = useAuth();
 
   const toLoginAction = async () => {
@@ -26,8 +24,25 @@ export default function Index() {
     }
   }
 
+  const getJerusalemHour = () => {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Jerusalem',
+      hour: 'numeric',
+      hour12: false,
+    });
+    return parseInt(formatter.format(new Date()), 10);
+  };
 
+  const greeting = () => {
+    const hour = getJerusalemHour();
 
+    if (hour >= 5 && hour < 12) return "בוקר טוב";
+    if (hour >= 12 && hour < 17) return "צהריים טובים";
+    if (hour >= 17 && hour < 21) return "ערב טוב";
+    return "לילה טוב";
+  };
+
+  greeting();
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -48,25 +63,20 @@ export default function Index() {
         {/* אזור עליון: לוגו + טקסט פתיחה */}
         <View className="flex-1 items-center justify-center px-6">
           {/* סמל עם גרדיאנט וצל משופר */}
-          <LinearGradient
-            colors={["#1e293b", "#334155"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="w-24 h-24 items-center justify-center mb-10 rounded-3xl"
-          >
-            <Ionicons name="wallet" size={42} color="#ffffff" />
-          </LinearGradient>
 
-          {/* כותרות – טיפוגרפיה מודרנית עם RTL נכון */}
+          <View className="flex-col items-center justify-center my-8">
+            <Image
+              className="w-52 h-52"
+              source={require("../assets/images/icon.png")}
+            />
+            <Text className="text-wrap text-4xl text-center text-slate-800 font-bold">Finance Manager</Text>
+          </View>
+
+
           <Text
-            className="text-5xl font-bold text-slate-900 tracking-tight text-center mb-2"
+            className="text-2xl font-bold text-slate-900 tracking-tight text-center"
           >
-            ברוך הבא
-          </Text>
-          <Text
-            className="text-2xl font-semibold text-slate-600 text-center mb-6"
-          >
-            למנהל הכספים
+            {greeting()}
           </Text>
 
           {/* תת-כותרת עם RTL נכון ואייקון משמאל */}
@@ -76,17 +86,17 @@ export default function Index() {
             >
               נהל את הכספים שלך בצורה חכמה ופשוטה
             </Text>
-          <Ionicons className="mr-4" name="trending-up" size={24} color="#64748b" />
+            <Ionicons name="trending-up" size={24} color="#64748b" />
           </View>
 
           {/* === הקרוסלה במקום ה"Highlights" הישנים === */}
-          <View className="mt-4 w-full">
+          <View className="mt-4">
             <FeatureCarousel />
           </View>
         </View>
 
         {/* אזור תחתון: כפתורים – זכוכית */}
-        <BlurView intensity={22} tint="light" style={{ flex: 1 }}>
+        <BlurView intensity={22} tint="light" style={{ flex: 1 }} className="mt-16">
           <View className="flex-1 items-center justify-center">
             <View className="w-11/12 max-w-sm rounded-3xl border border-white/40 bg-white backdrop-blur p-5 shadow-xl">
               <Text
@@ -109,13 +119,6 @@ export default function Index() {
                   להרשמה
                 </Button>
               </View>
-            </View>
-
-            <View className="flex-row-reverse items-center mt-6" style={{ direction: 'rtl' }}>
-              <Ionicons name="checkmark-circle" size={16} color="#10b981" style={{ marginRight: 4 }} />
-              <Text className="text-slate-400 text-center text-sm" style={{ writingDirection: "rtl" }}>
-                גרסה 1.0 • מנהל הכספים שלך
-              </Text>
             </View>
           </View>
         </BlurView>

@@ -51,7 +51,7 @@ export default function Navbar() {
         const rLight = Math.min(255, Math.round(r * factor));
         const gLight = Math.min(255, Math.round(g * factor));
         const bLight = Math.min(255, Math.round(b * factor));
-        
+
         return `rgb(${rLight}, ${gLight}, ${bLight})`;
     };
 
@@ -76,27 +76,27 @@ export default function Navbar() {
                     elevation: 6
                 }}
             />
-            
+
             {/* Decorative elements */}
-            <View style={{ 
-                position: 'absolute', 
-                top: -20, 
-                right: -20, 
-                width: 100, 
-                height: 100, 
-                borderRadius: 50, 
-                backgroundColor: 'rgba(255, 255, 255, 0.08)' 
+            <View style={{
+                position: 'absolute',
+                top: -20,
+                right: -20,
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                backgroundColor: 'rgba(255, 255, 255, 0.08)'
             }} />
-            <View style={{ 
-                position: 'absolute', 
-                bottom: -10, 
-                left: 20, 
-                width: 40, 
-                height: 40, 
-                borderRadius: 20, 
-                backgroundColor: 'rgba(255, 255, 255, 0.12)' 
+            <View style={{
+                position: 'absolute',
+                bottom: -10,
+                left: 20,
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: 'rgba(255, 255, 255, 0.12)'
             }} />
-            
+
             {/* Navbar content */}
             <View className="h-16 px-4">
                 <View className="flex-row justify-between items-center h-full">
@@ -117,13 +117,13 @@ export default function Navbar() {
                     <View className="flex-1 flex-row justify-center">
                         <Text
                             className="text-white text-xl font-bold"
-                            style={{ 
-                                textShadowColor: 'rgba(0, 0, 0, 0.2)', 
-                                textShadowOffset: { width: 0, height: 1 }, 
-                                textShadowRadius: 3 
+                            style={{
+                                textShadowColor: 'rgba(0, 0, 0, 0.2)',
+                                textShadowOffset: { width: 0, height: 1 },
+                                textShadowRadius: 3
                             }}
                         >
-                            {profile?.profileName || 'profile1'}
+                            {profile?.profileName || 'פרופיל'}
                         </Text>
                     </View>
                     <View className="flex-row items-center">

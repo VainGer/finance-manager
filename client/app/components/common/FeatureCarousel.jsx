@@ -1,77 +1,96 @@
-import { useEffect, useRef, useState, useMemo } from "react";
-import { View, Text, ScrollView, Dimensions, I18nManager } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { View, Text, ScrollView, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
-export default function FeatureCarousel({
-  cardHeight = 120,
-  maxCardWidth = 320,
-  sideGutter = 24,
-  interval = 3000,
-  autoPlay = true,
-}) {
-  const isRTL = I18nManager.isRTL;
+export default function FeatureCarousel() {
   const FEATURES = useMemo(
     () => [
-      { icon: "pie-chart", color: "#2563eb", title: "ניהול תקציבים", desc: "הגדר תקציבים לפי קטגוריות ועקוב אחרי ההוצאות" },
-      { icon: "card", color: "#059669", title: "מעקב עסקאות", desc: "הוסף, ערוך ונהל את כל העסקאות שלך במקום אחד" },
-      { icon: "cloud-upload", color: "#7c3aed", title: " סריקת קבצים חכמה", desc: "העלה דוח הוצאות אשראי ותוסיף בקלות עסקאות" },
-      { icon: "stats-chart", color: "#dc2626", title: "דוחות מפורטים", desc: "קבל תובנות על ההרגלים הכספיים שלך" },
+      {
+        icon: "pie-chart",
+        color: "#2563eb",
+        title: "ניהול תקציבים",
+        desc: "הגדר תקציבים לפי קטגוריות ועקוב אחרי ההוצאות",
+      },
+      {
+        icon: "card",
+        color: "#059669",
+        title: "מעקב עסקאות",
+        desc: "הוסף, ערוך ונהל את כל העסקאות שלך במקום אחד",
+      },
+      {
+        icon: "cloud-upload",
+        color: "#7c3aed",
+        title: "סריקת קבצים חכמה",
+        desc: "העלה דוח הוצאות אשראי ותוסיף בקלות עסקאות",
+      },
+      {
+        icon: "stats-chart",
+        color: "#dc2626",
+        title: "דוחות מפורטים",
+        desc: "קבל תובנות על ההרגלים הכספיים שלך",
+      },
     ],
     []
   );
 
-  const CARD_W = Math.min(maxCardWidth, SCREEN_W - sideGutter * 2);
-  const EDGE = (SCREEN_W - CARD_W) / 2;
+  // Layout constants
+  const CARD_WIDTH = 300;
+  const CARD_HEIGHT = 160;
+  const CARD_SPACING = 20;
+  const ITEM_SIZE = CARD_WIDTH + CARD_SPACING;
+  const EDGE = (SCREEN_W - ITEM_SIZE) / 2;
+
+  // Autoplay & scrolling
   const scrollRef = useRef(null);
   const [index, setIndex] = useState(0);
+  const OFFSETS = useMemo(
+    () => FEATURES.map((_, i) => i * ITEM_SIZE),
+    [FEATURES.length]
+  );
 
   useEffect(() => {
-    if (!autoPlay) return;
-    const id = setInterval(() => {
+    const timer = setInterval(() => {
       const next = (index + 1) % FEATURES.length;
       setIndex(next);
-      const target =
-        isRTL
-          ? (FEATURES.length - 1 - next) * CARD_W
-          : next * CARD_W;
-      scrollRef.current?.scrollTo({ x: target, animated: true });
-    }, interval);
-    return () => clearInterval(id);
-  }, [index, autoPlay, interval, CARD_W, isRTL]);
+      scrollRef.current?.scrollTo({ x: OFFSETS[next], animated: true });
+    }, 3000);
 
-  const onMomentumScrollEnd = (e) => {
+    return () => clearInterval(timer);
+  }, [index, OFFSETS, FEATURES.length]);
+
+  const handleScrollEnd = (e) => {
     const x = e.nativeEvent.contentOffset.x;
-    const page = Math.round(x / CARD_W);
-    const newIndex = isRTL ? (FEATURES.length - 1 - page) : page;
+    const newIndex = Math.round(x / ITEM_SIZE);
     setIndex(newIndex);
   };
 
   return (
     <View className="w-full items-center">
+      {/* Scrollable cards */}
       <ScrollView
         ref={scrollRef}
         horizontal
-        pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={onMomentumScrollEnd}
-        inverted={isRTL}
-        contentContainerStyle={{
-          justifyContent: "center",
-          alignItems: "center",
-          paddingHorizontal: sideGutter,
-          flexDirection: isRTL ? 'row-reverse' : 'row',
-        }}
-        snapToInterval={CARD_W}
         decelerationRate="fast"
-        style={{ height: cardHeight + 36 }}
+        snapToOffsets={OFFSETS}
+        onMomentumScrollEnd={handleScrollEnd}
+        contentContainerStyle={{ paddingHorizontal: EDGE }}
+        style={{ height: CARD_HEIGHT }}
       >
         {FEATURES.map((f, i) => (
-          <View key={i} style={{ width: CARD_W }} className="px-2">
+          <View
+            key={i}
+            style={{
+              width: ITEM_SIZE,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <View
-              className="rounded-2xl bg-white/95 border border-slate-200/50 backdrop-blur p-5"
-              style={{ height: cardHeight + 32 }}
+              className="rounded-2xl bg-white/95 border border-slate-200/50 p-5 shadow-sm"
+              style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
             >
               <View className="flex-1 items-center justify-center">
                 <View
@@ -80,16 +99,10 @@ export default function FeatureCarousel({
                 >
                   <Ionicons name={f.icon} size={28} color={f.color} />
                 </View>
-                <Text
-                  className="text-lg font-bold text-slate-800 text-center mb-2"
-                  style={{ writingDirection: isRTL ? "rtl" : "ltr" }}
-                >
+                <Text className="text-lg font-bold text-slate-800 text-center mb-1">
                   {f.title}
                 </Text>
-                <Text
-                  className="text-slate-600 text-center leading-5 text-sm"
-                  style={{ writingDirection: isRTL ? "rtl" : "ltr" }}
-                >
+                <Text className="text-slate-600 text-center text-sm leading-5">
                   {f.desc}
                 </Text>
               </View>
@@ -97,22 +110,6 @@ export default function FeatureCarousel({
           </View>
         ))}
       </ScrollView>
-
-      {/* נקודות אינדיקציה */}
-      <View className="flex-row items-center justify-center mt-2">
-        {FEATURES.map((_, i) => {
-          const active = i === index;
-          return (
-            <View
-              key={i}
-              className={`h-2 rounded-full mx-1 ${active ? "w-5" : "w-2"}`}
-              style={{
-                backgroundColor: active ? "rgba(30, 64, 175, 0.9)" : "rgba(30, 64, 175, 0.35)",
-              }}
-            />
-          );
-        })}
-      </View>
     </View>
   );
 }

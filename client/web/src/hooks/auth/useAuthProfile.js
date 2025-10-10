@@ -68,10 +68,6 @@ export default function useAuthProfile({ account, setProfile, scheduleTokenRefre
                 setRememberProfile(remember);
 
                 if (response.tokens?.accessToken) {
-                    // שמירת הטוקנים עבור API calls
-                    localStorage.setItem('tokens', JSON.stringify(response.tokens));
-                    sessionStorage.setItem('tokens', JSON.stringify(response.tokens));
-                    
                     const expDate = getExpiration(response.tokens.accessToken);
                     if (expDate) scheduleTokenRefresh(expDate);
                 }

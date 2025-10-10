@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import logo from '../../assets/images/logo.png'
 import Button from '../common/Button';
 
-export default function NavigationHeader({ 
+export default function NavigationHeader({
     title = "מנהל כספים",
     subtitle = "",
     buttons = [],
@@ -75,14 +76,12 @@ export default function NavigationHeader({
                         {/* Branding */}
                         {showBranding && (
                             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                                <button 
+                                <button
                                     onClick={handleLogoClick}
                                     className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity duration-200 min-w-0"
                                 >
-                                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-slate-700 to-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                                        </svg>
+                                    <div className="w-7 h-7 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <img src={logo} alt="logo" />
                                     </div>
                                     <div className="min-w-0">
                                         <span className="text-lg sm:text-xl font-bold text-slate-800 truncate block">{title}</span>
@@ -132,15 +131,15 @@ export default function NavigationHeader({
                                         </div>
 
                                         {/* User Avatar */}
-                                        <div 
+                                        <div
                                             className="h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center text-white font-semibold border-2 border-slate-200 transition-all duration-200 overflow-hidden bg-gradient-to-r from-slate-700 to-slate-800"
-                                            style={{ 
+                                            style={{
                                                 backgroundColor: profile?.color || undefined
                                             }}
                                         >
                                             {profile?.avatar ? (
-                                                <img 
-                                                    src={profile.avatar} 
+                                                <img
+                                                    src={profile.avatar}
                                                     alt={getDisplayName()}
                                                     className="h-full w-full object-cover rounded-full"
                                                     onError={(e) => {
@@ -149,7 +148,7 @@ export default function NavigationHeader({
                                                     }}
                                                 />
                                             ) : null}
-                                            <span 
+                                            <span
                                                 className={profile?.avatar ? 'hidden' : 'block'}
                                                 style={{ display: profile?.avatar ? 'none' : 'block' }}
                                             >
@@ -158,9 +157,8 @@ export default function NavigationHeader({
                                         </div>
 
                                         <svg
-                                            className={`h-4 w-4 transition-transform duration-200 ${
-                                                isDropdownOpen ? 'rotate-180' : ''
-                                            }`}
+                                            className={`h-4 w-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''
+                                                }`}
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -179,7 +177,7 @@ export default function NavigationHeader({
                                                     <div className="text-gray-500 text-xs truncate">{account.email}</div>
                                                 )}
                                             </div>
-                                            
+
                                             {/* Mobile Navigation Buttons - Only show on mobile */}
                                             {buttons.length > 0 && (
                                                 <div className="sm:hidden border-b border-gray-200">
@@ -198,7 +196,7 @@ export default function NavigationHeader({
                                                     ))}
                                                 </div>
                                             )}
-                                            
+
                                             {/* Settings Button - Only show when profile is selected */}
                                             {profile && (
                                                 <button
@@ -214,7 +212,7 @@ export default function NavigationHeader({
                                                     </div>
                                                 </button>
                                             )}
-                                            
+
                                             {/* Logout Button - Always show when account exists */}
                                             <button
                                                 onClick={handleLogout}

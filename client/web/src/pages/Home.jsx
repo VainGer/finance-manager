@@ -2,6 +2,7 @@ import Button from '../components/common/Button';
 import Footer from '../components/common/Footer';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/images/logo.svg'
 export default function Home() {
 
     const navigate = useNavigate();
@@ -9,6 +10,7 @@ export default function Home() {
 
     const handleLogin = async () => {
         const success = await autoLogin();
+        console.log(success)
         if (success) {
             navigate('/dashboard');
         } else {
@@ -23,12 +25,8 @@ export default function Home() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-gradient-to-r from-slate-600 to-slate-800 rounded-lg flex items-center justify-center">
-                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                            </div>
-                            <span className="text-xl font-semibold text-slate-800">מנהל כספים</span>
+                            <img className='w-24 h-24' src={logo} alt="logo" />
+                            <span className="text-xl font-semibold text-slate-800">Finance Manager</span>
                         </div>
                         <div className="flex gap-3">
                             <Button
@@ -78,7 +76,7 @@ export default function Home() {
                                 </span>
                             </h1>
                             <p className="text-xl sm:text-2xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-                                פלטפורמה מתקדמת לניהול פיננסי חכם עם עיבוד LLM אוטומטי לחוויית משתמש מושלמת
+                                פלטפורמה מתקדמת לניהול פיננסי חכם עם עיבוד AI אוטומטי לחוויית משתמש מושלמת
                             </p>
                         </div>
 
@@ -212,7 +210,7 @@ export default function Home() {
                                             </svg>
                                         </div>
                                         <span className="px-4 py-2 bg-slate-600 rounded-full text-sm font-medium shadow-lg">
-                                            חדש! עיבוד LLM חכם
+                                            חדש! עיבוד AI חכם
                                         </span>
                                     </div>
 
@@ -221,7 +219,7 @@ export default function Home() {
                                     </h2>
 
                                     <p className="text-xl text-slate-200 mb-6 leading-relaxed">
-                                        העלה קובץ דוח בנק והמערכת תעבד אוטומטית את כל העסקאות, תקטלג אותן ותסנכרן עם התקציבים שלך באמצעות טכנולוגיית LLM מתקדמת
+                                        העלה קובץ דוח בנק והמערכת תעבד אוטומטית את כל העסקאות, תקטלג אותן ותסנכרן עם התקציבים שלך באמצעות טכנולוגיית AI מתקדמת
                                     </p>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -274,7 +272,7 @@ export default function Home() {
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-3 text-sm">
                                                 <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                                                <span className="text-slate-200">מעבד LLM מוכן</span>
+                                                <span className="text-slate-200">מעבד AI מוכן</span>
                                             </div>
 
                                             <div className="bg-slate-700/50 rounded-lg p-4 backdrop-blur-sm border border-slate-600/30">

@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    useCallback,
+    useRef,
+} from 'react';
 import { post } from '../utils/api';
 import { getDeviceInfo, getExpiration } from '../utils/tokenUtils';
 
@@ -14,95 +21,93 @@ const safeJsonParse = (str, fallback = null) => {
 };
 
 export const AuthProvider = ({ children }) => {
-    const [account, setAccount] = useState(() => {
-        const saved = sessionStorage.getItem('account');
-        return saved ? safeJsonParse(saved) : null;
-    });
 
-    const [profile, setProfile] = useState(() => {
-        const savedLocal = localStorage.getItem('profile');
-        const savedSession = sessionStorage.getItem('profile');
-        return savedLocal ? safeJsonParse(savedLocal) : savedSession ? safeJsonParse(savedSession) : null;
-    });
+    const initialAccount =
+        safeJsonParse(sessionStorage.getItem('account')) ||
+        safeJsonParse(localStorage.getItem('account'));
 
-    const [rememberProfile, setRememberProfile] = useState(() => !!localStorage.getItem('profile'));
+    const initialProfile =
+        safeJsonParse(localStorage.getItem('profile')) ||
+        safeJsonParse(sessionStorage.getItem('profile'));
+
+    const [account, setAccount] = useState(initialAccount);
+    const [profile, setProfile] = useState(initialProfile);
+
+    const [rememberProfile, setRememberProfile] = useState(
+        !!localStorage.getItem('profile')
+    );
+
     const [isExpiredToken, setIsExpiredToken] = useState(false);
     const [isTokenReady, setIsTokenReady] = useState(false);
-    const [storageChecked, setStorageChecked] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [authChecked, setAuthChecked] = useState(false);
 
     const refreshTimerRef = useRef(null);
-    const REFRESH_OFFSET = 5 * 60 * 1000; // 5 minutes before expiry
+    const REFRESH_OFFSET = 5 * 60 * 1000;
 
-    // -------------------------------
-    // 🧠 Sync account to sessionStorage
-    // -------------------------------
+
     useEffect(() => {
         if (account) {
             sessionStorage.setItem('account', JSON.stringify(account));
+            if (rememberProfile) {
+                localStorage.setItem('account', JSON.stringify(account));
+            }
         } else {
             sessionStorage.removeItem('account');
+            localStorage.removeItem('account');
         }
-    }, [account]);
+    }, [account, rememberProfile]);
 
-    // -------------------------------
-    // 🧠 Sync profile to storage
-    // -------------------------------
     useEffect(() => {
         if (profile) {
+            sessionStorage.setItem('profile', JSON.stringify(profile));
             if (rememberProfile) {
                 localStorage.setItem('profile', JSON.stringify(profile));
-                sessionStorage.setItem('profile', JSON.stringify(profile));
-            } else {
-                sessionStorage.setItem('profile', JSON.stringify(profile));
-                localStorage.removeItem('profile');
             }
+        } else {
+            sessionStorage.removeItem('profile');
+            localStorage.removeItem('profile');
         }
-        // ⛔ don't remove stored data when profile === null here
-        // clearing happens only in clearProfile/logout
     }, [profile, rememberProfile]);
 
-    useEffect(() => {
-        setStorageChecked(true);
-    }, []);
 
-    // -------------------------------
-    // 🔄 Auto Login (silent)
-    // -------------------------------
     const autoLogin = useCallback(async () => {
-        let logged = false;
+        let loggedIn = false;
+
         try {
             setIsLoading(true);
-            const storedAccount = safeJsonParse(sessionStorage.getItem('account'));
-            const storedProfile = safeJsonParse(localStorage.getItem('profile')) ||
-                safeJsonParse(sessionStorage.getItem('profile'));
+
+            const storedAccount = initialAccount;
+            const storedProfile = initialProfile;
 
             if (storedAccount && storedProfile) {
                 const rememberFromStorage = !!localStorage.getItem('profile');
-                
+
                 if (rememberFromStorage) {
-                    // יש remember - נשתמש ב-validate-token
-                    const res = await rememberLogin(storedAccount.username, storedProfile._id, true);
-                    
+                    const res = await rememberLogin(
+                        storedAccount.username,
+                        storedProfile._id,
+                        true
+                    );
                     if (res.ok && res.tokens?.accessToken) {
-                        logged = true;
+                        loggedIn = true;
                         const expDate = getExpiration(res.tokens.accessToken);
                         if (expDate) scheduleTokenRefresh(expDate);
                     }
                 } else {
-                    // אין remember אבל יש בסשן - פשוט נשחזר את המצב
                     setAccount(storedAccount);
                     setProfile(storedProfile);
                     setIsTokenReady(true);
                     setIsExpiredToken(false);
-                    logged = true;
+                    loggedIn = true;
                 }
             }
         } catch (err) {
             console.error('Auto login error:', err);
         } finally {
             setIsLoading(false);
-            return logged;
+            setAuthChecked(true);
+            return loggedIn;
         }
     }, []);
 
@@ -110,9 +115,7 @@ export const AuthProvider = ({ children }) => {
         autoLogin();
     }, [autoLogin]);
 
-    // -------------------------------
-    // ⏱ Token Refresh Scheduling
-    // -------------------------------
+
     const clearRefreshTimer = () => {
         if (refreshTimerRef.current) {
             clearTimeout(refreshTimerRef.current);
@@ -127,8 +130,8 @@ export const AuthProvider = ({ children }) => {
             const delay = Math.max(refreshAt - now, 0);
 
             clearRefreshTimer();
-            refreshTimerRef.current = setTimeout(async () => {
-                await handleTokenRefresh();
+            refreshTimerRef.current = setTimeout(() => {
+                handleTokenRefresh();
             }, delay);
         } catch (err) {
             console.error('Error scheduling token refresh:', err);
@@ -138,12 +141,13 @@ export const AuthProvider = ({ children }) => {
     const handleTokenRefresh = useCallback(async () => {
         if (account && profile && !isExpiredToken) {
             try {
-                const result = await post('profile/refresh-access-token', { profileId: profile._id });
+                const result = await post('profile/refresh-access-token', {
+                    profileId: profile._id,
+                });
 
                 if (!result.ok || !result.accessToken) {
                     setIsTokenReady(false);
                     setIsExpiredToken(true);
-                    // ❌ don't clear storage here — behave like mobile
                 } else {
                     const expDate = getExpiration(result.accessToken);
                     if (expDate) scheduleTokenRefresh(expDate);
@@ -162,12 +166,15 @@ export const AuthProvider = ({ children }) => {
         return () => clearRefreshTimer();
     }, []);
 
-    // -------------------------------
-    // 👤 Remember Login
-    // -------------------------------
+
     async function rememberLogin(username, profileId, isAutoLogin = false) {
         const device = getDeviceInfo();
-        const res = await post('account/validate-token', { username, profileId, device, isAutoLogin });
+        const res = await post('account/validate-token', {
+            username,
+            profileId,
+            device,
+            isAutoLogin,
+        });
 
         if (res.ok) {
             setAccount(res.account);
@@ -180,15 +187,13 @@ export const AuthProvider = ({ children }) => {
         return { ok: false };
     }
 
-    // -------------------------------
-    // 🚪 Logout & Clear
-    // -------------------------------
-    const clearAllAuthData = useCallback(async () => {
+
+    const clearAllAuthData = useCallback(() => {
         try {
             clearRefreshTimer();
-            sessionStorage.removeItem('account');
-            sessionStorage.removeItem('profile');
+            sessionStorage.clear();
             localStorage.removeItem('profile');
+            localStorage.removeItem('account');
             setAccount(null);
             setProfile(null);
             setIsTokenReady(false);
@@ -204,12 +209,12 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
-            await clearAllAuthData();
+            clearAllAuthData();
             window.location.href = '/login';
         }
     }, [clearAllAuthData]);
 
-    const clearProfile = useCallback(async () => {
+    const clearProfile = useCallback(() => {
         clearRefreshTimer();
         sessionStorage.removeItem('profile');
         localStorage.removeItem('profile');
@@ -219,30 +224,30 @@ export const AuthProvider = ({ children }) => {
         window.location.href = '/profiles';
     }, []);
 
-    // -------------------------------
-    // 🧠 Context value
-    // -------------------------------
     return (
-        <AuthContext.Provider value={{
-            account,
-            profile,
-            setAccount,
-            setProfile,
-            isAuthenticated: !!account,
-            hasActiveProfile: !!profile,
-            isExpiredToken,
-            isTokenReady,
-            isLoading,
-            rememberProfile,
-            setRememberProfile,
-            setIsTokenReady,
-            setIsExpiredToken,
-            autoLogin,
-            logout,
-            clearProfile,
-            storageChecked,
-            scheduleTokenRefresh
-        }}>
+        <AuthContext.Provider
+            value={{
+                account,
+                profile,
+                setAccount,
+                setProfile,
+                isAuthenticated: !!account,
+                hasActiveProfile: !!profile,
+                isExpiredToken,
+                isTokenReady,
+                isLoading,
+                authChecked,
+                rememberProfile,
+                setRememberProfile,
+                setIsTokenReady,
+                setIsExpiredToken,
+                autoLogin,
+                logout,
+                clearProfile,
+                clearAllAuthData,
+                scheduleTokenRefresh,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

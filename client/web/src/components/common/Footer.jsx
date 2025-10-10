@@ -21,7 +21,7 @@ export default function Footer() {
                             <h3 className="text-xl font-bold">מנהל כספים</h3>
                         </div>
                         <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                            פלטפורמה מקצועית לניהול פיננסי חכם עם טכנולוגיית LLM מתקדמת לעיבוד אוטומטי של עסקאות.
+                            פלטפורמה מקצועית לניהול פיננסי חכם עם טכנולוגיית AI מתקדמת לעיבוד אוטומטי של עסקאות.
                         </p>
                         <div className="flex gap-3">
                             <a href="#" className="w-8 h-8 bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center justify-center transition-colors duration-300">
@@ -94,7 +94,7 @@ export default function Footer() {
                         <ul className="space-y-2">
                             <li className="text-slate-400 text-sm">ניהול תקציבים</li>
                             <li className="text-slate-400 text-sm">מעקב הוצאות</li>
-                            <li className="text-slate-400 text-sm">עיבוד LLM אוטומטי</li>
+                            <li className="text-slate-400 text-sm">עיבוד AI אוטומטי</li>
                             <li className="text-slate-400 text-sm">דוחות מתקדמים</li>
                             <li className="text-slate-400 text-sm">גרפים אינטראקטיביים</li>
                         </ul>
