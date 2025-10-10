@@ -248,7 +248,7 @@ export default class BudgetService {
         if (!profile) {
             throw new AppErrors.NotFoundError("Profile not found");
         }
-        const result = await BudgetModel.deleteBudget(username, profileName, budgetId);
+        const result = await BudgetModel.deleteBudget(username, profileName, budgetId, profile.expenses);
         if (!result || !result.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to delete budget with ID '${budgetId}'`);
         }

@@ -1,10 +1,8 @@
 import { ObjectId } from "mongodb";
-import CategoriesModel from "../expenses/categories.model";
-import ProfileModel from "../profile/profile.model";
 import db from "../../server";
 import { CategoryBudget } from "../../types/expenses.types";
 import { ProfileBudget } from "../../types/profile.types";
-import { c } from "framer-motion/dist/types.d-6pKw1mTI";
+
 
 export default class BudgetModel {
 
@@ -124,17 +122,33 @@ export default class BudgetModel {
         }
     }
 
-    static async deleteBudget(username: string, profileName: string, budgetId: string) {
+    static async deleteBudget(username: string, profileName: string, budgetId: string, refId: string | ObjectId) {
         try {
-            const profileResult = await db.UpdateDocument(this.profileCollection,
-                { username, profileName },
-                { $pull: { budgets: { _id: new ObjectId(budgetId) } } });
-            const expenseResult = await db.UpdateDocument(this.expenseCollection,
-                { username, profileName },
-                { $pull: { budgets: { _id: new ObjectId(budgetId) } } });
+            const expensesId = refId instanceof ObjectId ? refId.toString() : refId;
+            const operations = [{
+                collection: this.profileCollection,
+                query: { username, profileName },
+                update: { $pull: { budgets: { _id: new ObjectId(budgetId) } } }
+            },
 
-            if ((!profileResult || profileResult.modifiedCount === 0) &&
-                (!expenseResult || expenseResult.modifiedCount === 0)) {
+            {
+                collection: this.expenseCollection,
+                query: {
+                    _id: new ObjectId(expensesId),
+                    "categories.budgets._id": new ObjectId(budgetId)
+                },
+                update: {
+                    $pull: {
+                        "categories.$[].budgets": { _id: new ObjectId(budgetId) }
+                    }
+                }
+            }
+            ];
+
+
+            const result = await db.TransactionUpdateMany(operations);
+
+            if (!result || !result.success) {
                 return { success: false, message: "Budget not found" };
             }
 
