@@ -359,7 +359,7 @@ export default function useSettingsState({ account, profile, setAccount, setProf
   const sections = [
     { id: 'profile', name: 'פרופיל', icon: '👤' },
     { id: 'account', name: 'חשבון', icon: '⚙️' },
-    { id: 'newProfile', name: 'פרופיל חדש', icon: '➕' },
+    ...(profile?.parentProfile ? [{ id: 'newProfile', name: 'פרופיל חדש', icon: '➕' }] : []),
     ...(profile.children?.length > 0
       ? [{ id: 'addChildrenBudget', name: 'הוספת תקציב לילדים', icon: '👶' }]
       : []),

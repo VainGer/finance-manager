@@ -6,6 +6,8 @@ import { useLocation } from "react-router-dom";
 export default function useChildrenData() {
     const { profile } = useAuth();
     const children = profile?.children || [];
+    
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [childrenExpenses, setChildrenExpenses] = useState([]);
@@ -34,28 +36,37 @@ export default function useChildrenData() {
     };
 
     useEffect(() => {
-        resetStates();
-    }, [profile, pathname]);
+        // Only reset when profile changes, not when pathname changes
+        // This allows data to persist when navigating between tabs
+        if (profile) {
+            setError(null);
+            setLoading(false);
+            // Don't reset selectedChild and data when just changing tabs
+        }
+    }, [profile]);
 
-    const fetchChildrenExpenses = async (selectedChild) => {
+    const fetchChildrenExpenses = async (childId) => {
         if (!profile?.children || profile.children.length === 0) return;
         setLoading(true);
         setError(null);
         try {
-            const response = await get(`expenses/profile-expenses/child/${profile.username}/${selectedChild.id}`);
+            const response = await get(`expenses/profile-expenses/child/${profile.username}/${childId}`);
             if (response.ok) {
                 setChildrenExpenses(response.expenses);
                 const categories = [];
-                const businesses = [];
+                const allBusinesses = [];
                 response.expenses.forEach(expense => {
                     categories.push(expense.name);
-                    businesses.push({ category: expense.name, businesses: [] });
                     expense.Businesses.forEach(biz => {
-                        businesses.find(c => c.category === expense.name).businesses.push(biz.name);
+                        biz.transactionsArray.forEach(transactionGroup => {
+                            transactionGroup.transactions.forEach(transaction => {
+                                allBusinesses.push(transaction.business);
+                            });
+                        });
                     });
                 });
-                setChildrenCategories(categories);
-                setChildrenBusinesses(businesses);
+                setChildrenCategories([...new Set(categories)]);
+                setChildrenBusinesses(['all', ...new Set(allBusinesses)]);
             } else {
                 switch (response.status) {
                     case 400: setError('בקשה לא תקינה בטעינת הוצאות'); break;
@@ -71,13 +82,15 @@ export default function useChildrenData() {
         }
     };
 
-    const fetchChildrenBudgets = async (selectedChild) => {
+    const fetchChildrenBudgets = async (childId) => {
         if (!profile?.children || profile.children.length === 0) return;
         try {
             setLoading(true);
             setError(null);
+            const child = children.find(c => c.id === childId);
+            const childName = child?.name || child?.profileName;
             const response = await get(
-                `budgets/get-profile-budgets?username=${profile.username}&profileName=${selectedChild.name}`);
+                `budgets/get-profile-budgets?username=${profile.username}&profileName=${childName}`);
             if (response.ok) {
                 setChildrenProfileBudgets(response.budgets.budgets.profile || []);
                 setChildrenCategoryBudgets(response.budgets.budgets.categories || []);
