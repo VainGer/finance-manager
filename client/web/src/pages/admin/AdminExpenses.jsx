@@ -159,7 +159,7 @@ export default function AdminExpenses() {
                                 expensesId={selectedProfile.refId}
                                 onTransactionDeleted={() => { }}
                                 onTransactionUpdated={() => { }}
-                                inAdminMode={true}
+                                readOnly={true}
                             />
                         </div>
                     )}
