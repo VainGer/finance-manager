@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useProfileData } from '../../../context/ProfileDataContext';
 
 export default function SimpleAINotification() {
-    const { newDataReady } = useProfileData();
+    const { newDataReady, resetNewDataReady } = useProfileData(); // הוסף את resetNewDataReady
     const [show, setShow] = useState(false);
 
     useEffect(() => {
@@ -10,6 +10,13 @@ export default function SimpleAINotification() {
             setShow(true);
         }
     }, [newDataReady]);
+
+    const handleClose = () => {
+        setShow(false);
+        if (resetNewDataReady) {
+            resetNewDataReady(); // מאפס את המצב כדי שהפופאפ יוכל לקפוץ שוב
+        }
+    };
 
     if (!show) return null;
 
@@ -29,7 +36,7 @@ export default function SimpleAINotification() {
                         לחץ על טאב "תובנות AI" לצפייה
                     </p>
                     <button
-                        onClick={() => setShow(false)}
+                        onClick={handleClose} // שונה מ-setShow(false) ל-handleClose
                         className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
                     >
                         אישור

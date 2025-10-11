@@ -4,6 +4,7 @@ import BusinessMenu from '../expenses/businesses/BusinessMenu';
 import CategoriesMenu from '../expenses/categories/CategoriesMenu';
 import AddTransaction from '../expenses/transactions/AddTransaction';
 import CreateProfileBudget from '../budget/CreateProfileBudget';
+import BudgetManagementMenu from '../budget/BudgetManagementMenu';
 import QuickActionCard from '../QuickActionCard';
 import CenteredModal from '../../common/CenteredModal';
 
@@ -19,7 +20,7 @@ export default function SideMenu({
         addExpense: false,
         businesses: false,
         categories: false,
-        createBudget: false,
+        budgetManagement: false,
     });
 
     const closeAllPanels = () => {
@@ -27,7 +28,7 @@ export default function SideMenu({
             addExpense: false,
             businesses: false,
             categories: false,
-            createBudget: false,
+            budgetManagement: false,
         });
         if (setShowFloatingMenu) {
             setShowFloatingMenu(false);
@@ -39,7 +40,7 @@ export default function SideMenu({
             addExpense: false,
             businesses: false,
             categories: false,
-            createBudget: false,
+            budgetManagement: false,
             [menuItem]: !prevState[menuItem],
         }));
         if (setShowFloatingMenu) {
@@ -47,7 +48,7 @@ export default function SideMenu({
         }
     };
 
-    const isPanelOpen = menuToggler.addExpense || menuToggler.businesses || menuToggler.categories || menuToggler.createBudget;
+    const isPanelOpen = menuToggler.addExpense || menuToggler.businesses || menuToggler.categories || menuToggler.budgetManagement;
 
     const quickActions = [
         {
@@ -62,15 +63,15 @@ export default function SideMenu({
             onClick: () => handleMenuClick('addExpense')
         },
         {
-            title: 'יצירת תקציב',
-            description: 'הגדר תקציב חדש',
+            title: ' תקציבים',
+            description: 'ניהול תקציבים',
             priority: 'high',
             icon: (
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
             ),
-            onClick: () => handleMenuClick('createBudget')
+            onClick: () => handleMenuClick('budgetManagement')
         },
         {
             title: 'בעלי עסקים',
@@ -206,13 +207,13 @@ export default function SideMenu({
                                     <div className="text-right min-w-0 flex-1" dir="rtl">
                                         <h2 className="text-lg sm:text-xl font-bold truncate">
                                             {menuToggler.addExpense && 'הוספת עסקה חדשה'}
-                                            {menuToggler.createBudget && 'יצירת תקציב'}
+                                            {menuToggler.budgetManagement && 'ניהול תקציבים'}
                                             {menuToggler.businesses && 'ניהול בעלי עסקים'}
                                             {menuToggler.categories && 'ניהול קטגוריות'}
                                         </h2>
                                         <p className="text-white/80 text-xs sm:text-sm truncate">
                                             {menuToggler.addExpense && 'הוסף הוצאה או הכנסה לפרופיל'}
-                                            {menuToggler.createBudget && 'הגדר תקציב חדש לתקופה'}
+                                            {menuToggler.budgetManagement && 'יצור, ערוך ומחק תקציבים'}
                                             {menuToggler.businesses && 'נהל ספקים ועסקים'}
                                             {menuToggler.categories && 'ארגן הוצאות לפי קטגוריות'}
                                         </p>
@@ -236,7 +237,7 @@ export default function SideMenu({
                             {menuToggler.addExpense && (
                                 <AddTransaction goBack={closeAllPanels} onTransactionAdded={onTransactionAdded} />
                             )}
-                            {menuToggler.createBudget && <CreateProfileBudget goBack={closeAllPanels} />}
+                            {menuToggler.budgetManagement && <BudgetManagementMenu goBack={closeAllPanels} />}
                         </div>
                     </div>
                 </CenteredModal>

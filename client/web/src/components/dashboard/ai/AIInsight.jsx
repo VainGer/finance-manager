@@ -28,7 +28,7 @@ export default function AIInsight() {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Empty State */}
                 <div className="p-12 text-center">
                     <div className="w-20 h-20 mx-auto mb-6 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -51,7 +51,10 @@ export default function AIInsight() {
 
     const coachOutput = selectedHistory.coachOutput;
     const { summary, categories, nextMonthPlan, dataQuality } = coachOutput;
-
+    console.log('Summary data:', summary);
+    console.log('Global data:', summary.global);
+    console.log('All histories:', histories); // הוסף את זה
+    console.log('Selected history:', selectedHistory); // והוסף את זה
     const selectItems = histories.map((h) => ({
         value: h._id,
         label: h.periodLabel,
@@ -72,7 +75,7 @@ export default function AIInsight() {
                         <p className="text-white/80 text-sm">ניתוח חכם של הרגלי הוצאה</p>
                     </div>
                 </div>
-                
+
                 {/* History Selector */}
                 {histories.length > 1 && (
                     <div className="mt-4">
@@ -100,7 +103,7 @@ export default function AIInsight() {
                         </svg>
                         <h3 className="text-lg font-bold text-blue-900">סיכום כללי</h3>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                         <div className="text-center">
                             <div className="text-2xl font-bold text-slate-800">₪{summary.global.budget.toLocaleString()}</div>
@@ -130,11 +133,10 @@ export default function AIInsight() {
                             <h4 className="font-bold text-blue-900 mb-2">אותות חשובים:</h4>
                             <div className="space-y-2">
                                 {summary.topSignals.map((signal, idx) => (
-                                    <div key={idx} className={`p-3 rounded-lg ${
-                                        signal.type === 'over_budget' ? 'bg-red-100 text-red-800' :
+                                    <div key={idx} className={`p-3 rounded-lg ${signal.type === 'over_budget' ? 'bg-red-100 text-red-800' :
                                         signal.type === 'near_limit' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-blue-100 text-blue-800'
-                                    }`}>
+                                            'bg-blue-100 text-blue-800'
+                                        }`}>
                                         {signal.message}
                                     </div>
                                 ))}
@@ -157,15 +159,14 @@ export default function AIInsight() {
                             <div key={idx} className="bg-white rounded-lg p-4">
                                 <div className="flex justify-between items-center mb-2">
                                     <h4 className="font-bold text-slate-800">{cat.name}</h4>
-                                    <div className={`px-2 py-1 rounded text-xs font-bold ${
-                                        cat.utilizationPct <= 80 ? 'bg-green-100 text-green-800' :
+                                    <div className={`px-2 py-1 rounded text-xs font-bold ${cat.utilizationPct <= 80 ? 'bg-green-100 text-green-800' :
                                         cat.utilizationPct <= 100 ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-red-100 text-red-800'
-                                    }`}>
+                                            'bg-red-100 text-red-800'
+                                        }`}>
                                         {cat.utilizationPct.toFixed(1)}%
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex justify-between text-sm text-slate-600 mb-2">
                                     <span>תקציב: ₪{cat.budget.toLocaleString()}</span>
                                     <span>הוצא: ₪{cat.spent.toLocaleString()}</span>
@@ -176,11 +177,10 @@ export default function AIInsight() {
 
                                 {/* Progress Bar */}
                                 <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-                                    <div 
-                                        className={`h-2 rounded-full ${
-                                            cat.utilizationPct <= 80 ? 'bg-green-500' :
+                                    <div
+                                        className={`h-2 rounded-full ${cat.utilizationPct <= 80 ? 'bg-green-500' :
                                             cat.utilizationPct <= 100 ? 'bg-yellow-500' : 'bg-red-500'
-                                        }`} 
+                                            }`}
                                         style={{ width: `${Math.min(cat.utilizationPct, 100)}%` }}
                                     ></div>
                                 </div>
