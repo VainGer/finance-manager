@@ -1,8 +1,8 @@
 import BusinessModel from "../../models/expenses/business.model";
 import CategoriesModel from "../../models/expenses/categories.model";
 import * as AppErrors from "../../errors/AppError";
-import { Business, Category, MonthlyTransactions } from "../../types/expenses.types";
-import { ObjectId } from "mongodb";
+import { Business, Category } from "../../types/expenses.types";
+import AdminService from "../admin/admin.service";
 
 
 export default class BusinessService {
@@ -34,6 +34,15 @@ export default class BusinessService {
             throw new AppErrors.DatabaseError(`Failed to create business '${businessName}'.`);
         }
 
+        AdminService.logAction({
+            type: 'create',
+            executeAccount: existingCategories.username,
+            executeProfile: existingCategories.profileName,
+            action: 'create_business',
+            target: { refId, categoryName, businessName }
+        });
+
+
         return result;
     }
 
@@ -45,7 +54,9 @@ export default class BusinessService {
         if (oldName === newName) {
             throw new AppErrors.ValidationError("Old name and new name cannot be the same.");
         }
-
+        const categoriesDoc = await CategoriesModel.getCategories(refId);
+        let username = categoriesDoc?.username;
+        let profileName = categoriesDoc?.profileName;
         const businesses = await this.getBusinessNamesByCategory(refId, categoryName);
 
         if (businesses.includes(newName)) {
@@ -58,7 +69,13 @@ export default class BusinessService {
         if (!result?.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to rename business from '${oldName}' to '${newName}'.`);
         }
-
+        AdminService.logAction({
+            type: 'update',
+            executeAccount: username,
+            executeProfile: profileName,
+            action: 'rename_business',
+            target: { refId, categoryName, oldName, newName }
+        });
         return result;
     }
 
@@ -66,7 +83,9 @@ export default class BusinessService {
         if (!refId || !categoryName || !businessName) {
             throw new AppErrors.ValidationError("Reference ID, category name and business name are required.");
         }
-
+        const categoriesDoc = await CategoriesModel.getCategories(refId);
+        const username = categoriesDoc?.username;
+        const profileName = categoriesDoc?.profileName;
         const businessToDelete = await this.getBusinessNamesByCategory(refId, categoryName);
         if (!businessToDelete.includes(businessName)) {
             throw new AppErrors.NotFoundError(`Business '${businessName}' not found in category '${categoryName}'.`);
@@ -76,7 +95,13 @@ export default class BusinessService {
         if (!result?.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to delete business '${businessName}'.`);
         }
-
+        AdminService.logAction({
+            type: 'delete',
+            executeAccount: username,
+            executeProfile: profileName,
+            action: 'delete_business',
+            target: { refId, categoryName, businessName }
+        });
         return result;
     }
 
@@ -84,13 +109,22 @@ export default class BusinessService {
         if (!refId || !categoryName || !businessName || !bankName) {
             throw new AppErrors.ValidationError("Reference ID, category name, business name and bank name are required.");
         }
+        const categoriesDoc = await CategoriesModel.getCategories(refId);
+        const username = categoriesDoc?.username;
+        const profileName = categoriesDoc?.profileName;
 
         const result = await BusinessModel.updateBusinessBankName(refId, categoryName, businessName, bankName);
 
         if (!result?.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to update bank name for business '${businessName}'.`);
         }
-
+        AdminService.logAction({
+            type: 'update',
+            executeAccount: username,
+            executeProfile: profileName,
+            action: 'update_business_bank_name',
+            target: { refId, categoryName, businessName, bankName }
+        });
         return result;
     }
 

@@ -2,6 +2,7 @@ import { Business, Category, CategoryBudget, CategoryBudgetWithoutId } from "../
 import * as AppErrors from "../../errors/AppError";
 import CategoriesModel from "../../models/expenses/categories.model";
 import ProfileModel from "../../models/profile/profile.model";
+import AdminService from "../admin/admin.service";
 
 export default class CategoryService {
 
@@ -25,7 +26,13 @@ export default class CategoryService {
         if (!result?.success) {
             throw new AppErrors.DatabaseError(`Failed to create category '${name}'.`);
         }
-
+        AdminService.logAction({
+            type: 'create',
+            executeAccount: existingCategories.username,
+            executeProfile: existingCategories.profileName,
+            action: 'create_category',
+            target: { refId, name }
+        });
         return result;
     }
 
@@ -65,7 +72,13 @@ export default class CategoryService {
         if (!result || !result.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to rename category from '${oldName}' to '${newName}'.`);
         }
-
+        AdminService.logAction({
+            type: 'update',
+            executeAccount: existingCategories.username,
+            executeProfile: existingCategories.profileName,
+            action: 'rename_category',
+            target: { refId, oldName, newName }
+        });
         return result;
     }
 
@@ -73,12 +86,20 @@ export default class CategoryService {
         if (!refId || !catName) {
             throw new AppErrors.ValidationError("Reference ID and category name are required.");
         }
-
+        const categoriesDoc = await CategoriesModel.getCategories(refId);
+        const username = categoriesDoc?.username;
+        const profileName = categoriesDoc?.profileName;
         const result = await CategoriesModel.deleteCategory(refId, catName);
         if (!result || !result.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to delete category '${catName}'.`);
         }
-
+        AdminService.logAction({
+            type: 'delete',
+            executeAccount: username,
+            executeProfile: profileName,
+            action: 'delete_category',
+            target: { refId, catName }
+        });
         return result;
     }
 

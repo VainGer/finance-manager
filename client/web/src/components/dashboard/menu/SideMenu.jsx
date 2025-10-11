@@ -7,11 +7,11 @@ import CreateProfileBudget from '../budget/CreateProfileBudget';
 import QuickActionCard from '../QuickActionCard';
 import CenteredModal from '../../common/CenteredModal';
 
-export default function SideMenu({ 
-    onTransactionAdded, 
-    showFloatingMenu, 
-    setShowFloatingMenu, 
-    isFloatingMode = false 
+export default function SideMenu({
+    onTransactionAdded,
+    showFloatingMenu,
+    setShowFloatingMenu,
+    isFloatingMode = false
 }) {
     const navigate = useNavigate();
 
@@ -115,7 +115,7 @@ export default function SideMenu({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
             ),
-            onClick: () => navigate('/u')
+            onClick: () => navigate('/upload-from-file')
         }
     ];
 
@@ -125,19 +125,19 @@ export default function SideMenu({
             {isFloatingMode && showFloatingMenu && (
                 <>
                     {/* Backdrop */}
-                    <div 
+                    <div
                         className="fixed inset-0 z-[90] bg-black/30 backdrop-blur-sm xl:hidden"
                         onClick={() => setShowFloatingMenu && setShowFloatingMenu(false)}
                     />
-                    
+
                     {/* Menu Items Container */}
                     <div className="fixed left-4 bottom-20 z-[95] xl:hidden">
                         <div className="space-y-2 w-72 max-h-[60vh] overflow-y-auto">
                             {quickActions.map((action, index) => (
-                                <div 
-                                    key={index} 
-                                    className="transform translate-x-0 animate-in slide-in-from-left duration-300" 
-                                    style={{animationDelay: `${index * 80}ms`}}
+                                <div
+                                    key={index}
+                                    className="transform translate-x-0 animate-in slide-in-from-left duration-300"
+                                    style={{ animationDelay: `${index * 80}ms` }}
                                 >
                                     <QuickActionCard
                                         title={action.title}
@@ -228,7 +228,7 @@ export default function SideMenu({
                                 </button>
                             </div>
                         </div>
-                        
+
                         {/* Modal Content */}
                         <div className="flex-1 overflow-y-auto">
                             {menuToggler.businesses && <BusinessMenu goBack={closeAllPanels} />}

@@ -6,6 +6,7 @@ import { ProfileBudget } from "../../types/profile.types";
 import BudgetService from "../budget/budget.service";
 import CategoriesModel from "../../models/expenses/categories.model";
 import ProfileModel from "../../models/profile/profile.model";
+import AdminService from "../admin/admin.service";
 
 export default class TransactionService {
 
@@ -14,7 +15,9 @@ export default class TransactionService {
         if (!refId || !catName || !busName || !transactionData) {
             throw new appErrors.ValidationError("Reference ID, category name, business name and transaction data are required.");
         }
-
+        const categoriesDoc = await CategoriesModel.getCategories(refId);
+        const username = categoriesDoc?.username;
+        const profileName = categoriesDoc?.profileName;
         const id = new ObjectId();
         const transaction: Transaction = { ...transactionData, _id: id };
         transaction.amount = parseFloat(transaction.amount.toString());
@@ -29,7 +32,13 @@ export default class TransactionService {
         if (!updateBudgetOnTransaction?.success) {
             throw new appErrors.DatabaseError(updateBudgetOnTransaction?.message || "Failed to update budget on transaction.");
         }
-
+        AdminService.logAction({
+            type: 'create',
+            executeAccount: username,
+            executeProfile: profileName,
+            action: 'create_transaction',
+            target: { refId, catName, busName, transaction }
+        });
         return result;
     }
 
@@ -42,7 +51,9 @@ export default class TransactionService {
         newAmount = parseFloat(newAmount.toString());
 
         const txId = typeof transactionId === 'string' ? new ObjectId(transactionId) : transactionId;
-
+        const categoriesDoc = await CategoriesModel.getCategories(refId);
+        if (!categoriesDoc) throw new appErrors.NotFoundError("Categories document not found.");
+        const { username, profileName } = categoriesDoc;
         const updatedBudgetResult = await this.updateBudgetOnTransaction(refId, catName, busName, txId.toString(), newAmount);
         if (!updatedBudgetResult?.success) {
             throw new appErrors.DatabaseError(updatedBudgetResult?.message || "Failed to update budget on transaction.");
@@ -52,6 +63,13 @@ export default class TransactionService {
         if (!result?.success) {
             throw new appErrors.DatabaseError(result?.message || `Failed to change amount for transaction ${txId}.`);
         }
+        AdminService.logAction({
+            type: 'update',
+            executeAccount: username,
+            executeProfile: profileName,
+            action: 'change_transaction_amount',
+            target: { refId, catName, busName, transactionId, newAmount }
+        });
 
         return result;
     }
@@ -75,12 +93,21 @@ export default class TransactionService {
             date: newDate,
             description: transaction.description,
         };
-
+        const categoriesDoc = await CategoriesModel.getCategories(refId);
+        if (!categoriesDoc) throw new appErrors.NotFoundError("Categories document not found.");
+        const { username, profileName } = categoriesDoc;
         const createResult = await this.create(refId, catName, busName, newTransaction);
         if (!createResult?.success) {
             throw new appErrors.DatabaseError(
                 createResult?.message || `Failed to create transaction for ${busName}.`);
         }
+        AdminService.logAction({
+            type: 'update',
+            executeAccount: username,
+            executeProfile: profileName,
+            action: 'change_transaction_date',
+            target: { refId, catName, busName, transactionId, newDate }
+        });
         return { success: true, message: "Transaction date changed successfully" };
     }
 
@@ -95,7 +122,16 @@ export default class TransactionService {
         if (!result?.success) {
             throw new appErrors.DatabaseError(result?.message || `Failed to change description for transaction ${transactionId}.`);
         }
-
+        const categoriesDoc = await CategoriesModel.getCategories(refId);
+        if (!categoriesDoc) throw new appErrors.NotFoundError("Categories document not found.");
+        const { username, profileName } = categoriesDoc;
+        AdminService.logAction({
+            type: 'update',
+            executeAccount: username,
+            executeProfile: profileName,
+            action: 'change_transaction_description',
+            target: { refId, catName, busName, transactionId, newDescription }
+        });
         return result;
     }
 
@@ -105,7 +141,9 @@ export default class TransactionService {
             throw new appErrors.ValidationError
                 ("Reference ID, category name, business name and transaction ID are required.");
         }
-
+        const categoriesDoc = await CategoriesModel.getCategories(refId);
+        if (!categoriesDoc) throw new appErrors.NotFoundError("Categories document not found.");
+        const { username, profileName } = categoriesDoc;
         const updatedBudgetResult = await this.updateBudgetOnTransaction(refId, catName, busName, transactionId, 0);
         if (!updatedBudgetResult?.success) {
             throw new appErrors.DatabaseError(updatedBudgetResult?.message || "Failed to update budget on transaction deletion.");
@@ -115,7 +153,13 @@ export default class TransactionService {
         if (!result?.success) {
             throw new appErrors.DatabaseError(result?.message || `Failed to delete transaction ${transactionId}.`);
         }
-
+        AdminService.logAction({
+            type: 'delete',
+            executeAccount: username,
+            executeProfile: profileName,
+            action: 'delete_transaction',
+            target: { refId, catName, busName, transactionId }
+        });
         return result;
     }
 

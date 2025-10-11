@@ -1,6 +1,7 @@
 import { Account } from "../../types/account.types";
 import * as AppErrors from "../../errors/AppError";
 import AccountModel from "../../models/account/account.model";
+import AdminService from "../admin/admin.service";
 
 export default class AccountService {
 
@@ -27,6 +28,12 @@ export default class AccountService {
         if (!result.insertedId) {
             throw new AppErrors.DatabaseError("Failed to create account. Database operation unsuccessful.");
         }
+        AdminService.logAction({
+            type: "create",
+            executeAccount: username,
+            action: "create_account",
+            target: { username }
+        });
         return { success: true, accountId: result.insertedId, message: "Account created successfully." };
     }
 
@@ -41,6 +48,12 @@ export default class AccountService {
         }
 
         const { password: _, tokens, __, ...safeAccount } = validatedAccount;
+        AdminService.logAction({
+            type: "login",
+            executeAccount: username,
+            action: "account_login",
+            target: { username }
+        });
         return { success: true, safeAccount, message: "Account validated successfully." };
     }
 
@@ -66,7 +79,12 @@ export default class AccountService {
         if (!result.success) {
             throw new AppErrors.DatabaseError(`Failed to update password: ${result.message}`);
         }
-
+        AdminService.logAction({
+            type: "update",
+            executeAccount: username,
+            action: "change_password",
+            target: { username }
+        });
         return { success: true, message: 'Password changed successfully.' };
     }
 }

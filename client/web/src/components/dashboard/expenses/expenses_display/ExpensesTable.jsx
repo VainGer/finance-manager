@@ -2,7 +2,12 @@ import { formatAmount, formatDate } from "../../../../utils/expensesUtils";
 import DeleteTransaction from "../transactions/DeleteTransaction";
 import EditTransaction from "../transactions/EditTransaction";
 
-export default function ExpensesTable({ filteredExpenses, expensesId, onTransactionDeleted, onTransactionUpdated }) {
+export default function ExpensesTable({ filteredExpenses,
+    expensesId,
+    onTransactionDeleted,
+    onTransactionUpdated,
+    inAdminMode = false }) {
+
     if (filteredExpenses.length === 0) {
         return (
             <div className="text-center py-12">
@@ -29,7 +34,7 @@ export default function ExpensesTable({ filteredExpenses, expensesId, onTransact
                             <th className="text-right p-4 font-semibold text-slate-700">קטגוריה</th>
                             <th className="text-right p-4 font-semibold text-slate-700">עסק</th>
                             <th className="text-right p-4 font-semibold text-slate-700">סכום</th>
-                            <th className="text-center p-4 font-semibold text-slate-700">פעולות</th>
+                            {!inAdminMode && <th className="text-center p-4 font-semibold text-slate-700">פעולות</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -44,20 +49,22 @@ export default function ExpensesTable({ filteredExpenses, expensesId, onTransact
                                 </td>
                                 <td className="p-4 text-slate-600">{expense.business}</td>
                                 <td className="p-4 font-bold text-red-600">{formatAmount(expense.amount)}</td>
-                                <td className="p-4">
-                                    <div className="flex items-center justify-center gap-2">
-                                        <EditTransaction
-                                            transaction={expense}
-                                            refId={expensesId}
-                                            onTransactionUpdated={onTransactionUpdated}
-                                        />
-                                        <DeleteTransaction
-                                            transaction={expense}
-                                            refId={expensesId}
-                                            onTransactionDeleted={onTransactionDeleted}
-                                        />
-                                    </div>
-                                </td>
+                                {!inAdminMode &&
+                                    <td className="p-4">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <EditTransaction
+                                                transaction={expense}
+                                                refId={expensesId}
+                                                onTransactionUpdated={onTransactionUpdated}
+                                            />
+                                            <DeleteTransaction
+                                                transaction={expense}
+                                                refId={expensesId}
+                                                onTransactionDeleted={onTransactionDeleted}
+                                            />
+                                        </div>
+                                    </td>
+                                }
                             </tr>
                         ))}
                     </tbody>
@@ -94,18 +101,20 @@ export default function ExpensesTable({ filteredExpenses, expensesId, onTransact
                         </div>
 
                         {/* Actions */}
-                        <div className="md:flex justify-end gap-2 pt-3 border-t border-slate-200">
-                            <EditTransaction
-                                transaction={expense}
-                                refId={expensesId}
-                                onTransactionUpdated={onTransactionUpdated}
-                            />
-                            <DeleteTransaction
-                                transaction={expense}
-                                refId={expensesId}
-                                onTransactionDeleted={onTransactionDeleted}
-                            />
-                        </div>
+                        {!inAdminMode &&
+                            <div className="md:flex justify-end gap-2 pt-3 border-t border-slate-200">
+                                <EditTransaction
+                                    transaction={expense}
+                                    refId={expensesId}
+                                    onTransactionUpdated={onTransactionUpdated}
+                                />
+                                <DeleteTransaction
+                                    transaction={expense}
+                                    refId={expensesId}
+                                    onTransactionDeleted={onTransactionDeleted}
+                                />
+                            </div>
+                        }
                     </div>
                 ))}
             </div>

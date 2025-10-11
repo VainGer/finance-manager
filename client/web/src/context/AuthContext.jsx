@@ -111,10 +111,6 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
-    useEffect(() => {
-        autoLogin();
-    }, [autoLogin]);
-
 
     const clearRefreshTimer = () => {
         if (refreshTimerRef.current) {

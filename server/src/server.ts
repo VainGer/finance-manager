@@ -7,7 +7,7 @@ import routerV1 from "./routes/v1";
 import { v2 as cloudinary } from "cloudinary";
 import DB from "./utils/DB";
 dotenv.config({ path: path.join(__dirname, './dotenv/.env') });
-
+import crypto from "crypto";
 const PORT = process.env.PORT;
 const server = Express();
 const db = new DB();
