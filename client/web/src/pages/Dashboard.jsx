@@ -13,6 +13,7 @@ import DisplaySelector from '../components/dashboard/DisplaySelector';
 import NavigationHeader from '../components/layout/NavigationHeader';
 import PageLayout from '../components/layout/PageLayout';
 import FloatingActionButton from '../components/common/FloatingActionButton';
+import StatusDot from '../components/common/StatusDot';
 
 export default function Dashboard() {
     const { profile, account } = useAuth();
@@ -58,54 +59,84 @@ export default function Dashboard() {
             <PageLayout spacing={false}>
                 {/* Professional Navigation */}
                 <NavigationHeader 
-                    title="מערכת ניהול כספים"
-                    subtitle={`שלום ${profile?.profileName || account?.username}`}
+                    title="Finance Manager"
+                   
                 />
 
-                {/* Main Dashboard Container with proper spacing */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 flex-1">
-                    {/* Children Budget Update Banner */}
-                    {profile && !profile.parentProfile && (
-                        <ChildrenBudgetUpdate 
-                            username={account?.username} 
-                            profileName={profile?.profileName} 
-                        />
-                    )}
-
-                    {/* Display Selector - Now perfectly centered with proper spacing */}
-                    <DisplaySelector
-                        setDisplay={setDisplay}
-                        setCurrentDisplayType={setCurrentDisplayType}
-                        profile={profile}
-                        refreshTrigger={refreshTrigger}
-                    />
-
-                {/* Main Content Grid */}
-                    <div className="grid grid-cols-1 xl:grid-cols-7 gap-8">
-                        {/* Desktop Side Menu - Now wider */}
-                        <div className="hidden xl:block xl:col-span-2">
-                            <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-6 sticky top-6">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-8 h-8 bg-gradient-to-r from-slate-700 to-slate-800 rounded-lg flex items-center justify-center">
-                                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                    </div>
-                                    <h3 className="text-lg font-bold text-slate-800">פעולות מהירות</h3>
-                                </div>
-                                <SideMenu onTransactionAdded={triggerRefresh} isFloatingMode={false} />
+                {/* Main Dashboard Container with modern gradient background */}
+                <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 relative overflow-hidden">
+                    {/* Balanced background circles - visible but elegant */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+                        {/* Soft visible circles */}
+                        <div className="absolute -top-24 -right-24 w-80 h-80 bg-gradient-to-br from-blue-100/35 to-blue-200/25 rounded-full blur-xl"></div>
+                        <div className="absolute top-1/4 -left-32 w-72 h-72 bg-gradient-to-br from-slate-100/40 to-gray-200/30 rounded-full blur-xl"></div>
+                        <div className="absolute -bottom-20 -left-16 w-76 h-76 bg-gradient-to-br from-slate-100/35 to-blue-100/25 rounded-full blur-xl"></div>
+                        
+                        {/* Medium accent circle */}
+                        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-gradient-to-br from-cyan-100/30 to-blue-100/25 rounded-full blur-lg"></div>
+                    </div>
+                    
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative z-10">
+                        {/* Children Budget Update Banner with enhanced styling */}
+                        {profile && !profile.parentProfile && (
+                            <div className="animate-slideDown">
+                                <ChildrenBudgetUpdate 
+                                    username={account?.username} 
+                                    profileName={profile?.profileName} 
+                                />
                             </div>
+                        )}
+
+                        {/* Display Selector with hover animations */}
+                        <div className="animate-fadeIn">
+                            <DisplaySelector
+                                setDisplay={setDisplay}
+                                setCurrentDisplayType={setCurrentDisplayType}
+                                profile={profile}
+                                refreshTrigger={refreshTrigger}
+                            />
                         </div>
 
-                        {/* Enhanced Main Display Area */}
-                        <div className="xl:col-span-5">
-                            <div className="bg-white/60 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl overflow-hidden">
-                                {display || (
-                                    <div className="p-8 text-center">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto mb-4"></div>
-                                        <p className="text-slate-600">טוען נתונים...</p>
+                        {/* Main Content Grid with enhanced styling */}
+                        <div className="grid grid-cols-1 xl:grid-cols-7 gap-8 animate-slideUp">
+                            {/* Modern Side Menu */}
+                            <div className="hidden xl:block xl:col-span-2">
+                                <div className="bg-white/90 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl shadow-slate-100/50 p-6 sticky top-6 hover:shadow-3xl transition-all duration-300">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-10 h-10 bg-gradient-to-r from-slate-700 to-slate-800 rounded-xl flex items-center justify-center shadow-lg">
+                                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-800 bg-clip-text text-transparent">פעולות מהירות</h3>
                                     </div>
-                                )}
+                                    <SideMenu onTransactionAdded={triggerRefresh} isFloatingMode={false} />
+                                </div>
+                            </div>
+
+                            {/* Enhanced Main Display Area with glass morphism */}
+                            <div className="xl:col-span-5">
+                                <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/40 shadow-2xl shadow-slate-100/50 overflow-hidden hover:shadow-3xl transition-all duration-500 hover:border-white/60">
+                                    {display || (
+                                        <div className="p-12 text-center">
+                                            {/* Colorful Loading Animation */}
+                                            <div className="relative mb-8">
+                                                <div className="flex justify-center gap-2 mb-4">
+                                                    <StatusDot color="blue" size="lg" animated className="animate-bounce" />
+                                                    <StatusDot color="green" size="lg" animated className="animate-bounce delay-100" />
+                                                    <StatusDot color="orange" size="lg" animated className="animate-bounce delay-200" />
+                                                    <StatusDot color="purple" size="lg" animated className="animate-bounce delay-300" />
+                                                </div>
+                                                <div className="w-24 h-1 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500 rounded-full mx-auto animate-pulse"></div>
+                                            </div>
+                                            
+                                            <div className="space-y-2">
+                                                <p className="text-slate-700 text-lg font-medium">טוען נתונים...</p>
+                                                <p className="text-slate-500 text-sm">מכין את הדשבורד שלך</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -209,8 +209,8 @@ export default function Settings() {
     return (
         <PageLayout spacing={false}>
             <NavigationHeader
-                title="הגדרות מערכת"
-                subtitle={`נהל את הפרופיל והחשבון - ${profile?.profileName || account?.username}`}
+                title="Finance Manager"
+                subtitle={`הגדרות מערכת - ${profile?.profileName || account?.username}`}
             />
 
             {/* Fixed Message Overlay */}

@@ -5,7 +5,7 @@ import logo from '../../assets/images/logo.png'
 import Button from '../common/Button';
 
 export default function NavigationHeader({
-    title = "מנהל כספים",
+    title = "Finance Manager",
     subtitle = "",
     buttons = [],
     showBranding = true,
@@ -70,23 +70,23 @@ export default function NavigationHeader({
 
     return (
         <>
-            <nav className={`sticky top-0 z-[2000] bg-white/95 backdrop-blur-lg border-b border-slate-200/50 shadow-lg ${className}`} dir="rtl">
+            <nav className={`sticky top-0 z-[2000] bg-gradient-to-r from-white/95 via-slate-50/95 to-blue-50/95 backdrop-blur-xl border-b border-slate-100/50 shadow-xl shadow-slate-100/50 ${className}`} dir="rtl">
                 <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-                    <div className="flex justify-between items-center h-14 sm:h-16">
-                        {/* Branding */}
+                    <div className="flex justify-between items-center h-16 sm:h-18">
+                        {/* Enhanced Branding */}
                         {showBranding && (
                             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                                 <button
                                     onClick={handleLogoClick}
-                                    className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity duration-200 min-w-0"
+                                    className="flex items-center gap-2 sm:gap-3 hover:scale-105 transition-all duration-300 min-w-0 group"
                                 >
-                                    <div className="w-7 h-7 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <div className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl transition-all duration-300">
                                         <img src={logo} alt="logo" />
                                     </div>
                                     <div className="min-w-0">
-                                        <span className="text-lg sm:text-xl font-bold text-slate-800 truncate block">{title}</span>
+                                        <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-800 bg-clip-text text-transparent truncate block">{title}</span>
                                         {subtitle && (
-                                            <p className="text-xs sm:text-sm text-slate-600 truncate hidden sm:block">{subtitle}</p>
+                                            <p className="text-xs sm:text-sm text-slate-500/80 truncate hidden sm:block font-medium">{subtitle}</p>
                                         )}
                                     </div>
                                 </button>
@@ -122,17 +122,17 @@ export default function NavigationHeader({
                                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                         className="flex items-center gap-2 sm:gap-3 text-slate-700 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 rounded-lg p-1 sm:p-2 transition-colors duration-200"
                                     >
-                                        {/* Welcome Message - Hidden on mobile */}
+                                        {/* Enhanced Welcome Message */}
                                         <div className="text-sm hidden lg:block text-right">
-                                            <div className="font-medium">{getDisplayName()}</div>
+                                            <div className="font-bold bg-gradient-to-r from-slate-700 to-slate-800 bg-clip-text text-transparent">{getDisplayName()}</div>
                                             {profile && (
-                                                <div className="text-xs text-slate-500">פרופיל פעיל</div>
+                                                <div className="text-xs text-blue-600 font-medium">פרופיל פעיל</div>
                                             )}
                                         </div>
 
-                                        {/* User Avatar */}
+                                        {/* Enhanced User Avatar */}
                                         <div
-                                            className="h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center text-white font-semibold border-2 border-slate-200 transition-all duration-200 overflow-hidden bg-gradient-to-r from-slate-700 to-slate-800"
+                                            className="h-9 w-9 sm:h-11 sm:w-11 rounded-full flex items-center justify-center text-white font-semibold border-2 border-white/50 shadow-lg transition-all duration-300 overflow-hidden bg-gradient-to-r from-slate-700 to-slate-800 hover:shadow-xl hover:scale-105"
                                             style={{
                                                 backgroundColor: profile?.color || undefined
                                             }}
