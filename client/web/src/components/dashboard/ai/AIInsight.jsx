@@ -14,38 +14,39 @@ export default function AIInsight() {
     if (!selectedHistory) {
         return (
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
-                {/* Background circles for consistency */}
+                {/* Enhanced Background circles */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-16 -right-16 w-32 h-32 bg-blue-100/20 rounded-full"></div>
-                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cyan-100/15 rounded-full"></div>
+                    <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-orange-100/30 to-amber-100/20 rounded-full"></div>
+                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-purple-100/25 to-pink-100/15 rounded-full"></div>
+                    <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-gradient-to-br from-blue-100/20 to-cyan-100/10 rounded-full"></div>
                 </div>
 
-                {/* Header */}
-                <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-5 text-white relative z-10">
+                {/* Enhanced Header */}
+                <div className="bg-gradient-to-r from-orange-600 via-orange-700 to-amber-700 p-5 text-white relative z-10">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                             </svg>
                         </div>
                         <div>
-                            <h2 className="text-lg font-semibold">תובנות AI</h2>
-                            <p className="text-white/70 text-sm">ניתוח חכם של הוצאות</p>
+                            <h2 className="text-xl font-bold text-white drop-shadow-sm">תובנות AI</h2>
+                            <p className="text-white/80 text-sm">ניתוח חכם ומתקדם של דפוסי ההוצאה</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Empty State */}
-                <div className="p-6 text-center relative z-10">
-                    <div className="w-12 h-12 mx-auto mb-3 bg-slate-100/80 rounded-xl flex items-center justify-center">
-                        <svg className="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                {/* Enhanced Empty State */}
+                <div className="p-8 text-center relative z-10">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-orange-100/80 to-amber-100/60 rounded-2xl flex items-center justify-center shadow-lg">
+                        <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
                     </div>
-                    <div className="text-base font-medium text-slate-700 mb-2">אין דוחות להצגה</div>
-                    <div className="text-slate-500 mb-3 text-sm">הניתוח יהיה זמין לאחר מספר הוצאות</div>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100/80 rounded-lg text-sm text-slate-600">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="text-lg font-bold text-slate-700 mb-2">🤖 מנתח את הנתונים שלך</div>
+                    <div className="text-slate-500 mb-4 text-sm max-w-sm mx-auto">התובנות החכמות יהיו זמינות לאחר שתוסיף מספר הוצאות לניתוח מעמיק</div>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-100/80 to-amber-100/60 rounded-xl text-sm text-orange-700 font-medium shadow-sm">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         זמין בקרוב
@@ -68,35 +69,36 @@ export default function AIInsight() {
 
     return (
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
-            {/* Background circles for consistency */}
+            {/* Enhanced Background circles */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-16 -right-16 w-32 h-32 bg-blue-100/20 rounded-full"></div>
-                <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cyan-100/15 rounded-full"></div>
+                <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-orange-100/30 to-amber-100/20 rounded-full"></div>
+                <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-purple-100/25 to-pink-100/15 rounded-full"></div>
+                <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-gradient-to-br from-blue-100/20 to-cyan-100/10 rounded-full"></div>
             </div>
 
-            {/* Header */}
-            <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-5 text-white relative z-10">
+            {/* Enhanced Header */}
+            <div className="bg-gradient-to-r from-orange-600 via-orange-700 to-amber-700 p-5 text-white relative z-10">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+                        <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
                     </div>
                     <div>
-                        <h2 className="text-lg font-semibold">תובנות AI</h2>
-                        <p className="text-white/70 text-sm">ניתוח חכם של הוצאות</p>
+                        <h2 className="text-xl font-bold text-white drop-shadow-sm">תובנות AI</h2>
+                        <p className="text-white/80 text-sm">ניתוח חכם ומתקדם של דפוסי ההוצאה</p>
                     </div>
                 </div>
             </div>
 
             <div className="p-6 space-y-6 relative z-10">
-                {/* History Selector */}
+                {/* Enhanced History Selector */}
                 {histories.length > 1 && (
                     <div className="mb-6">
                         <select
                             value={selectedId || ''}
                             onChange={(e) => setSelectedId(e.target.value)}
-                            className="bg-white/60 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400 backdrop-blur-sm"
+                            className="bg-gradient-to-r from-white/70 to-white/50 border border-orange-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 backdrop-blur-sm shadow-sm font-medium"
                         >
                             {selectItems.map(item => (
                                 <option key={item.value} value={item.value}>
@@ -107,35 +109,41 @@ export default function AIInsight() {
                     </div>
                 )}
 
-                {/* Global Summary */}
-                <div className="bg-slate-50/50 backdrop-blur-sm rounded-xl p-6 border border-slate-200/30">
-                    <div className="flex items-center gap-2 mb-4">
-                        <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z" />
-                        </svg>
-                        <h3 className="text-lg font-bold text-slate-800">סיכום כללי</h3>
+                {/* Enhanced Global Summary */}
+                <div className="bg-gradient-to-br from-white/70 to-slate-50/60 backdrop-blur-sm rounded-xl p-6 border border-orange-200/40 shadow-lg">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg flex items-center justify-center shadow-md">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800">📊 סיכום כללי</h3>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div className="text-center">
-                            <div className="text-2xl font-bold text-slate-800">₪{summary.global.budget.toLocaleString()}</div>
-                            <div className="text-sm text-slate-600">תקציב</div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4 text-center border border-blue-200/40 shadow-sm">
+                            <div className="text-2xl font-bold text-blue-700 mb-1">₪{summary.global.budget.toLocaleString()}</div>
+                            <div className="text-sm text-blue-600 font-medium">💰 תקציב</div>
                         </div>
-                        <div className="text-center">
-                            <div className="text-2xl font-bold text-red-600">₪{summary.global.spent.toLocaleString()}</div>
-                            <div className="text-sm text-slate-600">הוצא</div>
+                        <div className="bg-gradient-to-br from-red-50 to-red-100/50 rounded-xl p-4 text-center border border-red-200/40 shadow-sm">
+                            <div className="text-2xl font-bold text-red-700 mb-1">₪{summary.global.spent.toLocaleString()}</div>
+                            <div className="text-sm text-red-600 font-medium">💸 הוצא</div>
                         </div>
-                        <div className="text-center">
-                            <div className={`text-2xl font-bold ${summary.global.remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <div className={`rounded-xl p-4 text-center border shadow-sm ${summary.global.remaining >= 0 ? 'bg-gradient-to-br from-green-50 to-green-100/50 border-green-200/40' : 'bg-gradient-to-br from-red-50 to-red-100/50 border-red-200/40'}`}>
+                            <div className={`text-2xl font-bold mb-1 ${summary.global.remaining >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                                 ₪{Math.abs(summary.global.remaining).toLocaleString()}
                             </div>
-                            <div className="text-sm text-slate-600">{summary.global.remaining >= 0 ? 'נותר' : 'חריגה'}</div>
+                            <div className={`text-sm font-medium ${summary.global.remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {summary.global.remaining >= 0 ? '✅ נותר' : '⚠️ חריגה'}
+                            </div>
                         </div>
-                        <div className="text-center">
-                            <div className={`text-2xl font-bold ${summary.global.utilizationPct <= 100 ? 'text-green-600' : 'text-red-600'}`}>
+                        <div className={`rounded-xl p-4 text-center border shadow-sm ${summary.global.utilizationPct <= 100 ? 'bg-gradient-to-br from-green-50 to-green-100/50 border-green-200/40' : 'bg-gradient-to-br from-red-50 to-red-100/50 border-red-200/40'}`}>
+                            <div className={`text-2xl font-bold mb-1 ${summary.global.utilizationPct <= 100 ? 'text-green-700' : 'text-red-700'}`}>
                                 {summary.global.utilizationPct.toFixed(1)}%
                             </div>
-                            <div className="text-sm text-slate-600">ניצול</div>
+                            <div className={`text-sm font-medium ${summary.global.utilizationPct <= 100 ? 'text-green-600' : 'text-red-600'}`}>
+                                📈 ניצול
+                            </div>
                         </div>
                     </div>
 
@@ -157,23 +165,25 @@ export default function AIInsight() {
                     )}
                 </div>
 
-                {/* Categories Analysis */}
-                <div className="bg-slate-50/50 backdrop-blur-sm rounded-xl p-6 border border-slate-200/30">
-                    <div className="flex items-center gap-2 mb-4">
-                        <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                        </svg>
-                        <h3 className="text-lg font-bold text-slate-800">ניתוח קטגוריות</h3>
+                {/* Enhanced Categories Analysis */}
+                <div className="bg-gradient-to-br from-white/70 to-slate-50/60 backdrop-blur-sm rounded-xl p-6 border border-purple-200/40 shadow-lg">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800">🎯 ניתוח קטגוריות</h3>
                     </div>
 
                     <div className="space-y-4">
                         {categories.map((cat, idx) => (
-                            <div key={idx} className="bg-white rounded-lg p-4">
-                                <div className="flex justify-between items-center mb-2">
-                                    <h4 className="font-bold text-slate-800">{cat.name}</h4>
-                                    <div className={`px-2 py-1 rounded text-xs font-bold ${cat.utilizationPct <= 80 ? 'bg-green-100 text-green-800' :
-                                        cat.utilizationPct <= 100 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
+                            <div key={idx} className="bg-gradient-to-r from-white to-slate-50/30 rounded-xl p-5 border border-slate-200/50 shadow-md hover:shadow-lg transition-all duration-300">
+                                <div className="flex justify-between items-center mb-3">
+                                    <h4 className="font-bold text-slate-800 text-lg">{cat.name}</h4>
+                                    <div className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${cat.utilizationPct <= 80 ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800' :
+                                        cat.utilizationPct <= 100 ? 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800' :
+                                            'bg-gradient-to-r from-red-100 to-red-200 text-red-800'
                                         }`}>
                                         {cat.utilizationPct.toFixed(1)}%
                                     </div>
@@ -187,23 +197,25 @@ export default function AIInsight() {
                                     </span>
                                 </div>
 
-                                {/* Progress Bar */}
-                                <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                                {/* Enhanced Progress Bar */}
+                                <div className="w-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-full h-3 mb-4 shadow-inner">
                                     <div
-                                        className={`h-2 rounded-full ${cat.utilizationPct <= 80 ? 'bg-green-500' :
-                                            cat.utilizationPct <= 100 ? 'bg-yellow-500' : 'bg-red-500'
+                                        className={`h-3 rounded-full shadow-sm ${cat.utilizationPct <= 80 ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                                            cat.utilizationPct <= 100 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 'bg-gradient-to-r from-red-400 to-red-600'
                                             }`}
                                         style={{ width: `${Math.min(cat.utilizationPct, 100)}%` }}
                                     ></div>
                                 </div>
 
-                                {/* Top Drivers */}
+                                {/* Enhanced Top Drivers */}
                                 {cat.drivers?.length > 0 && (
-                                    <div className="mb-3">
-                                        <div className="text-xs font-bold text-slate-700 mb-1">עסקים מובילים:</div>
-                                        <div className="flex flex-wrap gap-1">
+                                    <div className="mb-4">
+                                        <div className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-1">
+                                            🏪 עסקים מובילים:
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
                                             {cat.drivers.slice(0, 3).map((driver, dIdx) => (
-                                                <span key={dIdx} className="bg-slate-100 px-2 py-1 rounded text-xs">
+                                                <span key={dIdx} className="bg-gradient-to-r from-slate-100 to-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-700 shadow-sm">
                                                     {driver.business}: ₪{driver.amount.toLocaleString()}
                                                 </span>
                                             ))}
@@ -211,16 +223,20 @@ export default function AIInsight() {
                                     </div>
                                 )}
 
-                                {/* Actions */}
+                                {/* Enhanced Actions */}
                                 {cat.actions?.length > 0 && (
                                     <div>
-                                        <div className="text-sm font-bold text-slate-700 mb-2">המלצות:</div>
-                                        <div className="space-y-2">
+                                        <div className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-1">
+                                            💡 המלצות חכמות:
+                                        </div>
+                                        <div className="space-y-3">
                                             {cat.actions.slice(0, 2).map((action, aIdx) => (
-                                                <div key={aIdx} className="bg-blue-50/70 p-3 rounded-lg text-sm border border-blue-100">
-                                                    <div className="font-semibold text-blue-800 mb-1">{action.proposal}</div>
-                                                    <div className="text-blue-600 text-sm">
-                                                        חיסכון חודשי: ₪{action.quantifiedImpact.monthlySave.toLocaleString()}
+                                                <div key={aIdx} className="bg-gradient-to-r from-blue-50/80 to-cyan-50/60 p-4 rounded-xl text-sm border border-blue-200/50 shadow-sm">
+                                                    <div className="font-bold text-blue-800 mb-2 flex items-center gap-1">
+                                                        ⭐ {action.proposal}
+                                                    </div>
+                                                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 px-3 py-1.5 rounded-lg text-green-700 text-xs font-medium inline-block">
+                                                        💰 חיסכון חודשי: ₪{action.quantifiedImpact.monthlySave.toLocaleString()}
                                                     </div>
                                                 </div>
                                             ))}

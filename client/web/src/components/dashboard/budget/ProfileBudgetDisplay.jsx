@@ -151,16 +151,54 @@ export default function ProfileBudgetDisplay({ profile }) {
 
     if (displayData.error) {
         return (
-            <div className="bg-white/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-6">
-                <ErrorMessage message={displayData.error} />
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-blue-100/30 to-indigo-100/20 rounded-full"></div>
+                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-cyan-100/25 to-teal-100/15 rounded-full"></div>
+                </div>
+                <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 p-5 text-white relative z-10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-white drop-shadow-sm">💰 תקציב מול הוצאות</h2>
+                            <p className="text-white/80 text-sm">שגיאה בטעינת הנתונים</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="p-6 relative z-10">
+                    <ErrorMessage message={displayData.error} />
+                </div>
             </div>
         );
     }
 
     if (displayData.loading) {
         return (
-            <div className="bg-white/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8">
-                <LoadingSpinner />
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-blue-100/30 to-indigo-100/20 rounded-full"></div>
+                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-cyan-100/25 to-teal-100/15 rounded-full"></div>
+                </div>
+                <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 p-5 text-white relative z-10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-white drop-shadow-sm">💰 תקציב מול הוצאות</h2>
+                            <p className="text-white/80 text-sm">טוען נתונים...</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="p-8 relative z-10">
+                    <LoadingSpinner />
+                </div>
             </div>
         );
     }
@@ -168,35 +206,36 @@ export default function ProfileBudgetDisplay({ profile }) {
     if (!displayData.currentProfileBudget) {
         return (
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
-                {/* Background circles for consistency */}
+                {/* Enhanced Background circles */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-16 -right-16 w-32 h-32 bg-blue-100/20 rounded-full"></div>
-                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cyan-100/15 rounded-full"></div>
+                    <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-blue-100/30 to-indigo-100/20 rounded-full"></div>
+                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-cyan-100/25 to-teal-100/15 rounded-full"></div>
+                    <div className="absolute top-1/3 right-1/4 w-20 h-20 bg-gradient-to-br from-purple-100/20 to-pink-100/10 rounded-full"></div>
                 </div>
 
-                {/* Header */}
-                <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-5 text-white relative z-10">
-                    <div className="flex items-center justify-between">
+                {/* Enhanced Header */}
+                <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 p-5 text-white relative z-10">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+                                <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                                 </svg>
                             </div>
                             <div>
-                                <h2 className="text-lg font-semibold">תקציב מול הוצאות</h2>
-                                <p className="text-white/70 text-sm">{profile.profileName}</p>
+                                <h2 className="text-xl font-bold text-white drop-shadow-sm">💰 תקציב מול הוצאות</h2>
+                                <p className="text-white/80 text-sm">{profile.profileName}</p>
                             </div>
                         </div>
                         
-                        {/* Profile Selector - only show for parent profiles */}
+                        {/* Enhanced Profile Selector */}
                         {(authProfile?.parentProfile || profile?.parentProfile) && children && children.length > 0 && (
-                            <div className="flex items-center gap-2">
-                                <span className="text-white/80 text-sm">צפה בפרופיל:</span>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                <span className="text-white/90 text-sm font-medium">👥 צפה בפרופיל:</span>
                                 <select
                                     value={selectedChild || ''}
                                     onChange={(e) => setSelectedChild(e.target.value || null)}
-                                    className="bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+                                    className="bg-gradient-to-r from-white/25 to-white/15 border border-white/40 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/60 backdrop-blur-sm shadow-sm font-medium"
                                 >
                                     <option value="">שלי</option>
                                     {children.map((child) => (
@@ -226,21 +265,21 @@ export default function ProfileBudgetDisplay({ profile }) {
 
 
 
-                {/* Empty State */}
-                <div className="p-12 text-center">
-                    <div className="w-20 h-20 mx-auto mb-6 bg-slate-100 rounded-full flex items-center justify-center">
-                        <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* Enhanced Empty State */}
+                <div className="p-8 text-center relative z-10">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-100/80 to-indigo-100/60 rounded-2xl flex items-center justify-center shadow-lg">
+                        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                         </svg>
                     </div>
-                    <div className="text-xl font-bold text-slate-600 mb-3">
-                        {selectedChild ? 'אין תקציבים לפרופיל זה' : 'עדיין אין תקציבים'}
+                    <div className="text-lg font-bold text-slate-700 mb-2">
+                        {selectedChild ? '📊 אין תקציבים לפרופיל זה' : '💰 בואו ניצור תקציב ראשון!'}
                     </div>
-                    <div className="text-slate-500 mb-6">
-                        {selectedChild ? 'הפרופיל הנבחר עדיין לא יצר תקציבים' : 'צור תקציב ראשון כדי להתחיל לעקוב אחר ההוצאות'}
+                    <div className="text-slate-500 mb-4 text-sm max-w-sm mx-auto">
+                        {selectedChild ? 'הפרופיל הנבחר עדיין לא יצר תקציבים לתקופה זו' : 'צור תקציב ראשון כדי להתחיל לעקוב אחר ההוצאות ולנהל את הכספים בחכמה'}
                     </div>
                     {!selectedChild && (
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg text-sm text-slate-600">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100/80 to-indigo-100/60 rounded-xl text-sm text-blue-700 font-medium shadow-sm">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                             </svg>
@@ -260,29 +299,29 @@ export default function ProfileBudgetDisplay({ profile }) {
                 <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cyan-100/15 rounded-full"></div>
             </div>
 
-            {/* Header */}
-            <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-5 text-white relative z-10">
-                <div className="flex items-center justify-between">
+            {/* Enhanced Header */}
+            <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 p-5 text-white relative z-10">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                             </svg>
                         </div>
                         <div>
-                            <h2 className="text-lg font-semibold">תקציב מול הוצאות</h2>
-                            <p className="text-white/70 text-sm">{profile.profileName}</p>
+                            <h2 className="text-xl font-bold text-white drop-shadow-sm">💰 תקציב מול הוצאות</h2>
+                            <p className="text-white/80 text-sm">{profile.profileName}</p>
                         </div>
                     </div>
                     
-                    {/* Profile Selector - only show for parent profiles */}
+                    {/* Enhanced Profile Selector */}
                     {(authProfile?.parentProfile || profile?.parentProfile) && children && children.length > 0 && (
-                        <div className="flex items-center gap-2">
-                            <span className="text-white/80 text-sm">צפה בפרופיל:</span>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                            <span className="text-white/90 text-sm font-medium">👥 צפה בפרופיל:</span>
                             <select
                                 value={selectedChild || ''}
                                 onChange={(e) => setSelectedChild(e.target.value || null)}
-                                className="bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+                                className="bg-gradient-to-r from-white/25 to-white/15 border border-white/40 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/60 backdrop-blur-sm shadow-sm font-medium"
                             >
                                 <option value="">שלי</option>
                                 {children.map((child) => (

@@ -67,13 +67,15 @@ export default function Dashboard() {
                 <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 relative overflow-hidden">
                     {/* Balanced background circles - visible but elegant */}
                     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-                        {/* Soft visible circles */}
-                        <div className="absolute -top-24 -right-24 w-80 h-80 bg-gradient-to-br from-blue-100/35 to-blue-200/25 rounded-full blur-xl"></div>
-                        <div className="absolute top-1/4 -left-32 w-72 h-72 bg-gradient-to-br from-slate-100/40 to-gray-200/30 rounded-full blur-xl"></div>
-                        <div className="absolute -bottom-20 -left-16 w-76 h-76 bg-gradient-to-br from-slate-100/35 to-blue-100/25 rounded-full blur-xl"></div>
+                        {/* Colorful gradient circles matching tab colors */}
+                        <div className="absolute -top-24 -right-24 w-80 h-80 bg-gradient-to-br from-blue-100/35 to-cyan-100/25 rounded-full blur-xl"></div>
+                        <div className="absolute top-1/4 -left-32 w-72 h-72 bg-gradient-to-br from-purple-100/30 to-blue-100/25 rounded-full blur-xl"></div>
+                        <div className="absolute -bottom-20 -left-16 w-76 h-76 bg-gradient-to-br from-green-100/25 to-cyan-100/20 rounded-full blur-xl"></div>
                         
-                        {/* Medium accent circle */}
-                        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-gradient-to-br from-cyan-100/30 to-blue-100/25 rounded-full blur-lg"></div>
+                        {/* Medium accent circles with tab colors */}
+                        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-gradient-to-br from-orange-100/25 to-yellow-100/20 rounded-full blur-lg"></div>
+                        <div className="absolute top-1/2 right-1/3 w-32 h-32 bg-gradient-to-br from-purple-100/30 to-pink-100/25 rounded-full blur-md"></div>
+                        <div className="absolute bottom-1/4 left-1/3 w-40 h-40 bg-gradient-to-br from-emerald-100/25 to-teal-100/20 rounded-full blur-lg"></div>
                     </div>
                     
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative z-10">
@@ -119,15 +121,17 @@ export default function Dashboard() {
                                 <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/40 shadow-2xl shadow-slate-100/50 overflow-hidden hover:shadow-3xl transition-all duration-500 hover:border-white/60">
                                     {display || (
                                         <div className="p-12 text-center">
-                                            {/* Colorful Loading Animation */}
+                                            {/* Enhanced Colorful Loading Animation */}
                                             <div className="relative mb-8">
-                                                <div className="flex justify-center gap-2 mb-4">
+                                                <div className="flex justify-center gap-3 mb-4">
                                                     <StatusDot color="blue" size="lg" animated className="animate-bounce" />
                                                     <StatusDot color="green" size="lg" animated className="animate-bounce delay-100" />
-                                                    <StatusDot color="orange" size="lg" animated className="animate-bounce delay-200" />
-                                                    <StatusDot color="purple" size="lg" animated className="animate-bounce delay-300" />
+                                                    <StatusDot color="purple" size="lg" animated className="animate-bounce delay-200" />
+                                                    <StatusDot color="orange" size="lg" animated className="animate-bounce delay-300" />
+                                                    <StatusDot color="cyan" size="lg" animated className="animate-bounce delay-500" />
                                                 </div>
-                                                <div className="w-24 h-1 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500 rounded-full mx-auto animate-pulse"></div>
+                                                <div className="w-32 h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 rounded-full mx-auto animate-pulse shadow-lg"></div>
+                                                <div className="absolute -inset-4 bg-gradient-to-r from-blue-100/50 via-purple-100/50 to-cyan-100/50 rounded-2xl blur-xl animate-pulse"></div>
                                             </div>
                                             
                                             <div className="space-y-2">

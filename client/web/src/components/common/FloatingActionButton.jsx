@@ -39,14 +39,15 @@ export default function FloatingActionButton({ onClick, icon, className = "" }) 
             <button
                 onClick={onClick}
                 className={`
-                    w-16 h-16 
-                    bg-gradient-to-r from-slate-700 to-slate-800 
-                    hover:from-slate-600 hover:to-slate-700
-                    text-white rounded-full shadow-2xl
+                    w-14 h-14 sm:w-16 sm:h-16
+                    bg-gradient-to-br from-blue-500 to-blue-600
+                    hover:from-blue-600 hover:to-blue-700
+                    text-white
+                    rounded-full shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-600/40
                     flex items-center justify-center
                     transition-all duration-300 ease-in-out
                     transform hover:scale-110 active:scale-95
-                    border-2 border-white/20
+                    border-2 border-white/20 hover:border-white/30
                     backdrop-blur-sm
                     ${className}
                 `}

@@ -337,53 +337,94 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
 
   if (loading) {
     return (
-      <div className="bg-white/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8">
-        <LoadingSpinner />
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-cyan-100/30 to-blue-100/20 rounded-full"></div>
+          <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-indigo-100/25 to-purple-100/15 rounded-full"></div>
+        </div>
+        <div className="bg-gradient-to-r from-cyan-600 via-cyan-700 to-blue-700 p-5 text-white relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+              <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white drop-shadow-sm">📊 גרפים אינטראקטיביים</h2>
+              <p className="text-white/80 text-sm">טוען נתונים...</p>
+            </div>
+          </div>
+        </div>
+        <div className="p-8 relative z-10">
+          <LoadingSpinner />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-white/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-6">
-        <ErrorMessage message={error} />
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-cyan-100/30 to-blue-100/20 rounded-full"></div>
+          <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-indigo-100/25 to-purple-100/15 rounded-full"></div>
+        </div>
+        <div className="bg-gradient-to-r from-cyan-600 via-cyan-700 to-blue-700 p-5 text-white relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+              <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white drop-shadow-sm">📊 גרפים אינטראקטיביים</h2>
+              <p className="text-white/80 text-sm">שגיאה בטעינת הנתונים</p>
+            </div>
+          </div>
+        </div>
+        <div className="p-6 relative z-10">
+          <ErrorMessage message={error} />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative" dir="rtl">
-      {/* Background circles for consistency */}
+      {/* Enhanced Background circles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-16 -right-16 w-32 h-32 bg-blue-100/20 rounded-full"></div>
-        <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cyan-100/15 rounded-full"></div>
+        <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-cyan-100/30 to-blue-100/20 rounded-full"></div>
+        <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-indigo-100/25 to-purple-100/15 rounded-full"></div>
+        <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-gradient-to-br from-teal-100/20 to-cyan-100/10 rounded-full"></div>
       </div>
 
-      {/* Header */}
-      <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-5 text-white relative z-10">
+      {/* Enhanced Header */}
+      <div className="bg-gradient-to-r from-cyan-600 via-cyan-700 to-blue-700 p-5 text-white relative z-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+            <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </div>
           <div>
-            <h2 className="text-lg font-semibold">גרפים אינטראקטיביים</h2>
-            <p className="text-white/70 text-sm">ניתוח חזותי של ההוצאות שלך</p>
+            <h2 className="text-xl font-bold text-white drop-shadow-sm">📊 גרפים אינטראקטיביים</h2>
+            <p className="text-white/80 text-sm">ניתוח חזותי מתקדם של ההוצאות שלך</p>
           </div>
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="p-6 bg-gradient-to-r from-slate-50/80 to-gray-50/80 border-b border-slate-200/50 relative z-10">
-        {/* Chart Type Selector */}
-        <div className="mb-3 lg:mb-6">
-          <h3 className="text-sm font-semibold text-slate-700 mb-2 lg:mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-            סוג הצגה:
+      {/* Enhanced Controls */}
+      <div className="p-6 bg-gradient-to-r from-white/70 to-slate-50/60 border-b border-cyan-200/40 relative z-10">
+        {/* Enhanced Chart Type Selector */}
+        <div className="mb-4 lg:mb-6">
+          <h3 className="text-sm font-bold text-slate-700 mb-3 lg:mb-4 flex items-center gap-2">
+            <div className="w-6 h-6 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white text-xs">📈</span>
+            </div>
+            סוג התצוגה:
           </h3>
-          <div className="grid grid-cols-3 gap-2 lg:gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
             {[
               { id: 'pie', label: 'גרף עוגה', icon: '🥧' },
               { id: 'bar', label: 'גרף עמודות', icon: '📊' },
@@ -392,26 +433,26 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
               <button
                 key={opt.id}
                 onClick={() => setChartType(opt.id)}
-                className={`p-2 lg:p-3 rounded-lg border-2 transition-all duration-200 ${
+                className={`p-3 lg:p-4 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-2 font-medium ${
                   chartType === opt.id
-                    ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md transform scale-105'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:shadow-sm hover:scale-102'
+                    ? 'border-cyan-500 bg-gradient-to-br from-cyan-50 to-blue-50 text-cyan-700 shadow-lg transform scale-105'
+                    : 'border-slate-200 bg-gradient-to-br from-white to-slate-50/50 text-slate-600 hover:border-cyan-300 hover:shadow-md hover:scale-102'
                 }`}
               >
-                <div className="flex flex-col lg:flex-row items-center gap-1 lg:gap-2">
-                  <div className="text-base lg:text-xl">{opt.icon}</div>
-                  <span className="font-medium text-xs lg:text-sm text-center">{opt.label}</span>
-                </div>
+                <div className="text-lg lg:text-2xl mb-1">{opt.icon}</div>
+                <span className="font-semibold text-xs lg:text-sm text-center">{opt.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Date Filter */}
+        {/* Enhanced Date Filter */}
         <div>
-          <h3 className="text-sm font-semibold text-slate-700 mb-2 lg:mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-            תקופה:
+          <h3 className="text-sm font-bold text-slate-700 mb-3 lg:mb-4 flex items-center gap-2">
+            <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+              <span className="text-white text-xs">📅</span>
+            </div>
+            בחר תקופה:
           </h3>
           <div className="flex flex-wrap gap-2 mb-3 lg:mb-4">
             {[
@@ -459,10 +500,10 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
         </div>
       </div>
 
-      {/* Chart Display */}
-      <div className="p-2 lg:p-6 bg-gradient-to-br from-white to-slate-50/50">
+      {/* Chart Display - Simple and Clean */}
+      <div className="p-6 relative z-10">
         <div
-          className="bg-white rounded-lg lg:rounded-xl border border-slate-200/50 shadow-sm p-2 lg:p-6 transition-all duration-300 hover:shadow-md"
+          className="bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/30 shadow-sm p-4"
           style={{ minHeight: isMobile ? '350px' : (isTablet ? '400px' : '500px') }}
         >
           {renderChart()}

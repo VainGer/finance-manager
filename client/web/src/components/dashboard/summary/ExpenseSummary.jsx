@@ -75,13 +75,53 @@ export default function ExpenseSummary({ profile }) {
     };
 
     if (loading) {
-        return <LoadingSpinner />;
+        return (
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-purple-100/30 to-pink-100/20 rounded-full"></div>
+                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-violet-100/25 to-purple-100/15 rounded-full"></div>
+                </div>
+                <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-violet-700 p-5 text-white relative z-10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-white drop-shadow-sm">📋 סיכום הוצאות</h2>
+                            <p className="text-white/80 text-sm">טוען נתונים...</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="p-8 relative z-10">
+                    <LoadingSpinner />
+                </div>
+            </div>
+        );
     }
 
     if (error) {
         return (
-            <div className="bg-white rounded-lg shadow-lg p-6">
-                <div className="text-center py-8">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-purple-100/30 to-pink-100/20 rounded-full"></div>
+                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-violet-100/25 to-purple-100/15 rounded-full"></div>
+                </div>
+                <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-violet-700 p-5 text-white relative z-10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-white drop-shadow-sm">📋 סיכום הוצאות</h2>
+                            <p className="text-white/80 text-sm">שגיאה בטעינת הנתונים</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="p-6 text-center relative z-10">
                     <div className="text-red-500 text-lg mb-2">❌ שגיאה</div>
                     <div className="text-gray-600">{error}</div>
                 </div>
@@ -92,37 +132,38 @@ export default function ExpenseSummary({ profile }) {
     if (expenses.length === 0) {
         return (
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
-                {/* Background circles for consistency */}
+                {/* Enhanced Background circles */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-16 -right-16 w-32 h-32 bg-blue-100/20 rounded-full"></div>
-                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cyan-100/15 rounded-full"></div>
+                    <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-purple-100/30 to-pink-100/20 rounded-full"></div>
+                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-violet-100/25 to-purple-100/15 rounded-full"></div>
+                    <div className="absolute top-1/2 right-1/3 w-16 h-16 bg-gradient-to-br from-indigo-100/20 to-purple-100/10 rounded-full"></div>
                 </div>
 
-                {/* Header */}
-                <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-5 text-white relative z-10">
+                {/* Enhanced Header */}
+                <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-violet-700 p-5 text-white relative z-10">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                             </svg>
                         </div>
                         <div>
-                            <h2 className="text-lg font-semibold">סיכום הוצאות</h2>
-                            <p className="text-white/70 text-sm">ניתוח מפורט של דפוסי ההוצאה</p>
+                            <h2 className="text-xl font-bold text-white drop-shadow-sm">📋 סיכום הוצאות</h2>
+                            <p className="text-white/80 text-sm">ניתוח מפורט ומתקדם של דפוסי ההוצאה</p>
                         </div>
                     </div>
                 </div>
                 
-                {/* Empty State */}
-                <div className="p-16 text-center">
-                    <div className="w-20 h-20 mx-auto mb-6 bg-slate-100 rounded-full flex items-center justify-center">
-                        <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                {/* Enhanced Empty State */}
+                <div className="p-8 text-center relative z-10">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-100/80 to-pink-100/60 rounded-2xl flex items-center justify-center shadow-lg">
+                        <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                         </svg>
                     </div>
-                    <div className="text-xl font-bold text-slate-600 mb-3">עדיין אין הוצאות לניתוח</div>
-                    <div className="text-slate-500 mb-6">הוסף הוצאות כדי לראות סיכום ופירוט מפורט</div>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg text-sm text-slate-600">
+                    <div className="text-lg font-bold text-slate-700 mb-2">📊 בואו ניצור סיכום ראשון!</div>
+                    <div className="text-slate-500 mb-4 text-sm max-w-sm mx-auto">הוסף הוצאות כדי לראות סיכום מפורט וניתוח חכם של דפוסי ההוצאה שלך</div>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-100/80 to-pink-100/60 rounded-xl text-sm text-purple-700 font-medium shadow-sm">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
@@ -138,24 +179,25 @@ export default function ExpenseSummary({ profile }) {
 
     return (
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
-            {/* Background circles for consistency */}
+            {/* Enhanced Background circles */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-16 -right-16 w-32 h-32 bg-blue-100/20 rounded-full"></div>
-                <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cyan-100/15 rounded-full"></div>
+                <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-purple-100/30 to-pink-100/20 rounded-full"></div>
+                <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-violet-100/25 to-purple-100/15 rounded-full"></div>
+                <div className="absolute top-1/2 right-1/3 w-16 h-16 bg-gradient-to-br from-indigo-100/20 to-purple-100/10 rounded-full"></div>
             </div>
 
-            {/* Header */}
-            <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-5 text-white relative z-10">
+            {/* Enhanced Header */}
+            <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-violet-700 p-5 text-white relative z-10">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                             </svg>
                         </div>
                         <div>
-                            <h2 className="text-lg font-semibold">סיכום הוצאות</h2>
-                            <p className="text-white/70 text-sm">ניתוח מפורט של דפוסי ההוצאה</p>
+                            <h2 className="text-xl font-bold text-white drop-shadow-sm">📋 סיכום הוצאות</h2>
+                            <p className="text-white/80 text-sm">ניתוח מפורט ומתקדם של דפוסי ההוצאה</p>
                         </div>
                     </div>
                     

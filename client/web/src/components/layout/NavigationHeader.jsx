@@ -70,8 +70,9 @@ export default function NavigationHeader({
 
     return (
         <>
-            <nav className={`sticky top-0 z-[2000] bg-gradient-to-r from-white/95 via-slate-50/95 to-blue-50/95 backdrop-blur-xl border-b border-slate-100/50 shadow-xl shadow-slate-100/50 ${className}`} dir="rtl">
-                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+            <div className="sticky top-0 z-[2000]">
+                <nav className={`bg-gradient-to-r from-white/95 via-slate-50/95 to-blue-50/95 backdrop-blur-xl shadow-lg shadow-slate-100/50 ${className}`} dir="rtl">
+                    <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
                     <div className="flex justify-between items-center h-16 sm:h-18">
                         {/* Enhanced Branding */}
                         {showBranding && (
@@ -80,13 +81,13 @@ export default function NavigationHeader({
                                     onClick={handleLogoClick}
                                     className="flex items-center gap-2 sm:gap-3 hover:scale-105 transition-all duration-300 min-w-0 group"
                                 >
-                                    <div className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl transition-all duration-300">
-                                        <img src={logo} alt="logo" />
+                                    <div className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl group-hover:bg-white transition-all duration-300">
+                                        <img src={logo} alt="logo" className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 object-contain" />
                                     </div>
                                     <div className="min-w-0">
-                                        <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-800 bg-clip-text text-transparent truncate block">{title}</span>
+                                        <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent truncate block">{title}</span>
                                         {subtitle && (
-                                            <p className="text-xs sm:text-sm text-slate-500/80 truncate hidden sm:block font-medium">{subtitle}</p>
+                                            <p className="text-xs sm:text-sm text-slate-600 truncate hidden sm:block font-medium">{subtitle}</p>
                                         )}
                                     </div>
                                 </button>
@@ -99,18 +100,16 @@ export default function NavigationHeader({
                             {buttons.length > 0 && (
                                 <div className="hidden sm:flex gap-2 lg:gap-3">
                                     {buttons.map((button, index) => (
-                                        <Button
+                                        <button
                                             key={index}
                                             onClick={() => {
                                                 if (button.onClick) button.onClick();
                                                 navigate(button.path);
                                             }}
-                                            style={button.style || "outline"}
-                                            size="small"
-                                            className={`min-w-[80px] text-sm ${button.className || ""}`}
+                                            className={`px-4 py-2 min-w-[80px] text-sm font-medium text-slate-700 bg-white/80 hover:bg-white hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-md ${button.className || ""}`}
                                         >
                                             {button.label}
-                                        </Button>
+                                        </button>
                                     ))}
                                 </div>
                             )}
@@ -120,21 +119,23 @@ export default function NavigationHeader({
                                 <div className="relative">
                                     <button
                                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                        className="flex items-center gap-2 sm:gap-3 text-slate-700 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 rounded-lg p-1 sm:p-2 transition-colors duration-200"
+                                        className="flex items-center gap-2 sm:gap-3 text-slate-700 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg p-1 sm:p-2 transition-all duration-200 hover:bg-slate-50"
                                     >
-                                        {/* Enhanced Welcome Message */}
+                                        {/* Welcome Message */}
                                         <div className="text-sm hidden lg:block text-right">
-                                            <div className="font-bold bg-gradient-to-r from-slate-700 to-slate-800 bg-clip-text text-transparent">{getDisplayName()}</div>
+                                            <div className="font-bold text-slate-800">{getDisplayName()}</div>
                                             {profile && (
                                                 <div className="text-xs text-blue-600 font-medium">פרופיל פעיל</div>
                                             )}
                                         </div>
 
-                                        {/* Enhanced User Avatar */}
+                                        {/* User Avatar */}
                                         <div
-                                            className="h-9 w-9 sm:h-11 sm:w-11 rounded-full flex items-center justify-center text-white font-semibold border-2 border-white/50 shadow-lg transition-all duration-300 overflow-hidden bg-gradient-to-r from-slate-700 to-slate-800 hover:shadow-xl hover:scale-105"
+                                            className="h-9 w-9 sm:h-11 sm:w-11 rounded-full flex items-center justify-center text-white font-semibold border-2 border-slate-200 shadow-lg transition-all duration-300 overflow-hidden hover:shadow-xl hover:scale-105 hover:border-slate-300"
                                             style={{
-                                                backgroundColor: profile?.color || undefined
+                                                background: profile?.color ? 
+                                                    `linear-gradient(135deg, ${profile.color}, ${profile.color}dd)` : 
+                                                    'linear-gradient(135deg, #3b82f6, #1d4ed8)'
                                             }}
                                         >
                                             {profile?.avatar ? (
@@ -157,7 +158,7 @@ export default function NavigationHeader({
                                         </div>
 
                                         <svg
-                                            className={`h-4 w-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''
+                                            className={`h-4 w-4 text-slate-600 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''
                                                 }`}
                                             fill="none"
                                             stroke="currentColor"
@@ -178,9 +179,9 @@ export default function NavigationHeader({
                                                 )}
                                             </div>
 
-                                            {/* Mobile Navigation Buttons - Only show on mobile */}
+                                            {/* Enhanced Mobile Navigation Buttons */}
                                             {buttons.length > 0 && (
-                                                <div className="sm:hidden border-b border-gray-200">
+                                                <div className="sm:hidden border-b border-gray-200 bg-gradient-to-r from-slate-50/50 to-blue-50/50">
                                                     {buttons.map((button, index) => (
                                                         <button
                                                             key={index}
@@ -189,9 +190,15 @@ export default function NavigationHeader({
                                                                 navigate(button.path);
                                                                 setIsDropdownOpen(false);
                                                             }}
-                                                            className="block w-full text-right px-3 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                                                            className="flex items-center justify-between w-full text-right px-4 py-3 text-sm font-medium text-slate-700 hover:bg-white/80 hover:text-slate-900 transition-all duration-200 group border-b border-slate-100 last:border-b-0"
                                                         >
-                                                            {button.label}
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-2 h-2 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                                                                <svg className="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                                </svg>
+                                                            </div>
+                                                            <span className="flex-1 text-right">{button.label}</span>
                                                         </button>
                                                     ))}
                                                 </div>
@@ -231,8 +238,11 @@ export default function NavigationHeader({
                             )}
                         </div>
                     </div>
-                </div>
-            </nav>
+                    </div>
+                </nav>
+                {/* Elegant Bottom Border */}
+                <div className="h-0.5 bg-gradient-to-r from-transparent via-blue-200/60 to-transparent"></div>
+            </div>
 
             {/* Click outside to close dropdown */}
             {isDropdownOpen && (
