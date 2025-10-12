@@ -40,32 +40,34 @@ export default function Login() {
     ];
 
     return (
-        <PageLayout>
+        <>
             <NavigationHeader leftButtons={navigationButtons} />
-
-            <AuthFormContainer
+            <PageLayout className="pt-16">
+                <AuthFormContainer
                 title="התחברות לחשבון"
                 subtitle="ברוך הבא חזרה למנהל הכספים שלך"
             >
                 <ErrorAlert message={error} />
 
                 <form className="space-y-6" onSubmit={handleSubmit}>
-                    <FormInput
-                        label="שם משתמש"
-                        placeholder="הזן את שם המשתמש שלך"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
+                    <div className="space-y-5">
+                        <FormInput
+                            label="שם משתמש"
+                            placeholder="הזן את שם המשתמש שלך"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                        />
 
-                    <FormInput
-                        label="סיסמא"
-                        type="password"
-                        placeholder="הזן את הסיסמא שלך"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
+                        <FormInput
+                            label="סיסמא"
+                            type="password"
+                            placeholder="הזן את הסיסמא שלך"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
 
                     <Button
                         type="submit"
@@ -107,6 +109,7 @@ export default function Login() {
             </AuthFormContainer>
 
             <SecurityBadge />
-        </PageLayout>
+            </PageLayout>
+        </>
     );
 }
