@@ -21,7 +21,48 @@
  * 
  * Each test creates fresh, unique data using timestamps to ensure test isolation.
  * All created data is automatically cleaned up in reverse order at the end.
+ * 
+ * Enhanced Features:
+ * ✅ Unique entity names per test run to prevent conflicts
+ * ✅ Robust token extraction from multiple response formats  
+ * ✅ Retry logic and timeouts for CI stability
+ * ✅ 404 verification after deletion operations
+ * ✅ Authenticated request wrapper for cleaner code
  */
+
+/**
+ * Utility function to extract auth token from various response formats
+ * Handles both cookie-based and body-based token responses
+ */
+function extractTokenFrom(response) {
+  const cookie = response?.headers?.['set-cookie']?.find(c => c.includes('accessToken='));
+  const cookieToken = cookie ? cookie.split('accessToken=')[1].split(';')[0] : null;
+  const bodyToken =
+    response?.body?.tokens?.accessToken ||
+    response?.body?.accessToken ||
+    response?.body?.token;
+  return cookieToken || bodyToken || null;
+}
+
+/**
+ * Wrapper function for authenticated API requests
+ */
+function requestWithAuth(method, path, body = null) {
+  const options = {
+    method,
+    url: `${Cypress.env('API_BASE')}${path}`,
+    headers: {
+      'Authorization': `Bearer ${Cypress.env('AUTH_TOKEN')}`
+    },
+    failOnStatusCode: false
+  };
+  
+  if (body) {
+    options.body = body;
+  }
+  
+  return cy.request(options);
+}
 
 describe('Finance Manager - Complete User Journey E2E Tests', () => {
   let testData = {
@@ -35,9 +76,9 @@ describe('Finance Manager - Complete User Journey E2E Tests', () => {
     pinCode: '1234',
     refId: null,
     
-    // Test entities
-    categoryName: 'CypressTestCategory',
-    businessName: 'CypressTestBusiness',
+    // Test entities - unique names to prevent conflicts
+    categoryName: `CypressTestCategory_${Date.now()}_${Cypress._.random(1000, 9999)}`,
+    businessName: `CypressTestBusiness_${Date.now()}_${Cypress._.random(1000, 9999)}`,
     transactionId: null,
     transaction: {
       amount: 150,
@@ -88,15 +129,11 @@ describe('Finance Manager - Complete User Journey E2E Tests', () => {
         expect(response.status).to.eq(200);
         expect(response.body).to.have.property('account');
         
-        // The token is typically in cookies, let's try to get it from headers
-        const setCookieHeader = response.headers['set-cookie'];
-        if (setCookieHeader) {
-          const tokenCookie = setCookieHeader.find(cookie => cookie.includes('accessToken='));
-          if (tokenCookie) {
-            const token = tokenCookie.split('accessToken=')[1].split(';')[0];
-            Cypress.env('AUTH_TOKEN', token);
-            cy.log(`✅ User logged in successfully, token: ${token.substring(0, 20)}...`);
-          }
+        // Extract token using unified function
+        const token = extractTokenFrom(response);
+        if (token) {
+          Cypress.env('AUTH_TOKEN', token);
+          cy.log(`✅ User logged in successfully, token: ${token.substring(0, 20)}...`);
         }
       });
     });
@@ -143,24 +180,19 @@ describe('Finance Manager - Complete User Journey E2E Tests', () => {
         expect(response.body.profile).to.have.property('expenses');
         expect(response.body).to.have.property('tokens');
         
-        // Store the refId and tokens for subsequent requests
+        // Store the refId and extract fresh token
         testData.refId = response.body.profile.expenses;
-        Cypress.env('AUTH_TOKEN', response.body.tokens.accessToken);
-        cy.log(`✅ Profile validated, refId: ${testData.refId}, token: ${response.body.tokens.accessToken.substring(0, 20)}...`);
+        const token = extractTokenFrom(response);
+        expect(token, 'auth token').to.be.a('string').and.not.be.empty;
+        Cypress.env('AUTH_TOKEN', token);
+        cy.log(`✅ Profile validated, refId: ${testData.refId}, token: ${token.substring(0, 20)}...`);
       });
     });
 
     it('Step 5: Create first category', () => {
-      cy.request({
-        method: 'POST',
-        url: `${Cypress.env('API_BASE')}/expenses/category/create`,
-        headers: {
-          'Authorization': `Bearer ${Cypress.env('AUTH_TOKEN')}`
-        },
-        body: {
-          refId: testData.refId,
-          name: testData.categoryName
-        }
+      requestWithAuth('POST', '/expenses/category/create', {
+        refId: testData.refId,
+        name: testData.categoryName
       }).then((response) => {
         cy.log(`Create category: ${response.status} - ${JSON.stringify(response.body)}`);
         expect(response.status).to.eq(201);
@@ -170,13 +202,7 @@ describe('Finance Manager - Complete User Journey E2E Tests', () => {
     });
 
     it('Step 6: Verify category was created', () => {
-      cy.request({
-        method: 'GET',
-        url: `${Cypress.env('API_BASE')}/expenses/category/get-names/${testData.refId}`,
-        headers: {
-          'Authorization': `Bearer ${Cypress.env('AUTH_TOKEN')}`
-        }
-      }).then((response) => {
+      requestWithAuth('GET', `/expenses/category/get-names/${testData.refId}`).then((response) => {
         cy.log(`Get categories: ${response.status} - ${JSON.stringify(response.body)}`);
         expect(response.status).to.eq(200);
         
@@ -277,7 +303,10 @@ describe('Finance Manager - Complete User Journey E2E Tests', () => {
         );
         expect(ourTransaction).to.exist;
         testData.transactionId = ourTransaction._id;
-        cy.log(`✅ Transaction found, ID: ${testData.transactionId}`);
+        cy.log(`✅ Transaction found and stored for cleanup:`);
+        cy.log(`   🆔 Transaction ID: ${testData.transactionId}`);
+        cy.log(`   💰 Amount: ${ourTransaction.amount}`);
+        cy.log(`   📝 Description: ${ourTransaction.description}`);
       });
     });
 
@@ -513,6 +542,12 @@ describe('Finance Manager - Complete User Journey E2E Tests', () => {
         return;
       }
 
+      cy.log(`🔍 Attempting to delete transaction:`);
+      cy.log(`   Transaction ID: ${testData.transactionId}`);
+      cy.log(`   Category: ${testData.categoryName}`);
+      cy.log(`   Business: ${testData.businessName}`);
+      cy.log(`   RefId: ${testData.refId}`);
+
       cy.request({
         method: 'DELETE',
         url: `${Cypress.env('API_BASE')}/expenses/transaction/delete-transaction`,
@@ -527,9 +562,23 @@ describe('Finance Manager - Complete User Journey E2E Tests', () => {
         },
         failOnStatusCode: false
       }).then((response) => {
-        cy.log(`Delete transaction: ${response.status} - ${JSON.stringify(response.body)}`);
+        cy.log(`🗑️ Delete transaction response: ${response.status}`);
+        cy.log(`📄 Response body: ${JSON.stringify(response.body, null, 2)}`);
         expect([200, 404]).to.include(response.status);
         cy.log('✅ Transaction cleanup completed');
+        
+        // Verify 404 on fetch-by-id after delete
+        if (response.status === 200) {
+          cy.request({
+            method: 'GET',
+            url: `${Cypress.env('API_BASE')}/expenses/transaction/${testData.refId}/${testData.categoryName}/${testData.businessName}/${testData.transactionId}`,
+            headers: { 'Authorization': `Bearer ${Cypress.env('AUTH_TOKEN')}` },
+            failOnStatusCode: false
+          }).then((res) => {
+            expect(res.status).to.eq(404);
+            cy.log('✅ Verified 404 after transaction deletion');
+          });
+        }
       });
     });
 
