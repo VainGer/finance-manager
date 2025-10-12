@@ -1,4 +1,3 @@
-// useAdminLogs.js
 import { useState, useEffect, useCallback } from "react";
 import { post } from "../../utils/api";
 
@@ -17,45 +16,25 @@ export default function useAdminLogs() {
             } else {
                 setError(res.message || "שגיאה בטעינת רשימת הפרופילים");
             }
-        } catch (err) {
+        } catch {
             setError("שגיאת שרת בטעינת הפרופילים");
         }
     }, []);
 
-    const fetchRecentLogs = useCallback(async (limit = 50) => {
+    const fetchLogsWithFilters = useCallback(async (filters = {}) => {
         setLoading(true);
         setError("");
         try {
-            const res = await post("admin/actions/recent", { limit });
+            const res = await post("admin/actions/filter", filters);
             if (res.ok) {
                 setLogs(res.actions || []);
                 return res.actions || [];
             } else {
-                setError(res.message || "שגיאה בטעינת הלוגים האחרונים");
+                setError(res.message || "שגיאה בטעינת הלוגים");
                 return [];
             }
-        } catch (err) {
+        } catch {
             setError("שגיאת שרת בעת טעינת הלוגים");
-            return [];
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    const fetchLogsByDate = useCallback(async (start, end) => {
-        setLoading(true);
-        setError("");
-        try {
-            const res = await post("admin/actions/by-date", { start, end });
-            if (res.ok) {
-                setLogs(res.actions || []);
-                return res.actions || [];
-            } else {
-                setError(res.message || "שגיאה בטעינת הלוגים לפי תאריכים");
-                return [];
-            }
-        } catch (err) {
-            setError("שגיאת שרת בעת טעינת הלוגים לפי תאריכים");
             return [];
         } finally {
             setLoading(false);
@@ -71,7 +50,6 @@ export default function useAdminLogs() {
         logs,
         loading,
         error,
-        fetchRecentLogs,
-        fetchLogsByDate,
+        fetchLogsWithFilters,
     };
 }

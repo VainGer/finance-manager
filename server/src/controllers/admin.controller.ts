@@ -5,9 +5,9 @@ import JWT from "../utils/JWT";
 import AdminService from "../services/admin/admin.service";
 import BudgetService from "../services/budget/budget.service";
 import CategoryService from "../services/expenses/category.service";
-import { Admin } from "mongodb";
 
 export default class AdminController {
+
 
     static async register(req: Request, res: Response) {
         try {
@@ -30,24 +30,12 @@ export default class AdminController {
         }
     }
 
-    static async getRecentActions(req: Request, res: Response) {
+    static async getActionsWithFilters(req: Request, res: Response) {
         try {
-            const { limit } = req.body as { limit?: number };
-            const username = req.adminUsername!;
-            const actions = await AdminService.getRecentActions(limit ?? 50, username);
-            AdminController.setAdminAccessToken(res, username);
-            res.status(200).json({ success: true, actions });
-        } catch (error) {
-            AdminController.handleError(error, res);
-        }
-    }
-
-    static async getActionsByDateRange(req: Request, res: Response) {
-        try {
-            const { start, end } = req.body as { start: string; end: string };
-            const username = req.adminUsername!;
-            const actions = await AdminService.getActionsByDateRange(new Date(start), new Date(end), username);
-            AdminController.setAdminAccessToken(res, username);
+            const adminUsername = req.adminUsername!;
+            const filters = req.body; // { limit?, start?, end?, executeAccount?, executeProfile?, action?, type? }
+            const actions = await AdminService.getActionsWithFilters(filters, adminUsername);
+            AdminController.setAdminAccessToken(res, adminUsername);
             res.status(200).json({ success: true, actions });
         } catch (error) {
             AdminController.handleError(error, res);
@@ -94,12 +82,14 @@ export default class AdminController {
             const { username, profileName } = req.body;
             const adminUsername = req.adminUsername!;
             const budgets = await BudgetService.getBudgets(username, profileName);
+
             AdminService.logAction({
-                type: 'export',
+                type: "export",
                 executeAccount: adminUsername,
-                action: 'get_profile_budgets',
+                action: "get_profile_budgets",
                 target: { username, profileName }
             });
+
             AdminController.setAdminAccessToken(res, adminUsername);
             res.status(200).json({ success: true, budgets });
         } catch (error) {
@@ -112,14 +102,16 @@ export default class AdminController {
             const { username, profileName, budgetId } = req.body;
             const adminUsername = req.adminUsername!;
             const result = await BudgetService.deleteBudgets(username, profileName, budgetId, true);
-            AdminController.setAdminAccessToken(res, adminUsername);
+
             AdminService.logAction({
-                type: 'delete',
+                type: "delete",
                 executeAccount: adminUsername,
                 executeProfile: profileName,
-                action: 'delete_budget',
+                action: "delete_budget",
                 target: { username, profileName, budgetId }
             });
+
+            AdminController.setAdminAccessToken(res, adminUsername);
             res.status(200).json({
                 success: true,
                 message: result.message || "Budget deleted successfully"
@@ -134,12 +126,14 @@ export default class AdminController {
             const { refId } = req.body;
             const adminUsername = req.adminUsername!;
             const expenses = await CategoryService.getProfileExpenses(refId);
+
             AdminService.logAction({
-                type: 'export',
+                type: "export",
                 executeAccount: adminUsername,
-                action: 'get_profile_expenses',
+                action: "get_profile_expenses",
                 target: { refId }
             });
+
             AdminController.setAdminAccessToken(res, adminUsername);
             res.status(200).json({
                 success: true,
@@ -150,7 +144,6 @@ export default class AdminController {
             AdminController.handleError(error, res);
         }
     }
-
 
     private static setAdminAccessToken(res: Response, username: string) {
         const token = JWT.signAdminAccessToken({ username });

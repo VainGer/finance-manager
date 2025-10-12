@@ -1,0 +1,98 @@
+@url = {{baseUrl}}
+@username = test_account
+@device = vscode-rest-client
+@parentProfile = parent_test_profile
+@childProfile = child_test_profile
+@pin = 1234
+@newPin = 5678
+@color = #8A2BE2
+
+### 2. Create First (Parent) Profile
+POST {{url}}/api/profile/create-first-profile
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "profileName": "{{parentProfile}}",
+  "pin": "{{pin}}",
+  "parentProfile": true,
+  "color": "{{color}}"
+}
+
+### 3. Validate Profile (Login) - Capture Access Token
+# @name profileLogin
+POST {{url}}/api/profile/validate-profile
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "profileName": "{{parentProfile}}",
+  "pin": "{{pin}}",
+  "device": "{{device}}",
+  "remember": true
+}
+
+### 3.1 Store Access Token
+@accessToken = {{profileLogin.response.body.tokens.accessToken}}
+
+### 4. Create Child Profile
+POST {{url}}/api/profile/create-child-profile
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "username": "{{username}}",
+  "profileName": "{{childProfile}}",
+  "pin": "{{pin}}",
+  "parentProfile": false
+}
+
+### 5. Get All Profiles
+GET {{url}}/api/profile/get-profiles?username={{username}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+### 6. Rename Child Profile
+POST {{url}}/api/profile/rename-profile
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "username": "{{username}}",
+  "oldProfileName": "{{childProfile}}",
+  "newProfileName": "child_profile_renamed"
+}
+
+### 7. Change Parent Profile PIN
+POST {{url}}/api/profile/change-pin
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "username": "{{username}}",
+  "profileName": "{{parentProfile}}",
+  "oldPin": "{{pin}}",
+  "newPin": "{{newPin}}"
+}
+
+### 8. Set Profile Color
+POST {{url}}/api/profile/set-color
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "username": "{{username}}",
+  "profileName": "{{parentProfile}}",
+  "color": "#00BFFF"
+}
+
+### 9. Delete Child Profile (Renamed)
+POST {{url}}/api/profile/delete-profile
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "username": "{{username}}",
+  "profileName": "child_profile_renamed",
+  "pin": "{{pin}}"
+}

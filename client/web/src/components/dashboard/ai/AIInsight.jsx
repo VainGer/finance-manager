@@ -51,10 +51,6 @@ export default function AIInsight() {
 
     const coachOutput = selectedHistory.coachOutput;
     const { summary, categories, nextMonthPlan, dataQuality } = coachOutput;
-    console.log('Summary data:', summary);
-    console.log('Global data:', summary.global);
-    console.log('All histories:', histories); // הוסף את זה
-    console.log('Selected history:', selectedHistory); // והוסף את זה
     const selectItems = histories.map((h) => ({
         value: h._id,
         label: h.periodLabel,

@@ -1,0 +1,54 @@
+@url = {{baseUrl}}
+@refId = 68ebcee57893d2140c432b43
+@categoryName = groceries
+@newCategoryName = supermarket
+@accessToken = {{accessToken}}
+
+### 1. Create Category
+POST {{url}}/api/expenses/category/create
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refId": "{{refId}}",
+  "name": "{{categoryName}}"
+}
+
+###
+POST {{url}}/api/expenses/category/create
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refId": "{{refId}}",
+  "name": "transport"
+}
+
+###
+POST {{url}}/api/expenses/category/create
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refId": "{{refId}}",
+  "name": "entertainment"
+}
+
+### 2. Get Category Names
+GET {{url}}/api/expenses/category/get-names/{{refId}}
+Authorization: Bearer {{accessToken}}
+
+### 3. Rename Category
+PUT {{url}}/api/expenses/category/rename
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refId": "{{refId}}",
+  "oldName": "{{categoryName}}",
+  "newName": "{{newCategoryName}}"
+}
+
+### 4. Delete Category
+DELETE {{url}}/api/expenses/category/delete/{{refId}}/{{newCategoryName}}
+Authorization: Bearer {{accessToken}}

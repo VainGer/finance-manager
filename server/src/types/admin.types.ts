@@ -18,19 +18,13 @@ export type ActionType = "create" | "update" | "delete" | "login" | "export";
 
 
 export interface Action {
-    date: string;
+    _id?: ObjectId | string;
+    date: string; // ISO string
     type: ActionType;
     executeAccount: string;
     executeProfile?: string;
     action: string;
     target?: string;
-}
-
-
-export interface HistoryDoc {
-    _id?: ObjectId | string;
-    type: "logs";
-    operations: Action[];
 }
 
 export type GroupedProfiles = {

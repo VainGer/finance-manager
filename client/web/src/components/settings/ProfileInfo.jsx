@@ -81,14 +81,20 @@ export default function ProfileInfo({ profile, account, editMode, profileForm, s
                   { color: '#4B0082', name: 'אינדיגו' },
                   { color: '#708090', name: 'אפור' },
                   { color: '#8B4513', name: 'חום' },
-                  { color: '#2E8B57', name: 'ירוק ים' }
+                  { color: '#2E8B57', name: 'ירוק ים' },
+                  { color: '#FFFFFF', name: 'לבן' },
+                  { color: '#A52A2A', name: 'אדום חום' },
+                  { color: '#00CED1', name: 'טורקיז כהה' },
+                  { color: '#DAA520', name: 'זהב כהה' },
+                  { color: '#C0C0C0', name: 'כסף' },
+                  { color: '#ADFF2F', name: 'ירוק בהיר' },
                 ].map(({ color, name }) => (
                   <button
                     key={color}
                     onClick={() => setProfileForm(prev => ({ ...prev, profileColor: color }))}
                     className={`w-12 h-12 rounded-xl border-4 transition-all duration-200 hover:scale-110 hover:shadow-lg ${profileForm.profileColor === color
-                        ? 'border-slate-800 shadow-lg transform scale-105'
-                        : 'border-slate-300 hover:border-slate-500'
+                      ? 'border-slate-800 shadow-lg transform scale-105'
+                      : 'border-slate-300 hover:border-slate-500'
                       }`}
                     style={{ backgroundColor: color }}
                     title={name}
@@ -138,8 +144,8 @@ export default function ProfileInfo({ profile, account, editMode, profileForm, s
                     onClick={() => onSwitchProfile(prof.profileId)}
                     disabled={prof.profileId === profile?.profileId}
                     className={`p-4 rounded-lg border-2 transition-all duration-200 ${prof.profileId === profile?.profileId
-                        ? 'border-slate-400 bg-slate-100 cursor-not-allowed opacity-75'
-                        : 'border-slate-200 bg-white hover:border-slate-400 hover:shadow-md cursor-pointer'
+                      ? 'border-slate-400 bg-slate-100 cursor-not-allowed opacity-75'
+                      : 'border-slate-200 bg-white hover:border-slate-400 hover:shadow-md cursor-pointer'
                       }`}
                   >
                     <div className="flex items-center gap-3">

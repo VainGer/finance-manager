@@ -44,10 +44,13 @@ export default class BudgetController {
     static async getProfileBudgets(req: Request, res: Response) {
         try {
             const { username, profileName } = req.query as { username: string, profileName: string };
-            const budgets = await BudgetService.getBudgets(username, profileName);
+            const budgetsRes = await BudgetService.getBudgets(username, profileName);
+            const profileBudgets = budgetsRes.budgets.profile;
+            const categoryBudgets = budgetsRes.budgets.categories;
             res.status(200).json({
                 message: "Budgets retrieved successfully",
-                budgets
+                profileBudgets,
+                categoryBudgets
             });
         } catch (error) {
             BudgetController.handleError(error, res);

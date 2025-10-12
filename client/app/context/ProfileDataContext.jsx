@@ -37,8 +37,8 @@ export function ProfileDataProvider({ children }) {
             let errMsg = [];
             const response = await get(`budgets/get-profile-budgets?username=${account.username}&profileName=${profile.profileName}`);
             if (response.ok) {
-                setProfileBudgets(response.budgets.budgets.profile || []);
-                setCategoryBudgets(response.budgets.budgets.categories || []);
+                setProfileBudgets(response.profileBudgets || []);
+                setCategoryBudgets(response.categoryBudgets || []);
             } else {
                 switch (response.status) {
                     case 400: errMsg.push('בקשה לא תקינה בטעינת תקציבי הפרופיל'); break;

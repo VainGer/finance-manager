@@ -60,7 +60,7 @@ export default class TransactionModel {
                 if (!result || result.modifiedCount === 0) {
                     return { success: false, message: "Failed to create transaction" };
                 }
-                return { success: true, message: "Transaction created successfully with new month grouping" };
+                return { success: true, message: "Transaction created successfully" };
             }
         } catch (error) {
             console.error("Error in TransactionModel.create", error);

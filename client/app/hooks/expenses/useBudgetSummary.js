@@ -66,7 +66,7 @@ export default function useBudgetSummary() {
     useEffect(() => {
         if (!selectedChild) return;
 
-        if (!childrenLoading && childrenProfileBudgets?.length && childrenCategoryBudgets?.length) {
+        if (!childrenLoading) {
             setActiveProfileBudgets(childrenProfileBudgets);
             setActiveCategoryBudgets(childrenCategoryBudgets);
             processBudgets(childrenProfileBudgets, childrenCategoryBudgets);

@@ -7,7 +7,8 @@ import routerV1 from "./routes/v1";
 import { v2 as cloudinary } from "cloudinary";
 import DB from "./utils/DB";
 dotenv.config({ path: path.join(__dirname, './dotenv/.env') });
-import crypto from "crypto";
+
+
 const PORT = process.env.PORT;
 const server = Express();
 const db = new DB();
@@ -20,11 +21,11 @@ cloudinary.config({
 
 server.use(cors({
     origin: [
-        'http://localhost:5173',  // Vite dev server
-        'http://localhost:3000',  // Alternative dev port
-        'https://finance-manager-web.vercel.app', // Production web app
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://finance-manager-web.vercel.app',
     ],
-    credentials: true, // Allow cookies
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));

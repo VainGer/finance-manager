@@ -12,6 +12,7 @@ import {
 } from '../utils/tokenUtils';
 import { post } from '../utils/api';
 import { useRouter } from 'expo-router';
+import { usePathname } from 'expo-router';
 
 const AuthContext = createContext();
 
@@ -37,6 +38,8 @@ export const AuthProvider = ({ children }) => {
     const router = useRouter();
     const refreshTimerRef = useRef(null);
     const REFRESH_OFFSET = 5 * 60 * 1000; // 5 minutes before expiration
+    const pathname = usePathname();
+    const restrictedPaths = ['/', '/login', '/authProfile', '/register'];
 
     const loadStorage = async () => {
         try {
@@ -225,6 +228,12 @@ export const AuthProvider = ({ children }) => {
             console.error('Error clearing profile:', err);
         }
     }, []);
+
+    useEffect(() => {
+        if (pathname.includes(restrictedPaths)) {
+            clearProfile();
+        }
+    }, [pathname])
 
     async function rememberLogin(username, profileId, isAutoLogin, setAccount, setProfile) {
         const device = getDeviceInfo();

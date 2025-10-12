@@ -10,7 +10,6 @@ export default function Home() {
 
     const handleLogin = async () => {
         const success = await autoLogin();
-        console.log(success)
         if (success) {
             navigate('/dashboard');
         } else {

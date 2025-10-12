@@ -1,15 +1,20 @@
 import db from "../../server";
 import bcrypt from "bcrypt";
-import dotenv from 'dotenv';
-import path from 'path';
-import { AdminAccount, AdminAccountsDoc, Action, HistoryDoc, GroupedProfiles } from "../../types/admin.types";
-dotenv.config({ path: path.join(__dirname, '../../dotenv/.env') });
+import dotenv from "dotenv";
+import path from "path";
+import {
+    AdminAccount,
+    AdminAccountsDoc,
+    Action,
+    GroupedProfiles,
+} from "../../types/admin.types";
 
+dotenv.config({ path: path.join(__dirname, "../../dotenv/.env") });
 
 export default class AdminModel {
-
-    private static adminCollection: string = "admin";
-    private static profilesCollection: string = "profiles";
+    private static adminCollection = "admin";
+    private static logsCollection = "admin_logs";
+    private static profilesCollection = "profiles";
     private static SALT_ROUNDS = 10;
 
     static async createAdmin(username: string, password: string, secret: string) {
@@ -19,12 +24,7 @@ export default class AdminModel {
             }
 
             const hashedPassword = await bcrypt.hash(password, this.SALT_ROUNDS);
-
-            const newAdmin: AdminAccount = {
-                username,
-                password: hashedPassword,
-                isAdmin: true,
-            };
+            const newAdmin: AdminAccount = { username, password: hashedPassword, isAdmin: true };
 
             const existingDoc = await db.GetDocument(
                 this.adminCollection,
@@ -41,11 +41,6 @@ export default class AdminModel {
                     return { success: false, message: "Failed to create admin document" };
                 }
 
-                await db.AddDocument(this.adminCollection, {
-                    type: "logs",
-                    operations: [],
-                } as HistoryDoc);
-
                 return { success: true, message: "Admin created successfully (first admin)" };
             }
 
@@ -60,7 +55,6 @@ export default class AdminModel {
             }
 
             return { success: true, message: "Admin created successfully" };
-
         } catch (error) {
             console.error("Error in AdminModel.createAdmin:", error);
             return { success: false, message: "Internal server error while creating admin" };
@@ -69,11 +63,7 @@ export default class AdminModel {
 
     static async getAdminsDoc(): Promise<AdminAccountsDoc | null> {
         try {
-            const result = await db.GetDocument(
-                this.adminCollection,
-                { type: "accounts" }
-            );
-            return result as AdminAccountsDoc | null;
+            return await db.GetDocument(this.adminCollection, { type: "accounts" }) as AdminAccountsDoc | null;
         } catch (error) {
             console.error("Error in AdminModel.getAdminsDoc:", error);
             throw new Error("Internal server error while getting admins document");
@@ -83,36 +73,26 @@ export default class AdminModel {
     static async validateAdmin(username: string, password: string): Promise<boolean> {
         try {
             const adminDoc = await this.getAdminsDoc();
-            if (!adminDoc) {
-                return false;
-            }
-            const admin = adminDoc.accounts.find((admin) => admin.username === username);
-            if (!admin) {
-                return false;
-            }
-            const isPasswordValid = await bcrypt.compare(password, admin.password);
-            return isPasswordValid;
+            if (!adminDoc) return false;
+
+            const admin = adminDoc.accounts.find((a) => a.username === username);
+            if (!admin) return false;
+
+            return await bcrypt.compare(password, admin.password);
         } catch (error) {
             console.error("Error in AdminModel.validateAdmin:", error);
             throw new Error("Internal server error while validating admin");
         }
     }
 
-    static async addAction(action: Action) {
+    static async addAction(action: Action): Promise<boolean> {
         try {
-            const logEntry = {
+            const logEntry: Action = {
                 ...action,
                 date: new Date().toISOString()
-            }
-            const result = await db.UpdateDocument(
-                this.adminCollection,
-                { type: "logs" },
-                { $push: { operations: logEntry } }
-            );
-            if (!result?.modifiedCount) {
-                return false;
-            }
-            return true;
+            };
+            const result = await db.AddDocument(this.logsCollection, logEntry);
+            return !!result?.insertedId;
         } catch (error) {
             console.error("Error in AdminModel.addAction:", error);
             throw new Error("Internal server error while adding action");
@@ -121,32 +101,49 @@ export default class AdminModel {
 
     static async getRecentActions(limit: number = 50): Promise<Action[]> {
         try {
-            const doc = await db.GetDocument(this.adminCollection, { type: "logs" });
-            if (!doc || !doc.operations) return [];
-            return doc.operations
-                .sort((a: Action, b: Action) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                .slice(0, limit);
+            const result = await db.Find(this.logsCollection,
+                {},
+                { sort: { date: -1 }, limit }
+            );
+            return result as Action[];
         } catch (error) {
             console.error("Error in AdminModel.getRecentActions:", error);
             throw new Error("Internal server error while fetching recent actions");
         }
     }
 
-    static async getActionsByDateRange(start: Date, end: Date): Promise<Action[]> {
+    static async getActionsByFilters(filters: {
+        start?: Date;
+        end?: Date;
+        executeAccount?: string;
+        executeProfile?: string;
+        action?: string;
+        type?: string;
+        limit?: number;
+    }): Promise<Action[]> {
         try {
-            const doc = await db.GetDocument(this.adminCollection, { type: "logs" });
-            if (!doc || !doc.operations) return [];
+            const query: any = {};
 
-            const startTime = start.getTime();
-            const endTime = end.getTime();
+            if (filters.start || filters.end) {
+                query.date = {};
+                if (filters.start) query.date.$gte = new Date(filters.start).toISOString();
+                if (filters.end) query.date.$lte = new Date(filters.end).toISOString();
+            }
+            if (filters.executeAccount) query.executeAccount = filters.executeAccount;
+            if (filters.executeProfile) query.executeProfile = filters.executeProfile;
+            if (filters.action) query.action = filters.action;
+            if (filters.type) query.type = filters.type;
 
-            return doc.operations.filter((action: Action) => {
-                const actionTime = new Date(action.date).getTime();
-                return actionTime >= startTime && actionTime <= endTime;
-            });
+            const options: any = { sort: { date: -1 } };
+            if (filters.limit && !isNaN(filters.limit) && filters.limit > 0) {
+                options.limit = filters.limit;
+            }
+
+            const result = await db.Find(this.logsCollection, query, options);
+            return result as Action[];
         } catch (error) {
-            console.error("Error in AdminModel.getActionsByDateRange:", error);
-            throw new Error("Internal server error while fetching actions by date range");
+            console.error("Error in AdminModel.getActionsByFilters:", error);
+            throw new Error("Internal server error while filtering actions");
         }
     }
 
