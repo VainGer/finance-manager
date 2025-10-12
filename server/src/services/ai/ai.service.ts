@@ -7,6 +7,7 @@ import ProfileModel from "../../models/profile/profile.model";
 import TransactionModel from "../../models/expenses/transaction.model";
 import * as AppError from "../../errors/AppError";
 import AiModel from "../../models/ai/ai.model";
+import AdminService from "../admin/admin.service";
 import { ObjectId } from "mongodb";
 
 export default class AiService {
@@ -64,6 +65,13 @@ export default class AiService {
 
             try {
                 await AiModel.saveToHistory(profileId, historyEntry);
+                AdminService.logAction({
+                    type: "create",
+                    executeAccount: username,
+                    executeProfile: profileName,
+                    action: "ai_generate_coaching_report",
+                    target: { profileId }
+                });
             } catch (saveErr) {
                 console.error("[AI] Failed to save history entry:", saveErr);
             }

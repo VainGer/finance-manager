@@ -13,6 +13,7 @@ import BudgetService from "../budget/budget.service";
 import { formatDateYM } from "../../utils/date.utils";
 import TransactionModel from "../../models/expenses/transaction.model";
 import AiService from "../ai/ai.service";
+import AdminService from "../admin/admin.service";
 export default class ProfileService {
 
 
@@ -55,6 +56,13 @@ export default class ProfileService {
             if (!result.profileId || !result.success) {
                 throw new AppErrors.DatabaseError("Failed to create profile. Database operation unsuccessful.");
             }
+            AdminService.logAction({
+                type: "create",
+                executeAccount: profileData.username,
+                executeProfile: profileData.profileName,
+                action: "create_profile",
+                target: profileData
+            });
             return { success: true, profileId: result.profileId, message: "Profile created successfully." };
         } catch (error) {
             if (error instanceof AppErrors.AppError) {
@@ -127,6 +135,13 @@ export default class ProfileService {
         if (updateResults.some(r => !r.success)) {
             throw new AppErrors.DatabaseError("Failed to add child to one or more parent profiles.");
         }
+        AdminService.logAction({
+            type: "create",
+            executeAccount: childProfileData.username,
+            executeProfile: childProfileData.profileName,
+            action: "create_child_profile",
+            target: childProfileData
+        });
         return {
             success: true,
             profileId: createdProfileId,
@@ -203,6 +218,13 @@ export default class ProfileService {
             }
             const { pin: _, budgets: __, ...safeProfile } = profile;
             AiService.generateCoachingReport(profile.username, profile.profileName, profile._id.toString());
+            AdminService.logAction({
+                type: "login",
+                executeAccount: username,
+                executeProfile: profileName,
+                action: "profile_login",
+                target: { device, remember }
+            });
             return {
                 success: true,
                 safeProfile,
@@ -258,6 +280,13 @@ export default class ProfileService {
         if (!storeResult.success) {
             return { success: false, message: "Failed to store new token. Cannot refresh.", tokensRemoved: 1 };
         }
+        AdminService.logAction({
+            type: "update",
+            executeAccount: username,
+            executeProfile: profileName,
+            action: "refresh_device_token",
+            target: { device }
+        });
         return { success: true, message: "Token refreshed successfully.", tokensRemoved: 1 };
     }
 
@@ -323,6 +352,13 @@ export default class ProfileService {
             } catch (err) {
                 console.error("AI Coaching report generation failed:", err);
             }
+            AdminService.logAction({
+                type: "login",
+                executeAccount: username,
+                executeProfile: profile.profileName,
+                action: "validate_by_refresh_token",
+                target: { device }
+            });
             return {
                 success: true,
                 safeProfile,
@@ -349,18 +385,21 @@ export default class ProfileService {
 
     static async revokeRefreshToken(refreshToken: string) {
         try {
-            // Verify token to get profileId
+
             const decoded = JWT.verifyRefreshToken(refreshToken);
             if (!decoded || !decoded.profileId) {
                 throw new AppErrors.UnauthorizedError("Invalid refresh token");
             }
-
-            // Remove refresh token from the database
             const result = await ProfileModel.removeRefreshToken(decoded.profileId, refreshToken);
             if (!result) {
                 throw new AppErrors.DatabaseError("Failed to revoke refresh token");
             }
-
+            AdminService.logAction({
+                type: "delete",
+                executeAccount: "system",
+                action: "revoke_refresh_token",
+                target: { refreshToken }
+            });
             return { success: true, message: "Refresh token revoked successfully" };
         } catch (error) {
             if (error instanceof AppErrors.AppError) {
@@ -422,6 +461,13 @@ export default class ProfileService {
         if (!updatedProfile.success) {
             throw new AppErrors.ConflictError(updatedProfile.message);
         }
+        AdminService.logAction({
+            type: "update",
+            executeAccount: username,
+            executeProfile: oldProfileName,
+            action: "rename_profile",
+            target: { oldProfileName, newProfileName }
+        });
         return updatedProfile;
     }
 
@@ -450,6 +496,13 @@ export default class ProfileService {
         if (!updatedProfile.success) {
             throw new AppErrors.ConflictError(updatedProfile.message);
         }
+        AdminService.logAction({
+            type: "update",
+            executeAccount: username,
+            executeProfile: profileName,
+            action: "change_profile_pin",
+            target: { profileName }
+        });
         return updatedProfile;
     }
 
@@ -479,6 +532,13 @@ export default class ProfileService {
         if (!result.success) {
             throw new AppErrors.AppError(result.message, 500);
         }
+        AdminService.logAction({
+            type: "delete",
+            executeAccount: username,
+            executeProfile: profileName,
+            action: "delete_profile",
+            target: { profileName }
+        });
         return result;
     }
 
@@ -509,7 +569,13 @@ export default class ProfileService {
             if (!result.success) {
                 throw new AppErrors.DatabaseError(`Failed to update profile with new avatar: ${result.message}`);
             }
-
+            AdminService.logAction({
+                type: "update",
+                executeAccount: username,
+                executeProfile: profileName,
+                action: "set_avatar",
+                target: { hasAvatar: !!avatar }
+            });
             return { success: true, message: "Avatar set successfully." };
         } catch (error) {
             if (error instanceof AppErrors.AppError) {
@@ -531,6 +597,13 @@ export default class ProfileService {
         if (!result.success) {
             throw new AppErrors.AppError("Failed to delete avatar", 500);
         }
+        AdminService.logAction({
+            type: "delete",
+            executeAccount: username,
+            executeProfile: profileName,
+            action: "delete_avatar",
+            target: { profileName }
+        });
         return result;
     }
 
@@ -546,6 +619,13 @@ export default class ProfileService {
         if (!result.success) {
             throw new AppErrors.AppError(result.message, 500);
         }
+        AdminService.logAction({
+            type: "update",
+            executeAccount: username,
+            executeProfile: profileName,
+            action: "set_color",
+            target: { color }
+        });
         return { success: true, message: "Profile color set successfully" };
     }
 
@@ -568,6 +648,13 @@ export default class ProfileService {
         if (!uploadResult || !uploadResult.success) {
             throw new AppErrors.AppError(uploadResult?.message || "Failed to upload transactions", 500);
         }
+        AdminService.logAction({
+            type: "create",
+            executeAccount: username,
+            executeProfile: profileName,
+            action: "upload_transactions",
+            target: { refId, count: transactionsToUpload.length }
+        });
         return { success: true, message: "Transactions uploaded successfully" };
     }
 
@@ -678,6 +765,12 @@ export default class ProfileService {
             };
         });
         const categorizedData = await LLM.categorizeTransactions(JSON.stringify(categoriesAndBusinesses), transactionsData);
+        AdminService.logAction({
+            type: "export",
+            executeAccount: "system",
+            action: "categorize_transactions",
+            target: { refId }
+        });
         return categorizedData;
     }
 

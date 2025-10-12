@@ -7,6 +7,14 @@ import ProfileAuth from "../pages/profile/ProfileAuth.jsx";
 import Dashboard from "../pages/Dashboard.jsx";
 import Settings from "../pages/Settings.jsx";
 import UploadFromFileTransactions from "../pages/UploadFromFileTransactions.jsx";
+import AdminHome from "../pages/admin/AdminHome.jsx";
+import AdminLogin from "../pages/admin/AdminLogin.jsx";
+import AdminRegister from "../pages/admin/AdminRegister.jsx";
+import AdminDashboard from "../pages/admin/adminDashboard.jsx";
+import AdminLogs from "../pages/admin/AdminLogs.jsx";
+import AdminProfiles from "../pages/admin/AdminProfiles.jsx";
+import AdminExpenses from "../pages/admin/AdminExpenses.jsx";
+import AdminBudgets from "../pages/admin/AdminBudgets.jsx";
 
 const router = createBrowserRouter([
     {
@@ -34,8 +42,33 @@ const router = createBrowserRouter([
         path: '/profile-settings', element: <Settings />,
     },
     {
-        path: '/u', element: <UploadFromFileTransactions />,
-    }
+        path: '/upload-from-file', element: <UploadFromFileTransactions />,
+    },
+    {
+        path: '/admin', element: <AdminHome />,
+    },
+    {
+        path: '/admin/login', element: <AdminLogin />,
+    },
+    {
+        path: '/admin/register', element: <AdminRegister />,
+    },
+    {
+        path: '/admin/dashboard', element: <AdminDashboard />,
+    },
+    {
+        path: '/admin/logs', element: <AdminLogs />,
+    },
+    {
+        path: '/admin/profiles', element: <AdminProfiles />,
+    },
+    {
+        path: '/admin/expenses', element: <AdminExpenses />,
+    },
+    {
+        path: '/admin/budgets', element: <AdminBudgets />,
+    },
+
 ]);
 
 export default router;

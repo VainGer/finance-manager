@@ -5,6 +5,7 @@ import BudgetModel from "../../models/budget/budget.model";
 import ProfileModel from "../../models/profile/profile.model";
 import { ObjectId } from "mongodb";
 import { ProfileBudget } from "../../types/profile.types";
+import AdminService from "../admin/admin.service";
 
 export default class BudgetService {
 
@@ -53,6 +54,16 @@ export default class BudgetService {
         if (!budgetResult || !budgetResult.success) {
             throw new AppErrors.DatabaseError(budgetResult?.message || "Failed to create budget");
         }
+        AdminService.logAction({
+            type: 'create',
+            executeAccount: budgetData.username,
+            executeProfile: budgetData.profileName,
+            action: 'create_budget',
+            target: {
+                profileBudget: budgetData.profileBudget,
+                categoriesBudgets: budgetData.categoriesBudgets
+            }
+        });
         return { success: true, message: "Budget created successfully" };
     }
 
@@ -115,6 +126,13 @@ export default class BudgetService {
         if (!result || !result.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to update budget spent for category '${categoryName}'.`);
         }
+        AdminService.logAction({
+            type: 'update',
+            executeAccount: existingCategories.username,
+            executeProfile: existingCategories.profileName,
+            action: 'update_category_budget_spent',
+            target: { refId, categoryName, budgetId, diff }
+        });
         return result;
     }
 
@@ -128,6 +146,13 @@ export default class BudgetService {
         if (!result || !result.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to add budget to child profile '${profileName}'.`);
         }
+        AdminService.logAction({
+            type: 'create',
+            executeAccount: username,
+            executeProfile: "parent profile",
+            action: 'add_budget_to_child',
+            target: profileName + " " + budgetData.startDate + " " + budgetData.endDate + " " + budgetData.amount
+        });
         return result;
     }
 
@@ -139,6 +164,13 @@ export default class BudgetService {
         if (!result || !result.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to update budget spent for profile '${profileName}'.`);
         }
+        AdminService.logAction({
+            type: 'update',
+            executeAccount: username,
+            executeProfile: profileName,
+            action: 'update_budget_spent_on_transaction',
+            target: { budgetId, tAmount }
+        });
         return result;
     }
 
@@ -240,7 +272,7 @@ export default class BudgetService {
         return { success: true, budgets: { profile: profileBudget, categories: categoriesBudgets.categoriesBudgets } };
     }
 
-    static async deleteBudgets(username: string, profileName: string, budgetId: string) {
+    static async deleteBudgets(username: string, profileName: string, budgetId: string, byAdmin = false) {
         if (!username || !profileName || !budgetId) {
             throw new AppErrors.ValidationError("Username, profile name and budget ID are required");
         }
@@ -251,6 +283,15 @@ export default class BudgetService {
         const result = await BudgetModel.deleteBudget(username, profileName, budgetId, profile.expenses);
         if (!result || !result.success) {
             throw new AppErrors.DatabaseError(result?.message || `Failed to delete budget with ID '${budgetId}'`);
+        }
+        if (!byAdmin) {
+            AdminService.logAction({
+                type: 'delete',
+                executeAccount: username,
+                executeProfile: profileName,
+                action: 'delete_budget',
+                target: { budgetId }
+            });
         }
         return result;
     }
