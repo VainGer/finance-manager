@@ -273,22 +273,17 @@ export default function useBudgets({ setLoading }) {
   );
 
   const deleteBudget = async (budgetId) => {
-    console.log("starting delete for budgetId:", budgetId);
     if (!budgetId) {
       setError("לא נבחר תקציב למחיקה");
       return false;
     }
-    console.log("there is a budgetId, proceeding with deletion");
     setLoading(true);
     setError(null);
     setSuccess(null);
-    console.log("trying to delete budget");
     try {
-      console.log("sending delete request for budgetId:", budgetId);
       const response = await del(
         `budgets/delete-budget/${account.username}/${profile.profileName}/${budgetId}`,
       );
-      console.log("delete response received:", response);
       if (response.ok) {
         await fetchBudgets();
         setSuccess("התקציב נמחק בהצלחה");

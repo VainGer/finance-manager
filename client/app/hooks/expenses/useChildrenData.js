@@ -79,8 +79,8 @@ export default function useChildrenData() {
             const response = await get(
                 `budgets/get-profile-budgets?username=${profile.username}&profileName=${selectedChild.name}`);
             if (response.ok) {
-                setChildrenProfileBudgets(response.budgets.budgets.profile || []);
-                setChildrenCategoryBudgets(response.budgets.budgets.categories || []);
+                setChildrenProfileBudgets(response.profileBudgets || []);
+                setChildrenCategoryBudgets(response.categoryBudgets || []);
             }
             else {
                 switch (response.status) {

@@ -1,0 +1,73 @@
+@url = {{baseUrl}}
+@refId = 68ebcee57893d2140c432b43
+@catName = supermarket
+@busName = tesco_express
+@transactionId = 68ebd0c915b2e012152284f1
+@accessToken = {{accessToken}}
+
+### 1. Create Transaction
+POST {{url}}/api/expenses/transaction/create
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refId": "{{refId}}",
+  "catName": "{{catName}}",
+  "busName": "{{busName}}",
+  "transaction": {
+    "amount": 120.5,
+    "date": "2025-10-12T00:00:00.000Z",
+    "description": "Weekly grocery shopping"
+  }
+}
+
+### 2. Get All Transactions for Business
+GET {{url}}/api/expenses/transaction/{{refId}}/{{catName}}/{{busName}}
+Authorization: Bearer {{accessToken}}
+
+### 3. Change Transaction Amount
+PUT {{url}}/api/expenses/transaction/change-amount
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refId": "{{refId}}",
+  "catName": "{{catName}}",
+  "busName": "{{busName}}",
+  "transactionId": "{{transactionId}}",
+  "newAmount": 150
+}
+
+### 4. Change Transaction Date
+PUT {{url}}/api/expenses/transaction/change-date
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refId": "{{refId}}",
+  "catName": "{{catName}}",
+  "busName": "{{busName}}",
+  "transactionId": "{{transactionId}}",
+  "newDate": "2025-10-15T00:00:00.000Z"
+}
+
+### 5. Change Transaction Description
+PUT {{url}}/api/expenses/transaction/change-description
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refId": "{{refId}}",
+  "catName": "{{catName}}",
+  "busName": "{{busName}}",
+  "transactionId": "{{transactionId}}",
+  "newDescription": "Updated description for testing"
+}
+
+### 6. Delete Transaction
+DELETE {{url}}/api/expenses/transaction/delete-transaction?refId={{refId}}&catName={{catName}}&busName={{busName}}&transactionId={{transactionId}}
+Authorization: Bearer {{accessToken}}
+
+### 7. Get Monthly Transactions
+GET {{url}}/api/expenses/transaction/{{refId}}/{{catName}}/{{busName}}/by-month
+Authorization: Bearer {{accessToken}}

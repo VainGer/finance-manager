@@ -6,7 +6,7 @@ import { useLocation } from "react-router-dom";
 export default function useChildrenData() {
     const { profile } = useAuth();
     const children = profile?.children || [];
-    
+
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -92,8 +92,8 @@ export default function useChildrenData() {
             const response = await get(
                 `budgets/get-profile-budgets?username=${profile.username}&profileName=${childName}`);
             if (response.ok) {
-                setChildrenProfileBudgets(response.budgets.budgets.profile || []);
-                setChildrenCategoryBudgets(response.budgets.budgets.categories || []);
+                setChildrenProfileBudgets(response.profileBudgets || []);
+                setChildrenCategoryBudgets(response.categoryBudgets || []);
             }
             else {
                 switch (response.status) {

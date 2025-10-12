@@ -41,7 +41,6 @@ export default function BudgetSummary() {
 
     const { children, selectedChild, setSelectedChild } = childrenProps;
 
-
     const BackToMainBtn = () => {
         return (
             <Button onPress={() => { setSelectedChild(null); }} className="mb-4 bg-blue-500 px-4 py-4 rounded-full w-3/4 mx-auto">

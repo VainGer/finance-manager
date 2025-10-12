@@ -9,9 +9,6 @@ businessRouter.post<{}, {}, { refId: string, catName: string, name: string }>(
 businessRouter.put<{}, {}, { refId: string, catName: string, oldName: string, newName: string }>(
     '/rename', accessTokenVerification, ExpensesController.renameBusiness);
 
-businessRouter.put<{}, {}, { refId: string, catName: string, busName: string, bankName: string }>(
-    '/update-bank-name', accessTokenVerification, ExpensesController.updateBusinessBankName);
-
 businessRouter.get<{ refId: string, catName: string }, {}, {}>(
     '/get-businesses/:refId/:catName', accessTokenVerification, ExpensesController.getBusinessNamesByCategory);
 

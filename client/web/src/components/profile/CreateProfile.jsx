@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { post } from '../../utils/api';
-import FormInput from '../common/FormInput';
 import Button from '../common/Button';
-import ErrorAlert from '../common/ErrorAlert';
 
 const toBase64 = async (file) => {
     return new Promise((resolve, reject) => {
@@ -97,7 +95,7 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
                             </div>
                         </div>
                     )}
-                    
+
                     <form onSubmit={createProfile} className="space-y-6">
                         {/* Profile Name */}
                         <div className="space-y-2">
@@ -191,28 +189,33 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
                             <div className="bg-slate-50 rounded-xl p-6 border border-slate-200">
                                 <div className="grid grid-cols-6 gap-3 mb-4">
                                     {[
-                                        { color: '#FF0000', name: 'אדום' },     
-                                        { color: '#00AA00', name: 'ירוק' },     
-                                        { color: '#0066FF', name: 'כחול' },     
-                                        { color: '#FFD700', name: 'צהוב' },     
-                                        { color: '#FF6B35', name: 'כתום' },     
-                                        { color: '#800080', name: 'סגול' },     
-                                        { color: '#FF1493', name: 'ורוד' },     
-                                        { color: '#20B2AA', name: 'טורקיז' },   
-                                        { color: '#4B0082', name: 'אינדיגו' },  
-                                        { color: '#708090', name: 'אפור' },     
-                                        { color: '#8B4513', name: 'חום' },      
-                                        { color: '#2E8B57', name: 'ירוק ים' }   
+                                        { color: '#FF0000', name: 'אדום' },
+                                        { color: '#00AA00', name: 'ירוק' },
+                                        { color: '#0066FF', name: 'כחול' },
+                                        { color: '#FFD700', name: 'צהוב' },
+                                        { color: '#FF6B35', name: 'כתום' },
+                                        { color: '#800080', name: 'סגול' },
+                                        { color: '#FF1493', name: 'ורוד' },
+                                        { color: '#20B2AA', name: 'טורקיז' },
+                                        { color: '#4B0082', name: 'אינדיגו' },
+                                        { color: '#708090', name: 'אפור' },
+                                        { color: '#8B4513', name: 'חום' },
+                                        { color: '#2E8B57', name: 'ירוק ים' },
+                                        { color: '#FFFFFF', name: 'לבן' },
+                                        { color: '#A52A2A', name: 'אדום חום' },
+                                        { color: '#00CED1', name: 'טורקיז כהה' },
+                                        { color: '#DAA520', name: 'זהב כהה' },
+                                        { color: '#C0C0C0', name: 'כסף' },
+                                        { color: '#ADFF2F', name: 'ירוק בהיר' },
                                     ].map(({ color: colorValue, name }) => (
                                         <button
                                             key={colorValue}
                                             type="button"
                                             onClick={() => setColor(colorValue)}
-                                            className={`w-12 h-12 rounded-xl border-4 transition-all duration-200 hover:scale-110 hover:shadow-lg ${
-                                                color === colorValue
+                                            className={`w-12 h-12 rounded-xl border-4 transition-all duration-200 hover:scale-110 hover:shadow-lg ${color === colorValue
                                                     ? 'border-slate-800 shadow-lg transform scale-105'
                                                     : 'border-slate-300 hover:border-slate-500'
-                                            }`}
+                                                }`}
                                             style={{ backgroundColor: colorValue }}
                                             title={name}
                                         />
@@ -251,8 +254,8 @@ export default function CreateProfile({ username, firstProfile, onProfileCreated
 
                         {/* Submit Button */}
                         <div className="pt-6 border-t border-slate-200">
-                            <Button 
-                                type="submit" 
+                            <Button
+                                type="submit"
                                 className="w-full px-6 py-4 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white border-0 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl text-lg"
                             >
                                 <div className="flex items-center justify-center gap-2">

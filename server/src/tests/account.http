@@ -1,0 +1,69 @@
+@url = {{baseUrl}}
+
+
+###1. Register Test Account (Valid)
+POST  {{url}}/api/account/register
+Content-Type: application/json
+
+{
+  "username": "test_account",
+  "password": "test1234"
+}
+
+### 1.1 Register - Missing Fields (Invalid)
+POST {{url}}/api/account/register
+Content-Type: application/json
+
+{
+  "username": "",
+  "password": ""
+}
+
+###1.2 Register - Duplicate Account (Invalid)
+POST {{url}}/api/account/register
+Content-Type: application/json
+
+{
+  "username": "test_account",
+  "password": "anotherpass"
+}
+
+###2. Login (Validate) - Save Token
+POST {{url}}/api/account/validate
+Content-Type: application/json
+
+{
+  "username": "test_account",
+  "password": "test1234"
+}
+
+### 2.1 Login - Wrong Password
+POST {{url}}/api/account/validate
+Content-Type: application/json
+
+{
+  "username": "test_account",
+  "password": "wrongpassword"
+}
+
+### 3. Change Password (Protected)
+POST {{url}}/api/account/change-password
+Content-Type: application/json
+#Authorization: Bearer {{accessToken}}
+
+{
+  "username": "test_account",
+  "currentPassword": "test1234",
+  "newPassword": "newTest123"
+}
+
+###3.1 Change Password - Invalid Token
+POST {{url}}/api/account/change-password
+Content-Type: application/json
+Authorization: Bearer invalidtoken
+
+{
+  "username": "test_account",
+  "currentPassword": "test1234",
+  "newPassword": "newTest123"
+}

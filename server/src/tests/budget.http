@@ -1,0 +1,72 @@
+@url = {{baseUrl}}
+@username = test_account
+@parentProfile = parent_test_profile
+@refId = 68ebcee57893d2140c432b43
+@budgetId = 68ebd1fc15b2e012152284f7
+@accessToken = {{accessToken}}
+
+### 1. Create Budget (Profile + Categories)
+POST {{url}}/api/budgets/add-budget
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "budgetData": {
+    "username": "{{username}}",
+    "profileName": "{{parentProfile}}",
+    "refId": "{{refId}}",
+    "profileBudget": {
+      "startDate": "2025-10-01T00:00:00.000Z",
+      "endDate": "2025-10-31T23:59:59.000Z",
+      "amount": 5000
+    },
+    "categoriesBudgets": [
+      { "categoryName": "supermarket", "amount": 2500 },
+      { "categoryName": "transport", "amount": 1500 },
+      { "categoryName": "entertainment", "amount": 1000 }
+    ]
+  }
+}
+
+### 2. Add Budget to Child Profile
+POST {{url}}/api/budgets/add-child-budget
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "username": "{{username}}",
+  "profileName": "child_test_profile",
+  "budget": {
+    "startDate": "2025-11-01T00:00:00.000Z",
+    "endDate": "2025-11-30T23:59:59.000Z",
+    "amount": 2000
+  }
+}
+
+### 3. Get Child Budgets
+GET {{url}}/api/budgets/get-child-budgets?username={{username}}&profileName=child_test_profile
+Authorization: Bearer {{accessToken}}
+
+### 4. Get Profile Budgets
+GET {{url}}/api/budgets/get-profile-budgets?username={{username}}&profileName={{parentProfile}}
+Authorization: Bearer {{accessToken}}
+
+### 5. Get Category Budgets
+GET {{url}}/api/budgets/get-category-budgets?refId={{refId}}
+Authorization: Bearer {{accessToken}}
+
+### 6. Check Budget Dates (Validation)
+POST {{url}}/api/budgets/check-budget-dates
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "username": "{{username}}",
+  "profileName": "{{parentProfile}}",
+  "startDate": "2025-12-01T00:00:00.000Z",
+  "endDate": "2025-12-31T23:59:59.000Z"
+}
+
+### 7. Delete Budget
+DELETE {{url}}/api/budgets/delete-budget/{{username}}/{{parentProfile}}/{{budgetId}}
+Authorization: Bearer {{accessToken}}

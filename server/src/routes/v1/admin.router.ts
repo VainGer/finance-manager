@@ -9,8 +9,7 @@ adminRouter.post('/register', AdminController.register);
 adminRouter.post('/login', AdminController.login);
 
 // Logs
-adminRouter.post('/actions/recent', adminTokenVerification, AdminController.getRecentActions);
-adminRouter.post('/actions/by-date', adminTokenVerification, AdminController.getActionsByDateRange);
+adminRouter.post('/actions/filter', adminTokenVerification, AdminController.getActionsWithFilters);
 
 // Profiles
 adminRouter.post('/profiles', adminTokenVerification, AdminController.getAllProfilesGrouped);

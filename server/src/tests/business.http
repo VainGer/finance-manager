@@ -1,0 +1,39 @@
+@url = {{baseUrl}}
+@refId = 68ebcee57893d2140c432b43
+@catName = supermarket
+@busName = tesco
+@newBusName = tesco_express
+@bankName = MyBank
+@accessToken = {{accessToken}}
+
+### 1. Add Business to Category
+POST {{url}}/api/expenses/business/add
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refId": "{{refId}}",
+  "catName": "{{catName}}",
+  "name": "{{busName}}"
+}
+
+### 2. Get Businesses by Category
+GET {{url}}/api/expenses/business/get-businesses/{{refId}}/{{catName}}
+Authorization: Bearer {{accessToken}}
+
+### 3. Rename Business
+PUT {{url}}/api/expenses/business/rename
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refId": "{{refId}}",
+  "catName": "{{catName}}",
+  "oldName": "{{busName}}",
+  "newName": "{{newBusName}}"
+}
+
+
+### 4. Delete Business
+DELETE {{url}}/api/expenses/business/delete/{{refId}}/{{catName}}/{{newBusName}}
+Authorization: Bearer {{accessToken}}

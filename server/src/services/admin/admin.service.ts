@@ -6,6 +6,7 @@ import ProfileService from "../profile/profile.service";
 
 export default class AdminService {
 
+
     static async createAdmin(username: string, password: string, secret: string) {
         if (!username || !password || !secret) {
             throw new AppErrors.BadRequestError("username, password and secret are required");
@@ -13,10 +14,7 @@ export default class AdminService {
 
         const accs = await AdminModel.getAdminsDoc();
         const usernameExists = accs?.accounts.some(admin => admin.username === username);
-
-        if (usernameExists) {
-            throw new AppErrors.ConflictError("username already exists");
-        }
+        if (usernameExists) throw new AppErrors.ConflictError("username already exists");
 
         const result = await AdminModel.createAdmin(username, password, secret);
 
@@ -25,9 +23,9 @@ export default class AdminService {
         }
 
         this.logAction({
-            type: 'create',
+            type: "create",
             executeAccount: username,
-            action: 'create_admin',
+            action: "create_admin",
             target: { username }
         });
 
@@ -38,53 +36,51 @@ export default class AdminService {
         };
     }
 
+
     static async getGroupedProfiles(username: string) {
         const groupedProfiles = await AdminModel.getGroupedProfiles();
         this.logAction({
-            type: 'export',
+            type: "export",
             executeAccount: username,
-            action: 'get_grouped_profiles',
+            action: "get_grouped_profiles",
             target: "allProfiles"
-        })
+        });
         return groupedProfiles;
     }
 
-    static async getRecentActions(limit: number, username: string) {
-        const actions = await AdminModel.getRecentActions(limit);
+    static async getActionsWithFilters(
+        filters: {
+            limit?: number;
+            start?: Date;
+            end?: Date;
+            executeAccount?: string;
+            executeProfile?: string;
+            action?: string;
+            type?: string;
+        },
+        adminUsername: string
+    ): Promise<Action[]> {
+        const actions = await AdminModel.getActionsByFilters(filters);
         this.logAction({
-            type: 'export',
-            executeAccount: username,
-            action: 'get_recent_actions',
-            target: "all recent actions in limit: " + limit
-        })
-        return actions;
-    }
-
-    static async getActionsByDateRange(start: Date, end: Date, username: string) {
-        const actions = await AdminModel.getActionsByDateRange(start, end);
-        this.logAction({
-            type: 'export',
-            executeAccount: username,
-            action: 'get_actions_by_date_range',
-            target: "all actions between dates: " + start + " and " + end
+            type: "export",
+            executeAccount: adminUsername,
+            action: "get_actions_with_filters",
+            target: filters
         });
         return actions;
     }
-
 
     static async validateAdmin(username: string, password: string) {
         if (!username || !password) {
             throw new AppErrors.BadRequestError("username and password are required");
         }
         const isValid = await AdminModel.validateAdmin(username, password);
-        if (!isValid) {
-            throw new AppErrors.CredentialError();
-        }
+        if (!isValid) throw new AppErrors.CredentialError();
 
         this.logAction({
-            type: 'login',
+            type: "login",
             executeAccount: username,
-            action: 'admin_login',
+            action: "admin_login",
             target: { username }
         });
 
@@ -97,9 +93,7 @@ export default class AdminService {
         }
 
         const profile = await ProfileModel.findProfile(username, profileName);
-        if (!profile) {
-            throw new AppErrors.NotFoundError("Profile not found");
-        }
+        if (!profile) throw new AppErrors.NotFoundError("Profile not found");
 
         if (profile.avatar) {
             const delAvatar = await ProfileService.deleteAvatar(username, profileName);
@@ -120,35 +114,27 @@ export default class AdminService {
             }
         }
 
-        const result = await ProfileModel.deleteProfile(
-            username,
-            profileName,
-            profile.expenses
-        );
-
-        if (!result.success) {
-            throw new AppErrors.AppError(result.message, 500);
-        }
+        const result = await ProfileModel.deleteProfile(username, profileName, profile.expenses);
+        if (!result.success) throw new AppErrors.AppError(result.message, 500);
 
         this.logAction({
-            type: 'delete',
+            type: "delete",
             executeAccount: adminUsername,
-            action: 'admin_delete_profile',
+            action: "admin_delete_profile",
             target: { username, profileName }
         });
 
         return { success: true, message: "Profile deleted successfully" };
     }
 
-    static async updateProfile(
-        username: string,
-        profileName: string,
+    static async updateProfile(username: string, profileName: string,
         updates: {
             newProfileName?: string;
             newPin?: string;
             color?: string;
             avatar?: string | null;
-        }, adminUsername: string
+        },
+        adminUsername: string
     ) {
         if (!username || !profileName) {
             throw new AppErrors.BadRequestError("Username and profile name are required");
@@ -171,14 +157,8 @@ export default class AdminService {
             );
         }
 
-        if (updates.newPin) {
-            await this.handlePinChange(username, effectiveProfileName, updates.newPin);
-        }
-
-        if (updates.color) {
-            await this.handleColorChange(username, effectiveProfileName, updates.color);
-        }
-
+        if (updates.newPin) await this.handlePinChange(username, effectiveProfileName, updates.newPin);
+        if (updates.color) await this.handleColorChange(username, effectiveProfileName, updates.color);
         if (updates.avatar !== undefined) {
             await this.handleAvatarChange(username, effectiveProfileName, updates.avatar);
         }
@@ -186,10 +166,10 @@ export default class AdminService {
         const refreshed = await ProfileService.updateProfile(username, effectiveProfileName);
 
         this.logAction({
-            type: 'update',
+            type: "update",
             executeAccount: adminUsername,
             executeProfile: effectiveProfileName,
-            action: 'admin_update_profile',
+            action: "admin_update_profile",
             target: { username, profileName, updates }
         });
 
@@ -199,7 +179,6 @@ export default class AdminService {
             profile: refreshed.profile
         };
     }
-
 
     static async logAction(params: {
         type: ActionType;

@@ -131,5 +131,27 @@ export default class DB {
             await session.endSession();
         }
     }
+
+    async Find(collection: string, query: Record<string, any> = {},
+        options?: { sort?: Record<string, 1 | -1>; limit?: number }
+    ) {
+        try {
+            let cursor = this.client?.db(this.dbName).collection(collection).find(query);
+
+            if (options?.sort) {
+                cursor = cursor?.sort(options.sort);
+            }
+
+            if (options?.limit) {
+                cursor = cursor?.limit(options.limit);
+            }
+
+            const results = await cursor?.toArray();
+            return results || [];
+        } catch (error) {
+            console.error("Error finding documents: ", error);
+            throw error;
+        }
+    }
 }
 
