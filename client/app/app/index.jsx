@@ -3,8 +3,10 @@ import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Text, View, Image } from "react-native";
+import { useState } from "react";
 import Button from "../components/common/button.jsx";
 import FeatureCarousel from "../components/common/FeatureCarousel.jsx";
+import MotiSplashScreen from "../components/common/MotiSplashScreen.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import LoadingSpinner from "../components/common/loadingSpinner.jsx";
 import "../global.css";
@@ -14,6 +16,16 @@ import "../global.css";
 export default function Index() {
   const router = useRouter();
   const { autoLogin, isLoading } = useAuth();
+  const [showSplash, setShowSplash] = useState(true);
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+  };
+
+  // Show splash screen first
+  if (showSplash) {
+    return <MotiSplashScreen onFinish={handleSplashComplete} />;
+  }
 
   const toLoginAction = async () => {
     const result = await autoLogin();

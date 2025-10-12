@@ -88,10 +88,10 @@ export default function Home() {
                                 className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold px-12 py-4 text-lg shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 border-0"
                             >
                                 <span className="flex items-center gap-3">
-                                    להתחיל ניסיון חינם
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                                     </svg>
+                                    להתחיל ניסיון חינם
                                 </span>
                             </Button>
                         </div>
