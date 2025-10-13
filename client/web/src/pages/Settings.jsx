@@ -209,7 +209,7 @@ export default function Settings() {
     return (
         <PageLayout spacing={false}>
             <NavigationHeader
-                title="Finance Manager"
+                title="Smart Finance"
                 subtitle={`הגדרות מערכת - ${profile?.profileName || account?.username}`}
             />
 

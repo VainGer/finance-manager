@@ -196,7 +196,7 @@ const SplashScreen = ({ onFinish }) => {
           marginBottom: 8,
         }}
       >
-        Finance Manager
+        Smart Finance
       </MotiText>
 
       {/* כותרת משנה עם fade-up */}

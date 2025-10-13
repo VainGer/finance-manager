@@ -68,7 +68,7 @@ export default function SplashScreen({
           <div className="mx-auto w-32 h-32 rounded-full flex items-center justify-center bg-white shadow-2xl splash-card">
             <img
               src={logoImage}
-              alt="Finance Manager"
+              alt="SmartFinance"
               className="w-16 h-16 object-contain splash-logo"
               loading="eager"
               decoding="async"
@@ -78,7 +78,7 @@ export default function SplashScreen({
 
         {/* כותרת – bounce מדורג אחרי הלוגו */}
         <h1 className="text-4xl font-bold text-white text-center mb-2 splash-title">
-          Finance Manager
+          Smart Finance
         </h1>
 
         {/* תת־כותרת – fade up עדין */}

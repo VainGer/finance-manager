@@ -5,7 +5,7 @@ import logo from '../../assets/images/logo.png'
 import Button from '../common/Button';
 
 export default function NavigationHeader({
-    title = "Finance Manager",
+    title = "Smart Finance",
     subtitle = "",
     buttons = [],
     showBranding = true,

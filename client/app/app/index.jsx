@@ -81,7 +81,7 @@ export default function Index() {
               className="w-52 h-52"
               source={require("../assets/images/icon.png")}
             />
-            <Text className="text-wrap text-4xl text-center text-slate-800 font-bold">Finance Manager</Text>
+            <Text className="text-wrap text-4xl text-center text-slate-800 font-bold">Smart Finance</Text>
           </View>
 
 

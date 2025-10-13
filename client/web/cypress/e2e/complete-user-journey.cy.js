@@ -1,7 +1,7 @@
 /**
- * Finance Manager - Complete User Journey E2E Tests
+ * SmartFinance - Complete User Journey E2E Tests
  * 
- * This comprehensive test suite validates the complete user flow for the Finance Manager application.
+ * This comprehensive test suite validates the complete user flow for the SmartFinance application.
  * It covers 100% of the expenses domain API endpoints with full CRUD operations.
  * 
  * Test Flow:
@@ -64,7 +64,7 @@ function requestWithAuth(method, path, body = null) {
   return cy.request(options);
 }
 
-describe('Finance Manager - Complete User Journey E2E Tests', () => {
+describe('SmartFinance - Complete User Journey E2E Tests', () => {
   let testData = {
     // User registration data
     username: `cypress_user_${Date.now()}`,

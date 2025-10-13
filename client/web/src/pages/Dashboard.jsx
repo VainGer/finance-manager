@@ -59,7 +59,7 @@ export default function Dashboard() {
             <PageLayout spacing={false}>
                 {/* Professional Navigation */}
                 <NavigationHeader 
-                    title="Finance Manager"
+                    title="Smart Finance"
                    
                 />
 

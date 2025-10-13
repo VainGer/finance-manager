@@ -25,7 +25,7 @@ export default function Home() {
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center gap-3">
                             <img className='w-24 h-24' src={logo} alt="logo" />
-                            <span className="text-xl font-semibold text-slate-800">Finance Manager</span>
+                            <span className="text-xl font-semibold text-slate-800">Smart Finance</span>
                         </div>
                         <div className="flex gap-3">
                             <Button

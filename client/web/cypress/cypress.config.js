@@ -16,7 +16,7 @@ export default defineConfig({
     },
   },
   env: {
-    // API base URL for the Finance Manager backend
+    // API base URL for the SmartFinance backend
     API_BASE: 'http://localhost:5500/api'
   }
 })

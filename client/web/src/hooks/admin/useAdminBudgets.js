@@ -119,14 +119,13 @@ export default function useAdminBudgets() {
 
         const periods = profileArr
             .map(b => ({
-                id: b._id?.$oid || b._id || b.id,
+                id: b._id,
                 startDate: b.startDate,
                 endDate: b.endDate,
             }))
             .sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
 
         setAvailablePeriods(periods);
-
         const now = new Date();
         const current = periods.find(p => {
             const start = new Date(p.startDate);
@@ -143,8 +142,8 @@ export default function useAdminBudgets() {
             setCurrentCategoryBudgets([]);
             return;
         }
-
-        const entry = processedBudgets[selectedPeriod.id];
+        const id = availablePeriods.find(p => p.startDate === selectedPeriod.startDate)?.id;
+        const entry = processedBudgets[id];
         if (!entry) {
             setCurrentProfileBudget(null);
             setCurrentCategoryBudgets([]);
