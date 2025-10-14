@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { memo } from 'react';
 import { formatDate } from '../../../utils/budgetUtils';
-import { post, get } from '../../../utils/api';
-import { useAuth } from '../../../context/AuthContext';
+import useBudgets from '../../../hooks/useBudgets';
 
 const Categories = memo(function Categories({ categoryBudgets, onChange }) {
     return (
@@ -60,7 +59,7 @@ const DateSelect = memo(function DateSelect({
                 </div>
             )}
 
-            <form className="space-y-6" onSubmit={onSubmit} dir="rtl">
+            <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); onSubmit(); }} dir="rtl">
                 {!profile.parentProfile ? (
                     <div className="space-y-3">
                         <label htmlFor="date-select" className="block text-sm font-semibold text-slate-800 text-right">
@@ -69,7 +68,7 @@ const DateSelect = memo(function DateSelect({
                         <select
                             id="date-select"
                             value={selectedChildBudget ?? ""}
-                            onChange={onChildSelect}
+                            onChange={(e) => onChildSelect(Number(e.target.value))}
                             className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-right"
                         >
                             <option value="">בחר תאריך</option>
@@ -140,143 +139,28 @@ const DateSelect = memo(function DateSelect({
     );
 });
 
-
 export default function CreateProfileBudget({ goBack }) {
-    const { account, profile } = useAuth();
-
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [amount, setAmount] = useState('');
-    const [categoryBudgets, setCategoryBudgets] = useState([]);
-    const [childrenBudgets, setChildrenBudgets] = useState([]);
-    const [selectedChildBudget, setSelectedChildBudget] = useState(null);
-
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
-    const [validDates, setValidDates] = useState(false);
-
-    useEffect(() => {
-        const fetchCategories = async () => {
-            if (profile?.expenses) {
-                const response = await get(`expenses/category/get-names/${profile.expenses}`);
-                if (response.ok) {
-                    setCategoryBudgets(
-                        response.categoriesNames.map((cat) => ({ name: cat, budget: '' }))
-                    );
-                } else {
-                    setError('Failed to load categories');
-                }
-            }
-        };
-        fetchCategories();
-    }, [profile]);
-
-    const fetchBudgetsForChildren = useCallback(async () => {
-        try {
-            const response = await get(
-                `budgets/get-child-budgets?username=${account.username}&profileName=${profile.profileName}`
-            );
-            if (response.ok) {
-                setChildrenBudgets(response.budgets);
-            }
-        } catch (err) {
-            console.error('Error fetching budgets:', err);
-        }
-    }, [account.username, profile.profileName]);
-
-    useEffect(() => {
-        if (!profile.parentProfile) fetchBudgetsForChildren();
-    }, [profile, fetchBudgetsForChildren]);
-
-    const remainingAmount = useMemo(() => {
-        const totalSpent = categoryBudgets.reduce(
-            (total, category) => total + (parseFloat(category.budget) || 0),
-            0
-        );
-        return (parseFloat(amount) || 0) - totalSpent;
-    }, [categoryBudgets, amount]);
-
-    const handleCategoryBudgetChange = useCallback((index, value) => {
-        setCategoryBudgets((prev) => {
-            const updated = [...prev];
-            updated[index] = { ...updated[index], budget: value };
-            return updated;
-        });
-    }, []);
-
-    const handleChildBudgetSelect = useCallback((e) => {
-        const index = Number(e.target.value);
-        if (!isNaN(index)) {
-            setSelectedChildBudget(index);
-            const budget = childrenBudgets[index];
-            setStartDate(budget.startDate);
-            setEndDate(budget.endDate);
-            setAmount(String(budget.amount));
-        } else {
-            setSelectedChildBudget(null);
-        }
-    }, [childrenBudgets]);
-
-    const setDatesAndSum = useCallback(async (e) => {
-        e.preventDefault();
-        if (!startDate || !endDate || parseFloat(amount) <= 0) {
-            setError('אנא מלא את כל השדות');
-            return;
-        }
-
-        const response = await post('budgets/check-budget-dates', {
-            username: account.username,
-            profileName: profile.profileName,
-            startDate,
-            endDate
-        });
-
-        if (response.ok) {
-            if (response.isValid) {
-                setValidDates(true);
-                setError(null);
-            } else {
-                setError('תקופת תקציב בתאריכים שהוזנו כבר קיימת');
-                setStartDate('');
-                setEndDate('');
-            }
-        } else {
-            setError('אירעה שגיאה בבדיקת התאריכים');
-        }
-    }, [account.username, profile.profileName, startDate, endDate, amount]);
-
-    const create = useCallback(async (e) => {
-        e.preventDefault();
-
-        const finalCategoryBudgets = categoryBudgets
-            .filter((cat) => parseFloat(cat.budget) > 0)
-            .map((cat) => ({
-                categoryName: cat.name,
-                amount: parseFloat(cat.budget) || 0
-            }));
-
-        const response = await post('budgets/add-budget', {
-            budgetData: {
-                username: account.username,
-                profileName: profile.profileName,
-                refId: profile.expenses,
-                profileBudget: {
-                    startDate,
-                    endDate,
-                    amount: parseFloat(amount) || 0,
-                    spent: 0
-                },
-                categoriesBudgets: finalCategoryBudgets
-            }
-        });
-
-        if (response.ok) {
-            setSuccess('התקציב נוצר בהצלחה!');
-            setError(null);
-        } else {
-            setError('נכשל ביצירת התקציב.');
-        }
-    }, [account.username, profile.profileName, profile.expenses, startDate, endDate, amount, categoryBudgets]);
+    const {
+        account,
+        profile,
+        startDate, setStartDate,
+        endDate, setEndDate,
+        amount, setAmount,
+        categoryBudgets, handleCategoryBudgetChange,
+        childrenBudgets,
+        selectedChildBudget, handleChildBudgetSelect,
+        error, setError,
+        success, setSuccess,
+        validDates, setValidDates,
+        remainingAmount,
+        setDatesAndSum,
+        create,
+        resetState,
+        childrenProfiles,
+        addChildBudget,
+        profileBudgets,
+        deleteBudget
+    } = useBudgets({ setLoading: () => { } });
 
     return (
         <div className="p-6 bg-white/95 backdrop-blur-sm">
@@ -329,7 +213,7 @@ export default function CreateProfileBudget({ goBack }) {
                         )}
                     </div>
 
-                    <form onSubmit={create} className="space-y-6">
+                    <form onSubmit={(e) => { e.preventDefault(); create(); }} className="space-y-6">
                         <div className="space-y-3">
                             <h4 className="font-semibold text-slate-800">תקציב קטגוריות:</h4>
                             <Categories
@@ -350,8 +234,8 @@ export default function CreateProfileBudget({ goBack }) {
                                 disabled={remainingAmount !== 0}
                                 type="submit"
                                 className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-colors ${remainingAmount !== 0
-                                        ? 'bg-slate-300 cursor-not-allowed text-slate-500'
-                                        : 'bg-green-600 hover:bg-green-700 text-white'
+                                    ? 'bg-slate-300 cursor-not-allowed text-slate-500'
+                                    : 'bg-green-600 hover:bg-green-700 text-white'
                                     }`}
                             >
                                 צור תקציב

@@ -37,7 +37,7 @@ export default function AdminBudgets() {
             `האם אתה בטוח שברצונך למחוק את התקציב של התקופה ${selectedPeriod.startDate} - ${selectedPeriod.endDate}?`
         );
         if (!confirmDelete) return;
-        const success = await deleteBudget(selectedUser, selectedProfile, selectedPeriod.id);
+        const success = await deleteBudget(selectedUser, selectedProfile, selectedPeriod);
         if (success) await fetchBudgets(selectedUser, selectedProfile);
     };
 

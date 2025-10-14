@@ -16,7 +16,7 @@ function useSafeLocation() {
 
 export function ProfileDataProvider({ children }) {
     const { account, profile, isTokenReady, isExpiredToken } = useAuth();
-    const { history: aiData, newDataReady, startPolling } = useAIHistory();
+    const { history: aiHistory, newDataReady, startPolling } = useAIHistory();
 
     const [categories, setCategories] = useState([]);
     const [businesses, setBusinesses] = useState([]);
@@ -29,37 +29,62 @@ export function ProfileDataProvider({ children }) {
     const [getCategoriesLoading, setGetCategoriesLoading] = useState(false);
     const [getBusinessesLoading, setGetBusinessesLoading] = useState(false);
     const [dataLoaded, setDataLoaded] = useState(false);
+
     const prevProfileId = useRef(profile?._id);
     const prevAccountUsername = useRef(account?.username);
     const location = useSafeLocation();
     const pathname = location.pathname;
     const restrictedPaths = ['/login', '/register'];
 
-    const fetchBudgets = async () => {
-        if (!account || !profile) {
-            return false;
+
+    const STORAGE_KEY = 'profileData';
+
+
+    const loadCache = () => {
+        try {
+            const raw = sessionStorage.getItem(STORAGE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch {
+            return null;
         }
+    };
+
+    const saveCache = (partial) => {
+        try {
+            const current = loadCache() || {};
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ ...current, ...partial }));
+        } catch (e) {
+            console.error('Failed to save profile data to cache', e);
+        }
+    };
+
+    const clearCache = () => {
+        sessionStorage.removeItem(STORAGE_KEY);
+    };
+
+
+    const fetchBudgets = async () => {
+        if (!account || !profile) return false;
         try {
             setErrors(prev => prev.filter(e => !e.budgetErrors));
             setBudgetLoading(true);
-            let errMsg = [];
+
             const response = await get(`budgets/get-profile-budgets?username=${account.username}&profileName=${profile.profileName}`);
             if (response.ok) {
-                setProfileBudgets(response.profileBudgets || []);
-                setCategoryBudgets(response.categoriesBudgets || []);
+                const pb = response.profileBudgets || [];
+                const cb = response.categoryBudgets || [];
+                setProfileBudgets(pb);
+                setCategoryBudgets(cb);
+                saveCache({ profileBudgets: pb, categoryBudgets: cb });
             } else {
-                switch (response.status) {
-                    case 400: errMsg.push('בקשה לא תקינה בטעינת תקציבי הפרופיל'); break;
-                    case 404: errMsg.push('לא נמצאו תקציבי פרופיל'); break;
-                    case 500: errMsg.push('שגיאת שרת בטעינת תקציבי פרופיל'); break;
-                    default: errMsg.push('שגיאה בטעינת תקציבי פרופיל'); break;
-                }
+                const msg = {
+                    400: 'בקשה לא תקינה בטעינת תקציבי הפרופיל',
+                    404: 'לא נמצאו תקציבי פרופיל',
+                    500: 'שגיאת שרת בטעינת תקציבי פרופיל'
+                }[response.status] || 'שגיאה בטעינת תקציבי פרופיל';
+                setErrors(prev => [{ budgetErrors: [msg] }, ...prev]);
             }
-
-            if (errMsg.length > 0) {
-                setErrors(prev => [{ budgetErrors: errMsg }, ...prev]);
-            }
-        } catch (error) {
+        } catch {
             setErrors(prev => [{ budgetErrors: ['שגיאה בטעינת תקציבים'] }, ...prev]);
             return false;
         } finally {
@@ -69,70 +94,30 @@ export function ProfileDataProvider({ children }) {
     };
 
     const fetchExpenses = async () => {
-        if (!profile?.expenses) {
-            return false;
-        }
+        if (!profile?.expenses) return false;
         setErrors(prev => prev.filter(e => !e.expensesErrors));
         setExpensesLoading(true);
         try {
             const response = await get(`expenses/profile-expenses/${profile.expenses}`);
             if (response.ok) {
-                setExpenses(response.expenses || []);
+                const exp = response.expenses || [];
+                setExpenses(exp);
+                saveCache({ expenses: exp });
+            } else {
+                const msg = {
+                    400: 'בקשה לא תקינה בטעינת הוצאות',
+                    404: 'לא נמצאו הוצאות',
+                    500: 'שגיאת שרת בטעינת הוצאות'
+                }[response.status] || 'שגיאה בטעינת הוצאות';
+                setErrors(prev => [{ expensesErrors: [msg] }, ...prev]);
             }
-            else {
-                switch (response.status) {
-                    case 400: setErrors(prev => [{ expensesErrors: ['בקשה לא תקינה בטעינת הוצאות'] }, ...prev]); break;
-                    case 404: setErrors(prev => [{ expensesErrors: ['לא נמצאו הוצאות'] }, ...prev]); break;
-                    case 500: setErrors(prev => [{ expensesErrors: ['שגיאת שרת בטעינת הוצאות'] }, ...prev]); break;
-                    default: setErrors(prev => [{ expensesErrors: ['שגיאה בטעינת הוצאות'] }, ...prev]); break;
-                }
-            }
-        }
-        catch (error) {
+        } catch {
             setErrors(prev => [{ expensesErrors: ['שגיאה בטעינת הוצאות'] }, ...prev]);
             return false;
         } finally {
             setExpensesLoading(false);
         }
         return true;
-    };
-
-    const fetchCategories = async () => {
-        if (!profile?.expenses) return;
-
-        setGetCategoriesLoading(true);
-        try {
-            setErrors(prev => prev.filter(e => !e.categoriesErrors));
-            const response = await get(`expenses/category/get-names/${profile.expenses}`);
-            if (response.ok) {
-                setCategories(response.categoriesNames || []);
-                setGetBusinessesLoading(true);
-                await fetchAllBusinesses(response.categoriesNames || []);
-                return;
-            }
-            let errorMsg;
-            switch (response.status) {
-                case 400:
-                    errorMsg = 'בקשה לא תקינה בטעינת קטגוריות';
-                    break;
-                case 404:
-                    errorMsg = 'לא נמצאו קטגוריות';
-                    break;
-                case 500:
-                    errorMsg = 'שגיאת שרת בטעינת קטגוריות';
-                    break;
-                default:
-                    errorMsg = 'שגיאה בטעינת קטגוריות';
-            }
-            setErrors(prev => [{ categoriesErrors: [errorMsg] }, ...prev]);
-            console.error('Error fetching categories:', response.error || response.status);
-        } catch (error) {
-            setErrors(prev => [{ categoriesErrors: ['תקשורת עם השרת נכשלה בעת טעינת קטגוריות'] }, ...prev]);
-            console.error('Exception in fetchCategories:', error);
-        } finally {
-            setGetCategoriesLoading(false);
-            setGetBusinessesLoading(false);
-        }
     };
 
     const fetchBusinesses = async (category) => {
@@ -143,22 +128,15 @@ export function ProfileDataProvider({ children }) {
             if (response.ok) {
                 return response.businesses;
             } else {
-                switch (response.status) {
-                    case 400:
-                        setErrors(prev => [{ businessesErrors: ['בקשה לא תקינה בטעינת בעלי העסקים, נסה שוב מאוחר יותר'] }, ...prev]);
-                        break;
-                    case 404:
-                        setErrors(prev => [{ businessesErrors: ['לא נמצאה הקטגוריה המבוקשת'] }, ...prev]);
-                        break;
-                    case 500:
-                        setErrors(prev => [{ businessesErrors: ['שגיאת שרת בטעינת בעלי העסקים, נסה שוב מאוחר יותר'] }, ...prev]);
-                        break;
-                }
-                console.error('Error fetching businesses:', response.error);
+                const msg = {
+                    400: 'בקשה לא תקינה בטעינת בעלי העסקים, נסה שוב מאוחר יותר',
+                    404: 'לא נמצאה הקטגוריה המבוקשת',
+                    500: 'שגיאת שרת בטעינת בעלי העסקים, נסה שוב מאוחר יותר'
+                }[response.status];
+                setErrors(prev => [{ businessesErrors: [msg] }, ...prev]);
                 return [];
             }
-        } catch (error) {
-            console.error("Exception in getBusinesses:", error);
+        } catch {
             setErrors(prev => [{ businessesErrors: ['תקשורת עם השרת נכשלה בעת טעינת בעלי העסקים'] }, ...prev]);
             return [];
         }
@@ -169,37 +147,84 @@ export function ProfileDataProvider({ children }) {
             let allBusinesses = [];
             for (const category of categories) {
                 const businesses = await fetchBusinesses(category);
-                allBusinesses = [...allBusinesses, { category: category, businesses: businesses }]
+                allBusinesses = [...allBusinesses, { category, businesses }];
             }
             setBusinesses(allBusinesses);
+            saveCache({ businesses: allBusinesses });
         }
     };
 
+    const fetchCategories = async () => {
+        if (!profile?.expenses) return;
+        setGetCategoriesLoading(true);
+        try {
+            setErrors(prev => prev.filter(e => !e.categoriesErrors));
+            const response = await get(`expenses/category/get-names/${profile.expenses}`);
+            if (response.ok) {
+                const cats = response.categoriesNames || [];
+                setCategories(cats);
+                saveCache({ categories: cats });
+                setGetBusinessesLoading(true);
+                await fetchAllBusinesses(cats);
+            } else {
+                const msg = {
+                    400: 'בקשה לא תקינה בטעינת קטגוריות',
+                    404: 'לא נמצאו קטגוריות',
+                    500: 'שגיאת שרת בטעינת קטגוריות'
+                }[response.status] || 'שגיאה בטעינת קטגוריות';
+                setErrors(prev => [{ categoriesErrors: [msg] }, ...prev]);
+            }
+        } catch (error) {
+            setErrors(prev => [{ categoriesErrors: ['תקשורת עם השרת נכשלה בעת טעינת קטגוריות'] }, ...prev]);
+        } finally {
+            setGetCategoriesLoading(false);
+            setGetBusinessesLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
+        const cached = loadCache();
+        if (cached && !dataLoaded) {
+            setCategories(cached.categories || []);
+            setBusinesses(cached.businesses || []);
+            setProfileBudgets(cached.profileBudgets || []);
+            setCategoryBudgets(cached.categoryBudgets || []);
+            setExpenses(cached.expenses || []);
+        }
+    }, []);
+
+
     useEffect(() => {
         if (!dataLoaded && account && profile && isTokenReady && !isExpiredToken && !restrictedPaths.includes(pathname)) {
-            setExpensesLoading(true);
             const fetchData = async () => {
                 await fetchBudgets();
                 await fetchExpenses();
                 await fetchCategories();
-            }
+            };
             fetchData();
             startPolling();
             setDataLoaded(true);
         }
     }, [account, profile, isTokenReady, isExpiredToken, pathname, dataLoaded]);
 
+
     useEffect(() => {
         if (profile?._id !== prevProfileId.current ||
-            account?.username !== prevAccountUsername.current || restrictedPaths.includes(pathname)) {
+            account?.username !== prevAccountUsername.current ||
+            restrictedPaths.includes(pathname)) {
+
+            clearCache();
+
             setDataLoaded(false);
-            prevProfileId.current = profile?._id;
-            prevAccountUsername.current = account?.username;
             setCategories([]);
             setBusinesses([]);
             setProfileBudgets([]);
             setCategoryBudgets([]);
             setExpenses([]);
+
+            prevProfileId.current = profile?._id;
+            prevAccountUsername.current = account?.username;
         }
     }, [profile, account, pathname]);
 
@@ -218,7 +243,7 @@ export function ProfileDataProvider({ children }) {
         getBusinessesLoading,
         errors,
         dataLoaded,
-        aiData,
+        aiHistory,
         newDataReady,
         fetchBudgets,
         fetchExpenses,

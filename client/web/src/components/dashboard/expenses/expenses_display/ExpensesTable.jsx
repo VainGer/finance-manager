@@ -2,7 +2,12 @@ import { formatAmount, formatDate } from "../../../../utils/expensesUtils";
 import DeleteTransaction from "../transactions/DeleteTransaction";
 import EditTransaction from "../transactions/EditTransaction";
 
-export default function ExpensesTable({ filteredExpenses, expensesId, onTransactionDeleted, onTransactionUpdated, readOnly = false }) {
+export default function ExpensesTable({ filteredExpenses,
+    expensesId,
+    onTransactionDeleted,
+    onTransactionUpdated,
+    readOnly = false }) {
+
     if (filteredExpenses.length === 0) {
         return (
             <div className="text-center py-12">

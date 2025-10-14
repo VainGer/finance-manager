@@ -102,7 +102,7 @@ export default function Index() {
           </View>
 
           {/* === הקרוסלה במקום ה"Highlights" הישנים === */}
-          <View className="mt-4">
+          <View>
             <FeatureCarousel />
           </View>
         </View>

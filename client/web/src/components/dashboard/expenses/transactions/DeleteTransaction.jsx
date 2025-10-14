@@ -1,42 +1,22 @@
 import { useState } from 'react';
-import { del } from '../../../../utils/api';
-import { useAuth } from '../../../../context/AuthContext';
+import useEditTransactions from '../../../../hooks/useEditTransactions';
 
-export default function DeleteTransaction({ transaction, refId, onTransactionDeleted }) {
-    const { profile } = useAuth();
-    const [isDeleting, setIsDeleting] = useState(false);
+export default function DeleteTransaction({ transaction, onTransactionDeleted }) {
     const [showConfirm, setShowConfirm] = useState(false);
+    const { loading, error, deleteTransaction, resetState } = useEditTransactions();
 
     const handleDelete = async () => {
-        setIsDeleting(true);
-        try {
-            const deleteData = {
-                refId: refId,
-                catName: transaction.category,
-                busName: transaction.business,
-                transactionId: transaction._id
-            };
-
-            const response = await del('expenses/transaction/delete-transaction', deleteData);
-
-            if (response.ok || response.success || response.message?.includes('successfully')) {
-                if (onTransactionDeleted) {
-                    onTransactionDeleted(transaction._id);
-                }
-                setShowConfirm(false);
-            } else {
-                console.error('Delete failed:', response);
-                alert(`שגיאה במחיקת העסקה: ${response.message || 'לא ידוע'}`);
-            }
-        } catch (error) {
-            console.error('Error deleting transaction:', error);
-        } finally {
-            setIsDeleting(false);
+        const res = await deleteTransaction(transaction);
+        if (res.ok) {
+            onTransactionDeleted?.(transaction._id);
+            setShowConfirm(false);
+            resetState();
         }
     };
 
     const handleCancel = () => {
         setShowConfirm(false);
+        resetState();
     };
 
     if (showConfirm) {
@@ -49,13 +29,20 @@ export default function DeleteTransaction({ transaction, refId, onTransactionDel
                     <span className="text-sm font-medium">האם אתה בטוח?</span>
                 </div>
                 <p className="text-red-700 text-xs">פעולה זו תמחק את העסקה לצמיתות</p>
+
+                {error && (
+                    <div className="bg-red-100 border border-red-200 text-red-700 text-xs rounded-lg p-2">
+                        {error}
+                    </div>
+                )}
+
                 <div className="flex items-center gap-2">
                     <button
                         onClick={handleDelete}
-                        disabled={isDeleting}
+                        disabled={loading}
                         className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                     >
-                        {isDeleting ? (
+                        {loading ? (
                             <div className="flex items-center gap-2 justify-center">
                                 <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                 מוחק...
@@ -64,9 +51,10 @@ export default function DeleteTransaction({ transaction, refId, onTransactionDel
                             'כן, מחק'
                         )}
                     </button>
+
                     <button
                         onClick={handleCancel}
-                        disabled={isDeleting}
+                        disabled={loading}
                         className="flex-1 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-50 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                     >
                         ביטול

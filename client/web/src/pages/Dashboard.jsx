@@ -17,7 +17,7 @@ import StatusDot from '../components/common/StatusDot';
 
 export default function Dashboard() {
     const { profile, account } = useAuth();
-    const { dataLoaded, budgetLoading, expensesLoading } = useProfileData();
+    const { dataLoaded, budgetLoading, expensesLoading, newDataReady } = useProfileData();
     const [display, setDisplay] = useState(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [currentDisplayType, setCurrentDisplayType] = useState('budget');
@@ -58,9 +58,9 @@ export default function Dashboard() {
         <>
             <PageLayout spacing={false}>
                 {/* Professional Navigation */}
-                <NavigationHeader 
+                <NavigationHeader
                     title="Smart Finance"
-                   
+
                 />
 
                 {/* Main Dashboard Container with modern gradient background */}
@@ -71,20 +71,20 @@ export default function Dashboard() {
                         <div className="absolute -top-24 -right-24 w-80 h-80 bg-gradient-to-br from-blue-100/35 to-cyan-100/25 rounded-full blur-xl"></div>
                         <div className="absolute top-1/4 -left-32 w-72 h-72 bg-gradient-to-br from-purple-100/30 to-blue-100/25 rounded-full blur-xl"></div>
                         <div className="absolute -bottom-20 -left-16 w-76 h-76 bg-gradient-to-br from-green-100/25 to-cyan-100/20 rounded-full blur-xl"></div>
-                        
+
                         {/* Medium accent circles with tab colors */}
                         <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-gradient-to-br from-orange-100/25 to-yellow-100/20 rounded-full blur-lg"></div>
                         <div className="absolute top-1/2 right-1/3 w-32 h-32 bg-gradient-to-br from-purple-100/30 to-pink-100/25 rounded-full blur-md"></div>
                         <div className="absolute bottom-1/4 left-1/3 w-40 h-40 bg-gradient-to-br from-emerald-100/25 to-teal-100/20 rounded-full blur-lg"></div>
                     </div>
-                    
+
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative z-10">
                         {/* Children Budget Update Banner with enhanced styling */}
                         {profile && !profile.parentProfile && (
                             <div className="animate-slideDown">
-                                <ChildrenBudgetUpdate 
-                                    username={account?.username} 
-                                    profileName={profile?.profileName} 
+                                <ChildrenBudgetUpdate
+                                    username={account?.username}
+                                    profileName={profile?.profileName}
                                 />
                             </div>
                         )}
@@ -133,7 +133,7 @@ export default function Dashboard() {
                                                 <div className="w-32 h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 rounded-full mx-auto animate-pulse shadow-lg"></div>
                                                 <div className="absolute -inset-4 bg-gradient-to-r from-blue-100/50 via-purple-100/50 to-cyan-100/50 rounded-2xl blur-xl animate-pulse"></div>
                                             </div>
-                                            
+
                                             <div className="space-y-2">
                                                 <p className="text-slate-700 text-lg font-medium">טוען נתונים...</p>
                                                 <p className="text-slate-500 text-sm">מכין את הדשבורד שלך</p>
@@ -147,16 +147,16 @@ export default function Dashboard() {
                 </div>
 
                 {/* Pass floating menu state to SideMenu for modal handling */}
-                <SideMenu 
-                    onTransactionAdded={triggerRefresh} 
-                    showFloatingMenu={showFloatingMenu} 
+                <SideMenu
+                    onTransactionAdded={triggerRefresh}
+                    showFloatingMenu={showFloatingMenu}
                     setShowFloatingMenu={setShowFloatingMenu}
                     isFloatingMode={true}
                 />
 
                 {/* Grey Floating Action Button - Always visible on mobile/tablet */}
                 <div className="xl:hidden">
-                    <FloatingActionButton 
+                    <FloatingActionButton
                         onClick={() => setShowFloatingMenu(true)}
                         icon={
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

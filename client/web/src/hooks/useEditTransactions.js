@@ -44,9 +44,10 @@ export default function useEditTransactions(props = {}) {
     }, [contextErrors]);
 
     const handleTransactionResponse = async (response, successMsg, errorMsg, options = {}) => {
-        setLoading(false);
         if (response.ok) {
-            await Promise.all([fetchExpenses(), fetchBudgets()]);
+            await fetchBudgets();
+            await fetchExpenses();
+            setLoading(false);
             if (!options.silent) setSuccess(successMsg);
             return { ok: true };
         }
@@ -179,7 +180,7 @@ export default function useEditTransactions(props = {}) {
                 catName: transaction.category,
                 busName: transaction.business,
                 transactionId: transaction._id,
-                newDate: parsedDate,
+                newDate: new Date(parsedDate).toISOString(),
             });
             return await handleTransactionResponse(
                 response,

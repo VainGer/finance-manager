@@ -1,115 +1,75 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, ScrollView, Dimensions } from "react-native";
+import { useState, useEffect } from "react";
+import { View, Text, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
-export default function FeatureCarousel() {
-  const FEATURES = useMemo(
-    () => [
-      {
-        icon: "pie-chart",
-        color: "#2563eb",
-        title: "ניהול תקציבים",
-        desc: "הגדר תקציבים לפי קטגוריות ועקוב אחרי ההוצאות",
-      },
-      {
-        icon: "card",
-        color: "#059669",
-        title: "מעקב עסקאות",
-        desc: "הוסף, ערוך ונהל את כל העסקאות שלך במקום אחד",
-      },
-      {
-        icon: "cloud-upload",
-        color: "#7c3aed",
-        title: "סריקת קבצים חכמה",
-        desc: "העלה דוח הוצאות אשראי ותוסיף בקלות עסקאות",
-      },
-      {
-        icon: "stats-chart",
-        color: "#dc2626",
-        title: "דוחות מפורטים",
-        desc: "קבל תובנות על ההרגלים הכספיים שלך",
-      },
-    ],
-    []
-  );
+export const FEATURES = [
+  {
+    icon: "pie-chart",
+    color: "#2563eb",
+    title: "ניהול תקציבים",
+    desc: "הגדר תקציבים חכמים לפי קטגוריות ועקוב בקלות אחרי ההוצאות שלך."
+  },
+  {
+    icon: "card",
+    color: "#059669",
+    title: "מעקב עסקאות",
+    desc: "נהל את כל העסקאות שלך במקום אחד, עם אפשרויות עריכה והוספה פשוטות."
+  },
+  {
+    icon: "cloud-upload",
+    color: "#7c3aed",
+    title: "סריקת קבצים חכמה",
+    desc: "העלה בקלות דוח הוצאות אשראי, והמערכת תזהה ותוסיף את העסקאות אוטומטית."
+  },
+  {
+    icon: "stats-chart",
+    color: "#dc2626",
+    title: "דוחות מפורטים",
+    desc: "קבל תובנות ממוקדות על ההרגלים הכספיים שלך, בדוחות ברורים ומפורטים."
+  },
+  {
+    icon: "sparkles",
+    color: "#f59e0b",
+    title: "תובנות חכמות",
+    desc: "קבל ניתוחים מותאמים אישית והמלצות מעשיות מבוססות בינה מלאכותית."
+  }
+];
 
-  // Layout constants
-  const CARD_WIDTH = 300;
-  const CARD_HEIGHT = 160;
-  const CARD_SPACING = 20;
-  const ITEM_SIZE = CARD_WIDTH + CARD_SPACING;
-  const EDGE = (SCREEN_W - ITEM_SIZE) / 2;
 
-  // Autoplay & scrolling
-  const scrollRef = useRef(null);
+export default function FeatureTabs() {
   const [index, setIndex] = useState(0);
-  const OFFSETS = useMemo(
-    () => FEATURES.map((_, i) => i * ITEM_SIZE),
-    [FEATURES.length]
-  );
+  const feature = FEATURES[index];
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      const next = (index + 1) % FEATURES.length;
-      setIndex(next);
-      scrollRef.current?.scrollTo({ x: OFFSETS[next], animated: true });
-    }, 3000);
+    const timer = setTimeout(() => {
+      setIndex((prev) => (prev + 1) % FEATURES.length);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [index]);
 
-    return () => clearInterval(timer);
-  }, [index, OFFSETS, FEATURES.length]);
 
-  const handleScrollEnd = (e) => {
-    const x = e.nativeEvent.contentOffset.x;
-    const newIndex = Math.round(x / ITEM_SIZE);
-    setIndex(newIndex);
-  };
+  const CARD_WIDTH = SCREEN_W * 0.80;
+  const CARD_HEIGHT = 160;
 
   return (
-    <View className="w-full items-center">
-      {/* Scrollable cards */}
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        decelerationRate="fast"
-        snapToOffsets={OFFSETS}
-        onMomentumScrollEnd={handleScrollEnd}
-        contentContainerStyle={{ paddingHorizontal: EDGE }}
-        style={{ height: CARD_HEIGHT }}
+    <View className="items-center my-6 w-full px-4">
+      <View
+        className="rounded-2xl bg-white/95 border border-slate-200/50 shadow-sm"
+        style={{ width: CARD_WIDTH, height: CARD_HEIGHT, padding: 20 }}
       >
-        {FEATURES.map((f, i) => (
+        <View className="flex-1 items-center justify-center">
           <View
-            key={i}
-            style={{
-              width: ITEM_SIZE,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            className="w-14 h-14 rounded-full items-center justify-center mb-3"
+            style={{ backgroundColor: `${feature.color}15` }}
           >
-            <View
-              className="rounded-2xl bg-white/95 border border-slate-200/50 p-5 shadow-sm"
-              style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
-            >
-              <View className="flex-1 items-center justify-center">
-                <View
-                  className="w-14 h-14 rounded-full items-center justify-center mb-3"
-                  style={{ backgroundColor: `${f.color}15` }}
-                >
-                  <Ionicons name={f.icon} size={28} color={f.color} />
-                </View>
-                <Text className="text-lg font-bold text-slate-800 text-center mb-1">
-                  {f.title}
-                </Text>
-                <Text className="text-slate-600 text-center text-sm leading-5">
-                  {f.desc}
-                </Text>
-              </View>
-            </View>
+            <Ionicons name={feature.icon} size={28} color={feature.color} />
           </View>
-        ))}
-      </ScrollView>
+          <Text className="text-lg font-bold text-slate-800 text-center mb-1">{feature.title}</Text>
+          <Text className="text-slate-600 text-center text-sm leading-5">{feature.desc}</Text>
+        </View>
+      </View>
     </View>
   );
 }

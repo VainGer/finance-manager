@@ -185,7 +185,7 @@ export default function AdminLogs() {
                                     <th className="p-3">חשבון</th>
                                     <th className="p-3">פרופיל</th>
                                     <th className="p-3">פעולה</th>
-                                    <th className="p-3 min-w-[200px]">תיאור</th>
+                                    <th className="p-3 min-w-[200px]">יעד הפעולה/תיאור</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -199,7 +199,11 @@ export default function AdminLogs() {
                                         <td className="p-3">{log.executeAccount}</td>
                                         <td className="p-3">{log.executeProfile || "-"}</td>
                                         <td className="p-3">{log.action}</td>
-                                        <td className="p-3 break-words max-w-xs">{log.target || "-"}</td>
+                                        <td dir="ltr" className="p-3 break-words max-w-xs">
+                                            {typeof log.target === "object"
+                                                ? <pre className="whitespace-pre-wrap text-xs bg-slate-100 rounded p-2">{JSON.stringify(log.target, null, 2)}</pre>
+                                                : log.target || "-"}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

@@ -1,161 +1,75 @@
-import { useState, useMemo, useEffect } from 'react';
 import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer
+  PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import LoadingSpinner from "../../common/LoadingSpinner";
 import ErrorMessage from "../../common/ErrorMessage";
-import useExpensesDisplay from '../../../hooks/useExpensesDisplay';
+import useExpensesCharts from '../../../hooks/expenses/useExpensesCharts';
+import { useState } from 'react';
 
-export default function InteractiveCharts({ profile, refreshTrigger }) {
-  const [dateFilter, setDateFilter] = useState('all');
+export default function InteractiveCharts() {
+  const {
+    loading,
+    error,
+    chartData,
+    monthlyChartData,
+    dateFilter,
+    setDateFilter,
+    selectedMonth,
+    setSelectedMonth,
+    availableMonths
+  } = useExpensesCharts();
+
   const [chartType, setChartType] = useState('pie');
-  const [selectedMonth, setSelectedMonth] = useState('');
 
-  const { expenses, filteredExpenses, loading, error, refetchExpenses } = useExpensesDisplay(profile);
-
-  useEffect(() => {
-    if (refreshTrigger) refetchExpenses();
-  }, [refreshTrigger, refetchExpenses]);
-
-  // חודשים זמינים לבחירה
-  const availableMonths = useMemo(() => {
-    if (!expenses?.length) return [];
-    const months = new Set();
-    for (const exp of expenses) {
-      const d = new Date(exp.date);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      months.add(key);
-    }
-    return Array.from(months).sort().reverse();
-  }, [expenses]);
-
-  // פילטר לפי תאריכים
-  const filteredByDateExpenses = useMemo(() => {
-    if (!filteredExpenses) return [];
-    if (dateFilter === 'all') return filteredExpenses;
-
-    const now = new Date();
-
-    if (dateFilter === 'specific' && selectedMonth) {
-      const [year, month] = selectedMonth.split('-').map(Number);
-      return filteredExpenses.filter(e => {
-        const d = new Date(e.date);
-        return d.getFullYear() === year && d.getMonth() === month - 1;
-      });
-    }
-
-    const cutoff = new Date();
-    switch (dateFilter) {
-      case 'week':
-        cutoff.setDate(now.getDate() - 7);
-        break;
-      case 'month':
-        cutoff.setMonth(now.getMonth() - 1);
-        break;
-      case 'year':
-        cutoff.setFullYear(now.getFullYear() - 1);
-        break;
-      default:
-        return filteredExpenses;
-    }
-    return filteredExpenses.filter(e => {
-      const d = new Date(e.date);
-      return d >= cutoff && d <= now;
-    });
-  }, [filteredExpenses, dateFilter, selectedMonth]);
-
-  // דאטה לגרף עוגה/עמודות לפי קטגוריות
-  const pieChartData = useMemo(() => {
-    if (!filteredByDateExpenses.length) return [];
-    const colors = [
-      '#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FECA57','#FF9F43',
-      '#9C88FF','#FDA7DF','#6C5CE7','#A29BFE','#FD79A8','#00B894'
-    ];
-    const totals = {};
-    let sum = 0;
-    for (const e of filteredByDateExpenses) {
-      const cat = e.category || 'ללא קטגוריה';
-      totals[cat] = (totals[cat] || 0) + e.amount;
-      sum += e.amount;
-    }
-    return Object.entries(totals)
-      .sort(([,a],[,b]) => b - a)
-      .map(([name, value], i) => ({
-        name,
-        value,
-        color: colors[i % colors.length],
-        percentage: ((value / sum) * 100).toFixed(1)
-      }));
-  }, [filteredByDateExpenses]);
-
-  // דאטה חודשי למגמות
-  const monthlyChartData = useMemo(() => {
-    if (!expenses?.length) return [];
-    const monthly = {};
-    for (const e of expenses) {
-      const d = new Date(e.date);
-      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      const label = `${d.getMonth()+1}/${d.getFullYear()}`;
-      if (!monthly[key]) monthly[key] = { month: label, amount: 0 };
-      monthly[key].amount += e.amount;
-    }
-    return Object.values(monthly).sort((a,b) => {
-      const [ma, ya] = a.month.split('/').map(Number);
-      const [mb, yb] = b.month.split('/').map(Number);
-      return new Date(ya, ma - 1).getTime() - new Date(yb, mb - 1).getTime();
-    });
-  }, [expenses]);
-
-  // גובה/מידות בהתאם למסך
-  const isMobile = (typeof window !== 'undefined') ? window.innerWidth < 768 : false;
-  const isTablet = (typeof window !== 'undefined') ? window.innerWidth >= 768 && window.innerWidth < 1024 : false;
-  const isDesktop = (typeof window !== 'undefined') ? window.innerWidth >= 1024 : true;
-  
+  // screen sizes
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+  const isTablet = typeof window !== 'undefined' ? (window.innerWidth >= 768 && window.innerWidth < 1024) : false;
   const chartHeight = isMobile ? 350 : (isTablet ? 400 : 500);
 
   const renderChart = () => {
-    if (!filteredByDateExpenses.length && chartType !== 'monthly') {
-      return (
-        <div className="flex items-center justify-center h-full min-h-[300px]">
-          <div className="text-center p-8">
-            <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-              <div className="text-4xl">📊</div>
-            </div>
-            <div className="text-xl font-semibold text-gray-700 mb-2">אין נתונים להצגה</div>
-            <div className="text-gray-500 text-sm">הוסף הוצאות כדי לראות גרפים אינטראקטיביים</div>
-          </div>
-        </div>
-      );
-    }
-
+    // Pie chart
     if (chartType === 'pie') {
+      if (!chartData.length) {
+        return (
+          <div className="flex items-center justify-center h-full min-h-[300px]">
+            <div className="text-center p-8">
+              <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                <div className="text-4xl">📊</div>
+              </div>
+              <div className="text-xl font-semibold text-gray-700 mb-2">אין נתונים להצגה</div>
+              <div className="text-gray-500 text-sm">הוסף הוצאות כדי לראות גרפים אינטראקטיביים</div>
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div className="w-full" style={{ height: chartHeight }}>
           <div className="text-center mb-2 lg:mb-4">
             <h3 className="text-base lg:text-xl font-bold text-gray-800 mb-1">התפלגות הוצאות לפי קטגוריה</h3>
             <p className="text-xs lg:text-sm text-gray-600">
-              מציג {filteredByDateExpenses.length} מתוך {expenses?.length || 0} הוצאות
+              סה״כ קטגוריות: {chartData.length}
             </p>
           </div>
           <ResponsiveContainer width="100%" height={isMobile ? "85%" : "90%"}>
             <PieChart>
               <Pie
-                data={pieChartData}
-                cx="50%" cy="50%"
+                data={chartData}
+                cx="50%"
+                cy="50%"
                 innerRadius={isMobile ? 30 : (isTablet ? 50 : 70)}
                 outerRadius={isMobile ? 80 : (isTablet ? 110 : 140)}
                 paddingAngle={2}
-                dataKey="value"
+                dataKey="population"
                 animationBegin={0}
                 animationDuration={1000}
               >
-                {pieChartData.map((entry, idx) => (
+                {chartData.map((entry, idx) => (
                   <Cell key={idx} fill={entry.color} stroke="white" strokeWidth={2} />
                 ))}
               </Pie>
               <Tooltip
-                formatter={(v, name, props) => [`₪${v.toLocaleString()} (${props.payload.percentage}%)`, name]}
+                formatter={(v, name, props) => [`₪${v.toLocaleString()}`, props.payload.name]}
                 contentStyle={{
                   backgroundColor: 'rgba(255,255,255,0.98)',
                   border: 'none', borderRadius: '8px',
@@ -188,18 +102,30 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
       );
     }
 
-    if (chartType === 'bar') {
+    // Monthly trends
+    if (chartType === 'monthly') {
+      if (!monthlyChartData.length) {
+        return (
+          <div className="flex items-center justify-center h-full min-h-[300px]">
+            <div className="text-center p-8">
+              <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-100 to-blue-100 rounded-full flex items-center justify-center">
+                <div className="text-4xl">📈</div>
+              </div>
+              <div className="text-xl font-semibold text-gray-700 mb-2">אין נתונים להצגה</div>
+              <div className="text-gray-500 text-sm">הוסף הוצאות כדי לראות השוואה חודשית</div>
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div className="w-full" style={{ height: chartHeight }}>
           <div className="text-center mb-2 lg:mb-4">
-            <h3 className="text-base lg:text-xl font-bold text-gray-800 mb-1">התפלגות הוצאות לפי קטגוריה</h3>
-            <p className="text-xs lg:text-sm text-gray-600">
-              מציג {filteredByDateExpenses.length} מתוך {expenses?.length || 0} הוצאות
-            </p>
+            <h3 className="text-base lg:text-xl font-bold text-gray-800 mb-1">השוואת הוצאות חודשית</h3>
           </div>
           <ResponsiveContainer width="100%" height="90%">
             <BarChart
-              data={pieChartData}
+              data={monthlyChartData}
               margin={{
                 top: 20,
                 right: isMobile ? 5 : (isTablet ? 15 : 30),
@@ -207,9 +133,15 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                 bottom: isMobile ? 80 : (isTablet ? 70 : 60)
               }}
             >
+              <defs>
+                <linearGradient id="monthlyGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10B981" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#059669" stopOpacity={0.6} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis
-                dataKey="name"
+                dataKey="month"
                 angle={isMobile ? -90 : (isTablet ? -60 : -45)}
                 textAnchor="end"
                 height={isMobile ? 80 : (isTablet ? 70 : 60)}
@@ -227,7 +159,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
               />
               <Tooltip
                 formatter={(v) => [`₪${v.toLocaleString()}`, 'סכום']}
-                labelFormatter={(label) => `קטגוריה: ${label}`}
+                labelFormatter={(label) => `חודש: ${label}`}
                 contentStyle={{
                   backgroundColor: 'rgba(255,255,255,0.98)',
                   border: 'none', borderRadius: '8px',
@@ -237,174 +169,47 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
                   padding: isMobile ? '6px' : '8px'
                 }}
               />
-              <Bar 
-                dataKey="value" 
-                radius={[4,4,0,0]} 
-                animationDuration={1000} 
+              <Bar
+                dataKey="amount"
+                fill="url(#monthlyGradient)"
+                radius={[4, 4, 0, 0]}
+                animationDuration={1000}
                 animationBegin={0}
-              >
-                {pieChartData.map((entry, idx) => (
-                  <Cell key={idx} fill={entry.color} />
-                ))}
-              </Bar>
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
       );
     }
 
-    // monthly - default case
-    if (!monthlyChartData.length) {
-      return (
-        <div className="flex items-center justify-center h-full min-h-[300px]">
-          <div className="text-center p-8">
-            <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-100 to-blue-100 rounded-full flex items-center justify-center">
-              <div className="text-4xl">📈</div>
-            </div>
-            <div className="text-xl font-semibold text-gray-700 mb-2">אין נתונים להצגה</div>
-            <div className="text-gray-500 text-sm">הוסף הוצאות כדי לראות השוואה חודשית</div>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="w-full" style={{ height: chartHeight }}>
-        <div className="text-center mb-2 lg:mb-4">
-          <h3 className="text-base lg:text-xl font-bold text-gray-800 mb-1">השוואת הוצאות חודשית</h3>
-          {dateFilter !== 'all' && (
-            <p className="text-xs text-gray-500">(מציג את כל החודשים - הפילטר משפיע על גרפי קטגוריות)</p>
-          )}
-        </div>
-        <ResponsiveContainer width="100%" height="90%">
-          <BarChart
-            data={monthlyChartData}
-            margin={{
-              top: 20,
-              right: isMobile ? 5 : (isTablet ? 15 : 30),
-              left: isMobile ? 5 : (isTablet ? 10 : 20),
-              bottom: isMobile ? 80 : (isTablet ? 70 : 60)
-            }}
-          >
-            <defs>
-              <linearGradient id="monthlyGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10B981" stopOpacity={0.8}/>
-                <stop offset="100%" stopColor="#059669" stopOpacity={0.6}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis
-              dataKey="month"
-              angle={isMobile ? -90 : (isTablet ? -60 : -45)}
-              textAnchor="end"
-              height={isMobile ? 80 : (isTablet ? 70 : 60)}
-              fontSize={isMobile ? 8 : (isTablet ? 10 : 12)}
-              stroke="#666"
-              tick={{ fill: '#666' }}
-              interval={0}
-            />
-            <YAxis
-              tickFormatter={(v) => `₪${(v / 1000).toFixed(0)}K`}
-              fontSize={isMobile ? 8 : (isTablet ? 10 : 12)}
-              stroke="#666"
-              tick={{ fill: '#666' }}
-              width={isMobile ? 40 : 60}
-            />
-            <Tooltip
-              formatter={(v) => [`₪${v.toLocaleString()}`, 'סכום']}
-              labelFormatter={(label) => `חודש: ${label}`}
-              contentStyle={{
-                backgroundColor: 'rgba(255,255,255,0.98)',
-                border: 'none', borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                direction: 'rtl',
-                fontSize: isMobile ? '11px' : (isTablet ? '12px' : '14px'),
-                padding: isMobile ? '6px' : '8px'
-              }}
-            />
-            <Bar 
-              dataKey="amount" 
-              fill="url(#monthlyGradient)" 
-              radius={[4,4,0,0]} 
-              animationDuration={1000} 
-              animationBegin={0} 
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    );
+    return null;
   };
 
   if (loading) {
     return (
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-cyan-100/30 to-blue-100/20 rounded-full"></div>
-          <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-indigo-100/25 to-purple-100/15 rounded-full"></div>
-        </div>
-        <div className="bg-gradient-to-r from-cyan-600 via-cyan-700 to-blue-700 p-5 text-white relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
-              <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white drop-shadow-sm">📊 גרפים אינטראקטיביים</h2>
-              <p className="text-white/80 text-sm">טוען נתונים...</p>
-            </div>
-          </div>
-        </div>
-        <div className="p-8 relative z-10">
-          <LoadingSpinner />
-        </div>
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg p-8 flex justify-center">
+        <LoadingSpinner />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-cyan-100/30 to-blue-100/20 rounded-full"></div>
-          <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-indigo-100/25 to-purple-100/15 rounded-full"></div>
-        </div>
-        <div className="bg-gradient-to-r from-cyan-600 via-cyan-700 to-blue-700 p-5 text-white relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
-              <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white drop-shadow-sm">📊 גרפים אינטראקטיביים</h2>
-              <p className="text-white/80 text-sm">שגיאה בטעינת הנתונים</p>
-            </div>
-          </div>
-        </div>
-        <div className="p-6 relative z-10">
-          <ErrorMessage message={error} />
-        </div>
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg p-6">
+        <ErrorMessage message={error} />
       </div>
     );
   }
 
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden relative" dir="rtl">
-      {/* Enhanced Background circles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-cyan-100/30 to-blue-100/20 rounded-full"></div>
-        <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-indigo-100/25 to-purple-100/15 rounded-full"></div>
-        <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-gradient-to-br from-teal-100/20 to-cyan-100/10 rounded-full"></div>
-      </div>
-
-      {/* Enhanced Header */}
+      {/* Header */}
       <div className="bg-gradient-to-r from-cyan-600 via-cyan-700 to-blue-700 p-5 text-white relative z-10">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center shadow-lg">
             <svg className="w-5 h-5 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </div>
           <div>
@@ -414,9 +219,8 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
         </div>
       </div>
 
-      {/* Enhanced Controls */}
+      {/* Chart type selector */}
       <div className="p-6 bg-gradient-to-r from-white/70 to-slate-50/60 border-b border-cyan-200/40 relative z-10">
-        {/* Enhanced Chart Type Selector */}
         <div className="mb-4 lg:mb-6">
           <h3 className="text-sm font-bold text-slate-700 mb-3 lg:mb-4 flex items-center gap-2">
             <div className="w-6 h-6 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
@@ -424,20 +228,18 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
             </div>
             סוג התצוגה:
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
             {[
               { id: 'pie', label: 'גרף עוגה', icon: '🥧' },
-              { id: 'bar', label: 'גרף עמודות', icon: '📊' },
               { id: 'monthly', label: 'מגמות חודשיות', icon: '📈' },
             ].map(opt => (
               <button
                 key={opt.id}
                 onClick={() => setChartType(opt.id)}
-                className={`p-3 lg:p-4 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-2 font-medium ${
-                  chartType === opt.id
-                    ? 'border-cyan-500 bg-gradient-to-br from-cyan-50 to-blue-50 text-cyan-700 shadow-lg transform scale-105'
-                    : 'border-slate-200 bg-gradient-to-br from-white to-slate-50/50 text-slate-600 hover:border-cyan-300 hover:shadow-md hover:scale-102'
-                }`}
+                className={`p-3 lg:p-4 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-2 font-medium ${chartType === opt.id
+                  ? 'border-cyan-500 bg-gradient-to-br from-cyan-50 to-blue-50 text-cyan-700 shadow-lg transform scale-105'
+                  : 'border-slate-200 bg-gradient-to-br from-white to-slate-50/50 text-slate-600 hover:border-cyan-300 hover:shadow-md hover:scale-102'
+                  }`}
               >
                 <div className="text-lg lg:text-2xl mb-1">{opt.icon}</div>
                 <span className="font-semibold text-xs lg:text-sm text-center">{opt.label}</span>
@@ -446,7 +248,7 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
           </div>
         </div>
 
-        {/* Enhanced Date Filter */}
+        {/* Date filters */}
         <div>
           <h3 className="text-sm font-bold text-slate-700 mb-3 lg:mb-4 flex items-center gap-2">
             <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
@@ -464,11 +266,10 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
               <button
                 key={f.id}
                 onClick={() => { setDateFilter(f.id); setSelectedMonth(''); }}
-                className={`flex items-center gap-1 lg:gap-2 px-3 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium transition-all duration-200 ${
-                  dateFilter === f.id
-                    ? 'bg-slate-700 text-white shadow-lg transform scale-105'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:scale-102'
-                }`}
+                className={`flex items-center gap-1 lg:gap-2 px-3 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium transition-all duration-200 ${dateFilter === f.id
+                  ? 'bg-slate-700 text-white shadow-lg transform scale-105'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:scale-102'
+                  }`}
               >
                 <span className="text-sm lg:text-base">{f.icon}</span>
                 <span className="hidden sm:inline">{f.label}</span>
@@ -500,11 +301,11 @@ export default function InteractiveCharts({ profile, refreshTrigger }) {
         </div>
       </div>
 
-      {/* Chart Display - Simple and Clean */}
+      {/* Chart Display */}
       <div className="p-6 relative z-10">
         <div
           className="bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/30 shadow-sm p-4"
-          style={{ minHeight: isMobile ? '350px' : (isTablet ? '400px' : '500px') }}
+          style={{ minHeight: chartHeight }}
         >
           {renderChart()}
         </div>

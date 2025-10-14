@@ -154,7 +154,13 @@ export default function ExpensesDisplay() {
         </View>
     );
 
-
+    const BackToMainBtn = () => {
+        return (
+            <Button onPress={() => setSelectedChild(null)} className="mt-6 bg-blue-500 px-4 py-4 rounded-full w-3/4 mx-auto">
+                <Text className="text-white font-semibold text-center">חזרה לפרופיל הראשי</Text>
+            </Button>
+        );
+    };
 
     if (isLoading || childrenLoading) return <LoadingSpinner />;
 
@@ -165,6 +171,7 @@ export default function ExpensesDisplay() {
                     <Text className="text-red-500 text-lg mb-2">❌ שגיאה</Text>
                     <Text className="text-gray-600">{error || childrenError}</Text>
                 </View>
+                {selectedChild && <BackToMainBtn />}
             </View>
         );
     }
@@ -176,7 +183,8 @@ export default function ExpensesDisplay() {
                 <View className="items-center py-12">
                     <Text className="text-gray-400 text-5xl mb-4">💰</Text>
                     <Text className="text-xl font-semibold text-gray-600 mb-2">אין הוצאות</Text>
-                    <Text className="text-gray-500">לא נמצאו עסקאות להצגה</Text>
+                    <Text className="text-gray-500 mb-4">לא נמצאו עסקאות להצגה</Text>
+                    {selectedChild && <BackToMainBtn />}
                 </View>
             </View>
         );
@@ -204,7 +212,6 @@ export default function ExpensesDisplay() {
                     <Text className="text-2xl font-bold text-gray-800">💰 הוצאות</Text>
                 </View>
                 <View className="bg-white rounded-lg shadow-lg p-6 m-4">
-
                     <ProfileScopeSwitcher
                         children={children}
                         loading={childrenLoading}
@@ -213,9 +220,8 @@ export default function ExpensesDisplay() {
                         error={childrenError}
                     />
 
-
-
-                    <Filter key={selectedChild ? selectedChild.id : 'parent'}
+                    <Filter
+                        key={selectedChild ? selectedChild.id : 'parent'}
                         applyFilters={applyAllFilters}
                         availableDates={availableDates}
                         availableBusinesses={availableBusinesses}
@@ -233,7 +239,7 @@ export default function ExpensesDisplay() {
 
                     <ExpensesTable filteredExpenses={displayExpenses} onOpenEditor={handleOpenEditor} childrenExpenses={!!selectedChild} />
                 </View>
-            </ScrollView >
+            </ScrollView>
         </LinearGradient>
     );
 }

@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     const [authChecked, setAuthChecked] = useState(false);
 
     const refreshTimerRef = useRef(null);
-    const REFRESH_OFFSET = 5 * 60 * 1000;
+    const REFRESH_OFFSET = 15 * 60 * 1000;
 
 
     useEffect(() => {
@@ -81,25 +81,17 @@ export const AuthProvider = ({ children }) => {
             const storedProfile = initialProfile;
 
             if (storedAccount && storedProfile) {
-                const rememberFromStorage = !!localStorage.getItem('profile');
-
-                if (rememberFromStorage) {
-                    const res = await rememberLogin(
-                        storedAccount.username,
-                        storedProfile._id,
-                        true
-                    );
-                    if (res.ok && res.tokens?.accessToken) {
-                        loggedIn = true;
-                        const expDate = getExpiration(res.tokens.accessToken);
-                        if (expDate) scheduleTokenRefresh(expDate);
-                    }
-                } else {
-                    setAccount(storedAccount);
-                    setProfile(storedProfile);
+                const res = await rememberLogin(
+                    storedAccount.username,
+                    storedProfile._id,
+                    true
+                );
+                if (res.ok) {
+                    loggedIn = true;
+                    const expDate = getExpiration(res.tokens.accessToken);
+                    if (expDate) scheduleTokenRefresh(expDate);
                     setIsTokenReady(true);
                     setIsExpiredToken(false);
-                    loggedIn = true;
                 }
             }
         } catch (err) {
@@ -124,7 +116,6 @@ export const AuthProvider = ({ children }) => {
             const now = Date.now();
             const refreshAt = expDate.getTime() - REFRESH_OFFSET;
             const delay = Math.max(refreshAt - now, 0);
-
             clearRefreshTimer();
             refreshTimerRef.current = setTimeout(() => {
                 handleTokenRefresh();

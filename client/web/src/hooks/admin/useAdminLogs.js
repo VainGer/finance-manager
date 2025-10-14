@@ -27,8 +27,12 @@ export default function useAdminLogs() {
         try {
             const res = await post("admin/actions/filter", filters);
             if (res.ok) {
-                setLogs(res.actions || []);
-                return res.actions || [];
+                const processed = (res.actions || []).map(log => ({
+                    ...log,
+                    target: safeParseJSON(log.target),
+                }));
+                setLogs(processed);
+                return processed;
             } else {
                 setError(res.message || "שגיאה בטעינת הלוגים");
                 return [];
@@ -40,6 +44,21 @@ export default function useAdminLogs() {
             setLoading(false);
         }
     }, []);
+
+    function safeParseJSON(value) {
+        if (typeof value !== "string") return value;
+        try {
+            const parsed = JSON.parse(value);
+            if (typeof parsed === "string" && (parsed.startsWith("{") || parsed.startsWith("["))) {
+                return safeParseJSON(parsed);
+            }
+            return parsed;
+        } catch {
+            return value;
+        }
+    }
+
+
 
     useEffect(() => {
         fetchGroupedProfiles();

@@ -4,8 +4,6 @@ import { post } from "../../utils/api";
 export default function useAdminBudgets() {
     const [groupedProfiles, setGroupedProfiles] = useState([]);
 
-    const [rawBudgets, setRawBudgets] = useState({ profile: [], categories: [] });
-
     const [processedBudgets, setProcessedBudgets] = useState({});
     const [availablePeriods, setAvailablePeriods] = useState([]);
     const [selectedPeriod, setSelectedPeriod] = useState(null);
@@ -40,10 +38,8 @@ export default function useAdminBudgets() {
                 const profileBudgets = res.budgets?.budgets.profile || [];
                 const categoryBudgets = res.budgets?.budgets.categories || [];
 
-                setRawBudgets({ profile: profileBudgets, categories: categoryBudgets });
                 processBudgets(profileBudgets, categoryBudgets);
             } else {
-                setRawBudgets({ profile: [], categories: [] });
                 setProcessedBudgets({});
                 setAvailablePeriods([]);
                 setSelectedPeriod(null);
@@ -51,7 +47,6 @@ export default function useAdminBudgets() {
             }
         } catch {
             setError("שגיאת שרת בטעינת התקציבים");
-            setRawBudgets({ profile: [], categories: [] });
             setProcessedBudgets({});
             setAvailablePeriods([]);
             setSelectedPeriod(null);
@@ -61,9 +56,10 @@ export default function useAdminBudgets() {
     }, []);
 
 
-    const deleteBudget = useCallback(async (username, profileName, budgetId) => {
+    const deleteBudget = useCallback(async (username, profileName, selectedPeriod) => {
         setError("");
         setLoading(true);
+        const budgetId = availablePeriods.find(p => p.startDate === selectedPeriod.startDate)?.id;
         try {
             const res = await post("admin/budgets/delete", {
                 username,

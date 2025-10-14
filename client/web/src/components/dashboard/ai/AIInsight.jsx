@@ -1,10 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useProfileData } from '../../../context/ProfileDataContext';
+import { formatDate } from '../../../utils/expensesUtils';
 
 export default function AIInsight() {
-    const { aiData } = useProfileData();
-    const histories = aiData?.history || [];
+    const { aiHistory } = useProfileData();
+    const histories = aiHistory?.history || [];
     const [selectedId, setSelectedId] = useState(histories[0]?._id || null);
+
+    useEffect(() => {
+        if (histories.length > 0 && !selectedId) {
+            setSelectedId(histories[0]._id);
+        }
+    }, [histories, selectedId]);
 
     const selectedHistory = useMemo(
         () => histories.find((h) => h._id === selectedId) || histories[0],
@@ -44,7 +51,7 @@ export default function AIInsight() {
                         </svg>
                     </div>
                     <div className="text-lg font-bold text-slate-700 mb-2">🤖 מנתח את הנתונים שלך</div>
-                    <div className="text-slate-500 mb-4 text-sm max-w-sm mx-auto">התובנות החכמות יהיו זמינות לאחר שתוסיף מספר הוצאות לניתוח מעמיק</div>
+                    <div className="text-slate-500 mb-4 text-sm max-w-sm mx-auto">התובנות החכמות יהיו זמינות לאחר סיום תקופת תקציב שלך</div>
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-100/80 to-amber-100/60 rounded-xl text-sm text-orange-700 font-medium shadow-sm">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -58,9 +65,11 @@ export default function AIInsight() {
 
     const coachOutput = selectedHistory.coachOutput;
     const { summary, categories, nextMonthPlan, dataQuality } = coachOutput;
+
+
     const selectItems = histories.map((h) => ({
         value: h._id,
-        label: h.periodLabel,
+        label: `${formatDate(h.startDate)} - ${formatDate(h.endDate)}`,
     }));
 
     return (

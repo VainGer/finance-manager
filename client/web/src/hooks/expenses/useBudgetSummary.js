@@ -36,6 +36,7 @@ export default function useBudgetSummary() {
     const [currentCategoryBudgets, setCurrentCategoryBudgets] = useState([]);
     const [relevantPeriod, setRelevantPeriod] = useState(false);
 
+
     useEffect(() => {
         if (errors?.length > 0) {
             const budgetErrors = errors.find(e => e.budgetErrors)?.budgetErrors;
@@ -44,13 +45,13 @@ export default function useBudgetSummary() {
         if (childrenError) setError(childrenError);
     }, [errors, childrenError]);
 
+
     useEffect(() => {
         if (!selectedChild) {
             if (!profile || parentLoading) {
                 setLoading(true);
                 return;
             }
-
             if (profileBudgets?.length && categoryBudgets?.length) {
                 setActiveProfileBudgets(profileBudgets);
                 setActiveCategoryBudgets(categoryBudgets);
@@ -60,10 +61,11 @@ export default function useBudgetSummary() {
         }
     }, [profile, parentLoading, profileBudgets, categoryBudgets, selectedChild]);
 
+
     useEffect(() => {
         if (!selectedChild) return;
 
-        if (!childrenLoading && childrenProfileBudgets?.length && childrenCategoryBudgets?.length) {
+        if (!childrenLoading) {
             setActiveProfileBudgets(childrenProfileBudgets);
             setActiveCategoryBudgets(childrenCategoryBudgets);
             processBudgets(childrenProfileBudgets, childrenCategoryBudgets);
@@ -72,6 +74,7 @@ export default function useBudgetSummary() {
             setLoading(true);
         }
     }, [selectedChild, childrenLoading, childrenProfileBudgets, childrenCategoryBudgets]);
+
 
     const processBudgets = (profileArr, categoryArr) => {
         const map = {};
@@ -99,6 +102,7 @@ export default function useBudgetSummary() {
         buildAvailablePeriods(profileArr);
     };
 
+
     const buildAvailablePeriods = (profileArr) => {
         if (!profileArr?.length) {
             setAvailablePeriods([]);
@@ -125,6 +129,7 @@ export default function useBudgetSummary() {
         setSelectedPeriod(current || periods[0]);
     };
 
+
     useEffect(() => {
         if (!selectedPeriod || !processedBudgets) {
             setCurrentProfileBudget(null);
@@ -132,7 +137,8 @@ export default function useBudgetSummary() {
             return;
         }
 
-        const entry = processedBudgets[selectedPeriod.id];
+        const id = availablePeriods.find(p => p.startDate === selectedPeriod.startDate)?.id;
+        const entry = processedBudgets[id];
         if (!entry) {
             setCurrentProfileBudget(null);
             setCurrentCategoryBudgets([]);
