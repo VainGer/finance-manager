@@ -62,7 +62,7 @@ export default function useBudgets({ setLoading }) {
     setError(null);
     try {
       const response = await get(
-        `budgets/get-child-budgets?username=${account.username}&profileName=${profile.profileName}`
+        `budgets/get-child-budgets?username=${encodeURIComponent(account.username)}&profileName=${encodeURIComponent(profile.profileName)}`
       );
       if (response.ok) {
         setChildrenBudgets(response.budgets);
@@ -86,7 +86,7 @@ export default function useBudgets({ setLoading }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await get(`profile/get-profiles?username=${account.username}`);
+      const response = await get(`profile/get-profiles?username=${encodeURIComponent(account.username)}`);
       if (response.ok) {
         setChildrenProfiles(response.profiles.filter(p => !p.parentProfile));
         return;
@@ -282,7 +282,7 @@ export default function useBudgets({ setLoading }) {
     setSuccess(null);
     try {
       const response = await del(
-        `budgets/delete-budget/${account.username}/${profile.profileName}/${budgetId}`,
+        `budgets/delete-budget/${encodeURIComponent(account.username)}/${encodeURIComponent(profile.profileName)}/${budgetId}`,
       );
       if (response.ok) {
         await fetchBudgets();

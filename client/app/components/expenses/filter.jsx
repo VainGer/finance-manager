@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import BusinessSelect from '../business/businessSelect';
 import CategorySelect from '../categories/categorySelect';
 import Select from '../common/Select';
 import Button from '../common/button';
+
 export default function Filter({
     filterByMonth,
     filterByCategory,
@@ -21,28 +22,37 @@ export default function Filter({
     const [selectedMonth, setSelectedMonth] = useState(null);
     const [sortConfig, setSortConfig] = useState({
         sortBy: 'date',
-        sortOrder: 'desc'
+        sortOrder: 'desc',
     });
     const [businessList, setBusinessesList] = useState([]);
 
-    const formattedMonths = availableDates ? availableDates.map(({ year, month, dateYM }) => {
-        return {
-            key: dateYM,
-            label: `${month} ${year}`
-        };
-    }) : [];
+
+    const formattedMonths = useMemo(
+        () =>
+            availableDates.map(({ year, month, dateYM }) => ({
+                key: dateYM,
+                label: `${month} ${year}`,
+            })),
+        [availableDates]
+    );
+
+
+    const latestMonthKey = useMemo(
+        () => (formattedMonths.length > 0 ? formattedMonths[0].key : null),
+        [formattedMonths]
+    );
 
     const handleCategorySelect = (category) => {
-        const categoryValue = category || null;
-        setSelectedCategory(category);
+        const value = category || null;
+        setSelectedCategory(value);
         setSelectedBusiness(null);
-        filterByCategory(categoryValue);
+        filterByCategory(value);
     };
 
     const handleBusinessSelect = (business) => {
-        const businessValue = business || null;
-        setSelectedBusiness(business);
-        filterByBusiness(businessValue);
+        const value = business || null;
+        setSelectedBusiness(value);
+        filterByBusiness(value);
     };
 
     const handleApplyFilters = () => {
@@ -60,65 +70,50 @@ export default function Filter({
     const handleClearFilters = () => {
         setSelectedCategory(null);
         setSelectedBusiness(null);
-        setSelectedMonth(null);
         setSortConfig({ sortBy: 'date', sortOrder: 'desc' });
-        clearFilters();
+
+
+        if (latestMonthKey) {
+            setSelectedMonth(latestMonthKey);
+            filterByMonth(latestMonthKey);
+            clearFilters(latestMonthKey);
+        } else {
+            clearFilters();
+        }
     };
 
     useEffect(() => {
-        const businessData = businesses.find(b => b.category === selectedCategory)?.businesses || [];
-        setSelectedBusiness("");
+        if (latestMonthKey) {
+            setSelectedMonth(latestMonthKey);
+            filterByMonth(latestMonthKey);
+            applyFilters();
+        }
+    }, [latestMonthKey]);
+
+    useEffect(() => {
+        const businessData =
+            businesses.find((b) => b.category === selectedCategory)?.businesses || [];
+        setSelectedBusiness('');
         setBusinessesList(businessData);
-    }, [selectedCategory]);
+    }, [selectedCategory, businesses]);
 
     return (
-        <View
-            className="bg-gray-50 rounded-lg p-4 mb-6">
+        <View className="bg-gray-50 rounded-lg p-4 mb-6">
             <Text className="text-lg font-semibold mb-4">🔍 סינון וחיפוש</Text>
 
             <ScrollView>
-                {/* Category Filter using CategorySelect */}
-                <View className="mb-4">
-                    <Text className="text-sm font-medium text-gray-700 mb-2">
-                        קטגוריה
-                    </Text>
-                    <CategorySelect key={selectedCategory + categories.length}
-                        categories={categories}
-                        setSelectedCategory={handleCategorySelect}
-                        initialValue={selectedCategory || ''}
-                    />
-                </View>
-
-                {/* Business Filter using BusinessSelect */}
-                <View className="mb-4">
-                    <Text className="text-sm font-medium text-gray-700 mb-2">
-                        עסק
-                    </Text>
-                    <BusinessSelect key={selectedBusiness + businessList.length}
-                        selectedCategory={selectedCategory}
-                        businesses={businessList}
-                        setSelectedBusiness={handleBusinessSelect}
-                        initialValue={selectedBusiness || ''}
-                    />
-                </View>
-
                 {/* Month Filter */}
-                {formattedMonths && formattedMonths.length > 0 && (
+                {formattedMonths.length > 0 && (
                     <View className="mb-4">
-                        <Text className="text-sm font-medium text-gray-700 mb-2">
-                            חודש
-                        </Text>
+                        <Text className="text-sm font-medium text-gray-700 mb-2">חודש</Text>
                         <Select
-                            items={[
-                                { value: "all", label: "כל החודשים" },
-                                ...formattedMonths.map(month => ({
-                                    value: month.key,
-                                    label: month.label
-                                }))
-                            ]}
-                            selectedValue={selectedMonth || "all"}
+                            items={formattedMonths.map((month) => ({
+                                value: month.key,
+                                label: month.label,
+                            }))}
+                            selectedValue={selectedMonth || 'all'}
                             onSelect={(value) => {
-                                const monthValue = value === "all" ? null : value;
+                                const monthValue = value === 'all' ? null : value;
                                 setSelectedMonth(monthValue);
                                 filterByMonth(monthValue);
                             }}
@@ -130,21 +125,41 @@ export default function Filter({
                     </View>
                 )}
 
-                {/* Sort Options */}
+                {/* Category Filter */}
                 <View className="mb-4">
-                    <Text className="text-sm font-medium text-gray-700 mb-2">
-                        מיון לפי
-                    </Text>
+                    <Text className="text-sm font-medium text-gray-700 mb-2">קטגוריה</Text>
+                    <CategorySelect
+                        key={selectedCategory + categories.length}
+                        categories={categories}
+                        setSelectedCategory={handleCategorySelect}
+                        initialValue={selectedCategory || ''}
+                    />
+                </View>
+
+                {/* Business Filter */}
+                <View className="mb-4">
+                    <Text className="text-sm font-medium text-gray-700 mb-2">עסק</Text>
+                    <BusinessSelect
+                        key={selectedBusiness + businessList.length}
+                        selectedCategory={selectedCategory}
+                        businesses={businessList}
+                        setSelectedBusiness={handleBusinessSelect}
+                        initialValue={selectedBusiness || ''}
+                    />
+                </View>
+
+                {/* Sort Field */}
+                <View className="mb-4">
+                    <Text className="text-sm font-medium text-gray-700 mb-2">מיון לפי</Text>
                     <Select
                         items={[
                             { value: 'date', label: 'תאריך' },
-                            { value: 'amount', label: 'סכום' }
+                            { value: 'amount', label: 'סכום' },
                         ]}
                         selectedValue={sortConfig.sortBy}
-                        onSelect={(value) => {
-                            const newSortConfig = { ...sortConfig, sortBy: value };
-                            setSortConfig(newSortConfig);
-                        }}
+                        onSelect={(value) =>
+                            setSortConfig((prev) => ({ ...prev, sortBy: value }))
+                        }
                         placeholder="בחר שדה למיון"
                         title="מיון לפי"
                         iconName="filter-outline"
@@ -153,19 +168,16 @@ export default function Filter({
 
                 {/* Sort Direction */}
                 <View className="mb-4">
-                    <Text className="text-sm font-medium text-gray-700 mb-2">
-                        כיוון מיון
-                    </Text>
+                    <Text className="text-sm font-medium text-gray-700 mb-2">כיוון מיון</Text>
                     <Select
                         items={[
                             { value: 'desc', label: 'יורד (מהגבוה לנמוך)' },
-                            { value: 'asc', label: 'עולה (מהנמוך לגבוה)' }
+                            { value: 'asc', label: 'עולה (מהנמוך לגבוה)' },
                         ]}
                         selectedValue={sortConfig.sortOrder}
-                        onSelect={(value) => {
-                            const newSortConfig = { ...sortConfig, sortOrder: value };
-                            setSortConfig(newSortConfig);
-                        }}
+                        onSelect={(value) =>
+                            setSortConfig((prev) => ({ ...prev, sortOrder: value }))
+                        }
                         placeholder="בחר כיוון מיון"
                         title="כיוון מיון"
                         iconName="swap-vertical-outline"
@@ -173,12 +185,12 @@ export default function Filter({
                 </View>
             </ScrollView>
 
-            {/* Filter Action Buttons */}
+            {/* Action Buttons */}
             <View className="mt-4 flex flex-1 justify-between">
-
                 <Button onPress={handleApplyFilters}>סנן</Button>
-
-                <Button style="secondary" onPress={handleClearFilters}>נקה סינון</Button>
+                <Button style="secondary" onPress={handleClearFilters}>
+                    נקה סינון
+                </Button>
             </View>
         </View>
     );

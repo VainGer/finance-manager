@@ -140,7 +140,7 @@ export default function useEditBusinesses(props = {}) {
 
     setLoading(true);
     try {
-      const url = `expenses/business/delete/${profile.expenses}/${selectedCategory.trim()}/${selectedBusiness.trim()}`;
+      const url = `expenses/business/delete/${profile.expenses}/${encodeURIComponent(selectedCategory.trim())}/${encodeURIComponent(selectedBusiness.trim())}`;
       const response = await del(url);
       await handleResponse(response, 'העסק נמחק בהצלחה', 'אירעה שגיאה בעת מחיקת העסק');
     } catch (err) {

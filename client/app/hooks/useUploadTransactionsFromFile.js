@@ -12,7 +12,7 @@ export default function useUploadTransactionsFromFile({
   setShowCreateCategory,
   setShowCreateBusiness,
   setShowSuccessMessage,
-  setCategoryCreated
+  setIsCategorySuccess
 }) {
   const { profile } = useAuth();
   const {
@@ -23,7 +23,6 @@ export default function useUploadTransactionsFromFile({
     fetchBudgets
   } = useProfileData();
 
-
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -32,22 +31,10 @@ export default function useUploadTransactionsFromFile({
   const [transactionsData, setTransactionsData] = useState(null);
   const [dataToUpload, setDataToUpload] = useState(null);
   const [categorizedTransactions, setCategorizedTransactions] = useState(null);
-  /**
-   * The function `handleFileSelect` is used to handle the selection of a file, parse it based on its
-   * extension (CSV or XLSX), and set the parsed data in the state.
-   * @returns The `handleFileSelect` function is returning a Promise, as it is an async function. The
-   * function performs various tasks such as setting state variables, selecting a file using
-   * DocumentPicker, parsing the selected file based on its extension (CSV or XLSX), and handling any
-   * errors that may occur during the process.
-   */
 
+  // File Picker
   const handleFileSelect = async () => {
-    setError(null);
-    setSuccess(null);
-    setSelectedFile(null);
-    setTransactionsData(null);
-    setDataToUpload(null);
-    setCategorizedTransactions(null);
+    resetState();
     setLoading(true);
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -64,25 +51,23 @@ export default function useUploadTransactionsFromFile({
         return;
       }
 
-      setSelectedFile(result.assets[0]);
+      const fileInfo = result.assets[0];
+      setSelectedFile(fileInfo);
 
-      const { uri, name } = result.assets[0];
+      const { uri, name } = fileInfo;
       const fileExt = name.split('.').pop().toLowerCase();
-      let file;
-      if (fileExt === "csv") {
-        file = await parseCSV(uri);
-      } else {
-        file = await parseXLSX(uri);
-      }
-      setLoading(false);
-      file = JSON.stringify(file);
-      setTransactionsData(file);
-    } catch (error) {
-      console.error("Error selecting file:", error);
-      setError("שגיאה בטעינת הקובץ");
-    }
-  }
+      const parsed = fileExt === 'csv' ? await parseCSV(uri) : await parseXLSX(uri);
 
+      setTransactionsData(JSON.stringify(parsed));
+      setLoading(false);
+    } catch (err) {
+      console.error('Error selecting file:', err);
+      setError('שגיאה בטעינת הקובץ');
+      setLoading(false);
+    }
+  };
+
+  // Category / Business hooks
   const {
     addCategory,
     getCategoriesError,
@@ -101,121 +86,109 @@ export default function useUploadTransactionsFromFile({
     loading: businessLoading
   } = useEditBusiness();
 
+  // Show success overlay after creating category/business
+  const onCategoryOrBusinessAdded = useCallback(
+    (isCategory) => {
+      setShowCreateCategory(false);
+      setShowCreateBusiness(false);
+      setIsCategorySuccess(isCategory);
+      setShowSuccessMessage(true);
+    },
+    [setShowCreateCategory, setShowCreateBusiness, setShowSuccessMessage, setIsCategorySuccess]
+  );
 
-  const onCategoryAndBusinessAdded = useCallback(async (isCategory) => {
-    setShowCreateCategory(false);
-    setShowCreateBusiness(false);
-    setShowSuccessMessage(true);
-    setCategoryCreated(isCategory ? categorySuccess : businessSuccess);
-  }, [fetchCategories, contextCategories, setShowCreateCategory, setShowCreateBusiness, setShowSuccessMessage, setCategoryCreated]);
-
-
+  // Categorize transactions on backend
   const processTransactions = async () => {
-    /*******************************************************************************************/
-    // TESTING caching categorized transactions in AsyncStorage                                *
-    // const categorizedFromStorage = await AsyncStorage.getItem('categorizedTransactions');   *
-    // if (categorizedFromStorage) {                                                           *
-    //   setCategorizedTransactions(JSON.parse(categorizedFromStorage));                       *
-    //   return;                                                                               *
-    // }                                                                                       *
-    /*******************************************************************************************/
-    setError(null);
-    setSuccess(null);
-    setLoading(true);
     if (!transactionsData) {
-      setError("אין נתונים לעיבוד");
-      setLoading(false);
+      setError('אין נתונים לעיבוד');
       return;
     }
-    const response = await post("profile/categorize-transactions", {
+    setLoading(true);
+    const response = await post('profile/categorize-transactions', {
       refId: profile.expenses,
       transactionsData
     });
     setLoading(false);
+
     if (response.ok) {
       setCategorizedTransactions(response.categories.transactions);
       AsyncStorage.setItem('categorizedTransactions', JSON.stringify(response.categories.transactions));
     } else {
-      setError("שגיאה בעיבוד התנועות");
+      setError('שגיאה בעיבוד התנועות');
     }
-  }
+  };
 
-  // Prepare data for upload when categorizedTransactions changes
+  // Prepare data for upload
   useEffect(() => {
-    if (categorizedTransactions && categorizedTransactions.length > 0) {
-      const data = categorizedTransactions.map((transaction, index) => ({
-        id: index,
-        date: transaction.date,
-        amount: transaction.amount,
-        category: transaction.category,
-        business: transaction.business.name,
-        bank: transaction.business.bankName,
-        description: transaction.business.bankName,
-        toUpload: transaction.category && transaction.business ? true : false
-      }));
-      setDataToUpload(data);
+    if (categorizedTransactions?.length > 0) {
+      setDataToUpload(
+        categorizedTransactions.map((transaction, index) => ({
+          id: index,
+          date: transaction.date,
+          amount: transaction.amount,
+          category: transaction.category,
+          business: transaction.business.name,
+          bank: transaction.business.bankName,
+          description: transaction.business.bankName,
+          toUpload: Boolean(transaction.category && transaction.business)
+        }))
+      );
     }
   }, [categorizedTransactions]);
 
-
-  //handlers for changing category, business and toUpload flag
-  /* These three functions (`handleCategoryChange`, `handleBusinessChange`, `handleUploadSwitch`) are
-  responsible for updating the `dataToUpload` state based on user interactions in the UI. Here's a
-  breakdown of each function: */
+  // UI Handlers
   const handleCategoryChange = useCallback((index, newCategory) => {
-    setDataToUpload(prevData => {
-      const updatedData = [...prevData];
-      updatedData[index].category = newCategory;
-      return updatedData;
+    setDataToUpload(prev => {
+      const updated = [...prev];
+      updated[index].category = newCategory;
+      return updated;
     });
   }, []);
 
   const handleBusinessChange = useCallback((index, newBusiness) => {
-    setDataToUpload(prevData => {
-      const updatedData = [...prevData];
-      updatedData[index].business = newBusiness;
-      return updatedData;
+    setDataToUpload(prev => {
+      const updated = [...prev];
+      updated[index].business = newBusiness;
+      return updated;
     });
   }, []);
 
-  const handleUploadSwitch = (index, value) => {
-    setDataToUpload(prevData => {
-      const updateData = [...prevData];
-      updateData[index].toUpload = value;
-      return updateData;
+  const handleUploadSwitch = useCallback((index, value) => {
+    setDataToUpload(prev => {
+      const updated = [...prev];
+      updated[index].toUpload = value;
+      return updated;
     });
-  }
-  // end of handlers
+  }, []);
 
-
-  // Submit transactions for upload
+  // Upload to backend
   const handleSubmitTransactions = async () => {
-    if (!dataToUpload || dataToUpload.length === 0) {
-      setError("אין נתונים להעלאה");
+    if (!dataToUpload?.length) {
+      setError('אין נתונים להעלאה');
       return;
     }
-    setError(null);
-    setSuccess(null);
+
+    const toUpload = dataToUpload.filter(t => t.toUpload);
     setLoading(true);
-    const transactionsToSubmit = dataToUpload.filter(t => t.toUpload);
-    const response = await post(`profile/upload-transactions`, {
+
+    const response = await post('profile/upload-transactions', {
       username: profile.username,
       profileName: profile.profileName,
       refId: profile.expenses,
-      transactionsToUpload: transactionsToSubmit
+      transactionsToUpload: toUpload
     });
+
     setLoading(false);
     if (response.ok) {
       setSuccess('העסקאות הועלו בהצלחה');
-      fetchExpenses(); // Refetch expenses after successful upload
+      fetchExpenses();
       fetchBudgets();
-      onSuccessUpload();
+      setTimeout(() => resetState(), 3000);
     } else {
-      setError('שגיאה בהעלאת העסקאות, נסה שוב מאוחר יותר');
       console.error('Error uploading transactions:', response);
+      setError('שגיאה בהעלאת העסקאות, נסה שוב מאוחר יותר');
     }
   };
-
 
   const resetState = () => {
     setError(null);
@@ -227,17 +200,33 @@ export default function useUploadTransactionsFromFile({
     setCategorizedTransactions(null);
   };
 
-  const onSuccessUpload = () => { setTimeout(() => resetState(), 3000); };
-
-
-
   return {
-    handleFileSelect, processTransactions, handleCategoryChange,
-    handleBusinessChange, handleUploadSwitch, addCategory,
-    addBusiness, onCategoryAndBusinessAdded, handleSubmitTransactions, onSuccessUpload, resetState,
-    dataToUpload, selectedFile, error, loading, success, categories: contextCategories, businesses: contextBusinesses, categoryLoading,
-    businessLoading, getCategoriesError, getBusinessesError, getCategoriesLoading, getBusinessesLoading, categorySuccess, businessSuccess, categoryError, businessError
+    handleFileSelect,
+    processTransactions,
+    handleCategoryChange,
+    handleBusinessChange,
+    handleUploadSwitch,
+    addCategory,
+    addBusiness,
+    onCategoryOrBusinessAdded,
+    handleSubmitTransactions,
+    resetState,
+    dataToUpload,
+    selectedFile,
+    error,
+    loading,
+    success,
+    categories: contextCategories,
+    businesses: contextBusinesses,
+    categoryLoading,
+    businessLoading,
+    getCategoriesError,
+    getBusinessesError,
+    getCategoriesLoading,
+    getBusinessesLoading,
+    categorySuccess,
+    businessSuccess,
+    categoryError,
+    businessError
   };
-
-
 }

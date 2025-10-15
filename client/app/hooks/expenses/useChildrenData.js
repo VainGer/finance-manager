@@ -42,7 +42,7 @@ export default function useChildrenData() {
         setLoading(true);
         setError(null);
         try {
-            const response = await get(`expenses/profile-expenses/child/${profile.username}/${selectedChild.id}`);
+            const response = await get(`expenses/profile-expenses/child/${encodeURIComponent(profile.username)}/${selectedChild.id}`);
             if (response.ok) {
                 setChildrenExpenses(response.expenses);
                 const categories = [];
@@ -77,7 +77,7 @@ export default function useChildrenData() {
             setLoading(true);
             setError(null);
             const response = await get(
-                `budgets/get-profile-budgets?username=${profile.username}&profileName=${selectedChild.name}`);
+                `budgets/get-profile-budgets?username=${encodeURIComponent(profile.username)}&profileName=${encodeURIComponent(selectedChild.name)}`);
             if (response.ok) {
                 setChildrenProfileBudgets(response.profileBudgets || []);
                 setChildrenCategoryBudgets(response.categoryBudgets || []);

@@ -8,7 +8,7 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness })
 
     useEffect(() => {
         const fetchBusinesses = async () => {
-            const response = await get(`expenses/business/get-businesses/${refId}/${category}`);
+            const response = await get(`expenses/business/get-businesses/${refId}/${encodeURIComponent(category)}`);
             if (response.ok) {
                 setBusinesses(response.businesses || []);
             } else {
@@ -29,9 +29,9 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness })
                     <p className="text-red-700 text-sm font-medium">{error}</p>
                 </div>
             )}
-            
+
             <div className="relative">
-                <select 
+                <select
                     onChange={e => setSelectedBusiness(e.target.value)}
                     className="w-full px-4 py-3 pr-10 bg-white border border-slate-200 rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent appearance-none font-medium text-slate-800"
                 >
@@ -42,7 +42,7 @@ export default function BusinessSelect({ refId, category, setSelectedBusiness })
                         <option disabled className="text-slate-400">לא נמצאו עסקים</option>
                     )}
                 </select>
-                
+
                 <div className="absolute inset-y-0 left-0 flex items-center px-3 pointer-events-none">
                     <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

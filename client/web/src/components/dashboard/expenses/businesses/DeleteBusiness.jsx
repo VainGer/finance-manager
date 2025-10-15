@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useAuth } from "../../../../context/AuthContext";
-import {del} from "../../../../utils/api";
+import { del } from "../../../../utils/api";
 import BusinessSelect from "./BusinessSelect";
 import CategorySelect from "../categories/CategorySelect";
 
@@ -25,13 +25,13 @@ export default function DeleteBusiness({ goBack }) {
             return;
         }
 
-        const response = await del(`expenses/business/delete/${profile.expenses}/${selectedCategory}/${selectedBusiness}`);
+        const response = await del(`expenses/business/delete/${profile.expenses}/${encodeURIComponent(selectedCategory)}/${encodeURIComponent(selectedBusiness)}`);
         if (response.ok) {
             setSuccess('העסק נמחק בהצלחה');
             setTimeout(() => {
                 goBack();
             }, 1500);
-        }else{
+        } else {
             setError('אירעה שגיאה בעת מחיקת העסק, נסה שוב מאוחר יותר');
             console.error('Error deleting business:', response.error);
         }
@@ -47,7 +47,7 @@ export default function DeleteBusiness({ goBack }) {
                     <p className="text-red-700 text-sm font-medium">{error}</p>
                 </div>
             )}
-            
+
             {/* Success Alert */}
             {success && (
                 <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3 mb-6">
@@ -66,21 +66,21 @@ export default function DeleteBusiness({ goBack }) {
                         <CategorySelect refId={profile.expenses} setSelectedCategory={setSelectedCategory} />
                     </div>
                 </div>
-                
+
                 {/* Business Selection */}
                 {selectedCategory && (
                     <div className="space-y-3">
                         <label className="block text-sm font-semibold text-slate-800 text-right">בחר בעל עסק למחיקה</label>
                         <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
-                            <BusinessSelect 
-                                refId={profile.expenses} 
-                                category={selectedCategory} 
-                                setSelectedBusiness={setSelectedBusiness} 
+                            <BusinessSelect
+                                refId={profile.expenses}
+                                category={selectedCategory}
+                                setSelectedBusiness={setSelectedBusiness}
                             />
                         </div>
                     </div>
                 )}
-                
+
                 {/* Confirmation and Action */}
                 {selectedBusiness && (
                     <div className="space-y-6">
@@ -92,11 +92,11 @@ export default function DeleteBusiness({ goBack }) {
                                 <h4 className="font-semibold text-red-800">אזהרה!</h4>
                             </div>
                             <p className="text-red-700 text-sm">
-                                אתה בטוח שברצונך למחוק את בעל העסק <strong>"{selectedBusiness}"</strong>?<br/>
+                                אתה בטוח שברצונך למחוק את בעל העסק <strong>"{selectedBusiness}"</strong>?<br />
                                 פעולה זו בלתי הפיכה ותמחק את כל הנתונים הקשורים.
                             </p>
                         </div>
-                        
+
                         <div className="flex gap-3">
                             <button
                                 type="button"
@@ -114,7 +114,7 @@ export default function DeleteBusiness({ goBack }) {
                         </div>
                     </div>
                 )}
-                
+
                 {/* Back Button for Incomplete Selection */}
                 {!selectedBusiness && (
                     <div className="pt-4">

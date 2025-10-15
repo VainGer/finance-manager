@@ -14,7 +14,7 @@ export default function AddChildrenBudget() {
 
     const fetchChildrenProfiles = async () => {
         try {
-            const response = await get('profile/get-profiles?username=' + account.username);
+            const response = await get('profile/get-profiles?username=' + encodeURIComponent(account.username));
             if (response.ok) {
                 setChildrenProfiles(response.profiles.filter(p => !p.parentProfile));
             } else {
@@ -82,15 +82,15 @@ export default function AddChildrenBudget() {
                             </div>
                         </div>
                     )}
-                    
+
                     <form onSubmit={addChildrenBudget} className="space-y-6">
                         {/* Child Selection */}
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-slate-700 uppercase tracking-wide">בחירת ילד</label>
                             <div className="relative">
-                                <select 
-                                    name="childProfile" 
-                                    value={selectedChild} 
+                                <select
+                                    name="childProfile"
+                                    value={selectedChild}
                                     onChange={e => setSelectedChild(e.target.value)}
                                     className="w-full p-4 pr-12 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 bg-white shadow-sm appearance-none"
                                     required

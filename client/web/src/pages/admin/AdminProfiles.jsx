@@ -192,8 +192,8 @@ export default function AdminProfiles() {
                                             type="button"
                                             onClick={() => setEditForm(prev => ({ ...prev, color }))}
                                             className={`w-10 h-10 rounded-xl border-4 transition-all duration-200 hover:scale-110 hover:shadow-lg ${editForm.color === color
-                                                    ? 'border-slate-800 shadow-lg transform scale-105'
-                                                    : 'border-slate-300 hover:border-slate-500'
+                                                ? 'border-slate-800 shadow-lg transform scale-105'
+                                                : 'border-slate-300 hover:border-slate-500'
                                                 }`}
                                             style={{ backgroundColor: color }}
                                             title={name}

@@ -132,7 +132,7 @@ export default function useEditCategories() {
         setLoading(true);
 
         try {
-            const response = await del(`expenses/category/delete/${profile.expenses}/${selectedCategory}`);
+            const response = await del(`expenses/category/delete/${profile.expenses}/${encodeURIComponent(selectedCategory)}`);
             setLoading(false);
 
             if (response.ok) {

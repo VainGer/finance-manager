@@ -1,18 +1,44 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-export default function AddCategory({ goBack, addCategory, error, success, onCategoryAdded, inOverlay = false }) {
+export default function AddCategory({
+    goBack,
+    addCategory,
+    error,
+    success,
+    onCategoryAdded,
+    inOverlay = false
+}) {
     const [categoryName, setCategoryName] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (success && onCategoryAdded) {
             onCategoryAdded(true);
+            setTimeout(() => {
+                goBack?.();
+                setIsSubmitting(false);
+                setCategoryName('');
+            }, 300);
         }
-    }, [success, onCategoryAdded]);
+    }, [success]);
+
+    const handleSubmit = async () => {
+        if (!categoryName.trim()) return;
+        setIsSubmitting(true);
+        await addCategory(categoryName, setCategoryName);
+    };
+
+    useEffect(() => {
+        if (error) setIsSubmitting(false);
+    }, [error]);
 
     return (
-        <View className={`bg-white rounded-xl ${!inOverlay ? 'shadow-lg' : ''} p-6 w-full mx-auto`} style={{ minHeight: 300 }}>
+        <View
+            className={`bg-white rounded-xl ${!inOverlay ? 'shadow-lg' : ''} p-6 w-full mx-auto`}
+            style={{ minHeight: 300 }}
+        >
             {/* Title */}
             <View className="items-center mb-8">
                 <Text className="text-3xl font-bold text-slate-800">הוספת קטגוריה</Text>
@@ -48,6 +74,7 @@ export default function AddCategory({ goBack, addCategory, error, success, onCat
                     placeholderTextColor="#9CA3AF"
                     className="w-full px-5 py-4 text-right bg-white border-2 border-gray-300 rounded-xl"
                     style={{ textAlign: 'right', fontSize: 17 }}
+                    editable={!isSubmitting}
                 />
             </View>
 
@@ -57,24 +84,29 @@ export default function AddCategory({ goBack, addCategory, error, success, onCat
                     onPress={goBack}
                     className="bg-gray-100 py-4 rounded-2xl w-[48%] border border-gray-200"
                     activeOpacity={0.7}
+                    disabled={isSubmitting}
                 >
                     <Text className="text-gray-700 font-bold text-center">ביטול</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() => {
-                        addCategory(categoryName, setCategoryName);
-                    }}
+                    onPress={handleSubmit}
                     className="bg-blue-500 py-4 rounded-2xl w-[48%] flex-row items-center justify-center"
                     activeOpacity={0.7}
-                    disabled={!categoryName.trim()}
+                    disabled={!categoryName.trim() || isSubmitting}
                     style={{
-                        opacity: !categoryName.trim() ? 0.6 : 1,
+                        opacity: (!categoryName.trim() || isSubmitting) ? 0.6 : 1,
                         elevation: 2
                     }}
                 >
-                    <Text className="text-white font-bold text-center ml-2">הוסף קטגוריה</Text>
-                    <Ionicons name="add-circle" size={20} color="white" />
+                    {isSubmitting ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <>
+                            <Text className="text-white font-bold text-center ml-2">הוסף קטגוריה</Text>
+                            <Ionicons name="add-circle" size={20} color="white" />
+                        </>
+                    )}
                 </TouchableOpacity>
             </View>
         </View>

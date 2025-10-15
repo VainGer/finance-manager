@@ -50,7 +50,7 @@ export default function useChildrenData() {
         setLoading(true);
         setError(null);
         try {
-            const response = await get(`expenses/profile-expenses/child/${profile.username}/${childId}`);
+            const response = await get(`expenses/profile-expenses/child/${encodeURIComponent(profile.username)}/${childId}`);
             if (response.ok) {
                 setChildrenExpenses(response.expenses);
                 const categories = [];
@@ -90,7 +90,7 @@ export default function useChildrenData() {
             const child = children.find(c => c.id === childId);
             const childName = child?.name || child?.profileName;
             const response = await get(
-                `budgets/get-profile-budgets?username=${profile.username}&profileName=${childName}`);
+                `budgets/get-profile-budgets?username=${encodeURIComponent(profile.username)}&profileName=${encodeURIComponent(childName)}`);
             if (response.ok) {
                 setChildrenProfileBudgets(response.profileBudgets || []);
                 setChildrenCategoryBudgets(response.categoryBudgets || []);

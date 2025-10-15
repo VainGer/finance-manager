@@ -25,7 +25,7 @@ export default function DeleteCategory({ goBack }) {
     const deleteCategory = async () => {
         setLoading(true);
         try {
-            const response = await del(`expenses/category/delete/${profile.expenses}/${selectedCategory}`);
+            const response = await del(`expenses/category/delete/${profile.expenses}/${encodeURIComponent(selectedCategory)}`);
             if (response.ok) {
                 setError(null);
                 setSuccess('הקטגוריה נמחקה בהצלחה');
@@ -119,7 +119,7 @@ export default function DeleteCategory({ goBack }) {
                             <p className="text-red-700 text-sm font-medium">{error}</p>
                         </div>
                     )}
-                    
+
                     {/* Success Alert */}
                     {success && (
                         <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
@@ -129,7 +129,7 @@ export default function DeleteCategory({ goBack }) {
                             <p className="text-green-700 text-sm font-medium">{success}</p>
                         </div>
                     )}
-                    
+
                     <form onSubmit={handleSubmit} className="space-y-6" dir="rtl">
                         {/* Warning Section */}
                         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3">
@@ -141,7 +141,7 @@ export default function DeleteCategory({ goBack }) {
                                 <p className="text-orange-700 text-sm">מחיקת קטגוריה תמחק את כל הנתונים הקשורים אליה</p>
                             </div>
                         </div>
-                        
+
                         {/* Category Selection */}
                         <div className="space-y-3">
                             <label className="block text-sm font-semibold text-slate-800 text-right">בחר קטגוריה למחיקה</label>
@@ -149,7 +149,7 @@ export default function DeleteCategory({ goBack }) {
                                 <CategorySelect refId={profile.expenses} setSelectedCategory={setSelectedCategory} />
                             </div>
                         </div>
-                        
+
                         {/* Action Buttons */}
                         <div className="flex gap-3 pt-4">
                             <button

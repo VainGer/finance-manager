@@ -35,7 +35,7 @@ export function ProfileDataProvider({ children }) {
             setErrors(prev => prev.filter(e => !e.budgetErrors));
             setBudgetLoading(true);
             let errMsg = [];
-            const response = await get(`budgets/get-profile-budgets?username=${account.username}&profileName=${profile.profileName}`);
+            const response = await get(`budgets/get-profile-budgets?username=${encodeURIComponent(account.username)}&profileName=${encodeURIComponent(profile.profileName)}`);
             if (response.ok) {
                 setProfileBudgets(response.profileBudgets || []);
                 setCategoryBudgets(response.categoryBudgets || []);
@@ -67,7 +67,7 @@ export function ProfileDataProvider({ children }) {
         setErrors(prev => prev.filter(e => !e.expensesErrors));
         setExpensesLoading(true);
         try {
-            const response = await get(`expenses/profile-expenses/${profile.expenses}`);
+            const response = await get(`expenses/profile-expenses/${encodeURIComponent(rofile.expenses)}`);
             if (response.ok) {
                 setExpenses(response.expenses || []);
             }
@@ -97,7 +97,7 @@ export function ProfileDataProvider({ children }) {
         setGetCategoriesLoading(true);
         try {
             setErrors(prev => prev.filter(e => !e.categoriesErrors));
-            const response = await get(`expenses/category/get-names/${profile.expenses}`);
+            const response = await get(`expenses/category/get-names/${encodeURIComponent(profile.expenses)}`);
             if (response.ok) {
                 setCategories(response.categoriesNames || []);
                 setGetBusinessesLoading(true);
@@ -133,7 +133,9 @@ export function ProfileDataProvider({ children }) {
         if (!profile?.expenses) return [];
         try {
             setErrors(prev => prev.filter(e => !e.businessesErrors));
-            const response = await get(`expenses/business/get-businesses/${profile.expenses}/${category}`);
+            const response = await get(
+                `expenses/business/get-businesses/${profile.expenses}/${encodeURIComponent(category)}`
+            );
             if (response.ok) {
                 return response.businesses;
             } else {

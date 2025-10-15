@@ -13,7 +13,15 @@ export default function CreateProfile({ username, firstProfile, setOnCreateLoadi
     const [openColorPicker, setOpenColorPicker] = useState(false);
     const [pin, setPin] = useState('');
     const [parentProfile, setParentProfile] = useState(false);
-    const { loading, error, createProfile, setError } = useCreateProfile({ username, profileName, pin, avatar, color, firstProfile });
+    const { loading, error, createProfile, setError } = useCreateProfile({
+        username,
+        profileName,
+        pin,
+        avatar,
+        color,
+        firstProfile,
+        parentProfile
+    });
 
 
     useEffect(() => {
@@ -65,8 +73,8 @@ export default function CreateProfile({ username, firstProfile, setOnCreateLoadi
                     <View className="bg-white p-4 rounded-lg w-5/6 m-4">
                         <Text className="text-lg font-bold text-center mb-2">בחר צבע פרופיל</Text>
                         <ColorPicker setColor={setColor} />
-                        <Button 
-                            style="danger" 
+                        <Button
+                            style="danger"
                             onPress={() => setOpenColorPicker(false)}
                             className="mt-2"
                         >

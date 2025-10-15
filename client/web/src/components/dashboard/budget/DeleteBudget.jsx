@@ -6,7 +6,7 @@ import { del } from '../../../utils/api';
 export default function DeleteBudget({ goBack }) {
     const { account, profile } = useAuth();
     const { profileBudgets, fetchBudgets } = useProfileData();
-    
+
     const [selectedBudgetId, setSelectedBudgetId] = useState('');
     const [showConfirm, setShowConfirm] = useState(false);
     const [error, setError] = useState('');
@@ -29,9 +29,9 @@ export default function DeleteBudget({ goBack }) {
         setLoading(true);
         try {
             const response = await del(
-                `budgets/delete-budget/${account.username}/${profile.profileName}/${selectedBudgetId}`
+                `budgets/delete-budget/${encodeURIComponent(account.username)}/${encodeURIComponent(profile.profileName)}/${encodeURIComponent(selectedBudgetId)}`
             );
-            
+
             if (response.ok) {
                 setError('');
                 setSuccess('התקציב נמחק בהצלחה');
@@ -92,7 +92,7 @@ export default function DeleteBudget({ goBack }) {
                         <label className="block text-sm font-medium text-slate-700 mb-3">
                             בחר תקציב למחיקה:
                         </label>
-                        
+
                         {profileBudgets.length === 0 ? (
                             <div className="text-center py-8 text-slate-500">
                                 <p>אין תקציבים זמינים למחיקה</p>
@@ -102,15 +102,14 @@ export default function DeleteBudget({ goBack }) {
                                 {profileBudgets.map((budget) => {
                                     const startDate = new Date(budget.startDate).toLocaleDateString('he-IL');
                                     const endDate = new Date(budget.endDate).toLocaleDateString('he-IL');
-                                    
+
                                     return (
                                         <label
                                             key={budget._id}
-                                            className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                                                selectedBudgetId === budget._id
+                                            className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${selectedBudgetId === budget._id
                                                     ? 'border-red-300 bg-red-50'
                                                     : 'border-slate-200 bg-white hover:bg-slate-50'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-center">
                                                 <input
@@ -126,7 +125,7 @@ export default function DeleteBudget({ goBack }) {
                                                         {startDate} - {endDate}
                                                     </div>
                                                     <div className="text-sm text-slate-500">
-                                                        תקציב: ₪{budget.amount?.toLocaleString()} | 
+                                                        תקציב: ₪{budget.amount?.toLocaleString()} |
                                                         הוצא: ₪{budget.spent?.toLocaleString()}
                                                     </div>
                                                 </div>
@@ -143,11 +142,10 @@ export default function DeleteBudget({ goBack }) {
                         <button
                             type="submit"
                             disabled={!selectedBudgetId || loading}
-                            className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-                                selectedBudgetId && !loading
+                            className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${selectedBudgetId && !loading
                                     ? 'bg-red-600 hover:bg-red-700 text-white'
                                     : 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                            }`}
+                                }`}
                         >
                             {loading ? 'מוחק...' : 'מחק תקציב'}
                         </button>

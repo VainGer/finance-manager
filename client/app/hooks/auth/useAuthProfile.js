@@ -15,7 +15,7 @@ export default function useAuthProfile({ account, setProfile, setStoreProfile,
             setLoading(true);
             setError(null);
 
-            const response = await get('profile/get-profiles?username=' + account.username);
+            const response = await get('profile/get-profiles?username=' + encodeURIComponent(account.username));
 
             if (response.ok) {
                 setProfiles(response.profiles || []);

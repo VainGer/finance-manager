@@ -135,7 +135,7 @@ export default function useUploadTransactionFile() {
 
             for (const category of categories) {
                 try {
-                    const response = await get(`expenses/business/get-businesses/${profile.expenses}/${category}`);
+                    const response = await get(`expenses/business/get-businesses/${profile.expenses}/${encodeURIComponent(category)}`);
                     fetchedSelects.push({
                         category,
                         businesses: response.ok ? response.businesses : []

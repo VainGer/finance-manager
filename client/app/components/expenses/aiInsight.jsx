@@ -3,6 +3,7 @@ import { View, Text, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useProfileData } from '../../context/ProfileDataContext';
 import Select from '../../components/common/Select';
+import { formatDate } from '../../utils/formatters';
 
 export default function AIInsight() {
     const { aiData } = useProfileData();
@@ -28,7 +29,7 @@ export default function AIInsight() {
 
     const selectItems = histories.map((h) => ({
         value: h._id,
-        label: h.periodLabel,
+        label: `${formatDate(new Date(h.startDate))} - ${formatDate(new Date(h.endDate))}`,
     }));
 
     return (

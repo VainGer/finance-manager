@@ -1,25 +1,50 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState, memo } from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import CategorySelect from '../categories/categorySelect.jsx';
 
-const CreateBusiness = ({ goBack, refId, error, success, addBusiness, onBusinessAdded,
-    categories, getCategoriesLoading, getCategoriesError, inOverlay = false }) => {
+const CreateBusiness = ({
+    goBack,
+    error,
+    success,
+    addBusiness,
+    onBusinessAdded,
+    categories,
+    getCategoriesLoading,
+    getCategoriesError,
+    inOverlay = true
+}) => {
     const [name, setName] = useState('');
     const [category, setCategory] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (success && onBusinessAdded) {
             onBusinessAdded(false);
+            setTimeout(() => {
+                goBack?.();
+                setIsSubmitting(false);
+                setName('');
+                setCategory(null);
+            }, 300);
         }
-    }, [success, onBusinessAdded]);
+    }, [success]);
 
-    const handleSubmit = () => {
-        addBusiness(refId, category, name, setName);
+    useEffect(() => {
+        if (error) setIsSubmitting(false);
+    }, [error]);
+
+    const handleSubmit = async () => {
+        if (!category || !name.trim()) return;
+        setIsSubmitting(true);
+        await addBusiness(category, name, setName);
     };
 
     return (
-        <View className={`bg-white rounded-xl ${!inOverlay ? 'shadow-lg' : ''} p-6 w-full mx-auto`} style={{ minHeight: 380 }}>
+        <View
+            className={`bg-white rounded-xl ${!inOverlay ? 'shadow-lg' : ''} p-6 w-full mx-auto`}
+            style={{ minHeight: 380 }}
+        >
             {/* Title */}
             <View className="items-center mb-8">
                 <Text className="text-3xl font-bold text-slate-800">הוספת עסק</Text>
@@ -46,7 +71,6 @@ const CreateBusiness = ({ goBack, refId, error, success, addBusiness, onBusiness
             )}
 
             {/* Category Selection */}
-
             <View className="mb-7">
                 <Text className="text-slate-800 font-bold mb-3 text-lg text-right">בחר קטגוריה</Text>
                 <View className="border-2 border-gray-300 rounded-xl overflow-hidden">
@@ -70,6 +94,7 @@ const CreateBusiness = ({ goBack, refId, error, success, addBusiness, onBusiness
                     placeholderTextColor="#9CA3AF"
                     className="w-full px-5 py-4 text-right bg-white border-2 border-gray-300 rounded-xl"
                     style={{ textAlign: 'right', fontSize: 17 }}
+                    editable={!isSubmitting}
                 />
             </View>
 
@@ -79,6 +104,7 @@ const CreateBusiness = ({ goBack, refId, error, success, addBusiness, onBusiness
                     onPress={goBack}
                     className="bg-gray-100 py-4 rounded-2xl w-[48%] border border-gray-200"
                     activeOpacity={0.7}
+                    disabled={isSubmitting}
                 >
                     <Text className="text-gray-700 font-bold text-center">ביטול</Text>
                 </TouchableOpacity>
@@ -87,18 +113,24 @@ const CreateBusiness = ({ goBack, refId, error, success, addBusiness, onBusiness
                     onPress={handleSubmit}
                     className="bg-blue-500 py-4 rounded-2xl w-[48%] flex-row items-center justify-center"
                     activeOpacity={0.7}
-                    disabled={!category || !name.trim()}
+                    disabled={!category || !name.trim() || isSubmitting}
                     style={{
-                        opacity: (!category || !name.trim()) ? 0.6 : 1,
+                        opacity: (!category || !name.trim() || isSubmitting) ? 0.6 : 1,
                         elevation: 2
                     }}
                 >
-                    <Text className="text-white font-bold text-center ml-2">הוסף עסק</Text>
-                    <Ionicons name="business" size={20} color="white" />
+                    {isSubmitting ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <>
+                            <Text className="text-white font-bold text-center ml-2">הוסף עסק</Text>
+                            <Ionicons name="business" size={20} color="white" />
+                        </>
+                    )}
                 </TouchableOpacity>
             </View>
         </View>
     );
-}
+};
 
 export default memo(CreateBusiness);

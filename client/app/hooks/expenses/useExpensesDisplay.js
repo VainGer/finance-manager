@@ -222,8 +222,9 @@ export default function useExpensesDisplay() {
     };
 
     const clearFilters = () => {
-        setStagedFilters({ month: null, category: null, business: null });
-        setAppliedFilters({ month: null, category: null, business: null });
+        const latestMonth = availableDates.length > 0 ? availableDates[0].dateYM : null;
+        setStagedFilters({ month: latestMonth, category: null, business: null });
+        setAppliedFilters({ month: latestMonth, category: null, business: null });
         sortByDate(true, true);
     };
 
@@ -237,7 +238,7 @@ export default function useExpensesDisplay() {
                     monthNum: parseInt(month),
                     monthStr: month,
                     month: monthToHebrewName(month),
-                    dateYM: dateYM 
+                    dateYM: dateYM
                 };
             }).sort((a, b) => {
                 if (a.year !== b.year) {

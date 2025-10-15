@@ -9,7 +9,7 @@ export default function ChildrenBudgetUpdate({ username, profileName }) {
 
     const fetchBudgets = async () => {
         try {
-            const response = await get(`budgets/get-child-budgets?username=${username}&profileName=${profileName}`);
+            const response = await get(`budgets/get-child-budgets?username=${encodeURIComponent(username)}&profileName=${encodeURIComponent(profileName)}`);
             if (response.ok) {
                 setBudgets(response.budgets);
             }

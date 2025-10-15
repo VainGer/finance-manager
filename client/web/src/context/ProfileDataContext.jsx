@@ -69,7 +69,7 @@ export function ProfileDataProvider({ children }) {
             setErrors(prev => prev.filter(e => !e.budgetErrors));
             setBudgetLoading(true);
 
-            const response = await get(`budgets/get-profile-budgets?username=${account.username}&profileName=${profile.profileName}`);
+            const response = await get(`budgets/get-profile-budgets?username=${encodeURIComponent(account.username)}&profileName=${encodeURIComponent(profile.profileName)}`);
             if (response.ok) {
                 const pb = response.profileBudgets || [];
                 const cb = response.categoryBudgets || [];
@@ -98,7 +98,7 @@ export function ProfileDataProvider({ children }) {
         setErrors(prev => prev.filter(e => !e.expensesErrors));
         setExpensesLoading(true);
         try {
-            const response = await get(`expenses/profile-expenses/${profile.expenses}`);
+            const response = await get(`expenses/profile-expenses/${encodeURIComponent(profile.expenses)}`);
             if (response.ok) {
                 const exp = response.expenses || [];
                 setExpenses(exp);
@@ -124,7 +124,7 @@ export function ProfileDataProvider({ children }) {
         if (!profile?.expenses) return [];
         try {
             setErrors(prev => prev.filter(e => !e.businessesErrors));
-            const response = await get(`expenses/business/get-businesses/${profile.expenses}/${category}`);
+            const response = await get(`expenses/business/get-businesses/${profile.expenses}/${encodeURIComponent(category)}`);
             if (response.ok) {
                 return response.businesses;
             } else {
