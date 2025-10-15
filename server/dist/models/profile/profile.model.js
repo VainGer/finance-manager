@@ -271,55 +271,6 @@ class ProfileModel {
             throw new Error("Failed to set profile color");
         }
     }
-    static async addRefreshToken(profileId, refreshToken) {
-        try {
-            const result = await server_1.default.UpdateDocument(this.profileCollection, {
-                _id: new mongodb_1.ObjectId(profileId)
-            }, {
-                $addToSet: {
-                    refreshTokens: {
-                        token: refreshToken,
-                        createdAt: new Date()
-                    }
-                }
-            });
-            return result !== null;
-        }
-        catch (error) {
-            console.error("Error adding refresh token:", error);
-            return false;
-        }
-    }
-    static async removeRefreshToken(profileId, refreshToken) {
-        try {
-            const result = await server_1.default.UpdateDocument(this.profileCollection, {
-                _id: new mongodb_1.ObjectId(profileId)
-            }, {
-                $pull: {
-                    refreshTokens: { token: refreshToken }
-                }
-            });
-            return result !== null;
-        }
-        catch (error) {
-            console.error("Error removing refresh token:", error);
-            return false;
-        }
-    }
-    static async clearAllRefreshTokens(profileId) {
-        try {
-            const result = await server_1.default.UpdateDocument(this.profileCollection, {
-                _id: new mongodb_1.ObjectId(profileId)
-            }, {
-                $unset: { refreshTokens: "" }
-            });
-            return result !== null;
-        }
-        catch (error) {
-            console.error("Error clearing refresh tokens:", error);
-            return false;
-        }
-    }
     static extractPublicId(avatarUrl) {
         const urlParts = avatarUrl.split('/');
         const uploadIndex = urlParts.findIndex(part => part === 'upload');

@@ -3,6 +3,7 @@ import ProfileService from "../services/profile/profile.service";
 import * as AppErrors from "../errors/AppError";
 import { ChildProfileCreationData } from "../types/profile.types";
 import { cookieOptions } from "../utils/cookies";
+import AccountService from "../services/account/account.service";
 
 export default class ProfileController {
 
@@ -197,13 +198,10 @@ export default class ProfileController {
     static async logout(req: Request, res: Response) {
         try {
             const refreshToken = req.cookies?.refreshToken;
-            if (refreshToken) {
-                await ProfileService.revokeRefreshToken(refreshToken);
-            }
-
+            const { username } = req.body;
             res.clearCookie("accessToken", { path: "/" });
             res.clearCookie("refreshToken", { path: "/" });
-
+            await ProfileService.logout(username, refreshToken);
             res.status(200).json({ message: "Logged out successfully" });
         } catch (error) {
             ProfileController.handleError(error, res);

@@ -192,7 +192,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = useCallback(async () => {
         try {
-            await post('profile/logout', {});
+            await post('profile/logout', { username: profile.username });
         } catch (error) {
             console.error('Logout error:', error);
         } finally {

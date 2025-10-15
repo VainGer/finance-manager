@@ -213,7 +213,6 @@ export default class ProfileService {
                         lastUsedAt: new Date()
                     };
                     await AccountModel.storeToken(username, tokenData);
-                    await ProfileModel.addRefreshToken(profile._id.toString(), refreshToken);
                 }
             }
             const { pin: _, budgets: __, ...safeProfile } = profile;
@@ -383,29 +382,12 @@ export default class ProfileService {
         }
     }
 
-    static async revokeRefreshToken(refreshToken: string) {
+    static async logout(username: string, token: string) {
         try {
-
-            const decoded = JWT.verifyRefreshToken(refreshToken);
-            if (!decoded || !decoded.profileId) {
-                throw new AppErrors.UnauthorizedError("Invalid refresh token");
-            }
-            const result = await ProfileModel.removeRefreshToken(decoded.profileId, refreshToken);
-            if (!result) {
-                throw new AppErrors.DatabaseError("Failed to revoke refresh token");
-            }
-            AdminService.logAction({
-                type: "delete",
-                executeAccount: "system",
-                action: "revoke_refresh_token",
-                target: { refreshToken }
-            });
-            return { success: true, message: "Refresh token revoked successfully" };
+            await AccountModel.removeToken(username, token);
+            return { success: true, message: "Token removed successfully." };
         } catch (error) {
-            if (error instanceof AppErrors.AppError) {
-                throw error;
-            }
-            throw new AppErrors.AppError(`Error revoking refresh token: ${(error as Error).message}`, 500);
+            throw new AppErrors.AppError(`Error removing token: ${(error as Error).message}`, 500);
         }
     }
 

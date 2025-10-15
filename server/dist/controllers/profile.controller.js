@@ -218,11 +218,10 @@ class ProfileController {
     static async logout(req, res) {
         try {
             const refreshToken = req.cookies?.refreshToken;
-            if (refreshToken) {
-                await profile_service_1.default.revokeRefreshToken(refreshToken);
-            }
+            const { username } = req.body;
             res.clearCookie("accessToken", { path: "/" });
             res.clearCookie("refreshToken", { path: "/" });
+            await profile_service_1.default.logout(username, refreshToken);
             res.status(200).json({ message: "Logged out successfully" });
         }
         catch (error) {
