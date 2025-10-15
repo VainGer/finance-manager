@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Smart Finance",
-    "slug": "Smart-finance",
+    "slug": "app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -53,6 +53,7 @@
       "eas": {
         "projectId": "cc29f7d3-6d4b-4516-a020-dc570cdd23c3"
       }
-    }
+    },
+    "owner": "germanvainblat"
   }
 }

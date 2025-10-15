@@ -10,7 +10,7 @@ import UploadFromFileTransactions from "../pages/UploadFromFileTransactions.jsx"
 import AdminHome from "../pages/admin/AdminHome.jsx";
 import AdminLogin from "../pages/admin/AdminLogin.jsx";
 import AdminRegister from "../pages/admin/AdminRegister.jsx";
-import AdminDashboard from "../pages/admin/adminDashboard.jsx";
+import AdminDashboard from "../pages/admin/AdminDashboard.jsx";
 import AdminLogs from "../pages/admin/AdminLogs.jsx";
 import AdminProfiles from "../pages/admin/AdminProfiles.jsx";
 import AdminExpenses from "../pages/admin/AdminExpenses.jsx";
