@@ -12,7 +12,7 @@ const v1_1 = __importDefault(require("./routes/v1"));
 const cloudinary_1 = require("cloudinary");
 const DB_1 = __importDefault(require("./utils/DB"));
 dotenv_1.default.config({ path: path_1.default.join(__dirname, './dotenv/.env') });
-const PORT = process.env.PORT;
+const PORT = process.env.PORT ?? 5500;
 const server = (0, express_1.default)();
 const db = new DB_1.default();
 cloudinary_1.v2.config({

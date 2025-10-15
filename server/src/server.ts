@@ -9,7 +9,7 @@ import DB from "./utils/DB";
 dotenv.config({ path: path.join(__dirname, './dotenv/.env') });
 
 
-const PORT = process.env.PORT || 5500;
+const PORT = process.env.PORT ?? 5500;
 const server = Express();
 const db = new DB();
 
