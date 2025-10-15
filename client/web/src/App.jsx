@@ -8,9 +8,13 @@ import CenteredModal from './components/common/CenteredModal.jsx';
 import Button from './components/common/Button';
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+    return !hasSeenSplash;
+  });
 
   const handleSplashComplete = () => {
+    sessionStorage.setItem('hasSeenSplash', 'true');
     setShowSplash(false);
   };
 
