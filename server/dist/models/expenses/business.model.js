@@ -48,6 +48,21 @@ class BusinessModel {
             throw new Error("Failed to delete business");
         }
     }
+    static async updateBusinessBankName(refId, categoryName, businessName, bankName) {
+        try {
+            const result = await server_1.default.UpdateDocument(BusinessModel.expensesCollection, { _id: new mongodb_1.ObjectId(refId), "categories.name": categoryName, "categories.Businesses.name": businessName }, { $addToSet: { "categories.$.Businesses.$[bizFilter].bankNames": bankName } }, {
+                arrayFilters: [{ "bizFilter.name": businessName }]
+            });
+            if (!result) {
+                return { success: false, message: "Business not found" };
+            }
+            return { success: true, message: "Business bank name updated successfully" };
+        }
+        catch (error) {
+            console.error("Error in BusinessModel.updateBusinessBankName", error);
+            throw new Error("Failed to update business bank name");
+        }
+    }
 }
 exports.default = BusinessModel;
 //# sourceMappingURL=business.model.js.map

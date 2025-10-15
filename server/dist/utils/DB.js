@@ -34,6 +34,12 @@ class DB {
             }
         }
     }
+    getClient() {
+        if (!this.client) {
+            throw new Error("MongoDB client is not connected");
+        }
+        return this.client;
+    }
     async AddDocument(collection, document) {
         try {
             const res = await this.client?.db(this.dbName).collection(collection).insertOne(document);
@@ -91,6 +97,57 @@ class DB {
         }
         catch (error) {
             console.error("Error deleting document: ", error);
+            throw error;
+        }
+    }
+    async Aggregate(collection, pipeline) {
+        try {
+            const results = await this.client?.db(this.dbName).collection(collection).aggregate(pipeline).toArray();
+            return results;
+        }
+        catch (error) {
+            console.error("Error aggregating documents: ", error);
+            throw error;
+        }
+    }
+    async TransactionUpdateMany(operations) {
+        const session = this.client?.startSession();
+        if (!session)
+            throw new Error("No Mongo client available");
+        try {
+            session.startTransaction();
+            for (const op of operations) {
+                await this.client
+                    ?.db(this.dbName)
+                    .collection(op.collection)
+                    .updateMany(op.query, op.update, { session, ...(op.options || {}) });
+            }
+            await session.commitTransaction();
+            return { success: true, message: "Transaction committed successfully" };
+        }
+        catch (error) {
+            console.error("Error in Transaction:", error);
+            await session.abortTransaction();
+            return { success: false, message: "Transaction aborted due to error" };
+        }
+        finally {
+            await session.endSession();
+        }
+    }
+    async Find(collection, query = {}, options) {
+        try {
+            let cursor = this.client?.db(this.dbName).collection(collection).find(query);
+            if (options?.sort) {
+                cursor = cursor?.sort(options.sort);
+            }
+            if (options?.limit) {
+                cursor = cursor?.limit(options.limit);
+            }
+            const results = await cursor?.toArray();
+            return results || [];
+        }
+        catch (error) {
+            console.error("Error finding documents: ", error);
             throw error;
         }
     }

@@ -6,32 +6,105 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const server_1 = __importDefault(require("../../server"));
 const cloudinary_1 = require("cloudinary");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const mongodb_1 = require("mongodb");
+const dotenv_1 = __importDefault(require("dotenv"));
+const path_1 = __importDefault(require("path"));
+dotenv_1.default.config({ path: path_1.default.join(__dirname, '../../dotenv/.env') });
 class ProfileModel {
     static profileCollection = 'profiles';
     static expensesCollection = 'expenses';
+    static aiCollection = 'ai_history';
     static SALT_ROUNDS = 10;
+    static dbName = process.env.DB_NAME;
     static async create(profile) {
+        const client = server_1.default.getClient();
+        const session = client.startSession();
         try {
+            console.log(this.dbName);
+            session.startTransaction();
             const hashedPin = await bcrypt_1.default.hash(profile.pin, this.SALT_ROUNDS);
-            const newProfile = await server_1.default.AddDocument(this.profileCollection, {
+            const expensesResult = await client
+                .db(this.dbName)
+                .collection(this.expensesCollection)
+                .insertOne({
+                username: profile.username,
+                profileName: profile.profileName,
+                categories: []
+            }, { session });
+            const profileResult = await client
+                .db(this.dbName)
+                .collection(this.profileCollection)
+                .insertOne({
                 ...profile,
+                expenses: expensesResult.insertedId,
                 pin: hashedPin
-            });
-            if (newProfile?.insertedId) {
-                return { success: true, insertedId: newProfile.insertedId };
-            }
-            return { success: false, insertedId: null };
+            }, { session });
+            await client
+                .db(this.dbName)
+                .collection(this.aiCollection)
+                .insertOne({
+                profileId: profileResult.insertedId,
+                status: "idle",
+                history: []
+            }, { session });
+            await session.commitTransaction();
+            console.log("Profile and related documents created successfully.");
+            return {
+                success: true,
+                profileId: profileResult.insertedId,
+                message: "Profile created successfully."
+            };
         }
         catch (error) {
-            console.error("Error in ProfileModel.createProfile", error);
+            console.error("Error in ProfileModel.create:", error);
+            await session.abortTransaction();
             throw new Error("Profile creation failed");
         }
+        finally {
+            await session.endSession();
+        }
     }
-    static async findProfile(username, profileName) {
+    static async addChildToProfile(username, profileName, children) {
         try {
-            const profile = await server_1.default.GetDocument(this.profileCollection, {
+            const result = await server_1.default.UpdateDocument(this.profileCollection, {
                 username, profileName
-            });
+            }, { $addToSet: { children } });
+            if (!result) {
+                return { success: false, message: "Profile not found or child already exists" };
+            }
+            return { success: true, message: "Child added successfully" };
+        }
+        catch (error) {
+            console.error("Error in ProfileModel.addChildToProfile", error);
+            throw new Error("Failed to add child to profile");
+        }
+    }
+    static async removeChildFromProfile(username, profileName, childName) {
+        try {
+            const result = await server_1.default.UpdateDocument(this.profileCollection, {
+                username, profileName
+            }, { $pull: { children: { name: childName } } });
+            if (!result) {
+                return { success: false, message: "Profile not found or child does not exist" };
+            }
+            return { success: true, message: "Child removed successfully" };
+        }
+        catch (error) {
+            console.error("Error in ProfileModel.removeChildFromProfile", error);
+            throw new Error("Failed to remove child from profile");
+        }
+    }
+    static async findProfile(username, profileName, profileId) {
+        try {
+            let profile = null;
+            if (profileId) {
+                profile = await this.findProfileById(username, profileId);
+            }
+            else {
+                profile = await server_1.default.GetDocument(this.profileCollection, {
+                    username, profileName
+                });
+            }
             if (!profile) {
                 return null;
             }
@@ -42,18 +115,19 @@ class ProfileModel {
             throw new Error("Failed to find profile");
         }
     }
-    static async createExpensesDocument(username, profileName) {
+    static async findProfileById(username, profileId) {
         try {
-            const res = await server_1.default.AddDocument(ProfileModel.expensesCollection, {
-                username,
-                profileName,
-                categories: []
+            const profile = await server_1.default.GetDocument(this.profileCollection, {
+                username, _id: new mongodb_1.ObjectId(profileId)
             });
-            return res?.insertedId ?? null;
+            if (!profile) {
+                return null;
+            }
+            return profile;
         }
         catch (error) {
-            console.error("Error in ProfileModel.createExpenses", error);
-            throw new Error("Failed to create expenses");
+            console.error("Error in ProfileModel.findProfileById", error);
+            throw new Error("Failed to find profile");
         }
     }
     static async uploadAvatar(avatar) {
@@ -84,13 +158,37 @@ class ProfileModel {
             throw new Error("Failed to get profiles");
         }
     }
-    static async renameProfile(username, oldProfileName, newProfileName) {
+    static async renameProfile(username, oldProfileName, newProfileName, refId, parentProfile) {
         try {
-            const result = await server_1.default.UpdateDocument(this.profileCollection, {
-                username, profileName: oldProfileName
-            }, { $set: { profileName: newProfileName } });
-            if (!result || result.modifiedCount === 0) {
-                return { success: false, message: "Profile not found or name is the same" };
+            const operations = [
+                {
+                    collection: this.profileCollection,
+                    query: { username, profileName: oldProfileName },
+                    update: { $set: { profileName: newProfileName } }
+                },
+                {
+                    collection: this.expensesCollection,
+                    query: { _id: new mongodb_1.ObjectId(refId) },
+                    update: { $set: { profileName: newProfileName } }
+                }
+            ];
+            if (!parentProfile) {
+                operations.push({
+                    collection: this.profileCollection,
+                    query: {
+                        username,
+                        parentProfile: true,
+                        "children.name": oldProfileName
+                    },
+                    update: { $set: { "children.$.name": newProfileName } }
+                });
+            }
+            const transactionResult = await server_1.default.TransactionUpdateMany(operations);
+            if (!transactionResult?.success) {
+                return {
+                    success: false,
+                    message: transactionResult?.message || "Transaction failed during profile rename",
+                };
             }
             return { success: true, message: "Profile renamed successfully" };
         }
@@ -115,11 +213,15 @@ class ProfileModel {
             throw new Error("Failed to update PIN");
         }
     }
-    static async deleteProfile(username, profileName) {
+    static async deleteProfile(username, profileName, refId) {
         try {
-            const result = await server_1.default.DeleteDocument(this.profileCollection, { username, profileName });
-            if (!result || result.deletedCount === 0) {
+            const profileDocument = await server_1.default.DeleteDocument(this.profileCollection, { username, profileName });
+            if (!profileDocument || profileDocument.deletedCount === 0) {
                 return { success: false, message: "Profile not found" };
+            }
+            const expensesDocument = await server_1.default.DeleteDocument(this.expensesCollection, { _id: new mongodb_1.ObjectId(refId) });
+            if (!expensesDocument || expensesDocument.deletedCount === 0) {
+                return { success: false, message: "Expenses document not found" };
             }
             return { success: true, message: "Profile deleted successfully" };
         }
@@ -130,8 +232,7 @@ class ProfileModel {
     }
     static async setAvatar(username, profileName, avatar) {
         try {
-            const uploadedAvatar = await this.uploadAvatar(avatar);
-            const result = await server_1.default.UpdateDocument(this.profileCollection, { username, profileName }, { $set: { avatar: uploadedAvatar } });
+            const result = await server_1.default.UpdateDocument(this.profileCollection, { username, profileName }, { $set: { avatar } });
             if (!result || result.modifiedCount === 0) {
                 return { success: false, message: "Profile not found or avatar is the same" };
             }
@@ -168,6 +269,55 @@ class ProfileModel {
         catch (error) {
             console.error("Error in ProfileModel.setColor", error);
             throw new Error("Failed to set profile color");
+        }
+    }
+    static async addRefreshToken(profileId, refreshToken) {
+        try {
+            const result = await server_1.default.UpdateDocument(this.profileCollection, {
+                _id: new mongodb_1.ObjectId(profileId)
+            }, {
+                $addToSet: {
+                    refreshTokens: {
+                        token: refreshToken,
+                        createdAt: new Date()
+                    }
+                }
+            });
+            return result !== null;
+        }
+        catch (error) {
+            console.error("Error adding refresh token:", error);
+            return false;
+        }
+    }
+    static async removeRefreshToken(profileId, refreshToken) {
+        try {
+            const result = await server_1.default.UpdateDocument(this.profileCollection, {
+                _id: new mongodb_1.ObjectId(profileId)
+            }, {
+                $pull: {
+                    refreshTokens: { token: refreshToken }
+                }
+            });
+            return result !== null;
+        }
+        catch (error) {
+            console.error("Error removing refresh token:", error);
+            return false;
+        }
+    }
+    static async clearAllRefreshTokens(profileId) {
+        try {
+            const result = await server_1.default.UpdateDocument(this.profileCollection, {
+                _id: new mongodb_1.ObjectId(profileId)
+            }, {
+                $unset: { refreshTokens: "" }
+            });
+            return result !== null;
+        }
+        catch (error) {
+            console.error("Error clearing refresh tokens:", error);
+            return false;
         }
     }
     static extractPublicId(avatarUrl) {

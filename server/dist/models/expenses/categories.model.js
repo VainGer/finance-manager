@@ -59,19 +59,6 @@ class CategoriesModel {
             throw new Error("Failed to delete category");
         }
     }
-    static async createCategoriesBudgets(refId, budget, categoryName) {
-        try {
-            const result = await server_1.default.UpdateDocument(CategoriesModel.expenseCollection, { _id: new mongodb_1.ObjectId(refId), "categories.name": categoryName }, { $addToSet: { "categories.$.budgets": budget } });
-            if (!result || result.modifiedCount === 0) {
-                return { success: false, message: "Failed to create category budget" };
-            }
-            return { success: true, message: "Category budget created successfully" };
-        }
-        catch (error) {
-            console.error("Error in CategoriesModel.createCategoriesBudgets", error);
-            throw new Error("Failed to create category budget");
-        }
-    }
 }
 exports.default = CategoriesModel;
 //# sourceMappingURL=categories.model.js.map

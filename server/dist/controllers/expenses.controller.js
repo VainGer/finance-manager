@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const appErrors = __importStar(require("../errors/AppError"));
+const AppErrors = __importStar(require("../errors/AppError"));
 const category_service_1 = __importDefault(require("../services/expenses/category.service"));
 const business_service_1 = __importDefault(require("../services/expenses/business.service"));
 const transaction_service_1 = __importDefault(require("../services/expenses/transaction.service"));
@@ -84,16 +84,6 @@ class ExpensesController {
             ExpensesController.handleError(error, res);
         }
     }
-    static async createCategoryBudget(req, res) {
-        try {
-            const { refId, catName, budget } = req.body;
-            const result = await category_service_1.default.createCategoryBudget(refId, budget, catName);
-            res.status(201).json({ message: result.message });
-        }
-        catch (error) {
-            ExpensesController.handleError(error, res);
-        }
-    }
     //business
     static async addBusinessToCategory(req, res) {
         try {
@@ -125,6 +115,16 @@ class ExpensesController {
             ExpensesController.handleError(error, res);
         }
     }
+    static async updateBusinessBankName(req, res) {
+        try {
+            const { refId, catName, busName, bankName } = req.body;
+            const result = await business_service_1.default.updateBusinessBankName(refId, catName, busName, bankName);
+            res.status(200).json({ message: result.message });
+        }
+        catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
     static async deleteBusiness(req, res) {
         try {
             const { refId, catName, busName } = req.params;
@@ -139,7 +139,7 @@ class ExpensesController {
     static async createTransaction(req, res) {
         try {
             const { refId, catName, busName, transaction } = req.body;
-            const result = await transaction_service_1.default.createTransaction(refId, catName, busName, transaction);
+            const result = await transaction_service_1.default.create(refId, catName, busName, transaction);
             res.status(201).json({ message: result.message });
         }
         catch (error) {
@@ -149,18 +149,28 @@ class ExpensesController {
     static async changeTransactionAmount(req, res) {
         try {
             const { refId, catName, busName, transactionId, newAmount } = req.body;
-            const result = await transaction_service_1.default.changeTransactionAmount(refId, catName, busName, transactionId, newAmount);
+            const result = await transaction_service_1.default.changeAmount(refId, catName, busName, transactionId, newAmount);
             res.status(200).json({ message: result.message });
         }
         catch (error) {
             ExpensesController.handleError(error, res);
         }
     }
-    static async getTransactionById(req, res) {
+    static async changeTransactionDate(req, res) {
         try {
-            const { refId, catName, busName, transactionId } = req.params;
-            const transaction = await transaction_service_1.default.getTransactionById(refId, catName, busName, transactionId);
-            res.status(200).json({ transaction, message: "Transaction fetched successfully" });
+            const { refId, catName, busName, transactionId, newDate } = req.body;
+            const result = await transaction_service_1.default.changeDate(refId, catName, busName, transactionId, newDate);
+            res.status(200).json({ message: result.message });
+        }
+        catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
+    static async changeTransactionDescription(req, res) {
+        try {
+            const { refId, catName, busName, transactionId, newDescription } = req.body;
+            const result = await transaction_service_1.default.changeDescription(refId, catName, busName, transactionId, newDescription);
+            res.status(200).json({ message: result.message });
         }
         catch (error) {
             ExpensesController.handleError(error, res);
@@ -168,15 +178,41 @@ class ExpensesController {
     }
     static async deleteTransaction(req, res) {
         try {
-            const { refId, catName, busName, transactionId } = req.params;
-            const result = await transaction_service_1.default.deleteTransaction(refId, catName, busName, transactionId);
+            const { refId, catName, busName, transactionId } = req.body;
+            const result = await transaction_service_1.default.delete(refId, catName, busName, transactionId);
             res.status(200).json({ message: result.message });
         }
         catch (error) {
             ExpensesController.handleError(error, res);
         }
     }
-    static async getProfileExpenses(req, res) {
+    static async getAllTransactions(req, res) {
+        try {
+            const { refId, catName, busName } = req.params;
+            const result = await transaction_service_1.default.getAll(refId, catName, busName);
+            res.status(200).json({
+                transactions: result.transactions,
+                message: result.message
+            });
+        }
+        catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
+    static async getAllTransactionsByMonth(req, res) {
+        try {
+            const { refId, catName, busName } = req.params;
+            const result = await transaction_service_1.default.getAllByMonth(refId, catName, busName);
+            res.status(200).json({
+                monthlyTransactions: result.monthlyTransactions,
+                message: result.message
+            });
+        }
+        catch (error) {
+            ExpensesController.handleError(error, res);
+        }
+    }
+    static async getProfileExpensesByRef(req, res) {
         try {
             const { refId } = req.params;
             const expenses = await category_service_1.default.getProfileExpenses(refId);
@@ -186,9 +222,20 @@ class ExpensesController {
             this.handleError(error, res);
         }
     }
+    static async getProfileExpensesByChild(req, res) {
+        try {
+            const { username, childId } = req.params;
+            const expenses = await category_service_1.default.getChildProfileExpenses(username, childId);
+            res.status(200).json({ expenses, message: "Child profile expenses fetched successfully" });
+        }
+        catch (error) {
+            this.handleError(error, res);
+        }
+    }
     //private methods
     static handleError(error, res) {
-        if (error instanceof appErrors.AppError) {
+        if (error instanceof AppErrors.AppError) {
+            console.error("Application error:", error);
             return res.status(error.statusCode).json({ message: error.message });
         }
         console.error("Unexpected error:", error);
