@@ -1,9 +1,9 @@
 import { getAccessToken } from './tokenUtils.js';
 
 //render url
-//const baseUrl = "https://finance-manager-m3au.onrender.com/api";
+const baseUrl = "https://finance-manager-m3au.onrender.com/api";
 //german local ip url
-const baseUrl = "http://192.168.0.152:5500/api";
+// const baseUrl = "http://192.168.0.152:5500/api";
 //raz local ip url
 //   const baseUrl = "http://192.168.1.71:5500/api";
 

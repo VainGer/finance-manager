@@ -3,9 +3,9 @@
 // Status: WORKING - All API calls functional, profile data loading works
 
 //render url
-//const baseUrl = "https://finance-manager-m3au.onrender.com/api";
+const baseUrl = "https://finance-manager-m3au.onrender.com/api";
 //local url
-const baseUrl = "http://localhost:5500/api";
+// const baseUrl = "http://localhost:5500/api";
 
 const getHeaders = async (secure = true) => {
     const headers = {

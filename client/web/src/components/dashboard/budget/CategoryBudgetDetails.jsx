@@ -26,7 +26,8 @@ export default function CategoryBudgetDetails({ categories, selectedPeriod }) {
 
                 return (
                     <div key={index} className="border border-gray-200 rounded-lg p-4">
-                        <div className="flex justify-between items-center mb-3">
+                        <div className="grid text-center
+                        md:flex md:justify-between md:items-center md:mb-3">
                             <h4 className="text-lg font-semibold text-gray-800">{category.name}</h4>
                             <div className="text-sm text-gray-500">
                                 {selectedPeriod && (
