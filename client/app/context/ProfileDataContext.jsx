@@ -67,7 +67,7 @@ export function ProfileDataProvider({ children }) {
         setErrors(prev => prev.filter(e => !e.expensesErrors));
         setExpensesLoading(true);
         try {
-            const response = await get(`expenses/profile-expenses/${encodeURIComponent(rofile.expenses)}`);
+            const response = await get(`expenses/profile-expenses/${encodeURIComponent(profile.expenses)}`);
             if (response.ok) {
                 setExpenses(response.expenses || []);
             }

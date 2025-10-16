@@ -300,8 +300,7 @@ export default function useBudgets({ setLoading }) {
     setSuccess(null);
     try {
       const response = await del(
-        `budgets/delete-budget/${encodeURIComponent(account.username)}/${encodeURIComponent(profile.profileName)}/${budgetId}`,
-      );
+        `budgets/delete-budget/${encodeURIComponent(account.username)}/${encodeURIComponent(profile.profileName)}/${budgetId}`);
       if (response.ok) {
         await fetchBudgets();
         setSuccess("התקציב נמחק בהצלחה");
