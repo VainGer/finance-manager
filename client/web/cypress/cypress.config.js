@@ -2,7 +2,7 @@ import { defineConfig } from 'cypress'
 
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:5173', // Vite dev server
+    baseUrl: 'https://finance-manager-m3au.onrender.com/api', // Vite dev server
     supportFile: false, // Disable support file requirement
     
     // Enhanced stability configuration
