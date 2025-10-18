@@ -6,54 +6,26 @@ import useChildrenData from './useChildrenData';
 
 export default function useExpensesDisplay() {
     const { profile } = useAuth();
+    const { expenses: contextExpenses, expensesLoading, errors: contextErrors } = useProfileData();
     const {
-        expenses: contextExpenses,
-        expensesLoading,
-        errors: contextErrors,
-    } = useProfileData();
-
-    const { children,
+        children,
         loading: childrenLoading,
         error: childrenError,
         childrenExpenses,
         selectedChild,
         setSelectedChild,
         childrenCategories,
-        childrenBusinesses, } = useChildrenData();
+        childrenBusinesses,
+    } = useChildrenData();
 
-    const [allExpenses, setAllExpenses] = useState(null);
+    const [allExpenses, setAllExpenses] = useState([]);
     const [monthlyExpenses, setMonthlyExpenses] = useState({});
     const [availableDates, setAvailableDates] = useState([]);
-    const [sortedExpenses, setSortedExpenses] = useState(null);
-    const [filteredExpenses, setFilteredExpenses] = useState(null);
+    const [filteredExpenses, setFilteredExpenses] = useState([]);
     const [stagedFilters, setStagedFilters] = useState({ month: null, category: null, business: null });
     const [appliedFilters, setAppliedFilters] = useState({ month: null, category: null, business: null });
-    const [loading, setLoading] = useState(true);
     const [availableBusinesses, setAvailableBusinesses] = useState([]);
-
-    useEffect(() => {
-        if (sortedExpenses) {
-            applyAllFilters();
-        }
-    }, [sortedExpenses, applyAllFilters]);
-
-    useEffect(() => {
-        if (!expensesLoading) {
-            processExpensesData();
-        } else {
-            setLoading(true);
-        }
-    }, [processExpensesData, contextExpenses, expensesLoading, profile]);
-
-    useEffect(() => {
-        sortByDate(true, true);
-    }, [allExpenses, monthlyExpenses]);
-
-    useEffect(() => {
-        if (!selectedChild && !expensesLoading) {
-            processExpensesData();
-        }
-    }, [selectedChild, contextExpenses, expensesLoading, processExpensesData]);
+    const [loading, setLoading] = useState(true);
 
     const processExpensesData = useCallback(async () => {
         setLoading(true);
@@ -62,15 +34,12 @@ export default function useExpensesDisplay() {
             setLoading(false);
             return;
         }
+
         try {
-            const {
-                expensesFlat: realExpenses,
-                monthlyMap: monthlyExpenses,
-                dates: datesSet
-            } = flattenExpenses(contextExpenses);
-            sortAvailableDates(datesSet);
-            setAllExpenses(realExpenses);
-            setMonthlyExpenses(monthlyExpenses);
+            const { expensesFlat, monthlyMap, dates } = flattenExpenses(contextExpenses);
+            sortAvailableDates(dates);
+            setAllExpenses(expensesFlat);
+            setMonthlyExpenses(monthlyMap);
         } catch (err) {
             console.error('Error processing expenses data:', err);
         } finally {
@@ -79,30 +48,47 @@ export default function useExpensesDisplay() {
     }, [contextExpenses, profile]);
 
     useEffect(() => {
+        if (!selectedChild && !expensesLoading) processExpensesData();
+    }, [selectedChild, contextExpenses, expensesLoading, processExpensesData]);
+
+    useEffect(() => {
+        const isReady =
+            (!selectedChild && !expensesLoading && Object.keys(monthlyExpenses).length > 0) ||
+            (selectedChild && !childrenLoading && Object.keys(monthlyExpenses).length > 0);
+
+        if (!isReady) return;
+
+        const latestMonth = availableDates[0]?.dateYM;
+        if (latestMonth) {
+            setStagedFilters({ month: latestMonth, category: null, business: null });
+            setAppliedFilters({ month: latestMonth, category: null, business: null });
+            applyAllFilters('date', true);
+        }
+    }, [
+        selectedChild,
+        expensesLoading,
+        childrenLoading,
+        monthlyExpenses,
+        availableDates,
+        applyAllFilters,
+    ]);
+
+    useEffect(() => {
         if (!selectedChild) return;
         if (!childrenLoading && childrenExpenses?.length > 0) {
-            const {
-                expensesFlat: realExpenses,
-                monthlyMap: monthlyExpenses,
-                dates: datesSet
-            } = flattenExpenses(childrenExpenses);
-
-            sortAvailableDates(datesSet);
-            setAllExpenses(realExpenses);
-            setMonthlyExpenses(monthlyExpenses);
+            const { expensesFlat, monthlyMap, dates } = flattenExpenses(childrenExpenses);
+            sortAvailableDates(dates);
+            setAllExpenses(expensesFlat);
+            setMonthlyExpenses(monthlyMap);
             setLoading(false);
-        } else {
-            setLoading(true);
-        }
+        } else setLoading(true);
     }, [selectedChild, childrenLoading, childrenExpenses]);
-
-
-
 
     const flattenExpenses = (expenses) => {
         const expensesFlat = [];
         const monthlyMap = {};
         const dates = new Set();
+
         expenses.forEach((category) =>
             category.Businesses?.forEach((business) =>
                 business.transactionsArray?.forEach(({ dateYM, transactions }) => {
@@ -123,151 +109,93 @@ export default function useExpensesDisplay() {
                 })
             )
         );
+
         return { expensesFlat, monthlyMap, dates };
     };
 
-    const applyAllFilters = useCallback(() => {
-        if (!sortedExpenses) return;
+    const applyAllFilters = useCallback(
+        (sortType = null, descending = true) => {
+            const { month, category, business } = stagedFilters;
+            if (!month || !monthlyExpenses[month]) return setFilteredExpenses([]);
 
-        setAppliedFilters({ ...stagedFilters });
+            let result = [...monthlyExpenses[month]];
+            if (category) result = result.filter((exp) => exp.category === category);
+            if (business) result = result.filter((exp) => exp.business === business);
 
-        const { month, category, business } = stagedFilters;
-        let result;
-        if (month && monthlyExpenses[month]) {
-            result = [...monthlyExpenses[month]];
-        } else {
-            result = sortedExpenses;
-        }
+            if (sortType === 'amount') {
+                result.sort((a, b) => (descending ? b.amount - a.amount : a.amount - b.amount));
+            } else if (sortType === 'date' || !sortType) {
+                result.sort((a, b) =>
+                    descending ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date)
+                );
+            }
 
-        if (category) {
-            result = result.filter(exp => exp.category === category);
+            setAppliedFilters({ ...stagedFilters });
+            setFilteredExpenses(result);
 
-            const businessesInCategory = [...new Set(
-                result.map(exp => exp.business)
-            )].filter(Boolean);
-
-            setAvailableBusinesses(businessesInCategory);
-        } else {
-            const allBusinesses = [...new Set(
-                sortedExpenses.map(exp => exp.business)
-            )].filter(Boolean);
-
+            const allBusinesses = [...new Set(result.map((exp) => exp.business))].filter(Boolean);
             setAvailableBusinesses(allBusinesses);
-        }
+        },
+        [stagedFilters, monthlyExpenses]
+    );
 
-        if (business) {
-            result = result.filter(exp => exp.business === business);
-        }
-
-        setFilteredExpenses(result);
-    }, [stagedFilters, sortedExpenses, monthlyExpenses]);
-
-    const sortByDate = (descending = true, all = true) => {
-        if (all) {
-            if (!allExpenses || allExpenses.length === 0) { setSortedExpenses([]); return; }
-            const sorted = [...allExpenses].sort((a, b) => descending ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
-            setSortedExpenses(sorted);
-        } else {
-            if (!monthlyExpenses || Object.keys(monthlyExpenses).length === 0) { setSortedExpenses([]); return; }
-            const monthKeys = Object.keys(monthlyExpenses);
-            const sorted = [];
-            monthKeys.forEach(monthKey => {
-                const monthExpenses = monthlyExpenses[monthKey];
-                const monthSorted = [...monthExpenses].sort((a, b) => descending ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
-                sorted.push(...monthSorted);
-            });
-            setSortedExpenses(sorted);
-        }
-
-        if (appliedFilters.month || appliedFilters.category || appliedFilters.business) {
-            applyAllFilters();
-        }
+    const sortByDate = (descending = true) => {
+        const month = stagedFilters.month || appliedFilters.month;
+        if (!month || !monthlyExpenses[month]) return;
+        applyAllFilters('date', descending);
     };
 
-    const sortByAmount = (descending = true, all = true) => {
-        if (all) {
-            if (!allExpenses || allExpenses.length === 0) { setSortedExpenses([]); return; }
-            const sorted = [...allExpenses].sort((a, b) => descending ? b.amount - a.amount : a.amount - b.amount);
-            setSortedExpenses(sorted);
-        } else {
-            if (!monthlyExpenses || Object.keys(monthlyExpenses).length === 0) { setSortedExpenses([]); return; }
-            const monthKeys = Object.keys(monthlyExpenses);
-            const sorted = [];
-            monthKeys.forEach(monthKey => {
-                const monthExpenses = monthlyExpenses[monthKey];
-                const monthSorted = [...monthExpenses].sort((a, b) => descending ? b.amount - a.amount : a.amount - b.amount);
-                sorted.push(...monthSorted);
-            });
-            setSortedExpenses(sorted);
-        }
-
-        if (appliedFilters.month || appliedFilters.category || appliedFilters.business) {
-            applyAllFilters();
-        }
+    const sortByAmount = (descending = true) => {
+        const month = stagedFilters.month || appliedFilters.month;
+        if (!month || !monthlyExpenses[month]) return;
+        applyAllFilters('amount', descending);
     };
 
-    const filterByMonth = (month) => {
-        setStagedFilters(prev => {
-            const newFilters = { ...prev, month };
-            return newFilters;
-        });
-    };
-
-    const filterByCategory = (category) => {
-        setStagedFilters(prev => ({ ...prev, category, business: null }));
-    };
-
-    const filterByBusiness = (business) => {
-        setStagedFilters(prev => ({ ...prev, business }));
-    };
+    const filterByMonth = (month) => setStagedFilters((prev) => ({ ...prev, month }));
+    const filterByCategory = (category) =>
+        setStagedFilters((prev) => ({ ...prev, category, business: null }));
+    const filterByBusiness = (business) => setStagedFilters((prev) => ({ ...prev, business }));
 
     const clearFilters = () => {
         const latestMonth = availableDates.length > 0 ? availableDates[0].dateYM : null;
         setStagedFilters({ month: latestMonth, category: null, business: null });
         setAppliedFilters({ month: latestMonth, category: null, business: null });
-        sortByDate(true, true);
+
+        if (latestMonth && monthlyExpenses[latestMonth]) {
+            const sorted = [...monthlyExpenses[latestMonth]].sort(
+                (a, b) => new Date(b.date) - new Date(a.date)
+            );
+            setFilteredExpenses(sorted);
+        } else setFilteredExpenses([]);
     };
 
     const sortAvailableDates = (datesSet) => {
         const sortedDates = Array.from(datesSet)
-            .map(dateYM => {
+            .map((dateYM) => {
                 const [year, month] = dateYM.split('-');
                 return {
                     year: parseInt(year),
-                    yearStr: year,
                     monthNum: parseInt(month),
-                    monthStr: month,
                     month: monthToHebrewName(month),
-                    dateYM: dateYM
+                    dateYM,
                 };
-            }).sort((a, b) => {
-                if (a.year !== b.year) {
-                    return b.year - a.year;
-                }
-                return b.monthNum - a.monthNum;
-            }).map(({ year, month, dateYM }) => ({
-                year: year.toString(),
-                month,
-                dateYM
-            }))
+            })
+            .sort((a, b) => (a.year !== b.year ? b.year - a.year : b.monthNum - a.monthNum))
+            .map(({ year, month, dateYM }) => ({ year: year.toString(), month, dateYM }));
         setAvailableDates(sortedDates);
-    }
+    };
 
     const error = useMemo(() => {
-        const expenseErrors = contextErrors.find(e => e.expensesErrors)?.expensesErrors;
-        if (expenseErrors && expenseErrors.length > 0) {
-            return expenseErrors[0];
-        }
-        return null;
+        const expenseErrors = contextErrors.find((e) => e.expensesErrors)?.expensesErrors;
+        return expenseErrors && expenseErrors.length > 0 ? expenseErrors[0] : null;
     }, [contextErrors]);
 
-
     return {
-        expenses: filteredExpenses || sortedExpenses,
+        expenses: filteredExpenses,
         allExpenses,
         monthlyExpenses,
         isLoading: loading,
-        error: error,
+        error,
         availableDates,
         availableBusinesses,
         sortByDate,
@@ -288,6 +216,6 @@ export default function useExpensesDisplay() {
             setSelectedChild,
             childrenCategories,
             childrenBusinesses,
-        }
+        },
     };
-};
+}

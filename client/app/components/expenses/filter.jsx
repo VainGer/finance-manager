@@ -62,9 +62,6 @@ export default function Filter({
         } else {
             sortByAmount(isDescending);
         }
-        if (typeof applyFilters === 'function') {
-            applyFilters();
-        }
     };
 
     const handleClearFilters = () => {
@@ -86,7 +83,6 @@ export default function Filter({
         if (latestMonthKey) {
             setSelectedMonth(latestMonthKey);
             filterByMonth(latestMonthKey);
-            applyFilters();
         }
     }, [latestMonthKey]);
 

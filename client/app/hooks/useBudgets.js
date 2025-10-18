@@ -78,10 +78,11 @@ export default function useBudgets({ setLoading }) {
     if (isNaN(aiEnd) || isNaN(profileEnd)) return;
 
     if (aiEnd.getTime() === profileEnd.getTime() && !skipAdviceRef.current) {
-      setAdviceToPrefill(true);
+      setTimeout(() => setAdviceToPrefill(true), 100);
     }
+
     skipAdviceRef.current = false;
-  }, [aiData, profileBudgets]);
+  }, [aiData, profileBudgets, startDate, endDate]);
 
 
   useEffect(() => {
@@ -97,6 +98,7 @@ export default function useBudgets({ setLoading }) {
     setStartDate("");
     setEndDate("");
     setAmount("");
+    skipAdviceRef.current = false;
     if (categories?.length) {
       setCategoryBudgets(categories.map(cat => ({ name: cat, budget: "", include: true })));
     } else {

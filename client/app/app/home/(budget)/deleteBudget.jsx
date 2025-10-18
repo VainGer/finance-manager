@@ -6,6 +6,7 @@ import LoadingSpinner from "../../../components/common/loadingSpinner";
 import Select from "../../../components/common/Select";
 import useBudgets from "../../../hooks/useBudgets";
 import { formatDate } from "../../../utils/formatters";
+import { useRouter } from "expo-router";
 
 export default function DeleteBudgetScreen() {
     const {
@@ -16,6 +17,7 @@ export default function DeleteBudgetScreen() {
         setError,
     } = useBudgets({ setLoading: () => { } });
 
+    const router = useRouter();
     const [selectedBudgetId, setSelectedBudgetId] = useState(null);
     const [localError, setLocalError] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -53,12 +55,15 @@ export default function DeleteBudgetScreen() {
         if (deleted) setStep("success");
     }, [selectedBudgetId, deleteBudget]);
 
-    const handleReset = useCallback(() => {
+    const handleReset = () => {
         setSelectedBudgetId(null);
+        if (step === "initial") {
+            router.back();
+            return;
+        }
         setStep("initial");
-    }, []);
+    };
 
- 
     const InitialView = () => (
         <View className="flex-1 bg-gray-50 items-center justify-center px-6">
             <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />

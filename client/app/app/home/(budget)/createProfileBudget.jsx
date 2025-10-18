@@ -1,4 +1,4 @@
-import { useState,} from "react";
+import { useEffect, useState, } from "react";
 import { ScrollView, Text, TextInput, TouchableOpacity, View, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
@@ -12,7 +12,6 @@ import Overlay from "../../../components/common/Overlay";
 
 
 export default function CreateBudgetScreen() {
-  useFocusEffect(() => {});
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isStartDatePickerVisible, setStartDatePickerVisible] = useState(false);
@@ -263,7 +262,7 @@ export default function CreateBudgetScreen() {
           </Button>
 
           <Button style="secondary" onPress={resetState}>
-            חזרה לבחירת סכום ותאריך
+            חזרה לבחירת תאריכים
           </Button>
         </View>
       </View>
