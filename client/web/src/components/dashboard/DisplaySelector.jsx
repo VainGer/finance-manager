@@ -6,7 +6,7 @@ import InteractiveCharts from "./charts/InteractiveCharts";
 import AIInsight from "./ai/AIInsight";
 import StatusDot from '../common/StatusDot';
 
-export default function DisplaySelector({ setDisplay, setCurrentDisplayType, profile, refreshTrigger }) {
+export default function DisplaySelector({ setDisplay, setCurrentDisplayType, profile, refreshTrigger, onCreateSmartBudget }) {
     const [activeTab, setActiveTab] = useState('budget');
     const [currentIndex, setCurrentIndex] = useState(0);
     const scrollContainerRef = useRef(null);
@@ -82,7 +82,7 @@ export default function DisplaySelector({ setDisplay, setCurrentDisplayType, pro
             ),
             action: () => {
                 setCurrentDisplayType('ai');
-                setDisplay(<AIInsight profile={profile} key={`ai-${refreshTrigger}`} />);
+                setDisplay(<AIInsight profile={profile} onCreateSmartBudget={onCreateSmartBudget} key={`ai-${refreshTrigger}`} />);
             }
         }
     ];

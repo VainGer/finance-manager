@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BusinessMenu from '../expenses/businesses/BusinessMenu';
 import CategoriesMenu from '../expenses/categories/CategoriesMenu';
@@ -12,7 +12,9 @@ export default function SideMenu({
     onTransactionAdded,
     showFloatingMenu,
     setShowFloatingMenu,
-    isFloatingMode = false
+    isFloatingMode = false,
+    menuSelected,
+    setMenuSelected
 }) {
     const navigate = useNavigate();
 
@@ -22,6 +24,23 @@ export default function SideMenu({
         categories: false,
         budgetManagement: false,
     });
+
+    // Handle external menu selection (like from smart budget)
+    useEffect(() => {
+        if (menuSelected) {
+            setMenuToggler(prevState => ({
+                addExpense: false,
+                businesses: false,
+                categories: false,
+                budgetManagement: false,
+                [menuSelected]: true,
+            }));
+            // Clear the external selection after handling it
+            if (setMenuSelected) {
+                setMenuSelected('');
+            }
+        }
+    }, [menuSelected, setMenuSelected]);
 
     const closeAllPanels = () => {
         setMenuToggler({
