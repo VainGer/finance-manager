@@ -1,5 +1,5 @@
 import { useState } from "react";
-import useUploadTransactionFile from "../hooks/useUploadTransactionFile";
+import useUploadTransactionsFromFile from "../hooks/useUploadTransactionsFromFile";
 import AddCategory from "../components/dashboard/expenses/categories/AddCategory";
 import CreateBusiness from "../components/dashboard/expenses/businesses/CreateBusiness";
 import Button from "../components/common/Button";
@@ -7,8 +7,8 @@ import PageLayout from "../components/layout/PageLayout";
 import NavigationHeader from "../components/layout/NavigationHeader";
 import StatusModal from "../components/common/StatusModal";
 
-
-const UploadFile = ({ handleFileUpload,
+const UploadFile = ({
+    handleFileUpload,
     handleClearFile,
     processTransactions,
     selectedFile,
@@ -97,16 +97,17 @@ export default function UploadFromFileTransactions() {
         loading,
         error,
         success,
-        resetState
-    } = useUploadTransactionFile();
-
+        resetState,
+        getCategories
+    } = useUploadTransactionsFromFile();
 
     const handleClearFile = () => {
         resetState();
     };
 
-    const handleCreationSuccess = () => {
-        getSelects();
+    const handleCreationSuccess = async () => {
+        await getCategories();
+        await getSelects();
     };
 
     const getBusinessesForCategory = (category) => {
@@ -216,14 +217,11 @@ export default function UploadFromFileTransactions() {
         );
     };
 
-
-
     return (
         <>
             <NavigationHeader />
             <PageLayout>
                 <div className="space-y-6">
-                    {/* Header */}
                     <div className="bg-white/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8 flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center">
@@ -312,10 +310,10 @@ export default function UploadFromFileTransactions() {
                                                     {transaction.bank}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                    <CategorySelect transaction={transaction} />
+                                                    <CategorySelect key={`cat-${transaction.id}-${refreshCounter}`} transaction={transaction} />
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                    <BusinessSelect transaction={transaction} />
+                                                    <BusinessSelect key={`bus-${transaction.id}-${refreshCounter}`} transaction={transaction} />
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                     <input
@@ -351,7 +349,7 @@ export default function UploadFromFileTransactions() {
                                                     type="checkbox"
                                                     checked={transaction.toUpload}
                                                     onChange={(e) => handleUploadSwitch(transaction.id, e.target.checked)}
-                                                    className="w-5 h-5 text-slate-600 border-2 border-slate-300 rounded focus:ring-slate-500 focus:ring-2"
+                                                    classNameclassName="w-5 h-5 text-slate-600 border-2 border-slate-300 rounded focus:ring-slate-500 focus:ring-2"
                                                 />
                                             </div>
                                         </div>
@@ -364,18 +362,17 @@ export default function UploadFromFileTransactions() {
                                         <div className="grid grid-cols-1 gap-3">
                                             <div>
                                                 <label className="block text-xs text-slate-500 mb-1 text-right">קטגוריה</label>
-                                                <CategorySelect transaction={transaction} />
+                                                <CategorySelect key={`cat-m-${transaction.id}-${refreshCounter}`} transaction={transaction} />
                                             </div>
                                             <div>
                                                 <label className="block text-xs text-slate-500 mb-1 text-right">בעל עסק</label>
-                                                <BusinessSelect transaction={transaction} />
+                                                <BusinessSelect key={`bus-m-${transaction.id}-${refreshCounter}`} transaction={transaction} />
                                             </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
-                            {/* Submit Section */}
                             <div className="bg-gradient-to-r from-slate-50 to-slate-100 border-t border-slate-200 p-6">
                                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                                     <div className="flex-1 text-right">
@@ -415,7 +412,6 @@ export default function UploadFromFileTransactions() {
                             </div>
                         </div>
                     )}
-
                 </div>
             </PageLayout>
 

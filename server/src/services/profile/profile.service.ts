@@ -806,6 +806,7 @@ export default class ProfileService {
         if (!refId || !transactionsData) {
             throw new AppErrors.BadRequestError("Reference ID and transactions data are required");
         }
+        console.log(transactionsData);
         const categories = await CategoryService.getProfileExpenses(refId);
         const categoriesAndBusinesses = categories.map((category: any) => {
             return {
@@ -820,6 +821,7 @@ export default class ProfileService {
             action: "categorize_transactions",
             target: { refId }
         });
+        console.log("Categorized data:", categorizedData);
         return categorizedData;
     }
 

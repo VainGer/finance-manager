@@ -1,224 +1,218 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect, useCallback } from 'react';
+import { post, get } from "../utils/api";
+import * as XLSX from "xlsx";
+import { useAuth } from "../context/AuthContext";
 import { useProfileData } from '../context/ProfileDataContext';
-import { post } from "../utils/api";
-import { parseCSV, parseXLSX } from '../utils/parsers';
-import useEditBusiness from './useEditBusiness';
-import useEditCategories from './useEditCategories';
 
-export default function useUploadTransactionsFromFile({
-  setShowCreateCategory,
-  setShowCreateBusiness,
-  setShowSuccessMessage,
-  setCategoryCreated
-}) {
+export default function useUploadTransactionFile() {
   const { profile } = useAuth();
-  const {
-    categories: contextCategories,
-    businesses: contextBusinesses,
-    fetchExpenses,
-    fetchCategories,
-    fetchBudgets
-  } = useProfileData();
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [transactionsData, setTransactionsData] = useState(null);
+  const [categorizedTransactions, setCategorizedTransactions] = useState(null);
+  const [dataToUpload, setDataToUpload] = useState(null);
+
+  const [categories, setCategories] = useState([]);
+  const [selects, setSelects] = useState([]);
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [transactionsData, setTransactionsData] = useState(null);
-  const [dataToUpload, setDataToUpload] = useState(null);
-  const [categorizedTransactions, setCategorizedTransactions] = useState(null);
+  const { fetchExpenses, fetchBudgets } = useProfileData();
 
-  /**
-   * Web-based file selection using HTML input element
-   */
-  const handleFileSelect = async (file) => {
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
     setError(null);
     setSuccess(null);
-    setSelectedFile(null);
-    setTransactionsData(null);
-    setDataToUpload(null);
     setCategorizedTransactions(null);
-    setLoading(true);
-    
-    try {
-      if (!file) {
-        setLoading(false);
-        return;
-      }
+    setDataToUpload(null);
+    setTransactionsData(null);
 
-      // Check file type
-      const fileName = file.name;
-      const fileExt = fileName.split('.').pop().toLowerCase();
-      
-      if (!['csv', 'xlsx', 'xls'].includes(fileExt)) {
-        setError("סוג קובץ לא נתמך. אנא העלה קובץ CSV או Excel");
-        setLoading(false);
-        return;
-      }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: "array", cellDates: true });
+        const date1904 = workbook.Workbook?.WBProps?.date1904;
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rawTransactions = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
 
-      setSelectedFile(file);
+        const processedTransactions = rawTransactions
+          .filter(row => Object.values(row).some(v => v !== ""))
+          .map((transaction) => {
+            const processed = { ...transaction };
+            for (const [key, value] of Object.entries(processed)) {
+              if (value instanceof Date) {
+                const correctedDate = new Date(value);
+                if (date1904) correctedDate.setDate(correctedDate.getDate() + 1462);
+                processed[key] = correctedDate.toISOString().split("T")[0];
+              }
+            }
+            return processed;
+          });
 
-      let parsedData;
-      if (fileExt === "csv") {
-        parsedData = await parseCSV(file);
-      } else {
-        parsedData = await parseXLSX(file);
-      }
-      
-      setLoading(false);
-      setTransactionsData(JSON.stringify(parsedData));
-    } catch (error) {
-      console.error("Error selecting file:", error);
-      setError("שגיאה בטעינת הקובץ");
-      setLoading(false);
-    }
-  };
-
-  // Create file input handler for web
-  const createFileInputHandler = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.csv,.xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv';
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        handleFileSelect(file);
+        setSelectedFile(file);
+        setTransactionsData(JSON.stringify(processedTransactions));
+      } catch (err) {
+        console.error("Error parsing file:", err);
+        setError("שגיאה בקריאת הקובץ. ודא שהקובץ תקין");
       }
     };
-    input.click();
+    reader.readAsArrayBuffer(file);
   };
 
-  const {
-    addCategory,
-    getCategoriesError,
-    getCategoriesLoading,
-    success: categorySuccess,
-    error: categoryError,
-    loading: categoryLoading
-  } = useEditCategories();
-
-  const {
-    addBusiness,
-    getBusinessesError,
-    getBusinessesLoading,
-    success: businessSuccess,
-    error: businessError,
-    loading: businessLoading
-  } = useEditBusiness();
-
-  const onCategoryAndBusinessAdded = useCallback(async (isCategory) => {
-    setShowCreateCategory(false);
-    setShowCreateBusiness(false);
-    setShowSuccessMessage(true);
-    setCategoryCreated(isCategory ? categorySuccess : businessSuccess);
-  }, [fetchCategories, contextCategories, setShowCreateCategory, setShowCreateBusiness, setShowSuccessMessage, setCategoryCreated]);
-
   const processTransactions = async () => {
-    // Web storage instead of AsyncStorage
-    const categorizedFromStorage = localStorage.getItem('categorizedTransactions');
-    if (categorizedFromStorage) {
-      setCategorizedTransactions(JSON.parse(categorizedFromStorage));
-      return;
-    }
-    
     setError(null);
     setSuccess(null);
     setLoading(true);
-    
+
     if (!transactionsData) {
       setError("אין נתונים לעיבוד");
       setLoading(false);
       return;
     }
-    
-    const response = await post("profile/categorize-transactions", {
-      refId: profile.expenses,
-      transactionsData
-    });
-    
-    setLoading(false);
-    
-    if (response.ok) {
-      setCategorizedTransactions(response.categories.transactions);
-      localStorage.setItem('categorizedTransactions', JSON.stringify(response.categories.transactions));
-    } else {
+
+    try {
+      const response = await post("profile/categorize-transactions", {
+        refId: profile.expenses,
+        transactionsData
+      });
+
+      if (response.ok) {
+        setCategorizedTransactions(response.categories.transactions);
+        localStorage.setItem('categorizedTransactions', JSON.stringify(response.categories.transactions));
+      } else {
+        setError("שגיאה בעיבוד התנועות");
+      }
+    } catch (error) {
+      console.error("Error categorizing transactions:", error);
       setError("שגיאה בעיבוד התנועות");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Prepare data for upload when categorizedTransactions changes
+  const getCategories = async () => {
+    if (!profile?.expenses) return;
+    try {
+      const response = await get(`expenses/category/get-names/${profile.expenses}`);
+      if (response.ok) {
+        setCategories(response.categoriesNames);
+      } else {
+        console.error("Error fetching categories:", response.error);
+      }
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  };
+
+  const getSelects = async () => {
+    if (!profile?.expenses) return;
+    try {
+      const fetchedSelects = [];
+      for (const category of categories) {
+        try {
+          const response = await get(`expenses/business/get-businesses/${profile.expenses}/${encodeURIComponent(category)}`);
+          fetchedSelects.push({
+            category,
+            businesses: response.ok ? response.businesses : []
+          });
+        } catch (error) {
+          console.error(`Error fetching businesses for ${category}:`, error);
+          fetchedSelects.push({ category, businesses: [] });
+        }
+      }
+      setSelects(fetchedSelects);
+      setRefreshCounter(prev => prev + 1);
+    } catch (error) {
+      console.error("Failed in getSelects:", error);
+    }
+  };
+
   useEffect(() => {
-    if (categorizedTransactions && categorizedTransactions.length > 0) {
+    if (profile?.expenses) getCategories();
+  }, [profile?.expenses]);
+
+  useEffect(() => {
+    if (categories.length > 0) getSelects();
+  }, [categories]);
+
+  useEffect(() => {
+    if (categorizedTransactions?.length > 0) {
       const data = categorizedTransactions.map((transaction, index) => ({
         id: index,
         date: transaction.date,
         amount: transaction.amount,
         category: transaction.category,
-        business: transaction.business.name,
-        bank: transaction.business.bankName,
-        description: transaction.business.bankName,
-        toUpload: transaction.category && transaction.business ? true : false
+        business: transaction.business?.name || "",
+        bank: transaction.business?.bankName || "",
+        description: transaction.business?.bankName || "",
+        toUpload: Boolean(transaction.category && transaction.business)
       }));
       setDataToUpload(data);
     }
   }, [categorizedTransactions]);
 
-  // Handlers for changing category, business and toUpload flag
   const handleCategoryChange = useCallback((index, newCategory) => {
-    setDataToUpload(prevData => {
-      const updatedData = [...prevData];
-      updatedData[index].category = newCategory;
-      return updatedData;
+    setDataToUpload(prev => {
+      const updated = [...prev];
+      updated[index].category = newCategory;
+      return updated;
     });
   }, []);
 
   const handleBusinessChange = useCallback((index, newBusiness) => {
-    setDataToUpload(prevData => {
-      const updatedData = [...prevData];
-      updatedData[index].business = newBusiness;
-      return updatedData;
+    setDataToUpload(prev => {
+      const updated = [...prev];
+      updated[index].business = newBusiness;
+      return updated;
     });
   }, []);
 
   const handleUploadSwitch = (index, value) => {
-    setDataToUpload(prevData => {
-      const updateData = [...prevData];
-      updateData[index].toUpload = value;
-      return updateData;
+    setDataToUpload(prev => {
+      const updated = [...prev];
+      updated[index].toUpload = value;
+      return updated;
     });
   };
 
-  // Submit transactions for upload
   const handleSubmitTransactions = async () => {
-    if (!dataToUpload || dataToUpload.length === 0) {
+    if (!dataToUpload?.length) {
       setError("אין נתונים להעלאה");
       return;
     }
-    
+
     setError(null);
     setSuccess(null);
     setLoading(true);
-    
+
     const transactionsToSubmit = dataToUpload.filter(t => t.toUpload);
-    const response = await post(`profile/upload-transactions`, {
-      username: profile.username,
-      profileName: profile.profileName,
-      refId: profile.expenses,
-      transactionsToUpload: transactionsToSubmit
-    });
-    
-    setLoading(false);
-    
-    if (response.ok) {
-      setSuccess('העסקאות הועלו בהצלחה');
-      fetchExpenses(); // Refetch expenses after successful upload
-      fetchBudgets();
-      onSuccessUpload();
-    } else {
-      setError('שגיאה בהעלאת העסקאות, נסה שוב מאוחר יותר');
-      console.error('Error uploading transactions:', response);
+    try {
+      const response = await post("profile/upload-transactions", {
+        username: profile.username,
+        profileName: profile.profileName,
+        refId: profile.expenses,
+        transactionsToUpload
+      });
+
+      if (response.ok) {
+        setSuccess("העסקאות הועלו בהצלחה");
+        await fetchExpenses();
+        await fetchBudgets();
+        onSuccessUpload();
+      } else {
+        setError("שגיאה בהעלאת העסקאות, נסה שוב מאוחר יותר");
+      }
+    } catch (err) {
+      console.error("Error uploading transactions:", err);
+      setError("שגיאה בהעלאת העסקאות, נסה שוב מאוחר יותר");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -230,42 +224,31 @@ export default function useUploadTransactionsFromFile({
     setTransactionsData(null);
     setDataToUpload(null);
     setCategorizedTransactions(null);
-    // Clear web storage
-    localStorage.removeItem('categorizedTransactions');
+    localStorage.removeItem("categorizedTransactions");
   };
 
-  const onSuccessUpload = () => { 
-    setTimeout(() => resetState(), 3000); 
+  const onSuccessUpload = () => {
+    setTimeout(() => resetState(), 3000);
   };
 
   return {
-    handleFileSelect: createFileInputHandler, // Web version
-    processTransactions, 
+    handleFileUpload,
+    processTransactions,
     handleCategoryChange,
-    handleBusinessChange, 
-    handleUploadSwitch, 
-    addCategory,
-    addBusiness, 
-    onCategoryAndBusinessAdded, 
-    handleSubmitTransactions, 
-    onSuccessUpload, 
+    handleBusinessChange,
+    handleUploadSwitch,
+    handleSubmitTransactions,
     resetState,
-    dataToUpload, 
-    selectedFile, 
-    error, 
-    loading, 
-    success, 
-    categories: contextCategories, 
-    businesses: contextBusinesses, 
-    categoryLoading,
-    businessLoading, 
-    getCategoriesError, 
-    getBusinessesError, 
-    getCategoriesLoading, 
-    getBusinessesLoading, 
-    categorySuccess, 
-    businessSuccess, 
-    categoryError, 
-    businessError
+    onSuccessUpload,
+    getCategories,
+    dataToUpload,
+    selectedFile,
+    categorizedTransactions,
+    selects,
+    refreshCounter,
+    getSelects,
+    error,
+    success,
+    loading
   };
 }
