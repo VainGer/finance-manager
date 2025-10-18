@@ -75,7 +75,7 @@ export default function useBudgetSummary() {
         profileArr.forEach(b => {
             const id = b._id?.$oid || b._id || b.id;
             map[id] = {
-                profileBudget: b,
+                profileBudget: { ...b }, 
                 categories: [],
                 unexpected: []
             };
@@ -91,7 +91,6 @@ export default function useBudgetSummary() {
                             budget: catBudget.amount,
                             spent: catBudget.spent || 0
                         });
-                        map[id].profileBudget.spent += catBudget.spent || 0;
                     }
                 } else {
                     const id = catBudget._id?.$oid || catBudget._id || catBudget.id;
