@@ -35,6 +35,7 @@ export default function BudgetSummary() {
         relevantPeriod,
         currentProfileBudget,
         currentCategoryBudgets,
+        currentUnexpectedBudgets,
         setSelectedPeriod,
         childrenProps
     } = useBudgetSummary({ profile });
@@ -200,6 +201,18 @@ export default function BudgetSummary() {
                         </View>
                         <View className="w-full bg-white rounded-xl border mb-4 border-slate-100 p-4 shadow-sm">
                             <OverallBudgetSummary budget={currentProfileBudget} />
+                        </View>
+                    </View>
+
+                    <View className="mx-4">
+                        <View className="flex-1 items-center justify-center mb-3 bg-white p-6 rounded-xl">
+                            <Ionicons name="pie-chart-outline" size={26} color="#334155" />
+                            <Text className="text-slate-800 font-bold text-base">
+                                הוצאות לא צפויות
+                            </Text>
+                        </View>
+                        <View className="w-full bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+                            <CategoryBudgetDetails categories={currentUnexpectedBudgets} />
                         </View>
                     </View>
 
