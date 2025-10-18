@@ -32,7 +32,7 @@ export default class BudgetModel {
         }
     }
 
-    static async addBudgetToChild(username: string, profileName: string, budgetData: { startDate: Date, endDate: Date, amount: number }) {
+    static async addBudgetToChild(username: string, profileName: string, budgetData: { startDate: string, endDate: string, amount: number }) {
         try {
             const formattedBudgetData = {
                 startDate: new Date(budgetData.startDate).toISOString(),

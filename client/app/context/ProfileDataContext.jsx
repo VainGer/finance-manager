@@ -21,6 +21,7 @@ export function ProfileDataProvider({ children }) {
     const [getCategoriesLoading, setGetCategoriesLoading] = useState(false);
     const [getBusinessesLoading, setGetBusinessesLoading] = useState(false);
     const [dataLoaded, setDataLoaded] = useState(false);
+    const [canBuildNewBudget, setCanBuildNewBudget] = useState(false);
     const prevProfileId = useRef(profile?._id);
     const prevAccountUsername = useRef(account?.username);
     const pathname = usePathname();
@@ -37,8 +38,10 @@ export function ProfileDataProvider({ children }) {
             let errMsg = [];
             const response = await get(`budgets/get-profile-budgets?username=${encodeURIComponent(account.username)}&profileName=${encodeURIComponent(profile.profileName)}`);
             if (response.ok) {
-                setProfileBudgets(response.profileBudgets || []);
+                const sortedProfileBudgets = response.profileBudgets.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+                setProfileBudgets(sortedProfileBudgets || []);
                 setCategoryBudgets(response.categoryBudgets || []);
+                console.log(JSON.stringify(response.categoryBudgets, null, 2));
             } else {
                 switch (response.status) {
                     case 400: errMsg.push('בקשה לא תקינה בטעינת תקציבי הפרופיל'); break;
@@ -171,6 +174,9 @@ export function ProfileDataProvider({ children }) {
         }
     };
 
+
+
+
     useEffect(() => {
         if (!dataLoaded && account && profile && isTokenReady && !isExpiredToken && !restrictedPaths.includes(pathname)) {
             setExpensesLoading(true);
@@ -216,6 +222,7 @@ export function ProfileDataProvider({ children }) {
         dataLoaded,
         aiData,
         newDataReady,
+        canBuildNewBudget,
         fetchBudgets,
         fetchExpenses,
         fetchCategories,

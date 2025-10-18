@@ -8,7 +8,6 @@ import TransactionModel from "../../models/expenses/transaction.model";
 import * as AppError from "../../errors/AppError";
 import AiModel from "../../models/ai/ai.model";
 import AdminService from "../admin/admin.service";
-import { ObjectId } from "mongodb";
 
 export default class AiService {
 
@@ -48,15 +47,12 @@ export default class AiService {
             }
 
             const { startDate, endDate } = aiInputObj.recentlyClosedGlobalBudget;
-            const periodLabel = `${startDate} to ${endDate}`;
 
             const historyEntry: AIHistoryEntry = {
-                _id: new ObjectId().toString(),
+                _id: aiInputObj.recentlyClosedGlobalBudget._id,
                 profileId,
-                periodLabel,
                 startDate: new Date(startDate).toISOString(),
                 endDate: new Date(endDate).toISOString(),
-                inputHash: `${startDate}_${endDate}`,
                 coachOutput: result,
                 generatedAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
@@ -151,15 +147,14 @@ export default class AiService {
                 return null;
             }
             const aiHistory = (await AiModel.getRecentHistory(profileId)) as AIHistoryEntry[];
-            const analyzedHashes = new Set(aiHistory.map(entry => entry.inputHash));
-
+            const analyzedBudgets = new Set(aiHistory.map(entry => entry._id?.toString()));
             const sortedClosedBudgets = [...closedBudgets].sort(
                 (a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
             );
 
             const targetBudget = sortedClosedBudgets.find(b => {
-                const hash = `${b.startDate}_${b.endDate}`;
-                return !analyzedHashes.has(hash);
+                const id = b._id.toString();
+                return !analyzedBudgets.has(id);
             });
 
             if (!targetBudget) {
@@ -170,10 +165,7 @@ export default class AiService {
             const matchingCategoryBudgets: CategoryBudgetForAI[] = [];
             for (const cb of categoriesBudgets) {
                 for (const b of cb.budgets) {
-                    if (
-                        b.startDate === targetBudget.startDate &&
-                        b.endDate === targetBudget.endDate
-                    ) {
+                    if (b._id.toString() === targetBudget._id.toString()) {
                         matchingCategoryBudgets.push({
                             _id: b._id,
                             categoryName: cb.name,

@@ -19,16 +19,16 @@ export type Profile = {
 
 export type ChildProfile = Profile & {
   newBudgets?: {
-    startDate: Date;
-    endDate: Date;
+    startDate: Date | string;
+    endDate: Date | string;
     amount: number;
   }[]
 }
 
 export type ProfileBudget = {
   _id: ObjectId;
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | string;
+  endDate: Date | string;
   amount: number;
   spent: number;
 };

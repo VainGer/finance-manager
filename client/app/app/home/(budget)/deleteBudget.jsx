@@ -58,7 +58,7 @@ export default function DeleteBudgetScreen() {
         setStep("initial");
     }, []);
 
-    // Step components
+ 
     const InitialView = () => (
         <View className="flex-1 bg-gray-50 items-center justify-center px-6">
             <View pointerEvents="none" className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-300/20" />

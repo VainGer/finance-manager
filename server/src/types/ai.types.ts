@@ -9,12 +9,10 @@ export type HistoryDoc = {
 }
 
 export interface AIHistoryEntry {
-    _id?: string;
+    _id?: ObjectId;
     profileId: string | ObjectId;
-    periodLabel: string;
     startDate: string;
     endDate: string;
-    inputHash: string;
     coachOutput: AICoachOutput;
     generatedAt: string;
     createdAt?: string;

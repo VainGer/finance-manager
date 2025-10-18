@@ -15,7 +15,7 @@ export default function useEditBusinesses(props = {}) {
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Extract business/category-level errors from ProfileDataContext
+
   const businessesErrors = useMemo(() => {
     const errObj = errors.find(e => e.businessesErrors);
     return errObj ? errObj.businessesErrors : null;
@@ -88,7 +88,9 @@ export default function useEditBusinesses(props = {}) {
 
       const response = await post('expenses/business/add', payload);
       const result = await handleResponse(response, 'בעל העסק נוסף בהצלחה', 'אירעה שגיאה בעת יצירת בעל העסק');
-      if (result.ok) setName('');
+      if (result.ok) {
+        setName('');
+      }
     } catch (err) {
       console.error('Error adding business:', err);
       setLoading(false);

@@ -116,8 +116,7 @@ export default function useBudgetSummary() {
                 id: b._id?.$oid || b._id || b.id,
                 startDate: b.startDate,
                 endDate: b.endDate
-            }))
-            .sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+            }));
 
         setAvailablePeriods(periods);
 

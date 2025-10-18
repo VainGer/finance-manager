@@ -611,25 +611,44 @@ export default class ProfileService {
         return { success: true, message: "Profile color set successfully" };
     }
 
-    static async uploadTransactions(username: string, profileName: string, refId: string, transactionsToUpload: CategorizedFile[]) {
+    static async uploadTransactions(
+        username: string,
+        profileName: string,
+        refId: string,
+        transactionsToUpload: CategorizedFile[]
+    ) {
         if (!username || !profileName || !refId || !transactionsToUpload) {
             throw new AppErrors.BadRequestError("Username, profile name, refId and transactionsToUpload are required");
         }
+
         const profile = await ProfileModel.findProfile(username, profileName);
         if (!profile) {
             throw new AppErrors.NotFoundError("Profile not found");
         }
+
         await this.updateBankNames(refId, transactionsToUpload);
+
         const incValues = await this.getIncBudgetsValues(username, profileName, transactionsToUpload);
         if (!incValues.success) {
             throw new AppErrors.AppError("Failed to get budgets increase values", 500);
         }
+
         const { profileInc, categoryInc } = incValues.budgets;
-        const groupedTransactions = this.groupTransactions(transactionsToUpload);
-        const uploadResult = await TransactionModel.uploadFromFile(profileName, refId, groupedTransactions, profileInc, categoryInc);
+
+        const groupedTransactions = this.groupTransactions(transactionsToUpload, incValues.flatBudgetsMap);
+
+        const uploadResult = await TransactionModel.uploadFromFile(
+            profileName,
+            refId,
+            groupedTransactions,
+            profileInc,
+            categoryInc
+        );
+
         if (!uploadResult || !uploadResult.success) {
             throw new AppErrors.AppError(uploadResult?.message || "Failed to upload transactions", 500);
         }
+
         AdminService.logAction({
             type: "create",
             executeAccount: username,
@@ -637,34 +656,64 @@ export default class ProfileService {
             action: "upload_transactions",
             target: { refId, count: transactionsToUpload.length }
         });
+
         return { success: true, message: "Transactions uploaded successfully" };
     }
 
-    private static groupTransactions(transactions: CategorizedFile[]) {
+    private static groupTransactions(transactions: CategorizedFile[],
+        flatBudgetsMap?: Map<string, { id: ObjectId; start: Date; end: Date }[]>
+    ) {
         const groupedMap = new Map<string, GroupedTransactions>();
+        const norm = (s?: string) => (s ?? "").trim();
+
         for (const t of transactions) {
             const dateObj = new Date(t.date);
-            const dateYM = formatDateYM(dateObj); // ✅ uses your util
-            const key = `${t.category}::${t.business}::${dateYM}`;
+            const dateYM = formatDateYM(dateObj);
+            const categoryName = norm(t.category);
+            const key = `${categoryName}::${t.business}::${dateYM}`;
+
+            let unexpected = false;
+            if (flatBudgetsMap) {
+                const periods = flatBudgetsMap.get(categoryName);
+                const inBudgetPeriod = periods?.some(p => {
+                    const end = new Date(p.end);
+                    end.setHours(23, 59, 59, 999);
+                    return dateObj >= p.start && dateObj <= end;
+                });
+                unexpected = !inBudgetPeriod;
+            }
+
             if (!groupedMap.has(key)) {
                 groupedMap.set(key, {
-                    category: t.category,
+                    category: categoryName,
                     business: t.business,
                     dateYM,
                     transactions: []
                 });
             }
+
             groupedMap.get(key)!.transactions.push({
                 _id: new ObjectId(),
                 amount: t.amount,
                 date: dateObj.toISOString(),
-                description: t.description
+                description: t.description,
+                ...(unexpected ? { unexpected: true } : {})
             });
         }
         return Array.from(groupedMap.values());
     }
 
-    private static async getIncBudgetsValues(username: string, profileName: string, transactions: CategorizedFile[]) {
+
+
+    private static async getIncBudgetsValues(username: string, profileName: string, transactions: CategorizedFile[]):
+        Promise<{
+            success: boolean;
+            budgets: {
+                profileInc: { id: ObjectId; amount: number }[];
+                categoryInc: { categoryName: string; id: ObjectId; amount: number }[];
+            };
+            flatBudgetsMap: Map<string, { id: ObjectId; start: Date; end: Date }[]>;
+        }> {
         const budgetsRes = await BudgetService.getBudgets(username, profileName);
         if (!budgetsRes.success) {
             throw new AppErrors.AppError("Failed to get budgets", 500);
@@ -674,8 +723,12 @@ export default class ProfileService {
         const categoriesBudgets = budgetsRes.budgets.categories as { name: string; budgets: CategoryBudget[] }[] | undefined;
 
         const empty = {
-            success: true as const,
-            budgets: { profileInc: [] as { id: ObjectId; amount: number }[], categoryInc: [] as { categoryName: string; id: ObjectId; amount: number }[] }
+            success: true,
+            budgets: {
+                profileInc: [] as { id: ObjectId; amount: number }[],
+                categoryInc: [] as { categoryName: string; id: ObjectId; amount: number }[]
+            },
+            flatBudgetsMap: new Map<string, { id: ObjectId; start: Date; end: Date }[]>()
         };
 
         if (!profileBudgets?.length || !categoriesBudgets?.length) {
@@ -685,14 +738,16 @@ export default class ProfileService {
 
         const norm = (s?: string) => (s ?? "").trim();
 
-        const flatCategoryBudgets = categoriesBudgets.flatMap(cat =>
-            cat.budgets.map(b => ({
-                categoryName: norm(cat.name),
-                _id: b._id,
-                startDate: new Date(b.startDate),
-                endDate: new Date(b.endDate)
-            }))
-        );
+        const flatBudgetsMap = new Map<string, { id: ObjectId; start: Date; end: Date }[]>();
+        for (const cat of categoriesBudgets) {
+            const catName = norm(cat.name);
+            const periods = cat.budgets.map(b => ({
+                id: b._id,
+                start: new Date(b.startDate),
+                end: new Date(b.endDate)
+            }));
+            flatBudgetsMap.set(catName, periods);
+        }
 
         const categoryIncMap = new Map<string, { categoryName: string; id: ObjectId; amount: number }>();
         const profileIncMap = new Map<string, number>();
@@ -700,22 +755,29 @@ export default class ProfileService {
         for (const t of transactions) {
             const tCategory = norm(t.category);
             const tDate = new Date(t.date);
-            const matchingBudgets = flatCategoryBudgets.filter(cb => {
-                const end = new Date(cb.endDate);
-                end.setHours(23, 59, 59, 999);
-                return cb.categoryName === tCategory && tDate >= cb.startDate && tDate <= end;
-            });
+            const categoryBudgets = flatBudgetsMap.get(tCategory);
+            if (!categoryBudgets) continue;
 
-            for (const budget of matchingBudgets) {
-                const key = `${tCategory}_${budget._id.toString()}`;
-                const existing = categoryIncMap.get(key);
-                if (existing) {
-                    existing.amount += t.amount;
-                } else {
-                    categoryIncMap.set(key, { categoryName: tCategory, id: budget._id, amount: t.amount });
+            for (const budget of categoryBudgets) {
+                const end = new Date(budget.end);
+                end.setHours(23, 59, 59, 999);
+
+                if (tDate >= budget.start && tDate <= end) {
+                    const key = `${tCategory}_${budget.id.toString()}`;
+                    const existing = categoryIncMap.get(key);
+                    if (existing) {
+                        existing.amount += t.amount;
+                    } else {
+                        categoryIncMap.set(key, {
+                            categoryName: tCategory,
+                            id: budget.id,
+                            amount: t.amount
+                        });
+                    }
+
+                    const pid = budget.id.toString();
+                    profileIncMap.set(pid, (profileIncMap.get(pid) ?? 0) + t.amount);
                 }
-                const pid = budget._id.toString();
-                profileIncMap.set(pid, (profileIncMap.get(pid) ?? 0) + t.amount);
             }
         }
 
@@ -727,11 +789,16 @@ export default class ProfileService {
 
         if (!categoryInc.length && !profileInc.length) {
             console.log("No budgets increase found");
-            return empty;
+            return { ...empty, flatBudgetsMap };
         }
 
-        return { success: true as const, budgets: { profileInc, categoryInc } };
+        return {
+            success: true,
+            budgets: { profileInc, categoryInc },
+            flatBudgetsMap
+        };
     }
+
 
 
 

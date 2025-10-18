@@ -61,7 +61,7 @@ export default function BudgetSummary() {
                         <Text className="font-semibold text-center mb-2">פירוט התקציב:</Text>
                         <View className="space-y-2">
                             {Array.isArray(profile.newBudgets) && profile.newBudgets.map((budget) => (
-                                <View key={budget.amount} className="p-3 bg-slate-100 rounded-lg border border-slate-300 my-4">
+                                <View key={`${budget.amount}-${budget.startDate}-${budget.endDate}`} className="p-3 bg-slate-100 rounded-lg border border-slate-300 my-4">
                                     <Text className=" text-center mb-4">תקציב חדש בסך <Text className="font-semibold">₪{budget.amount}</Text></Text>
                                     <Text className=" text-center">לתקופה {formatDate(budget.startDate)} עד {formatDate(budget.endDate)}</Text>
                                 </View>

@@ -14,7 +14,8 @@ export default function useAIHistory() {
         try {
             const res = await get(`ai/history/${profileId}`);
             if (res.ok) {
-                setHistory(res.history || []);
+                const sortedData = res.history.history.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+                setHistory(sortedData || []);
             } else {
                 setHistory([]);
             }

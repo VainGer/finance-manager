@@ -15,8 +15,8 @@ export type Business = {
 export type CategoryBudget = {
     _id: ObjectId;
     categoryName?: string; // only for service use
-    startDate: Date;
-    endDate: Date;
+    startDate: Date | string;
+    endDate: Date | string;
     amount: number;
     spent: number;
 }
@@ -35,6 +35,7 @@ export type Transaction = {
     amount: number;
     date: string; // ISO string format
     description: string;
+    unexpected?: boolean;
 }
 
 export type GroupedTransactions = {

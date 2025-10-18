@@ -7,7 +7,7 @@ import { formatDate } from '../../utils/formatters';
 
 export default function AIInsight() {
     const { aiData } = useProfileData();
-    const histories = aiData?.history || [];
+    const histories = aiData || [];
     const [selectedId, setSelectedId] = useState(histories[0]?._id || null);
 
     const selectedHistory = useMemo(
@@ -256,7 +256,7 @@ export default function AIInsight() {
                         <View key={idx} className="bg-slate-50 rounded-lg p-3 mb-2">
                             <Text className="font-bold text-slate-800">{b.category}</Text>
                             <Text className="text-sm text-gray-600">
-                                {b.current} ₪ ➡ {b.proposed} ₪ — {b.rationale}
+                                {b.proposed} ₪ ➡ {b.current} ₪ — {b.rationale}
                             </Text>
                         </View>
                     ))}

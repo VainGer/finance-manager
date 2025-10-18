@@ -207,6 +207,7 @@ export default class TransactionService {
         });
 
         if (!budget) {
+            await TransactionModel.setUnexpected(refId, catName, busName, transactionId, transaction.date, true);
             return { success: true, message: "No budget found for this transaction date" };
         }
 

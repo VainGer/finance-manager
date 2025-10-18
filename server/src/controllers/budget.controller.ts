@@ -72,7 +72,7 @@ export default class BudgetController {
 
     static async validateBudgetDates(req: Request, res: Response) {
         try {
-            const { username, profileName, startDate, endDate } = req.body as { username: string, profileName: string, startDate: Date, endDate: Date };
+            const { username, profileName, startDate, endDate } = req.body;
             const isValid = await BudgetService.validateBudgetDates(username, profileName, startDate, endDate);
             res.status(200).json({
                 message: "Dates validated successfully",

@@ -4,7 +4,6 @@ import { MonthlyTransactions, Transaction, GroupedTransactions, CategoryForAI } 
 import { formatDateYM } from "../../utils/date.utils";
 
 export default class TransactionModel {
-    private static profileCollection: string = "profiles";
     private static expenseCollection: string = "expenses";
 
     static async create(refId: string, catName: string, busName: string, transaction: Transaction) {
@@ -209,24 +208,111 @@ export default class TransactionModel {
         }
     }
 
-    static async getTransactionsInDateRange(refId: string, startDate: string, endDate: string) {
+    static async updatetUnexpected(
+        refId: string,
+        startDate: string,
+        endDate: string,
+        catNames: string[],
+        set: boolean
+    ) {
         try {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+
+            const operation = set ? "$set" : "$unset";
+            const value = set ? true : "";
+            const unexpectedFilter = set ? { $exists: false } : { $exists: true };
+            const operations = catNames.map(catName => ({
+                collection: this.expenseCollection,
+                query: { _id: new ObjectId(refId) },
+                update: {
+                    [operation]: {
+                        "categories.$[cat].Businesses.$[biz].transactionsArray.$[month].transactions.$[trans].unexpected": value
+                    }
+                },
+                options: {
+                    arrayFilters: [
+                        { "cat.name": catName },
+                        { "biz.name": { $exists: true } },
+                        { "month.dateYM": { $exists: true } },
+                        {
+                            $and: [
+                                { "trans.date": { $gte: start.toISOString() } },
+                                { "trans.date": { $lte: end.toISOString() } },
+                                { "trans.unexpected": unexpectedFilter }
+                            ]
+                        }
+                    ],
+                    multi: true
+                }
+            }));
+
+            const result = await db.TransactionUpdateMany(operations);
+            return result;
+        } catch (error) {
+            console.error("Error in TransactionModel.updatetUnexpected", error);
+            throw new Error("Failed to update unexpected transactions");
+        }
+    }
+
+
+
+    static async setUnexpected(
+        refId: string,
+        catName: string,
+        busName: string,
+        transactionId: string,
+        transactionDate: string,
+        unexpected: boolean
+    ) {
+        try {
+            const dateYM = formatDateYM(transactionDate);
+            const result = await db.UpdateDocument(
+                this.expenseCollection,
+                { _id: new ObjectId(refId) },
+                {
+                    $set: {
+                        "categories.$[catFilter].Businesses.$[bizFilter].transactionsArray.$[dateFilter].transactions.$[transFilter].unexpected": unexpected
+                    }
+                },
+                {
+                    arrayFilters: [
+                        { "catFilter.name": catName },
+                        { "bizFilter.name": busName },
+                        { "dateFilter.dateYM": dateYM },
+                        { "transFilter._id": new ObjectId(transactionId) }
+                    ]
+                }
+            );
+            return result;
+        } catch (error) {
+            console.error("Error in TransactionModel.setUnexpected", error);
+            throw new Error("Failed to set unexpected transaction");
+        }
+    }
+
+
+    static async getTransactionsInDateRange(refId: string, startDate: string, endDate: string, unexpectedOnly = false) {
+        try {
+            const matchStage: Record<string, any> = {
+                "categories.Businesses.transactionsArray.transactions.date": {
+                    $gte: startDate,
+                    $lte: endDate
+                }
+            };
+
+            if (unexpectedOnly) {
+                matchStage["categories.Businesses.transactionsArray.transactions.unexpected"] = true;
+            }
+
             const pipeline = [
                 { $match: { _id: new ObjectId(refId) } },
                 { $unwind: "$categories" },
                 { $unwind: "$categories.Businesses" },
                 { $unwind: "$categories.Businesses.transactionsArray" },
                 { $unwind: "$categories.Businesses.transactionsArray.transactions" },
-
-                {
-                    $match: {
-                        "categories.Businesses.transactionsArray.transactions.date": {
-                            $gte: startDate,
-                            $lte: endDate
-                        }
-                    }
-                },
-
+                { $match: matchStage },
                 {
                     $project: {
                         category: "$categories.name",
@@ -236,16 +322,10 @@ export default class TransactionModel {
                         amount: "$categories.Businesses.transactionsArray.transactions.amount",
                         date: "$categories.Businesses.transactionsArray.transactions.date",
                         description: "$categories.Businesses.transactionsArray.transactions.description",
-                        dateYM: {
-                            $substr: [
-                                "$categories.Businesses.transactionsArray.transactions.date",
-                                0,
-                                7
-                            ]
-                        }
+                        unexpected: "$categories.Businesses.transactionsArray.transactions.unexpected",
+                        dateYM: { $substr: ["$categories.Businesses.transactionsArray.transactions.date", 0, 7] }
                     }
                 },
-
                 {
                     $group: {
                         _id: {
@@ -259,12 +339,12 @@ export default class TransactionModel {
                                 _id: "$txId",
                                 amount: "$amount",
                                 date: "$date",
-                                description: "$description"
+                                description: "$description",
+                                unexpected: "$unexpected"
                             }
                         }
                     }
                 },
-
                 {
                     $project: {
                         _id: 0,
@@ -283,14 +363,10 @@ export default class TransactionModel {
                             bankNames: "$bankNames"
                         },
                         transactionsArray: {
-                            $push: {
-                                dateYM: "$dateYM",
-                                transactions: "$transactions"
-                            }
+                            $push: { dateYM: "$dateYM", transactions: "$transactions" }
                         }
                     }
                 },
-
                 {
                     $project: {
                         _id: 0,
@@ -312,15 +388,7 @@ export default class TransactionModel {
                         }
                     }
                 },
-
-                {
-                    $project: {
-                        _id: 0,
-                        name: "$_id",
-                        Businesses: 1
-                    }
-                },
-
+                { $project: { _id: 0, name: "$_id", Businesses: 1 } },
                 { $sort: { name: 1 } }
             ];
 
@@ -426,14 +494,15 @@ export default class TransactionModel {
         try {
             const operations: { collection: string; query: any; update: any; options?: any }[] = [];
 
-            // 1. Insert grouped transactions
             for (const group of groupedTransactions) {
-                // Step 1a: ensure the month bucket exists
                 operations.push({
                     collection: "expenses",
-                    query: { _id: new ObjectId(refId) },
+                    query: {
+                        _id: new ObjectId(refId),
+                        [`categories.Businesses.transactionsArray.dateYM`]: { $ne: group.dateYM }
+                    },
                     update: {
-                        $addToSet: {
+                        $push: {
                             "categories.$[cat].Businesses.$[biz].transactionsArray": {
                                 dateYM: group.dateYM,
                                 transactions: []
@@ -448,7 +517,6 @@ export default class TransactionModel {
                     }
                 });
 
-                // Step 1b: push transactions into the correct month
                 operations.push({
                     collection: "expenses",
                     query: { _id: new ObjectId(refId) },
@@ -469,7 +537,6 @@ export default class TransactionModel {
                 });
             }
 
-            // 2. Update category budgets
             for (const inc of categoryIncs) {
                 operations.push({
                     collection: "expenses",
@@ -486,7 +553,6 @@ export default class TransactionModel {
                 });
             }
 
-            // 3. Update profile budgets
             for (const inc of profileIncs) {
                 operations.push({
                     collection: "profiles",
@@ -497,7 +563,6 @@ export default class TransactionModel {
                 });
             }
 
-            // 4. Execute all ops atomically
             const result = await db.TransactionUpdateMany(operations);
             return result;
         } catch (error) {
@@ -505,4 +570,5 @@ export default class TransactionModel {
             throw new Error("Failed to upload transactions from file");
         }
     }
+
 }
