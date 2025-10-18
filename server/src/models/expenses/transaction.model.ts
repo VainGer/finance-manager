@@ -500,17 +500,20 @@ export default class TransactionModel {
         categoryIncs: { id: ObjectId; categoryName: string; amount: number }[]
     ) {
         try {
-            const operations: { collection: string; query: any; update: any; options?: any }[] = [];
+            const operations: {
+                collection: string;
+                query: any;
+                update: any;
+                options?: any;
+            }[] = [];
 
             for (const group of groupedTransactions) {
+                // 1) Ensure the month bucket exists for THIS category+business (no $ne in query!)
                 operations.push({
                     collection: "expenses",
-                    query: {
-                        _id: new ObjectId(refId),
-                        [`categories.Businesses.transactionsArray.dateYM`]: { $ne: group.dateYM }
-                    },
+                    query: { _id: new ObjectId(refId) },
                     update: {
-                        $push: {
+                        $addToSet: {
                             "categories.$[cat].Businesses.$[biz].transactionsArray": {
                                 dateYM: group.dateYM,
                                 transactions: []
@@ -525,6 +528,7 @@ export default class TransactionModel {
                     }
                 });
 
+                // 2) Push transactions into that month
                 operations.push({
                     collection: "expenses",
                     query: { _id: new ObjectId(refId) },
@@ -578,5 +582,6 @@ export default class TransactionModel {
             throw new Error("Failed to upload transactions from file");
         }
     }
+
 
 }
