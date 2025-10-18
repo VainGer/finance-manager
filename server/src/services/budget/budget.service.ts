@@ -355,7 +355,9 @@ export default class BudgetService {
 
         const { categoriesBudgets, unexpectedExpenses } = await this.getCategoriesBudgets(profile.expenses);
         const unexpectedData = unexpectedExpenses[0] as any[];
-
+        if (!unexpectedData || unexpectedData.length === 0) {
+            return { success: true, budgets: { profile: profileBudgets, categories: categoriesBudgets } };
+        }
         const unexpectedMap = new Map<string, any>();
         for (const cat of unexpectedData) {
             unexpectedMap.set(cat.name, cat);
