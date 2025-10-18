@@ -359,7 +359,7 @@ export default class BudgetService {
 
         const profileBudgets = profile.budgets;
         if (!profileBudgets || profileBudgets.length === 0) {
-            throw new AppErrors.NotFoundError("No budgets found for this profile");
+            return { success: true, budgets: { profile: [], categories: [] } };
         }
 
         const { categoriesBudgets, unexpectedExpenses } = await this.getCategoriesBudgets(profile.expenses);

@@ -197,7 +197,7 @@ export default function useUploadTransactionFile() {
         username: profile.username,
         profileName: profile.profileName,
         refId: profile.expenses,
-        transactionsToUpload
+        transactionsToUpload: transactionsToSubmit
       });
 
       if (response.ok) {
