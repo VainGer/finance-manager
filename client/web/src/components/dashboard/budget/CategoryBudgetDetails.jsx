@@ -15,7 +15,7 @@ const BudgetStatus = ({ progressPercentage }) => (
     </div>
 );
 
-export default function CategoryBudgetDetails({ categories, selectedPeriod }) {
+export default function CategoryBudgetDetails({ categories, selectedPeriod, isUnexpected = false }) {
     return (
         <div className="space-y-4">
             {categories.map((category, index) => {
@@ -36,37 +36,57 @@ export default function CategoryBudgetDetails({ categories, selectedPeriod }) {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
-                            <div className="text-center">
-                                <div className="text-xl font-bold text-blue-600">{formatCurrency(budgetAmount)}</div>
-                                <div className="text-xs text-gray-600">תקציב</div>
-                            </div>
+                        <div className={`grid grid-cols-1 ${isUnexpected ? 'md:grid-cols-2' : 'md:grid-cols-4'} gap-4 mb-3`}>
+                            {!isUnexpected && (
+                                <div className="text-center">
+                                    <div className="text-xl font-bold text-blue-600">{formatCurrency(budgetAmount)}</div>
+                                    <div className="text-xs text-gray-600">תקציב</div>
+                                </div>
+                            )}
                             <div className="text-center">
                                 <div className="text-xl font-bold text-red-600">{formatCurrency(categorySpent)}</div>
-                                <div className="text-xs text-gray-600">הוצאות</div>
+                                <div className="text-xs text-gray-600">{isUnexpected ? 'הוצאות לא צפויות' : 'הוצאות'}</div>
                             </div>
-                            <div className="text-center">
-                                <div className={`text-xl font-bold ${categorySpent <= budgetAmount ? 'text-green-600' : 'text-red-600'}`}>
-                                    {formatCurrency(budgetAmount - categorySpent)}
+                            {!isUnexpected && (
+                                <>
+                                    <div className="text-center">
+                                        <div className={`text-xl font-bold ${categorySpent <= budgetAmount ? 'text-green-600' : 'text-red-600'}`}>
+                                            {formatCurrency(budgetAmount - categorySpent)}
+                                        </div>
+                                        <div className="text-xs text-gray-600">יתרה</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className={`text-xl font-bold ${progressPercentage <= 90 ? 'text-green-600' : 'text-red-600'}`}>
+                                            {Math.min(progressPercentage, 100).toFixed(1)}%
+                                        </div>
+                                        <div className="text-xs text-gray-600">אחוז ניצול</div>
+                                    </div>
+                                </>
+                            )}
+                            {isUnexpected && (
+                                <div className="text-center">
+                                    
                                 </div>
-                                <div className="text-xs text-gray-600">יתרה</div>
-                            </div>
-                            <div className="text-center">
-                                <div className={`text-xl font-bold ${progressPercentage <= 90 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {Math.min(progressPercentage, 100).toFixed(1)}%
-                                </div>
-                                <div className="text-xs text-gray-600">אחוז ניצול</div>
-                            </div>
+                            )}
                         </div>
 
-                        <div className="w-full bg-gray-200 rounded-full h-3">
-                            <div
-                                className={`h-3 rounded-full ${getProgressColor(progressBarPercentage)}`}
-                                style={{ width: `${progressBarPercentage}%` }}
-                            ></div>
-                        </div>
-
-                        <BudgetStatus progressPercentage={progressPercentage} />
+                        {!isUnexpected && (
+                            <>
+                                <div className="w-full bg-gray-200 rounded-full h-3">
+                                    <div
+                                        className={`h-3 rounded-full ${getProgressColor(progressBarPercentage)}`}
+                                        style={{ width: `${progressBarPercentage}%` }}
+                                    ></div>
+                                </div>
+                                <BudgetStatus progressPercentage={progressPercentage} />
+                            </>
+                        )}
+                        
+                        {isUnexpected && (
+                            <div className="mt-2 text-sm">
+                                <span className="text-orange-600 font-semibold">⚡ הוצאה שלא תוכננה מראש</span>
+                            </div>
+                        )}
                     </div>
                 );
             })}

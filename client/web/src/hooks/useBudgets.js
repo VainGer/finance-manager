@@ -49,7 +49,12 @@ export default function useBudgets({ setLoading }) {
 
   useEffect(() => {
     if (categories?.length) {
-      setCategoryBudgets(categories.map(cat => ({ name: cat, budget: "" })));
+      setCategoryBudgets(categories.map(cat => ({ 
+        name: cat, 
+        budget: "", 
+        include: true,
+        autoDisabled: false // דגל לזכור אם בוטל אוטומטית
+      })));
     }
   }, [categories]);
 
@@ -122,6 +127,38 @@ export default function useBudgets({ setLoading }) {
     setCategoryBudgets(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], budget: value };
+      
+      // חישוב סך הכל מחדש
+      const totalAllocated = updated.reduce((sum, cat) => sum + (parseFloat(cat.budget) || 0), 0);
+      const totalBudget = parseFloat(amount) || 0;
+      
+      if (totalAllocated >= totalBudget) {
+        updated.forEach((cat, i) => {
+          if (!cat.budget || parseFloat(cat.budget) <= 0) {
+            updated[i] = { ...updated[i], include: false, autoDisabled: true };
+          }
+        });
+      } else {
+       
+        updated.forEach((cat, i) => {
+          if (cat.autoDisabled && (!cat.budget || parseFloat(cat.budget) <= 0)) {
+            updated[i] = { ...updated[i], include: true, autoDisabled: false };
+          }
+        });
+      }
+      
+      return updated;
+    });
+  }, [amount]);
+
+  const handleCategoryIncludeToggle = useCallback((index, value) => {
+    setCategoryBudgets(prev => {
+      const updated = [...prev];
+      updated[index] = { 
+        ...updated[index], 
+        include: value, 
+        autoDisabled: false // אפס את הדגל כי זה שינוי ידני
+      };
       return updated;
     });
   }, []);
@@ -135,8 +172,12 @@ export default function useBudgets({ setLoading }) {
   }, [childrenBudgets]);
 
   const setDatesAndSum = useCallback(async () => {
-    if (!startDate || !endDate || parseFloat(amount) <= 0) {
-      setError("אנא מלא את כל השדות");
+    if (!startDate || !endDate) {
+      setError("אנא בחר תאריכים");
+      return false;
+    }
+    if (new Date(startDate) >= new Date(endDate)) {
+      setError("תאריך התחלה חייב להיות לפני תאריך סיום");
       return false;
     }
 
@@ -175,7 +216,7 @@ export default function useBudgets({ setLoading }) {
     } finally {
       setLoading(false);
     }
-  }, [account.username, profile.profileName, startDate, endDate, amount, setLoading]);
+  }, [account.username, profile.profileName, startDate, endDate, setLoading]);
 
   const create = useCallback(async () => {
     if (!startDate || !endDate || parseFloat(amount) <= 0) {
@@ -185,12 +226,18 @@ export default function useBudgets({ setLoading }) {
 
     const finalBudgets = [];
     for (const cat of categoryBudgets) {
+      if (!cat.include) continue;
       const amt = parseFloat(cat.budget);
       if (!amt || amt <= 0) {
-        setError("סכום תקציב קטגוריה חייב להיות גדול מאפס");
+        setError("יש להקצות סכום חיובי לכל קטגוריה שנבחרה");
         return false;
       }
       finalBudgets.push({ categoryName: cat.name, amount: amt });
+    }
+
+    if (finalBudgets.length === 0) {
+      setError("יש לבחור לפחות קטגוריה אחת לתקציב");
+      return false;
     }
 
     setLoading(true);
@@ -208,7 +255,7 @@ export default function useBudgets({ setLoading }) {
 
       if (response.ok) {
         await fetchBudgets();
-        setSuccess("התקציב נוצר בהצלחה!");
+        setSuccess("🎉 התקציב נוצר בהצלחה! חוזר לתפריט...");
         setTimeout(() => setSuccess(null), 2000);
         return true;
       }
@@ -331,6 +378,7 @@ export default function useBudgets({ setLoading }) {
     setAmount,
     categoryBudgets,
     handleCategoryBudgetChange,
+    handleCategoryIncludeToggle,
     childrenBudgets,
     selectedChildBudget,
     handleChildBudgetSelect,

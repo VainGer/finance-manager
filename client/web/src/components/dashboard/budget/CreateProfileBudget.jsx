@@ -2,34 +2,100 @@ import { memo } from 'react';
 import { formatDate } from '../../../utils/budgetUtils';
 import useBudgets from '../../../hooks/useBudgets';
 
-const Categories = memo(function Categories({ categoryBudgets, onChange }) {
+// פונקציית עזר לפרמוט תאריכים
+const formatDateDisplay = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('he-IL', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+    });
+};
+
+const Categories = memo(function Categories({ categoryBudgets, onChange, onToggle, remainingAmount }) {
     return (
-        <div className="space-y-3">
-            {categoryBudgets.map((category, index) => (
-                <div
-                    key={category.name ?? index}
-                    className="flex items-center justify-between bg-slate-50 border border-slate-200 p-4 rounded-xl"
-                >
-                    <label
-                        htmlFor={`category-${category.name ?? index}`}
-                        className="font-semibold text-slate-800"
-                    >
-                        {category.name}
-                    </label>
-                    <div className="relative">
-                        <input
-                            type="number"
-                            inputMode="decimal"
-                            id={`category-${category.name ?? index}`}
-                            value={category.budget}
-                            placeholder="0.00"
-                            onChange={(e) => onChange(index, e.target.value)}
-                            className="w-32 px-3 py-2 bg-white border border-slate-300 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent font-medium"
-                        />
-                        <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 text-sm">₪</div>
-                    </div>
+        <div className="space-y-4" dir="rtl">
+            {/* תקציב נותר */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+                <div className="flex items-center justify-between text-sm">
+                    <span className="font-semibold text-blue-800">תקציב נותר:</span>
+                    <span className={`font-bold ${remainingAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {remainingAmount.toLocaleString('he-IL')} ₪
+                    </span>
                 </div>
-            ))}
+                {remainingAmount < 0 && (
+                    <p className="text-red-600 text-xs mt-1">⚠️ חרגת מהתקציב המתוכנן</p>
+                )}
+            </div>
+
+            {categoryBudgets.map((category, index) => {
+                const categoryAmount = parseFloat(category.budget) || 0;
+                const hasValue = categoryAmount > 0;
+                const isIncluded = category.include ?? true;
+                
+                return (
+                    <div
+                        key={category.name ?? index}
+                        className={`border p-4 rounded-xl transition-all duration-200 ${
+                            isIncluded ? 'bg-slate-50 border-slate-200' : 'bg-gray-50 border-gray-200 opacity-75'
+                        }`}
+                    >
+                        {/* כותרת הקטגוריה עם טוגל */}
+                        <div className="flex items-center justify-between mb-3">
+                            <label
+                                htmlFor={`category-${category.name ?? index}`}
+                                className={`font-semibold ${isIncluded ? 'text-slate-800' : 'text-gray-500'}`}
+                            >
+                                {category.name}
+                            </label>
+                            <div className="flex items-center gap-3">
+                                <span className="text-xs text-slate-600">כלול בתקציב</span>
+                                <input
+                                    type="checkbox"
+                                    checked={isIncluded}
+                                    onChange={(e) => onToggle(index, e.target.checked)}
+                                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                />
+                            </div>
+                        </div>
+
+                        {/* שדה הסכום */}
+                        <div className="relative">
+                            <input
+                                type="number"
+                                inputMode="decimal"
+                                id={`category-${category.name ?? index}`}
+                                value={category.budget}
+                                placeholder="0.00"
+                                onChange={(e) => onChange(index, e.target.value)}
+                                disabled={!isIncluded}
+                                className={`w-full px-4 py-3 bg-white border rounded-xl text-right font-medium text-lg focus:outline-none focus:ring-2 transition-all ${
+                                    isIncluded 
+                                        ? 'border-slate-300 focus:ring-blue-500 focus:border-blue-500' 
+                                        : 'border-gray-300 opacity-50 cursor-not-allowed bg-gray-50'
+                                }`}
+                            />
+                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 font-medium">₪</div>
+                        </div>
+
+                        {/* הודעות מצב */}
+                        {isIncluded && (
+                            <div className="mt-2">
+                                {hasValue ? (
+                                    <p className="text-green-600 text-xs flex items-center gap-1">
+                                        ✅ הוקצה {categoryAmount.toLocaleString('he-IL')} ₪
+                                    </p>
+                                ) : (
+                                    <p className="text-amber-600 text-xs flex items-center gap-1">
+                                        ⏳ ממתין להקצאת תקציב
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
         </div>
     );
 });
@@ -146,7 +212,7 @@ export default function CreateProfileBudget({ goBack }) {
         startDate, setStartDate,
         endDate, setEndDate,
         amount, setAmount,
-        categoryBudgets, handleCategoryBudgetChange,
+        categoryBudgets, handleCategoryBudgetChange, handleCategoryIncludeToggle,
         childrenBudgets,
         selectedChildBudget, handleChildBudgetSelect,
         error, setError,
@@ -192,33 +258,47 @@ export default function CreateProfileBudget({ goBack }) {
 
             {validDates && (
                 <div className="space-y-6">
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                        <h3 className="font-semibold text-slate-800 mb-2">
-                            הגדרת תקציב לתאריכים: {startDate} - {endDate}
+                    <div className="bg-gradient-to-r from-blue-50 to-slate-50 border border-blue-200 rounded-xl p-5" dir="rtl">
+                        <h3 className="font-bold text-slate-800 mb-3 text-lg">
+                            🗓️ הגדרת תקציב לתקופה: {formatDateDisplay(startDate)} - {formatDateDisplay(endDate)}
                         </h3>
-                        {remainingAmount >= 0 ? (
-                            <p className="text-slate-600 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                                </svg>
-                                סכום פנוי: ₪{remainingAmount}
+                        <div className="bg-white rounded-lg p-3 border border-slate-200 mb-3">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-slate-600 font-medium">תקציב כולל:</span>
+                                <span className="text-2xl font-bold text-slate-800">{parseFloat(amount || 0).toLocaleString('he-IL')} ₪</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-slate-600 font-medium">הוקצה עד כה:</span>
+                                <span className="text-lg font-semibold text-blue-600">
+                                    {(parseFloat(amount || 0) - remainingAmount).toLocaleString('he-IL')} ₪
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                            <p className="text-sm text-amber-800 flex items-center gap-2">
+                                💡 <strong>טיפ:</strong> קטגוריות ללא תקציב יהפכו לקטגוריות "הוצאות בלתי צפויות"
                             </p>
-                        ) : (
-                            <p className="text-red-600 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                הסכום חורג ב - ₪{Math.abs(remainingAmount)}
-                            </p>
-                        )}
+                        </div>
                     </div>
 
-                    <form onSubmit={(e) => { e.preventDefault(); create(); }} className="space-y-6">
+                    <form onSubmit={async (e) => { 
+                        e.preventDefault(); 
+                        const success = await create();
+                        if (success) {
+                            // סגירת הטופס אחרי יצירה מוצלחת
+                            setTimeout(() => {
+                                goBack();
+                            }, 2500);
+                        }
+                    }} className="space-y-6">
                         <div className="space-y-3">
                             <h4 className="font-semibold text-slate-800">תקציב קטגוריות:</h4>
                             <Categories
                                 categoryBudgets={categoryBudgets}
                                 onChange={handleCategoryBudgetChange}
+                                onToggle={handleCategoryIncludeToggle}
+                                remainingAmount={remainingAmount}
                             />
                         </div>
 
@@ -231,12 +311,8 @@ export default function CreateProfileBudget({ goBack }) {
                                 ביטול
                             </button>
                             <button
-                                disabled={remainingAmount !== 0}
                                 type="submit"
-                                className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-colors ${remainingAmount !== 0
-                                    ? 'bg-slate-300 cursor-not-allowed text-slate-500'
-                                    : 'bg-green-600 hover:bg-green-700 text-white'
-                                    }`}
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
                             >
                                 צור תקציב
                             </button>

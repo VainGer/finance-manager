@@ -16,6 +16,7 @@ export default function ProfileBudgetDisplay({ profile }) {
         setSelectedPeriod,
         currentProfileBudget,
         currentCategoryBudgets,
+        currentUnexpectedBudgets,
         relevantPeriod,
         childrenProps
     } = useBudgetSummary();
@@ -128,7 +129,24 @@ export default function ProfileBudgetDisplay({ profile }) {
                     <OverallBudgetSummary budget={currentProfileBudget} />
                 </div>
 
-                {/* Category Details */}
+               
+                {currentUnexpectedBudgets?.length > 0 && (
+                    <div className="bg-orange-50 rounded-xl p-6 border border-orange-200">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-lg">⚡</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-orange-800">הוצאות לא צפויות</h3>
+                        </div>
+                        <CategoryBudgetDetails
+                            categories={currentUnexpectedBudgets}
+                            selectedPeriod={selectedPeriod}
+                            isUnexpected={true}
+                        />
+                    </div>
+                )}
+
+                {/* Category Details - תקציבים רגילים */}
                 <CategoryBudgetDetails
                     categories={currentCategoryBudgets}
                     selectedPeriod={selectedPeriod}

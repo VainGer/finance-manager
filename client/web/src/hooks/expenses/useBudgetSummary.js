@@ -26,14 +26,12 @@ export default function useBudgetSummary() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [activeProfileBudgets, setActiveProfileBudgets] = useState([]);
-    const [activeCategoryBudgets, setActiveCategoryBudgets] = useState([]);
-
     const [availablePeriods, setAvailablePeriods] = useState([]);
     const [selectedPeriod, setSelectedPeriod] = useState(null);
     const [processedBudgets, setProcessedBudgets] = useState({});
     const [currentProfileBudget, setCurrentProfileBudget] = useState(null);
     const [currentCategoryBudgets, setCurrentCategoryBudgets] = useState([]);
+    const [currentUnexpectedBudgets, setCurrentUnexpectedBudgets] = useState([]);
     const [relevantPeriod, setRelevantPeriod] = useState(false);
 
 
@@ -53,8 +51,6 @@ export default function useBudgetSummary() {
                 return;
             }
             if (profileBudgets?.length && categoryBudgets?.length) {
-                setActiveProfileBudgets(profileBudgets);
-                setActiveCategoryBudgets(categoryBudgets);
                 processBudgets(profileBudgets, categoryBudgets);
             }
             setLoading(false);
@@ -66,8 +62,6 @@ export default function useBudgetSummary() {
         if (!selectedChild) return;
 
         if (!childrenLoading) {
-            setActiveProfileBudgets(childrenProfileBudgets);
-            setActiveCategoryBudgets(childrenCategoryBudgets);
             processBudgets(childrenProfileBudgets, childrenCategoryBudgets);
             setLoading(false);
         } else if (childrenLoading) {
@@ -82,19 +76,33 @@ export default function useBudgetSummary() {
             const id = b._id?.$oid || b._id || b.id;
             map[id] = {
                 profileBudget: b,
-                categories: []
+                categories: [],
+                unexpected: []
             };
         });
 
         categoryArr.forEach(category => {
             category.budgets.forEach(catBudget => {
-                const id = catBudget._id?.$oid || catBudget._id || catBudget.id;
-                if (map[id]) {
-                    map[id].categories.push({
-                        name: category.name,
-                        budget: catBudget.amount,
-                        spent: catBudget.spent || 0
-                    });
+                if (!catBudget.unexpected) {
+                    const id = catBudget._id?.$oid || catBudget._id || catBudget.id;
+                    if (map[id]) {
+                        map[id].categories.push({
+                            name: category.name,
+                            budget: catBudget.amount,
+                            spent: catBudget.spent || 0
+                        });
+                        map[id].profileBudget.spent += catBudget.spent || 0;
+                    }
+                } else {
+                    const id = catBudget._id?.$oid || catBudget._id || catBudget.id;
+                    if (map[id]) {
+                        map[id].unexpected.push({
+                            name: category.name,
+                            budget: catBudget.amount,
+                            spent: catBudget.spent || 0
+                        });
+                        map[id].profileBudget.spent += catBudget.spent || 0;
+                    }
                 }
             });
         });
@@ -134,6 +142,7 @@ export default function useBudgetSummary() {
         if (!selectedPeriod || !processedBudgets) {
             setCurrentProfileBudget(null);
             setCurrentCategoryBudgets([]);
+            setCurrentUnexpectedBudgets([]);
             return;
         }
 
@@ -142,11 +151,13 @@ export default function useBudgetSummary() {
         if (!entry) {
             setCurrentProfileBudget(null);
             setCurrentCategoryBudgets([]);
+            setCurrentUnexpectedBudgets([]);
             return;
         }
 
         setCurrentProfileBudget(entry.profileBudget);
         setCurrentCategoryBudgets(entry.categories);
+        setCurrentUnexpectedBudgets(entry.unexpected);
 
         const now = new Date();
         const start = new Date(selectedPeriod.startDate);
@@ -166,6 +177,7 @@ export default function useBudgetSummary() {
         relevantPeriod,
         currentProfileBudget,
         currentCategoryBudgets,
+        currentUnexpectedBudgets,
         refetchBudgets: fetchBudgets,
         childrenProps: {
             children,
