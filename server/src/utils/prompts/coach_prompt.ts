@@ -28,7 +28,7 @@ Your task is to analyze their spending patterns and produce actionable budgeting
       "utilizationPct": number
     },
     "topSignals": [
-      { "type": "over_budget" | "near_limit" | "anomaly" | string, "message": string }
+      { "type": "over_budget" | "near_limit" | "anomaly" | "unplanned" | string, "message": string }
     ]
   },
   "categories": [
@@ -38,12 +38,14 @@ Your task is to analyze their spending patterns and produce actionable budgeting
       "spent": number,
       "variance": number,
       "utilizationPct": number,
+      "unexpected": boolean,
+      "unexpectedSpent": number,
       "drivers": [
         { "business": string, "amount": number }
       ],
       "actions": [
         {
-          "kind": "reduce" | "switch" | "cap" | string,
+          "kind": "reduce" | "switch" | "cap" | "adjust_budget" | "investigate" | string,
           "proposal": string,
           "quantifiedImpact": { "monthlySave": number, "oneTimeSave": number },
           "evidence": string
@@ -71,27 +73,30 @@ Your task is to analyze their spending patterns and produce actionable budgeting
   ]
 }
 
-🧠 **Analysis logic to follow**:
+**Analysis logic to follow**:
 - **summary.global**: Calculate total budget, spent, remaining, utilizationPct = spent / budget × 100.
 - **summary.topSignals**:
   - Add "over_budget" if spent > budget.
   - Add "near_limit" if utilizationPct ≥ 95%.
   - Add "anomaly" for irregular spikes or out-of-period transactions.
+  - Add "unplanned" for categories with "unexpected": true or unexpectedSpent > 0.
 - **categories**:
   - Compute variance = spent - budget.
-  - List top 2–3 businesses in "drivers".
-  - Suggest 1–2 practical actions (in Hebrew).
+  - If "unexpected": true, always include unexpectedSpent (sum of unplanned transactions).
+  - List top 2 – 3 businesses in "drivers".
+  - Suggest 1 – 2 practical actions (in Hebrew).
+  - For "unexpected": true, actions should focus on investigating or adjusting next month's budget.
 - **nextMonthPlan**:
   - Suggest increasing/reducing budgets with rationale (in Hebrew).
-  - "watchList" should highlight Hebrew category names nearing their limits.
+  - "watchList" should highlight Hebrew category names nearing or exceeding limits, or with unexpected spending.
   - "reminders" should be short actionable tips in Hebrew.
 - **questions**: Add user-facing Hebrew questions if needed.
 - **dataQuality**:
   - Include only issues related to financial data accuracy or temporal inconsistencies (e.g., עסקאות מחוץ לטווח התקציב, סכומים חסרים, חוסר התאמה בין סכומי תקציב והוצאות).
-  - ❌ Do NOT mention or reflect on internal database structure, IDs (כגון _id או profileId), או כל מידע טכני שאינו קשור לנתונים פיננסיים.
+  - Do NOT mention or reflect on internal database structure, IDs (כגון _id או profileId), או כל מידע טכני שאינו קשור לנתונים פיננסיים.
   - ניסוח ההערות צריך להיות ברור למשתמש לא טכני ובשפה טבעית בעברית.
 
-❗ Important: Your entire response must be a **single valid JSON object**, without any Markdown, explanations, or additional text.
+Important: Your entire response must be a **single valid JSON object**, without any Markdown, explanations, or additional text.
 
 INPUT JSON (do not repeat this in the response):
 {budget_json}

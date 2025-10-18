@@ -19,6 +19,7 @@ export type CategoryBudget = {
     endDate: Date | string;
     amount: number;
     spent: number;
+    unexpected?: boolean;
 }
 
 export type CategoryBudgetWithoutId = Omit<CategoryBudget, '_id'>;

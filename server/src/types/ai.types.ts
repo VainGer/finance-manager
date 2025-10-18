@@ -1,12 +1,12 @@
 import { ObjectId } from "mongodb";
 import { ProfileBudget } from "./profile.types";
-import { CategoryBudget, CategoryForAI } from "./expenses.types";
+import { CategoryForAI } from "./expenses.types";
 
 export type HistoryDoc = {
     profileId: string | ObjectId;
     status: string;
     history: AIHistoryEntry[];
-}
+};
 
 export interface AIHistoryEntry {
     _id?: ObjectId;
@@ -28,7 +28,7 @@ export interface AICoachOutput {
             utilizationPct: number;
         };
         topSignals: {
-            type: "over_budget" | "near_limit" | "anomaly" | string;
+            type: "over_budget" | "near_limit" | "anomaly" | "unplanned" | string;
             message: string;
         }[];
     };
@@ -53,12 +53,17 @@ export interface AICategoryInsight {
     spent: number;
     variance: number;
     utilizationPct: number;
-    drivers: {
-        business: string;
-        amount: number;
-    }[];
+    unexpected?: boolean;
+    unexpectedSpent?: number;
+    drivers: { business: string; amount: number }[];
     actions: {
-        kind: "reduce" | "switch" | "cap" | string;
+        kind:
+        | "reduce"
+        | "switch"
+        | "cap"
+        | "adjust_budget"
+        | "investigate"
+        | string;
         proposal: string;
         quantifiedImpact: { monthlySave: number; oneTimeSave: number };
         evidence: string;
@@ -72,6 +77,7 @@ export interface CategoryBudgetForAI {
     endDate: string | Date;
     amount: number;
     spent: number;
+    unexpected?: boolean;
 }
 
 export interface AICoachInput {

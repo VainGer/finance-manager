@@ -38,6 +38,7 @@ export default class AiService {
                 console.error("[AI] Failed to update history status to 'processing':", statusErr);
             }
             const aiInputStr = JSON.stringify(aiInputObj);
+            // console.log(aiInputStr);
             const result = (await LLM.generateCoachAdvice(aiInputStr)) as AICoachOutput | null;
 
             if (!result) {
@@ -134,6 +135,8 @@ export default class AiService {
                 budgets: CategoryBudget[];
             }[];
 
+            console.log("[AI] categoriesBudgets:", JSON.stringify(categoriesBudgets));
+
             const now = new Date();
             const THREE_MONTHS_MS = 1000 * 60 * 60 * 24 * 90;
 
@@ -142,50 +145,86 @@ export default class AiService {
                 return end < now && now.getTime() - end.getTime() <= THREE_MONTHS_MS;
             });
 
+            console.log("[AI] closedBudgets:", JSON.stringify(closedBudgets));
+
             if (closedBudgets.length === 0) {
                 console.info("[AI] No closed budgets in the last 3 months for:", profileId);
                 return null;
             }
+
             const aiHistory = (await AiModel.getRecentHistory(profileId)) as AIHistoryEntry[];
-            const analyzedBudgets = new Set(aiHistory.map(entry => entry._id?.toString()));
+            const analyzedBudgets = new Set(
+                aiHistory.map(entry => {
+                    const start = new Date(entry.startDate).toISOString().split("T")[0];
+                    const end = new Date(entry.endDate).toISOString().split("T")[0];
+                    return `${entry._id?.toString()}|${start}|${end}`;
+                })
+            );
+
             const sortedClosedBudgets = [...closedBudgets].sort(
                 (a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
             );
 
             const targetBudget = sortedClosedBudgets.find(b => {
-                const id = b._id.toString();
-                return !analyzedBudgets.has(id);
+                const start = new Date(b.startDate).toISOString().split("T")[0];
+                const end = new Date(b.endDate).toISOString().split("T")[0];
+                const keyById = `${b._id.toString()}|${start}|${end}`;
+                const keyByDates = `unknown|${start}|${end}`;
+                return !(analyzedBudgets.has(keyById) || analyzedBudgets.has(keyByDates));
             });
+
+            console.log("[AI] targetBudget:", JSON.stringify(targetBudget));
 
             if (!targetBudget) {
                 console.info("[AI] All recent budgets already analyzed for:", profileId);
                 return null;
             }
 
+            const targetStart = new Date(targetBudget.startDate).toISOString().split("T")[0];
+            const targetEnd = new Date(targetBudget.endDate).toISOString().split("T")[0];
+
             const matchingCategoryBudgets: CategoryBudgetForAI[] = [];
+
             for (const cb of categoriesBudgets) {
                 for (const b of cb.budgets) {
-                    if (b._id.toString() === targetBudget._id.toString()) {
+                    const bStart = new Date(b.startDate).toISOString().split("T")[0];
+                    const bEnd = new Date(b.endDate).toISOString().split("T")[0];
+                    const samePeriod = bStart === targetStart && bEnd === targetEnd;
+
+                    if (
+                        b._id.toString() === targetBudget._id.toString() ||
+                        (b.unexpected && samePeriod)
+                    ) {
                         matchingCategoryBudgets.push({
                             _id: b._id,
                             categoryName: cb.name,
                             startDate: b.startDate,
                             endDate: b.endDate,
                             amount: b.amount,
-                            spent: b.spent
+                            spent: b.spent,
+                            unexpected: !!b.unexpected
                         });
                     }
                 }
             }
+
+            const uniqueMatchingCategoryBudgets = [
+                ...new Map(
+                    matchingCategoryBudgets.map(b => [`${b.categoryName}|${b._id}`, b])
+                ).values()
+            ];
+
+            console.log("[AI] matchingCategoryBudgets:", JSON.stringify(uniqueMatchingCategoryBudgets));
 
             const budgetRelevantExpenses = (await TransactionModel.getTransactionsInDateRange(
                 profile.expenses,
                 new Date(targetBudget.startDate).toISOString(),
                 new Date(targetBudget.endDate).toISOString()
             )) as CategoryForAI[];
+
             return {
                 recentlyClosedGlobalBudget: targetBudget,
-                recentlyClosedCategoryBudgets: matchingCategoryBudgets,
+                recentlyClosedCategoryBudgets: uniqueMatchingCategoryBudgets,
                 budgetRelevantExpenses,
                 relevantAiHistory: aiHistory
             };

@@ -41,7 +41,6 @@ export function ProfileDataProvider({ children }) {
                 const sortedProfileBudgets = response.profileBudgets.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
                 setProfileBudgets(sortedProfileBudgets || []);
                 setCategoryBudgets(response.categoryBudgets || []);
-                console.log(JSON.stringify(response.categoryBudgets, null, 2));
             } else {
                 switch (response.status) {
                     case 400: errMsg.push('בקשה לא תקינה בטעינת תקציבי הפרופיל'); break;

@@ -206,7 +206,13 @@ export default class TransactionService {
             }
         });
 
-        if (!budget) {
+        const categoriesBudgets = (await BudgetService.getCategoriesBudgets(refId)).categoriesBudgets;
+
+        const foundCategoryBudget = categoriesBudgets.find((cb) => {
+            return cb.name === catName && cb.budgets.find((b) => b._id.toString() === budget._id.toString());
+        });
+
+        if (!budget || !foundCategoryBudget) {
             await TransactionModel.setUnexpected(refId, catName, busName, transactionId, transaction.date, true);
             return { success: true, message: "No budget found for this transaction date" };
         }

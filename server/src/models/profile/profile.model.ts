@@ -19,7 +19,6 @@ export default class ProfileModel {
         const session = client.startSession();
 
         try {
-            console.log(this.dbName);
             session.startTransaction();
 
             const hashedPin = await bcrypt.hash(profile.pin, this.SALT_ROUNDS);
@@ -61,7 +60,6 @@ export default class ProfileModel {
                 );
 
             await session.commitTransaction();
-            console.log("Profile and related documents created successfully.");
             return {
                 success: true,
                 profileId: profileResult.insertedId,

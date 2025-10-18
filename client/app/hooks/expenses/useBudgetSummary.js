@@ -101,6 +101,7 @@ export default function useBudgetSummary() {
                             budget: catBudget.amount,
                             spent: catBudget.spent || 0
                         });
+                        map[id].profileBudget.spent += catBudget.spent;
                     }
                 }
             });

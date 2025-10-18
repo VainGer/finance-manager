@@ -293,18 +293,25 @@ export default class TransactionModel {
     }
 
 
-    static async getTransactionsInDateRange(refId: string, startDate: string, endDate: string, unexpectedOnly = false) {
+    static async getTransactionsInDateRange(
+        refId: string,
+        startDate: string,
+        endDate: string,
+        unexpectedOnly = false
+    ) {
         try {
-            const matchStage: Record<string, any> = {
+            const dateFilter = {
                 "categories.Businesses.transactionsArray.transactions.date": {
                     $gte: startDate,
                     $lte: endDate
                 }
             };
 
-            if (unexpectedOnly) {
-                matchStage["categories.Businesses.transactionsArray.transactions.unexpected"] = true;
-            }
+            const unexpectedFilter = unexpectedOnly
+                ? { "categories.Businesses.transactionsArray.transactions.unexpected": true }
+                : {};
+
+            const matchStage = { ...dateFilter, ...unexpectedFilter };
 
             const pipeline = [
                 { $match: { _id: new ObjectId(refId) } },
@@ -323,7 +330,9 @@ export default class TransactionModel {
                         date: "$categories.Businesses.transactionsArray.transactions.date",
                         description: "$categories.Businesses.transactionsArray.transactions.description",
                         unexpected: "$categories.Businesses.transactionsArray.transactions.unexpected",
-                        dateYM: { $substr: ["$categories.Businesses.transactionsArray.transactions.date", 0, 7] }
+                        dateYM: {
+                            $substr: ["$categories.Businesses.transactionsArray.transactions.date", 0, 7]
+                        }
                     }
                 },
                 {
@@ -362,9 +371,7 @@ export default class TransactionModel {
                             business: "$business",
                             bankNames: "$bankNames"
                         },
-                        transactionsArray: {
-                            $push: { dateYM: "$dateYM", transactions: "$transactions" }
-                        }
+                        transactionsArray: { $push: { dateYM: "$dateYM", transactions: "$transactions" } }
                     }
                 },
                 {
@@ -399,6 +406,7 @@ export default class TransactionModel {
             throw new Error("Failed to get transactions in date range");
         }
     }
+
 
     static async findMonthlyTransactionsByDateYM(refId: string, catName: string, busName: string, dateYM: string) {
         try {

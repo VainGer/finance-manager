@@ -71,7 +71,6 @@ export default class BudgetModel {
                 }))
             ] as any[];
             if (childProfile) {
-                console.log("Removing newBudget from child profile");
                 operations.push({
                     collection: this.profileCollection,
                     query: { username, profileName },

@@ -12,6 +12,7 @@ import { useAuth } from '../../../context/AuthContext';
 import useBudgetSummary from '../../../hooks/expenses/useBudgetSummary';
 import { formatDate } from '../../../utils/formatters';
 import ProfileScopeSwitcher from '../../../components/expenses/profileScopeSwitcher';
+import UnexpectedCategoryDetails from "../../../components/budgets/unexpectedCategoryDetails";
 
 export default function BudgetSummary() {
     const { profile } = useAuth();
@@ -203,19 +204,8 @@ export default function BudgetSummary() {
                             <OverallBudgetSummary budget={currentProfileBudget} />
                         </View>
                     </View>
-
-                    <View className="mx-4">
-                        <View className="flex-1 items-center justify-center mb-3 bg-white p-6 rounded-xl">
-                            <Ionicons name="pie-chart-outline" size={26} color="#334155" />
-                            <Text className="text-slate-800 font-bold text-base">
-                                הוצאות לא צפויות
-                            </Text>
-                        </View>
-                        <View className="w-full bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
-                            <CategoryBudgetDetails categories={currentUnexpectedBudgets} />
-                        </View>
-                    </View>
-
+                    {/* פירוט לפי קטגוריות של הוצאות לא צפויות */}
+                    <UnexpectedCategoryDetails categories={currentUnexpectedBudgets} />
                     {/* פירוט לפי קטגוריות */}
                     <View className="mx-4">
                         <View className="flex-1 items-center justify-center mb-3 bg-white p-6 rounded-xl">

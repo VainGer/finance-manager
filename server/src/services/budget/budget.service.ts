@@ -49,6 +49,15 @@ export default class BudgetService {
         }
         const categoriesNames = categoriesBudgets.map(cat => cat.categoryName);
 
+        const startDateObj = new Date(profileBudget.startDate);
+        startDateObj.setHours(0, 0, 0, 0);
+
+        const endDateObj = new Date(profileBudget.endDate);
+        endDateObj.setHours(23, 59, 59, 999);
+
+        profileBudget.startDate = startDateObj.toISOString();
+        profileBudget.endDate = endDateObj.toISOString();
+
         const budgetId = new ObjectId();
         const { preparedBudgets, totalSpent } = this.prepareCategoriesBudgets(
             categoriesBudgets,
@@ -366,7 +375,6 @@ export default class BudgetService {
         for (const pb of profileBudgets) {
             const start = new Date(pb.startDate);
             const end = new Date(pb.endDate);
-
             for (const cb of categoriesBudgets) {
                 if (cb.budgets.some(b => b._id.toString() === pb._id.toString())) continue;
 
@@ -424,7 +432,6 @@ export default class BudgetService {
                     cat.budgets.some(b => b._id.toString() === budget._id.toString())
                 )
                 .map(cat => cat.name);
-            console.log(categoryNames);
             if (categoryNames) {
                 await TransactionModel.updatetUnexpected(
                     profile.expenses,
