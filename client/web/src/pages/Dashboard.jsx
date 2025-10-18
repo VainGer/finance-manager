@@ -22,6 +22,17 @@ export default function Dashboard() {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [currentDisplayType, setCurrentDisplayType] = useState('budget');
     const [showFloatingMenu, setShowFloatingMenu] = useState(false);
+    const [menuSelected, setMenuSelected] = useState('');
+
+    // Function to handle smart budget creation (like mobile app)
+    const handleCreateSmartBudget = useCallback((nextMonthPlan) => {
+        // Store the AI plan in localStorage for the budget creation process
+        sessionStorage.setItem('smartBudgetPlan', JSON.stringify(nextMonthPlan));
+        
+        // Navigate to budget management via menu selection (like regular budget creation)
+        setMenuSelected('budgetManagement');
+        setCurrentDisplayType('budget');
+    }, []);
 
     // Set initial display when profile is ready
     useEffect(() => {
@@ -49,7 +60,7 @@ export default function Dashboard() {
                 setDisplay(<InteractiveCharts profile={profile} refreshTrigger={refreshTrigger} key={`charts-${refreshTrigger + 1}`} />);
                 break;
             case 'ai':
-                setDisplay(<AIInsight profile={profile} key={`ai-${refreshTrigger + 1}`} />);
+                setDisplay(<AIInsight profile={profile} onCreateSmartBudget={handleCreateSmartBudget} key={`ai-${refreshTrigger + 1}`} />);
                 break;
         }
     }, [profile, refreshTrigger, currentDisplayType]);
@@ -96,6 +107,7 @@ export default function Dashboard() {
                                 setCurrentDisplayType={setCurrentDisplayType}
                                 profile={profile}
                                 refreshTrigger={refreshTrigger}
+                                onCreateSmartBudget={handleCreateSmartBudget}
                             />
                         </div>
 
@@ -112,7 +124,12 @@ export default function Dashboard() {
                                         </div>
                                         <h3 className="text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-800 bg-clip-text text-transparent">פעולות מהירות</h3>
                                     </div>
-                                    <SideMenu onTransactionAdded={triggerRefresh} isFloatingMode={false} />
+                                    <SideMenu 
+                                        onTransactionAdded={triggerRefresh} 
+                                        isFloatingMode={false}
+                                        menuSelected={menuSelected}
+                                        setMenuSelected={setMenuSelected}
+                                    />
                                 </div>
                             </div>
 

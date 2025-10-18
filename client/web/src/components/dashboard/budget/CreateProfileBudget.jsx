@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { formatDate } from '../../../utils/budgetUtils';
 import useBudgets from '../../../hooks/useBudgets';
+import Overlay from '../../common/Overlay';
 
 // פונקציית עזר לפרמוט תאריכים
 const formatDateDisplay = (dateStr) => {
@@ -225,7 +226,11 @@ export default function CreateProfileBudget({ goBack }) {
         childrenProfiles,
         addChildBudget,
         profileBudgets,
-        deleteBudget
+        deleteBudget,
+        // AI Smart Budget features
+        setPrefillNextBudget,
+        adviceToPrefill,
+        setAdviceToPrefill
     } = useBudgets({ setLoading: () => { } });
 
     return (
@@ -237,6 +242,43 @@ export default function CreateProfileBudget({ goBack }) {
                     </svg>
                     <p className="text-green-700 text-sm font-medium">{success}</p>
                 </div>
+            )}
+
+            {/* AI Smart Budget Suggestion Overlay - Same as mobile app */}
+            {adviceToPrefill && (
+                <Overlay visible={adviceToPrefill} onClose={() => setAdviceToPrefill(false)}>
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-2xl font-bold text-slate-800 mb-3">
+                            תקציב חכם מומלץ
+                        </h3>
+                        <p className="text-slate-600 text-center mb-6 leading-6 dir-rtl" dir="rtl">
+                            ניתוח ההוצאות החכם שלך מציע תקציב חדש מבוסס על ההוצאות האחרונות.<br />
+                            האם תרצה שנמלא עבורך את הנתונים?
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setPrefillNextBudget(true);
+                                    setAdviceToPrefill(false);
+                                }}
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition-colors"
+                            >
+                                כן, אני מעוניין
+                            </button>
+                            <button
+                                onClick={() => setAdviceToPrefill(false)}
+                                className="flex-1 bg-gray-300 hover:bg-gray-400 text-slate-700 py-3 rounded-xl font-semibold transition-colors"
+                            >
+                                לא, אעדיף ידנית
+                            </button>
+                        </div>
+                    </div>
+                </Overlay>
             )}
 
             {!validDates && (

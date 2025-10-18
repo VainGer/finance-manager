@@ -11,6 +11,7 @@ export default function useBudgets({ setLoading }) {
     getCategoriesLoading,
     errors,
     profileBudgets,
+    aiHistory,
   } = useProfileData();
 
   const [startDate, setStartDate] = useState("");
@@ -20,6 +21,8 @@ export default function useBudgets({ setLoading }) {
   const [childrenBudgets, setChildrenBudgets] = useState([]);
   const [childrenProfiles, setChildrenProfiles] = useState([]);
   const [selectedChildBudget, setSelectedChildBudget] = useState(null);
+  const [prefillNextBudget, setPrefillNextBudget] = useState(false);
+  const [adviceToPrefill, setAdviceToPrefill] = useState(false);
 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -34,18 +37,77 @@ export default function useBudgets({ setLoading }) {
     else setError(null);
   }, [errors]);
 
+  // Check for smart budget plan on component mount
+  useEffect(() => {
+    const smartPlan = sessionStorage.getItem('smartBudgetPlan');
+    if (smartPlan) {
+      try {
+        const plan = JSON.parse(smartPlan);
+        if (plan?.proposedBudgets?.length) {
+          setAdviceToPrefill(true);
+        }
+      } catch (e) {
+        console.warn('Failed to parse smart budget plan:', e);
+        sessionStorage.removeItem('smartBudgetPlan');
+      }
+    }
+  }, []);
+
+  // Handle AI prefill logic (same as mobile app)
+  useEffect(() => {
+    if (prefillNextBudget) {
+      const smartPlan = sessionStorage.getItem('smartBudgetPlan');
+      if (smartPlan) {
+        try {
+          const plan = JSON.parse(smartPlan);
+          if (plan?.proposedBudgets?.length) {
+            const prefilledCategories = plan.proposedBudgets.map((p) => ({
+              name: p.category,
+              budget: String(p.proposed || 0),
+              include: true,
+              autoDisabled: false
+            }));
+
+            setCategoryBudgets(prefilledCategories);
+
+            const total = plan.proposedBudgets.reduce(
+              (sum, c) => sum + (parseFloat(c.proposed) || 0),
+              0
+            );
+            setAmount(String(total));
+
+            // Clear the session storage after using it
+            sessionStorage.removeItem('smartBudgetPlan');
+          }
+        } catch (e) {
+          console.warn('Failed to parse smart budget plan:', e);
+        }
+      }
+      setPrefillNextBudget(false);
+    }
+  }, [prefillNextBudget]);
+
   const resetState = useCallback(() => {
     setStartDate("");
     setEndDate("");
     setAmount("");
-    setCategoryBudgets([]);
+    if (categories?.length) {
+      setCategoryBudgets(categories.map(cat => ({ 
+        name: cat, 
+        budget: "", 
+        include: true,
+        autoDisabled: false
+      })));
+    } else {
+      setCategoryBudgets([]);
+    }
     setChildrenBudgets([]);
     setSelectedChildBudget(null);
     setError(null);
     setSuccess(null);
     setValidDates(false);
     setLoading(false);
-  }, [setLoading]);
+  }, [setLoading, categories]);
 
   useEffect(() => {
     if (categories?.length) {
@@ -395,6 +457,10 @@ export default function useBudgets({ setLoading }) {
     childrenProfiles,
     addChildBudget,
     profileBudgets,
-    deleteBudget
+    deleteBudget,
+    // AI Smart Budget features
+    setPrefillNextBudget,
+    adviceToPrefill,
+    setAdviceToPrefill
   };
 }

@@ -1,9 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CreateProfileBudget from './CreateProfileBudget';
 import DeleteBudget from './DeleteBudget';
 
 export default function BudgetManagementMenu({ goBack }) {
     const [currentView, setCurrentView] = useState('main'); // 'main' | 'create' | 'delete'
+
+    // Check if smart budget data exists and go directly to create
+    useEffect(() => {
+        const smartBudgetPlan = sessionStorage.getItem('smartBudgetPlan');
+        if (smartBudgetPlan) {
+            setCurrentView('create');
+        }
+    }, []);
 
     const handleBack = () => {
         if (currentView === 'main') {

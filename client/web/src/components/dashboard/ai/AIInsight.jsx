@@ -2,8 +2,8 @@ import { useMemo, useState, useEffect } from 'react';
 import { useProfileData } from '../../../context/ProfileDataContext';
 import { formatDate } from '../../../utils/expensesUtils';
 
-export default function AIInsight() {
-    const { aiHistory } = useProfileData();
+export default function AIInsight({ onCreateSmartBudget }) {
+    const { aiHistory, profileBudgets } = useProfileData();
     const histories = aiHistory?.history || [];
     const [selectedId, setSelectedId] = useState(histories[0]?._id || null);
 
@@ -17,6 +17,20 @@ export default function AIInsight() {
         () => histories.find((h) => h._id === selectedId) || histories[0],
         [selectedId, histories]
     );
+
+    // Check if can create next budget (same logic as mobile app)
+    const canCreateNextBudget = useMemo(() => {
+        if (!selectedHistory || !profileBudgets?.length) return false;
+        const aiEnd = new Date(selectedHistory.endDate);
+        const profileEnd = new Date(profileBudgets[0].endDate);
+        return aiEnd.getTime() === profileEnd.getTime();
+    }, [selectedHistory, profileBudgets]);
+
+    const handleCreateSmartBudget = () => {
+        if (onCreateSmartBudget && selectedHistory?.coachOutput?.nextMonthPlan) {
+            onCreateSmartBudget(selectedHistory.coachOutput.nextMonthPlan);
+        }
+    };
 
     if (!selectedHistory) {
         return (
@@ -279,7 +293,28 @@ export default function AIInsight() {
                                 </div>
                             </div>
                         )}
-
+ {/* Smart Budget Button - Same as mobile app */}
+                        {canCreateNextBudget && onCreateSmartBudget && (
+                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <h5 className="font-bold text-green-800 mb-1">תקציב חכם מומלץ</h5>
+                                        <p className="text-sm text-green-700">
+                                            השתמש בהמלצות ה-AI ליצירת תקציב מותאם אישית
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleCreateSmartBudget}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    המשך ליצירת תקציב מומלץ
+                                </button>
+                            </div>
+                        )}
                         {nextMonthPlan.watchList?.length > 0 && (
                             <div className="mb-4">
                                 <h4 className="font-bold text-purple-800 mb-2">קטגוריות לעקוב אחריהן:</h4>
@@ -294,7 +329,7 @@ export default function AIInsight() {
                         )}
 
                         {nextMonthPlan.reminders?.length > 0 && (
-                            <div>
+                            <div className="mb-4">
                                 <h4 className="font-bold text-purple-800 mb-2">תזכורות:</h4>
                                 <div className="space-y-1">
                                     {nextMonthPlan.reminders.map((reminder, idx) => (
@@ -305,6 +340,8 @@ export default function AIInsight() {
                                 </div>
                             </div>
                         )}
+                       
+
                     </div>
                 )}
 
