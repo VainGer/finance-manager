@@ -38,7 +38,7 @@ export default class AiService {
                 console.error("[AI] Failed to update history status to 'processing':", statusErr);
             }
             const aiInputStr = JSON.stringify(aiInputObj);
-            // console.log(aiInputStr);
+
             const result = (await LLM.generateCoachAdvice(aiInputStr)) as AICoachOutput | null;
 
             if (!result) {
