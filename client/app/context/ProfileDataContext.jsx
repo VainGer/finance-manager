@@ -21,7 +21,7 @@ export function ProfileDataProvider({ children }) {
     const [getCategoriesLoading, setGetCategoriesLoading] = useState(false);
     const [getBusinessesLoading, setGetBusinessesLoading] = useState(false);
     const [dataLoaded, setDataLoaded] = useState(false);
-    const [canBuildNewBudget, setCanBuildNewBudget] = useState(false);
+    const [navigatedToProposedBudget, setNavigatedToProposedBudget] = useState(false);
     const prevProfileId = useRef(profile?._id);
     const prevAccountUsername = useRef(account?.username);
     const pathname = usePathname();
@@ -221,7 +221,8 @@ export function ProfileDataProvider({ children }) {
         dataLoaded,
         aiData,
         newDataReady,
-        canBuildNewBudget,
+        navigatedToProposedBudget,
+        setNavigatedToProposedBudget,
         fetchBudgets,
         fetchExpenses,
         fetchCategories,

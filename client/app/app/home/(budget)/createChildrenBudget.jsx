@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-
+import { useScreenReset } from '../../../hooks/useScreenReset';
 import useBudgets from "../../../hooks/useBudgets";
 import Button from "../../../components/common/button";
 import LoadingSpinner from "../../../components/common/loadingSpinner";
 
 export default function CreateChildrenBudgetScreen() {
+  useScreenReset();
   const router = useRouter();
-
   const {
     childrenProfiles,
     addChildBudget,

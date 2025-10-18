@@ -3,7 +3,6 @@ import { Text, View } from "react-native";
 import { formatCurrency } from "../../utils/formatters.js";
 
 export default function UnexpectedCategoryDetails({ categories }) {
-    console.log(categories);
     if (!categories || categories.length === 0) return null;
 
     return (

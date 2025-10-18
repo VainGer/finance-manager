@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState,} from "react";
 import { ScrollView, Text, TextInput, TouchableOpacity, View, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
@@ -8,8 +8,11 @@ import useBudgets from "../../../hooks/useBudgets";
 import { formatDate } from "../../../utils/formatters";
 import Button from "../../../components/common/button";
 import LoadingSpinner from "../../../components/common/loadingSpinner";
+import Overlay from "../../../components/common/Overlay";
+
 
 export default function CreateBudgetScreen() {
+  useFocusEffect(() => {});
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isStartDatePickerVisible, setStartDatePickerVisible] = useState(false);
@@ -38,6 +41,9 @@ export default function CreateBudgetScreen() {
     setDates,
     create,
     resetState,
+    setPrefillNextBudget,
+    adviceToPrefill,
+    setAdviceToPrefill
   } = useBudgets({ setLoading });
 
   const renderChildrenSelection = () => (
@@ -114,6 +120,45 @@ export default function CreateBudgetScreen() {
     return (
       <View>
         {/* Total amount field */}
+        {adviceToPrefill && (
+          <Overlay visible={adviceToPrefill} onClose={() => setAdviceToPrefill(false)}>
+            <View className="items-center">
+              <Ionicons name="bulb-outline" size={64} color="#facc15" />
+              <Text className="text-2xl font-bold text-center mt-4 text-slate-800">
+                הצעה חכמה לתקציב הבא
+              </Text>
+
+              <Text className="text-slate-600 text-center mt-3 mb-6 leading-6">
+                ניתוח ה-AI האחרון שלך מציע תקציב חדש{"\n"}
+                מבוסס על הוצאות העבר.{"\n"}
+                האם תרצה שנמלא עבורך את הנתונים?
+              </Text>
+
+              <View className="flex-row w-full mt-2">
+                <TouchableOpacity
+                  className="flex-1 bg-emerald-500 py-3 rounded-xl mx-1"
+                  onPress={() => {
+                    setPrefillNextBudget(true);
+                    setAdviceToPrefill(false);
+                  }}
+                >
+                  <Text className="text-white font-bold text-center text-base">
+                    כן, מלא אוטומטית
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="flex-1 bg-gray-300 py-3 rounded-xl mx-1"
+                  onPress={() => setAdviceToPrefill(false)}
+                >
+                  <Text className="text-slate-700 font-semibold text-center text-base">
+                    לא, אגדיר ידנית
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Overlay>
+        )}
         <View className="flex-row justify-between items-center mb-4 space-y-4">
           <Text className="text-base font-semibold text-slate-700">סכום התקציב</Text>
           <View className="flex-row items-center space-x-2">

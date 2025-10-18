@@ -135,8 +135,6 @@ export default class AiService {
                 budgets: CategoryBudget[];
             }[];
 
-            console.log("[AI] categoriesBudgets:", JSON.stringify(categoriesBudgets));
-
             const now = new Date();
             const THREE_MONTHS_MS = 1000 * 60 * 60 * 24 * 90;
 
@@ -144,8 +142,6 @@ export default class AiService {
                 const end = new Date(b.endDate);
                 return end < now && now.getTime() - end.getTime() <= THREE_MONTHS_MS;
             });
-
-            console.log("[AI] closedBudgets:", JSON.stringify(closedBudgets));
 
             if (closedBudgets.length === 0) {
                 console.info("[AI] No closed budgets in the last 3 months for:", profileId);
@@ -172,8 +168,6 @@ export default class AiService {
                 const keyByDates = `unknown|${start}|${end}`;
                 return !(analyzedBudgets.has(keyById) || analyzedBudgets.has(keyByDates));
             });
-
-            console.log("[AI] targetBudget:", JSON.stringify(targetBudget));
 
             if (!targetBudget) {
                 console.info("[AI] All recent budgets already analyzed for:", profileId);
@@ -213,8 +207,6 @@ export default class AiService {
                     matchingCategoryBudgets.map(b => [`${b.categoryName}|${b._id}`, b])
                 ).values()
             ];
-
-            console.log("[AI] matchingCategoryBudgets:", JSON.stringify(uniqueMatchingCategoryBudgets));
 
             const budgetRelevantExpenses = (await TransactionModel.getTransactionsInDateRange(
                 profile.expenses,

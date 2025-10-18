@@ -4,16 +4,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useProfileData } from '../../context/ProfileDataContext';
 import Select from '../../components/common/Select';
 import { formatDate } from '../../utils/formatters';
-
+import Button from '../common/button';
+import { useRouter } from 'expo-router';
 export default function AIInsight() {
-    const { aiData } = useProfileData();
+
+    const { aiData, profileBudgets, setNavigatedToProposedBudget } = useProfileData();
     const histories = aiData || [];
     const [selectedId, setSelectedId] = useState(histories[0]?._id || null);
+    const router = useRouter();
 
     const selectedHistory = useMemo(
         () => histories.find((h) => h._id === selectedId) || histories[0],
         [selectedId, histories]
     );
+
 
     if (!selectedHistory) {
         return (
@@ -24,13 +28,21 @@ export default function AIInsight() {
         );
     }
 
+    const canCreateNextBudget =
+        new Date(selectedHistory.endDate).getTime() === new Date(profileBudgets[0].endDate).getTime();
+
+
+    const navigateToCreateBudget = () => {
+        router.push('../(budget)/createProfileBudget');
+        setNavigatedToProposedBudget(true);
+    };
+
     const { summary, categories, nextMonthPlan, dataQuality } = selectedHistory.coachOutput;
     const selectItems = histories.map((h) => ({
         value: h._id,
         label: `${formatDate(new Date(h.startDate))} - ${formatDate(new Date(h.endDate))}`,
     }));
 
-    // Separate normal vs unexpected categories
     const regularCategories = categories.filter(c => !c.unexpected);
     const unexpectedCategories = categories.filter(c => c.unexpected);
 
@@ -87,7 +99,7 @@ export default function AIInsight() {
                                         signal.type === 'unplanned' ? '#3B82F6' :
                                             '#EAB308';
                             const icon =
-                                signal.type === 'over_budget' ? 'alert-circle-outline' :
+                                signal.type === 'over_budget' ? 'warning-outline' :
                                     signal.type === 'anomaly' ? 'pulse-outline' :
                                         signal.type === 'unplanned' ? 'sparkles-outline' :
                                             'warning-outline';
@@ -113,6 +125,7 @@ export default function AIInsight() {
                     title="הוצאות בלתי צפויות"
                     data={unexpectedCategories}
                     highlight
+                    unexpected={true}
                 />
             )}
 
@@ -144,6 +157,12 @@ export default function AIInsight() {
                             ))}
                         </View>
                     )}
+                    {canCreateNextBudget && (
+                        <View className="my-6">
+                            <Button style="success" onPress={navigateToCreateBudget}>
+                                המשך ליצירת תקציב מומלץ
+                            </Button>
+                        </View>)}
                 </View>
             )}
 
@@ -166,7 +185,7 @@ export default function AIInsight() {
     );
 }
 
-function CategorySection({ title, data, highlight = false }) {
+function CategorySection({ title, data, highlight = false, unexpected = false }) {
     return (
         <View className="mt-6">
             <View className="flex-row items-center mb-3">
@@ -192,7 +211,7 @@ function CategorySection({ title, data, highlight = false }) {
                     const variancePositive = item.variance >= 0;
 
                     const getStatus = () => {
-                        if (item.unexpected) return { icon: "alert-triangle-outline", color: "#3B82F6", label: "הוצאה בלתי צפויה" };
+                        if (item.unexpected) return { icon: "warning-outline", color: "#3B82F6", label: "הוצאה בלתי צפויה" };
                         if (utilization > 100) return { icon: "alert-circle", color: "#EF4444", label: "חריגה מהתקציב" };
                         if (utilization > 90) return { icon: "warning", color: "#F59E0B", label: "קרוב לחריגה" };
                         if (utilization > 75) return { icon: "alert", color: "#FBBF24", label: "ניצול גבוה" };
@@ -215,10 +234,12 @@ function CategorySection({ title, data, highlight = false }) {
                             </View>
 
                             {/* Budget info */}
-                            <View className="bg-slate-50 rounded-lg p-3 mb-2 flex-row justify-between items-center">
-                                <Text className="text-sm text-slate-700">תקציב</Text>
-                                <Text className="font-bold text-slate-800">{item.budget.toLocaleString()} ₪</Text>
-                            </View>
+                            {!unexpected &&
+                                <View className="bg-slate-50 rounded-lg p-3 mb-2 flex-row justify-between items-center">
+                                    <Text className="text-sm text-slate-700">תקציב</Text>
+                                    <Text className="font-bold text-slate-800">{item.budget.toLocaleString()} ₪</Text>
+                                </View>
+                            }
                             <View className="bg-slate-50 rounded-lg p-3 mb-2 flex-row justify-between items-center">
                                 <Text className="text-sm text-slate-700">הוצאות</Text>
                                 <Text className="font-bold text-slate-800">{item.spent.toLocaleString()} ₪</Text>

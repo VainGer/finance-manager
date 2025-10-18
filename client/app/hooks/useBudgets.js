@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useProfileData } from "../context/ProfileDataContext";
 import { get, post, del } from "../utils/api";
@@ -12,7 +12,8 @@ export default function useBudgets({ setLoading }) {
     errors,
     profileBudgets,
     aiData,
-    canBuildNewBudget
+    navigatedToProposedBudget,
+    setNavigatedToProposedBudget
   } = useProfileData();
 
   const [startDate, setStartDate] = useState("");
@@ -22,10 +23,65 @@ export default function useBudgets({ setLoading }) {
   const [childrenBudgets, setChildrenBudgets] = useState([]);
   const [childrenProfiles, setChildrenProfiles] = useState([]);
   const [selectedChildBudget, setSelectedChildBudget] = useState(null);
-
+  const [prefillNextBudget, setPrefillNextBudget] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [validDates, setValidDates] = useState(false);
+  const [adviceToPrefill, setAdviceToPrefill] = useState(false);
+  const skipAdviceRef = useRef(false);
+
+
+  useEffect(() => {
+    if (navigatedToProposedBudget) {
+      skipAdviceRef.current = true;
+      setAdviceToPrefill(false);
+      setPrefillNextBudget(true);
+      setNavigatedToProposedBudget(false);
+    }
+  }, [navigatedToProposedBudget]);
+
+
+  useEffect(() => {
+    if (prefillNextBudget && aiData?.length) {
+      const latestHistory = aiData[0];
+      const plan = latestHistory?.coachOutput?.nextMonthPlan;
+
+      if (!plan?.proposedBudgets?.length) {
+        console.warn("[AI Prefill] No proposedBudgets found in AI data.");
+        return;
+      }
+
+      const prefilledCategories = plan.proposedBudgets.map((p) => ({
+        name: p.category,
+        budget: String(p.proposed || 0),
+        include: true,
+      }));
+
+      setCategoryBudgets(prefilledCategories);
+
+      const total = plan.proposedBudgets.reduce(
+        (sum, c) => sum + (parseFloat(c.proposed) || 0),
+        0
+      );
+      setAmount(String(total));
+
+      setPrefillNextBudget(false);
+    }
+  }, [prefillNextBudget, aiData]);
+
+  useEffect(() => {
+    if (!aiData?.length || !profileBudgets?.length) return;
+
+    const aiEnd = new Date(aiData[0].endDate);
+    const profileEnd = new Date(profileBudgets[0].endDate);
+
+    if (isNaN(aiEnd) || isNaN(profileEnd)) return;
+
+    if (aiEnd.getTime() === profileEnd.getTime() && !skipAdviceRef.current) {
+      setAdviceToPrefill(true);
+    }
+    skipAdviceRef.current = false;
+  }, [aiData, profileBudgets]);
 
 
   useEffect(() => {
@@ -41,7 +97,11 @@ export default function useBudgets({ setLoading }) {
     setStartDate("");
     setEndDate("");
     setAmount("");
-    setCategoryBudgets([]);
+    if (categories?.length) {
+      setCategoryBudgets(categories.map(cat => ({ name: cat, budget: "", include: true })));
+    } else {
+      setCategoryBudgets([]);
+    }
     setChildrenBudgets([]);
     setSelectedChildBudget(null);
     setError(null);
@@ -372,6 +432,9 @@ export default function useBudgets({ setLoading }) {
     childrenProfiles,
     addChildBudget,
     profileBudgets,
-    deleteBudget
+    deleteBudget,
+    setPrefillNextBudget,
+    adviceToPrefill,
+    setAdviceToPrefill
   };
 }
