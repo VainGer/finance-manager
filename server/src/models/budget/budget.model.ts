@@ -34,9 +34,14 @@ export default class BudgetModel {
 
     static async addBudgetToChild(username: string, profileName: string, budgetData: { startDate: string, endDate: string, amount: number }) {
         try {
+            const startDate = new Date(budgetData.startDate);
+            startDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(budgetData.endDate);
+            endDate.setHours(23, 59, 59, 999);
+
             const formattedBudgetData = {
-                startDate: new Date(budgetData.startDate).toISOString(),
-                endDate: new Date(budgetData.endDate).toISOString(),
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
                 amount: budgetData.amount
             };
 
