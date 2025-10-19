@@ -26,6 +26,7 @@ export default function useExpensesDisplay() {
     const [appliedFilters, setAppliedFilters] = useState({ month: null, category: null, business: null });
     const [availableBusinesses, setAvailableBusinesses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [firstLoad, setFirstLoad] = useState(true);
 
     const processExpensesData = useCallback(async () => {
         setLoading(true);
@@ -57,6 +58,13 @@ export default function useExpensesDisplay() {
             (selectedChild && !childrenLoading && Object.keys(monthlyExpenses).length > 0);
 
         if (!isReady) return;
+
+        if (firstLoad) {
+            setFirstLoad(false);
+            const all = Object.values(monthlyExpenses).flat();
+            setFilteredExpenses(all);
+            return;
+        }
 
         const latestMonth = availableDates[0]?.dateYM;
         if (latestMonth) {

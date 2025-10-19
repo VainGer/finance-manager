@@ -71,11 +71,10 @@ export function ProfileDataProvider({ children }) {
 
             const response = await get(`budgets/get-profile-budgets?username=${encodeURIComponent(account.username)}&profileName=${encodeURIComponent(profile.profileName)}`);
             if (response.ok) {
-                const pb = response.profileBudgets || [];
-                const cb = response.categoryBudgets || [];
-                setProfileBudgets(pb);
-                setCategoryBudgets(cb);
-                saveCache({ profileBudgets: pb, categoryBudgets: cb });
+                const sortedProfileBudgets = response.profileBudgets.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+                setProfileBudgets(sortedProfileBudgets || []);
+                setCategoryBudgets(response.categoryBudgets || []);
+                saveCache({ profileBudgets: sortedProfileBudgets, categoryBudgets: response.categoryBudgets });
             } else {
                 const msg = {
                     400: 'בקשה לא תקינה בטעינת תקציבי הפרופיל',

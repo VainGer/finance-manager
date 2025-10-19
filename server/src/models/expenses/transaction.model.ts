@@ -495,11 +495,27 @@ export default class TransactionModel {
     static async uploadFromFile(
         profileName: string,
         refId: string,
-        groupedTransactions: GroupedTransactions[],
+        groupedTransactions: {
+            category: string;
+            business: string;
+            dateYM: string;
+            transactions: any[];
+        }[],
         profileIncs: { id: ObjectId; amount: number }[],
         categoryIncs: { id: ObjectId; categoryName: string; amount: number }[]
     ) {
         try {
+            const expensesCollection = db.getClient().db(process.env.DB_NAME).collection("expenses");
+
+            const expenseDoc = await expensesCollection.findOne(
+                { _id: new ObjectId(refId) },
+                { projection: { "categories.name": 1, "categories.Businesses.name": 1, "categories.Businesses.transactionsArray.dateYM": 1 } }
+            );
+
+            if (!expenseDoc) {
+                throw new Error("Referenced expense document not found");
+            }
+
             const operations: {
                 collection: string;
                 query: any;
@@ -507,28 +523,38 @@ export default class TransactionModel {
                 options?: any;
             }[] = [];
 
-            for (const group of groupedTransactions) {
-                // 1) Ensure the month bucket exists for THIS category+business (no $ne in query!)
-                operations.push({
-                    collection: "expenses",
-                    query: { _id: new ObjectId(refId) },
-                    update: {
-                        $addToSet: {
-                            "categories.$[cat].Businesses.$[biz].transactionsArray": {
-                                dateYM: group.dateYM,
-                                transactions: []
-                            }
-                        }
-                    },
-                    options: {
-                        arrayFilters: [
-                            { "cat.name": group.category },
-                            { "biz.name": group.business }
-                        ]
-                    }
-                });
+            const monthExists = (category: string, business: string, dateYM: string) => {
+                const cat = expenseDoc.categories.find((c: any) => c.name === category);
+                if (!cat) return false;
+                const biz = cat.Businesses.find((b: any) => b.name === business);
+                if (!biz) return false;
+                return biz.transactionsArray.some((t: any) => t.dateYM === dateYM);
+            };
 
-                // 2) Push transactions into that month
+            for (const group of groupedTransactions) {
+                if (!monthExists(group.category, group.business, group.dateYM)) {
+                    operations.push({
+                        collection: "expenses",
+                        query: { _id: new ObjectId(refId) },
+                        update: {
+                            $push: {
+                                "categories.$[cat].Businesses.$[biz].transactionsArray": {
+                                    dateYM: group.dateYM,
+                                    transactions: []
+                                }
+                            }
+                        },
+                        options: {
+                            arrayFilters: [
+                                { "cat.name": group.category },
+                                { "biz.name": group.business }
+                            ]
+                        }
+                    });
+                }
+            }
+
+            for (const group of groupedTransactions) {
                 operations.push({
                     collection: "expenses",
                     query: { _id: new ObjectId(refId) },
@@ -576,10 +602,15 @@ export default class TransactionModel {
             }
 
             const result = await db.TransactionUpdateMany(operations);
-            return result;
-        } catch (error) {
-            console.error("Error in TransactionModel.uploadFromFile", error);
-            throw new Error("Failed to upload transactions from file");
+
+            if (!result?.success) {
+                throw new Error("Transaction bulk update failed");
+            }
+
+            return { success: true, message: "Transactions uploaded successfully" };
+        } catch (error: any) {
+            console.error("Error in TransactionModel.uploadFromFile:", error);
+            throw new Error(`Failed to upload transactions: ${error.message}`);
         }
     }
 
