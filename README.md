@@ -69,7 +69,7 @@ By utilizing Large Language Models (LLMs) and a secure multi-profile architectur
 
 ---
 ### Setup & Installation
-  Clone the Repo: git clone [https://github.com/yourusername/smart-finance.git](https://github.com/VainGer/finance-manager)
+  Clone the Repo: git clone [https://github.com/VainGer/finance-manager](https://github.com/VainGer/finance-manager)
 
   Env Config: Create a .env withing dotenv folder with MONGO_URI, DB_NAME, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, 
   CLOUDINARY_API_SECRET, HF_TOKEN, JWT_SECRET, JWT_ADMIN_ACCESS_EXPIRATION, JWT_ACCESS_EXPIRATION, JWT_REFRESH_EXPIRATION, JWT_REFRESH_MAX_VALIDITY,
