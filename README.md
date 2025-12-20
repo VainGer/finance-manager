@@ -48,7 +48,7 @@ By utilizing Large Language Models (LLMs) and a secure multi-profile architectur
 
     * Real-time Synchronization: Leverages MongoDB arrayFilters and positional operators (such as $[catFilter]) to perform high-performance, atomic updates to nested objects directly in the DB engine.
 
-### 📸 App Showcase (Mobile Version)
+###  App Showcase (Mobile Version)
 
 | Real-time Budget Health | Conversational AI Coach | Semantic Mapping |
 | :---: | :---: | :---: |
@@ -56,7 +56,7 @@ By utilizing Large Language Models (LLMs) and a secure multi-profile architectur
 
 ---
 
-### 🛠️ Tech Stack
+###  Tech Stack
 
 | Layer | Technologies |
 | :--- | :--- |
