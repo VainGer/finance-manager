@@ -5,7 +5,7 @@ SmartFinance is a production-grade personal finance application that bridges the
 By utilizing Large Language Models (LLMs) and a secure multi-profile architecture, it allows users to manage complex budgets and receive personalized coaching.
 
 ### Platforms
-* Mobile (Primary Focus): A high-performance React Native (Expo) application. This is the flagship of the project, featuring custom hooks for modular logic, fluid UI transitions, and an optimized "AI Coach" interface.
+* Mobile: A high-performance React Native (Expo) application. This is the flagship of the project, featuring custom hooks for modular logic, fluid UI transitions, and an optimized "AI Coach" interface.
 
 * Backend: A scalable Node.js/Express API written in TypeScript. It follows a "Service-Model" architecture with specialized wrappers for DB transactions and AI orchestration.
 
