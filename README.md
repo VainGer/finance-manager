@@ -164,13 +164,6 @@ Feel free to register a new account to test the full onboarding flow, profile cr
 
 This project was developed as a final capstone project for Practical Software Engineering degree at Shenkar College (2023-2025).
 
----
-
-### 👤 Author
-
-**German Vainblat**
-- GitHub: [@VainGer](https://github.com/VainGer)
-- LinkedIn: [german-vainblat](https://linkedin.com/in/german-vainblat-a34751274)
 
 ---
 
