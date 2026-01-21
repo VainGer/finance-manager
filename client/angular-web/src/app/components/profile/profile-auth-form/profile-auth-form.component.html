@@ -1,0 +1,14 @@
+<form class="grid" [formGroup]="authForm" (submit)="onSubmit()">
+  <label for="pin">הזן את הקוד הסודי</label>
+  <input
+    formControlName="pin"
+    name="pin"
+    type="password"
+    maxlength="4"
+    inputmode="numeric"
+  />
+  <label for="remember">זכור אותי</label>
+  <input name="remember" formControlName="remember" type="checkbox" />
+  <button type="submit" [disabled]="!authForm.valid">התחברות</button>
+  <button (click)="back()">חזרה לבחירת פרופיל</button>
+</form>

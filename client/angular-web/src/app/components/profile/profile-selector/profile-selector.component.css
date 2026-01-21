@@ -1,0 +1,27 @@
+.list-container {
+  place-self: center;
+  grid-template-columns: 1fr 1fr 1fr;
+  text-align: center;
+}
+
+.profile-card {
+  width: 160px;
+  height: 160px;
+  padding: 8px;
+  margin: 12px;
+  border-radius: 16px;
+  transition: 50ms;
+}
+
+.avatar {
+  width: 8em;
+  height: 8em;
+  padding: 8px;
+  border-radius: 16px;
+  object-fit: cover;
+  margin-inline: auto;
+}
+
+.profile-card:hover{
+    scale: 110%;
+}

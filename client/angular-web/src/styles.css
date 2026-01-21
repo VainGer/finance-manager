@@ -1,0 +1,9 @@
+@import url(./reset.css);
+
+.grid {
+  display: grid;
+}
+
+.flex {
+  display: flex;
+}

@@ -1,0 +1,18 @@
+<form [formGroup]="profileForm" class="grid" (submit)="onSubmit()">
+  <label for="profileName">שם פרופיל</label>
+  <input type="text" formControlName="profileName" />
+  <label for="pin">קוד סודי</label>
+  <input type="password" name="pin" formControlName="pin" maxlength="4"/>
+  <label for="avatar">תמונת פרופיל</label>
+  <input type="file" name="avatar" (change)="onAvatarPick($event)" />
+  <app-color-picker (setProfileColor)="onColorClick($event)"></app-color-picker>
+  <label for="parentProfile">פרופיל הורה</label>
+  @if (!firstProfile) {
+    <input
+      type="checkbox"
+      name="parentProfile"
+      formControlName="parentProfile"
+    />
+  }
+  <button [disabled]="!profileForm.valid" type="submit">צור פרופיל חדש</button>
+</form>

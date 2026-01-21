@@ -1,0 +1,16 @@
+<p>בחר פרופיל כדי להמשיך</p>
+<ul class="grid list-container">
+  @for(profile of profileList; track profile.profileName){
+  <li
+    class="profile-card grid"
+    [style.background-color]="profile.color || '#1e293b'"
+    (click)="onSelectProfile(profile)"
+  >
+    <img
+      class="avatar"
+      [src]="profile.avatar || './images/avatar_default.png'"
+    />
+    <p class="name">{{ profile.profileName }}</p>
+  </li>
+  }
+</ul>

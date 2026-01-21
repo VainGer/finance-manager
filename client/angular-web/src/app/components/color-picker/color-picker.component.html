@@ -1,0 +1,10 @@
+<div class="picker grid">
+  @for (color of colors; track color.color) {
+    <button
+      type="button"
+      (click)="onColorClick( color.color)"
+      class="option"
+      [style.background-color]="color.color"
+    ></button>
+  }
+</div>

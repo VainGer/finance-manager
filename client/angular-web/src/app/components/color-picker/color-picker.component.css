@@ -1,0 +1,19 @@
+.picker{
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    width: max-content;
+    margin-inline: auto;
+}
+
+.option{
+    margin: 4px;
+    padding: 4px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid;
+    transition: 30ms;
+    border-radius: 8px;
+}
+
+.option:hover{
+    scale: 110%;
+}

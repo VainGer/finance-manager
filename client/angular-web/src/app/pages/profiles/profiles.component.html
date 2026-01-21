@@ -1,0 +1,27 @@
+@switch (pageState) {
+  @case ("profile-select") {
+    <app-profile-selector
+      [profileList]="profiles"
+      (profileSelected)="onProfileClick($event)"
+    ></app-profile-selector>
+  }
+  @case ("profile-auth") {
+    <app-profile-auth-form
+      [account]="account"
+      [selectedProfile]="selectedProfile"
+      (goBack)="onBackToList()"
+    ></app-profile-auth-form>
+  }
+  @case ("profile-create") {
+    <app-create-profile
+      [account]="account"
+      [firstProfile]="firstProfile"
+    ></app-create-profile>
+  }
+  @case ("loading") {
+    <app-loading></app-loading>
+  }
+  @case ("fetch-error") {
+    <app-error></app-error>
+  }
+}

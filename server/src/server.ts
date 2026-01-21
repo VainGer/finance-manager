@@ -23,6 +23,7 @@ server.use(cors({
     origin: [
         'http://localhost:5173',
         'http://localhost:3000',
+        'http://localhost:4200',
         'https://smart-finance-shenkar2025.netlify.app',
     ],
     credentials: true,

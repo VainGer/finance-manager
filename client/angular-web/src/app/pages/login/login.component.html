@@ -1,0 +1,18 @@
+<div class="grid">
+  <h1>התחברות לחשבון</h1>
+  <p>ברוך הבא למנהל הכספים שלך</p>
+</div>
+<form class="grid" [formGroup]="loginForm" (submit)="onSubmit()">
+  @if(error){
+  <app-error [errorMessage]="error"></app-error>
+  }
+  <label for="username">שם משתמש</label>
+  <input formControlName="username" type="text" />
+  <label for="password">סיסמא</label>
+  <input type="password" formControlName="password" />
+  <button [disabled]="!loginForm.valid" type="submit">התחבר לחשבון</button>
+  <span
+    >עדיין אין לך חשבון?
+    <a href="/register">הירשם עכשיו</a>
+  </span>
+</form>
