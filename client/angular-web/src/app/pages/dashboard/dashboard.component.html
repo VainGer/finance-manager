@@ -1,1 +1,29 @@
-<p>dashboard works!</p>
+<div>
+  <button (click)="setState('budgets')">סקירת תקציב</button>
+  <button (click)="setState('expenses-display')">הוצאות</button>
+  <button (click)="setState('expenses-summary')">סיכום הוצאות</button>
+  <button (click)="setState('graphs')">גרפים</button>
+  <button (click)="setState('insights')">תובנות AI</button>
+</div>
+@switch (displayState) {
+  @case ("budgets") {
+    @if (budgetsData$ | async; as budgets) {
+      <app-budget-summary
+        [profileBudget]="budgets.profile"
+        [categoryBudgets]="budgets.category"
+      ></app-budget-summary>
+    }
+  }
+  @case ("expenses-display") {
+    <app-expenses-display></app-expenses-display>
+  }
+  @case ("expenses-summary") {
+    <app-expenses-summary></app-expenses-summary>
+  }
+  @case ("graphs") {
+    <app-expenses-graphs></app-expenses-graphs>
+  }
+  @case ("insights") {
+    <app-insights></app-insights>
+  }
+}

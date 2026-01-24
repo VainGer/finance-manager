@@ -7,12 +7,7 @@ import { Account, Profile } from '../types';
 })
 export default class AuthService {
   private accountSubject = new BehaviorSubject<Account | null>(null);
-  public account$: Observable<Account | null> =
-    this.accountSubject.asObservable();
-
   private profileSubject = new BehaviorSubject<Profile | null>(null);
-  public profile$: Observable<Profile | null> =
-    this.profileSubject.asObservable();
 
   constructor() {
     const savedAccount = localStorage.getItem('account');
