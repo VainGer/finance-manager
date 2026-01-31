@@ -1,1 +1,90 @@
-<p>expenses-display works!</p>
+<div>
+  <div>
+    <h2>סינון ומיון</h2>
+    <div>
+      <div>
+        <p>חודש</p>
+        <select (change)="setSelectedDate($event)">
+          <option value="">כל החודשים</option>
+          @for (ym of availableDates; track ym) {
+            <option [value]="ym">
+              {{ formatters.monthToHebrewName(ym.split("-")[1]) }} -
+              {{ ym.split("-")[0] }}
+            </option>
+          }
+        </select>
+      </div>
+      <div>
+        <p>קטגוריה</p>
+        <select (change)="setSelectedCategory($event)">
+          <option value="">כל הקטגוריות</option>
+          @for (cat of availableCategories; track cat) {
+            <option [value]="cat">
+              {{ cat }}
+            </option>
+          }
+        </select>
+      </div>
+      <div>
+        <p>עסק</p>
+        <select
+          (change)="setSelectedBusiness($event)"
+          [disabled]="!selectedCategory"
+        >
+          <option value="">כל העסקים</option>
+          @for (bus of availableBusinesses; track bus) {
+            <option [value]="bus">
+              {{ bus }}
+            </option>
+          }
+        </select>
+      </div>
+    </div>
+    <div>
+      <h2>מיון</h2>
+      <div>
+        <button (click)="sortByDate()">לפי תאריך</button>
+        <button (click)="sortByAmount()">לפי סכום</button>
+      </div>
+      <div>
+        <button (click)="filterExpenses(true)">החל סינונים</button>
+        <button (click)="filterExpenses(false)">נקה סינונים</button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <h2>סיכום עסקאות מוצגות</h2>
+    <div>
+      <p>עסקאות מוצגות</p>
+      <p>{{ summaryInfo.trsNum }}</p>
+    </div>
+    <div>
+      <p>סה"כ הוצאות</p>
+      <p>{{ formatters.formatCurrency(summaryInfo.trsSum) }}</p>
+    </div>
+    <div>
+      <p>ממוצע לעסקה</p>
+      <p>{{ formatters.formatCurrency(summaryInfo.avgTrs) }}</p>
+    </div>
+  </div>
+  <table>
+    <tr>
+      <th>תאריך</th>
+      <th>תיאור</th>
+      <th>קטגוריה</th>
+      <th>עסק</th>
+      <th>סכום</th>
+      <th>פעולות</th>
+    </tr>
+    @for (expense of expensesToDisplay; track expense._id) {
+      <tr>
+        <td>{{ formatters.formatDate(expense.date.toDateString()) }}</td>
+        <td>{{ expense.description }}</td>
+        <td>{{ expense.category }}</td>
+        <td>{{ expense.business }}</td>
+        <td>{{ formatters.formatCurrency(expense.amount) }}</td>
+        <td>TODO ACTIONS</td>
+      </tr>
+    }
+  </table>
+</div>

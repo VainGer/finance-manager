@@ -35,12 +35,17 @@ export class DashboardComponent implements OnInit {
   categoryBudgets$ = this.pdService.categoryBudgets$;
   profileBudgets$ = this.pdService.profileBudgets$;
   expenses$ = this.pdService.profileExpenses$;
-  catAndBisNames = this.pdService.categoryAndBusinessNames$;
-  isDataFetched = this.pdService.isDataFetched$;
+  catAndBisNames$ = this.pdService.categoryAndBusinessNames$;
+  isDataFetched$ = this.pdService.isDataFetched$;
 
   budgetsData$ = combineLatest({
     profile: this.profileBudgets$,
     category: this.categoryBudgets$,
+  });
+
+  expensesData$ = combineLatest({
+    expenses: this.expenses$,
+    catAndBisNames: this.catAndBisNames$,
   });
 
   ngOnInit(): void {

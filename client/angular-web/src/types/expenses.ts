@@ -17,11 +17,21 @@ export interface Business {
 }
 
 export interface TransactionsArray {
-  DateYM: string;
+  dateYM: string;
   transactions: Transaction[];
 }
 
 export interface Category {
   name: string;
   Businesses: Business[];
+}
+
+export interface FlattenedExpenses {
+  amount: number;
+  business: string;
+  category: string;
+  dateYM: string;
+  date: Date;
+  description: string;
+  _id: string;
 }

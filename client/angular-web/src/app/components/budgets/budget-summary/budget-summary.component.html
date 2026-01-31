@@ -1,17 +1,95 @@
-<div>
-    <h2>סיכום כללי</h2>
-    <div>
-        <div>
-            <p>{{currentProfileBudget?.startDate}}</p>
-            <p></p>
-        </div>
-        <div>
-            <p></p>
-            <p></p>
-        </div>
-        <div>
-            <p></p>
-            <p></p>
-        </div>
+@if (!currentProfileBudget || !currentCategoryBudgets) {
+  <div>
+    <p>לא נמצאו תקציבים לפרופיל זה</p>
+  </div>
+} @else {
+  <div class="grid">
+    @if (profileBudget.length > 0) {
+      <div>
+        <p>בחר תקופת תקציב</p>
+        <select
+          name="currentProfileBudget"
+          (change)="setCurrentBudgets($event)"
+        >
+          @for (pb of profileBudget; track pb._id) {
+            <option [value]="pb._id">
+              {{ formatters.formatDate(pb.startDate) }} -
+              {{ formatters.formatDate(pb.endDate) }}
+            </option>
+          }
+        </select>
+      </div>
+    }
+    <p>
+      תקציב לתקופה
+      {{ formatters.formatDate(currentProfileBudget.startDate) }} -
+      {{ formatters.formatDate(currentProfileBudget.endDate) }}
+    </p>
+    <div class="grid">
+      <div class="grid">
+        <h2>סיכום כללי</h2>
+        <p>סך התקציב</p>
+        <p>{{ formatters.formatCurrency(currentProfileBudget.amount) }}</p>
+      </div>
+      <div class="grid">
+        <p>סך ההוצאות</p>
+        <p>{{ formatters.formatCurrency(currentProfileBudget.spent) }}</p>
+      </div>
+      <div class="grid">
+        <p>יתרה</p>
+        <p>
+          {{
+            formatters.formatCurrency(
+              currentProfileBudget.amount - currentProfileBudget.spent
+            )
+          }}
+        </p>
+      </div>
+      <p>
+        {{
+          formatters.getProgressPercentage(
+            currentProfileBudget.spent,
+            currentProfileBudget.amount
+          )
+        }}% מהתקציב הככלי
+      </p>
     </div>
-</div>
+    <div class="grid">
+      <h2>סיכום לפי קטגוריות</h2>
+      @for (cb of currentCategoryBudgets; track cb.name) {
+        <div>
+          <p>{{ cb.name }}</p>
+          <div>
+            <div>
+              <p>תקציב</p>
+              <p>{{ formatters.formatCurrency(cb.budget.amount) }}</p>
+            </div>
+            <div>
+              <p>הוצאות</p>
+              <p>{{ formatters.formatCurrency(cb.budget.spent) }}</p>
+            </div>
+            <div>
+              <p>יתרה</p>
+              <p>
+                {{
+                  formatters.formatCurrency(cb.budget.amount - cb.budget.spent)
+                }}
+              </p>
+            </div>
+            <div>
+              <p>אחות ניצול</p>
+              <p>
+                {{
+                  formatters.getProgressPercentage(
+                    cb.budget.spent,
+                    cb.budget.amount
+                  )
+                }}
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

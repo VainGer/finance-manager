@@ -15,7 +15,11 @@
     }
   }
   @case ("expenses-display") {
-    <app-expenses-display></app-expenses-display>
+    @if (expensesData$ | async; as expensesData) {
+      <app-expenses-display
+        [expenses]="expensesData.expenses"
+      ></app-expenses-display>
+    }
   }
   @case ("expenses-summary") {
     <app-expenses-summary></app-expenses-summary>
