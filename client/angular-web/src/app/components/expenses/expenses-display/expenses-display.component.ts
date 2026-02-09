@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit, SimpleChange } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { Category, FlattenedExpenses } from '../../../../types';
 import * as formatters from '../../../../utils/formatters';
 import { ExpenseService } from '../../../../services/expenses.service';
@@ -81,62 +81,53 @@ export class ExpensesDisplayComponent implements OnInit {
       this.selectedDate = null;
       this.selectedCategory = null;
       this.selectedBusiness = null;
-      this.expensesToDisplay = this.flatExpenses;
+      this.expensesToDisplay = [...this.flatExpenses];
       this.descendingDateSort = false;
       this.descendingAmountSort = false;
       return;
     }
     let tempExpenses: FlattenedExpenses[] = [...this.flatExpenses];
     if (this.selectedDate) {
-      tempExpenses = this.filterByDate();
+      tempExpenses = this.expensesService.filterByDate(
+        this.monthlyExpenses,
+        this.selectedDate,
+      );
     }
     if (this.selectedCategory) {
-      tempExpenses = this.filterByCategory(tempExpenses);
+      tempExpenses = this.expensesService.filterByCategory(
+        tempExpenses,
+        this.selectedCategory,
+      );
     }
     if (this.selectedBusiness) {
-      tempExpenses = this.filterByBusiness(tempExpenses);
+      tempExpenses = this.expensesService.filterByBusiness(
+        tempExpenses,
+        this.selectedBusiness,
+      );
     }
     this.expensesToDisplay = tempExpenses;
   }
 
-  filterByDate() {
-    return [...this.monthlyExpenses[this.selectedDate!]];
-  }
-
-  filterByCategory(expenses: FlattenedExpenses[]) {
-    return expenses.filter((e) => e.category === this.selectedCategory);
-  }
-
-  filterByBusiness(expenses: FlattenedExpenses[]) {
-    return expenses.filter((e) => e.business === this.selectedBusiness);
+  sortByAmount() {
+    this.expensesToDisplay = this.expensesService.sortByAmount(
+      this.descendingAmountSort,
+      this.expensesToDisplay,
+    );
+    this.descendingAmountSort = !this.descendingAmountSort;
   }
 
   sortByDate() {
-    if (this.descendingDateSort) {
-      this.expensesToDisplay.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-      );
-    } else {
-      this.expensesToDisplay.sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-      );
-    }
+    this.expensesToDisplay = this.expensesService.sortByDate(
+      this.descendingDateSort,
+      this.expensesToDisplay,
+    );
     this.descendingDateSort = !this.descendingDateSort;
-  }
-
-  sortByAmount() {
-    if (this.descendingAmountSort) {
-      this.expensesToDisplay.sort((a, b) => b.amount - a.amount);
-    } else {
-      this.expensesToDisplay.sort((a, b) => a.amount - b.amount);
-    }
-    this.descendingAmountSort = !this.descendingAmountSort;
   }
 
   ngOnInit(): void {
     const { flatExpenses, monthlyExpenses, availableDates } =
       this.expensesService.processExpenses(this.expenses);
-    this.flatExpenses = flatExpenses;
+    this.flatExpenses = [...flatExpenses];
     this.monthlyExpenses = monthlyExpenses;
     this.availableDates = availableDates;
     this.expensesToDisplay = [...flatExpenses];

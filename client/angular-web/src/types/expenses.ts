@@ -35,3 +35,16 @@ export interface FlattenedExpenses {
   description: string;
   _id: string;
 }
+
+export interface ExpenseSummary {
+  transactionsNumber: number;
+  transactionsSum: number;
+  transactionAvg: number;
+  numberOfItems: number;
+  itemSummary: Record<string, ItemSummary>;
+}
+
+export interface ItemSummary {
+  totalSum: number;
+  percentOfTotal: number;
+}

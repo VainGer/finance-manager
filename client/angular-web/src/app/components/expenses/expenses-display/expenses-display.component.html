@@ -4,7 +4,7 @@
     <div>
       <div>
         <p>חודש</p>
-        <select (change)="setSelectedDate($event)">
+        <select (change)="setSelectedDate($event)" [value]="selectedDate || ''">
           <option value="">כל החודשים</option>
           @for (ym of availableDates; track ym) {
             <option [value]="ym">
@@ -16,7 +16,10 @@
       </div>
       <div>
         <p>קטגוריה</p>
-        <select (change)="setSelectedCategory($event)">
+        <select
+          (change)="setSelectedCategory($event)"
+          [value]="selectedBusiness || ''"
+        >
           <option value="">כל הקטגוריות</option>
           @for (cat of availableCategories; track cat) {
             <option [value]="cat">

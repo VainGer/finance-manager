@@ -1,1 +1,49 @@
-<p>expenses-summary works!</p>
+@if (!summaryInfo) {
+} @else {
+  <div>
+    <span>בחר חודש</span>
+    <select (change)="setDate($event)">
+      <option value="">כל החודשים</option>
+      @for (ym of availableDates; track ym) {
+        <option [value]="ym">
+          {{ formatters.monthToHebrewName(ym.split("-")[1]) }} -
+          {{ ym.split("-")[0] }}
+        </option>
+      }
+    </select>
+    <div>
+      <button (click)="setView('categories')">קטגוריות</button>
+      <button (click)="setView('businesses')">עסקים</button>
+    </div>
+    <div>
+      <div>
+        <p>{{ summaryInfo.transactionsNumber }}</p>
+        <p>עסקאות</p>
+      </div>
+      <div>
+        <p>{{ summaryInfo.transactionsSum }}</p>
+        <p>סה"כ הוצאות</p>
+      </div>
+      <div>
+        <p>{{ summaryInfo.transactionAvg }}</p>
+        <p>ממוצע לעסקה</p>
+      </div>
+      <div>
+        <p>{{ summaryInfo.numberOfItems }}</p>
+        <p>{{ breakdownView === "categories" ? "קטגוריות" : "עסקים" }}</p>
+      </div>
+    </div>
+    <div>
+      @for (
+        item of summaryInfo.itemSummary | keyvalue: preserveOrder;
+        track item.key
+      ) {
+        <div>
+          <p>{{ item.key }}</p>
+          <p>{{ formatters.formatCurrency(item.value.totalSum) }}</p>
+          <p>{{ item.value.percentOfTotal }}%</p>
+        </div>
+      }
+    </div>
+  </div>
+}

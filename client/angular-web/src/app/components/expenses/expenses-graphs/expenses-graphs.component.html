@@ -1,1 +1,24 @@
-<p>expenses-graphs works!</p>
+<div>
+  <button (click)="setChartType('categoryBreakdown')">גרף עוגה</button>
+  <button (click)="setChartType('monthlyComparison')">מגמות חודשיות</button>
+</div>
+<div>
+  @if (chartToShow === "categoryBreakdown") {
+    <div>
+      <button>שבוע אחרון</button>
+      <button>חודש אחרון</button>
+      <button>שנה אחרונה</button>
+      <button>כל התקופה</button>
+      <div>
+        <p>חודש ספציפי</p>
+        <select>
+          <option value="">בחר חודש</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <p>התפלגות הוצאות לפי קטגוריה</p>
+      <p>סה"כ קטגוריות: {{ "number to render" }}</p>
+    </div>
+  } @else {}
+</div>

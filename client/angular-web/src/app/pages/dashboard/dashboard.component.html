@@ -22,10 +22,18 @@
     }
   }
   @case ("expenses-summary") {
-    <app-expenses-summary></app-expenses-summary>
+    @if (expensesData$ | async; as expensesData) {
+      <app-expenses-summary
+        [expenses]="expensesData.expenses"
+      ></app-expenses-summary>
+    }
   }
   @case ("graphs") {
-    <app-expenses-graphs></app-expenses-graphs>
+    @if (expensesData$ | async; as expensesData) {
+     <app-expenses-graphs
+     [expenses]="expensesData.expenses"
+     ></app-expenses-graphs>
+    }
   }
   @case ("insights") {
     <app-insights></app-insights>
