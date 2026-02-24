@@ -6,8 +6,8 @@ import { OnInit } from '@angular/core';
 import ApiProvider from '../../../services/api.service';
 import AuthService from '../../../services/auth.service';
 import { Account, ProfileForList } from '../../../types';
-import { LoadingComponent } from '../../components/loading/loading.component';
-import { ErrorComponent } from '../../components/error/error.component';
+import { LoadingComponent } from '../../components/ui/loading/loading.component';
+import { ErrorComponent } from '../../components/ui/error/error.component';
 
 type PageState =
   | 'profile-select'

@@ -6,7 +6,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ErrorComponent } from '../../components/error/error.component';
+import { ErrorComponent } from '../../components/ui/error/error.component';
 import ApiProvider from '../../../services/api.service';
 import AuthService from '../../../services/auth.service';
 import { Router } from '@angular/router';

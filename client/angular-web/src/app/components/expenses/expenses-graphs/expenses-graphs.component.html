@@ -1,24 +1,33 @@
-<div>
-  <button (click)="setChartType('categoryBreakdown')">גרף עוגה</button>
-  <button (click)="setChartType('monthlyComparison')">מגמות חודשיות</button>
-</div>
-<div>
-  @if (chartToShow === "categoryBreakdown") {
-    <div>
-      <button>שבוע אחרון</button>
-      <button>חודש אחרון</button>
-      <button>שנה אחרונה</button>
-      <button>כל התקופה</button>
+@if (!monthlyExpenses || flatExpenses.length === 0) {
+  <div></div>
+} @else {
+  <div>
+    <button (click)="setChartType('categoryBreakdown')">גרף עוגה</button>
+    <button (click)="setChartType('monthlyComparison')">מגמות חודשיות</button>
+  </div>
+  <div>
+    @if (chartToShow === "categoryBreakdown") {
       <div>
-        <p>חודש ספציפי</p>
-        <select>
-          <option value="">בחר חודש</option>
+        <span>בחר חודש</span>
+        <select (change)="setDate($event)">
+          <option value="">כל התקופה</option>
+          @for (ym of availableDates; track ym) {
+            <option [value]="ym">
+              {{ formatters.monthToHebrewName(ym.split("-")[1]) }} -
+              {{ ym.split("-")[0] }}
+            </option>
+          }
         </select>
+        <h2>התפלגות הוצאות לפי קטגוריה</h2>
+        <p>סה"כ קטגוריות: {{ numOfItems }}</p>
+        <div class="chart-wrapper">
+          <app-pie-chart [data]="pieChart" />
+        </div>
       </div>
-    </div>
-    <div>
-      <p>התפלגות הוצאות לפי קטגוריה</p>
-      <p>סה"כ קטגוריות: {{ "number to render" }}</p>
-    </div>
-  } @else {}
-</div>
+    } @else {
+      <div>
+        <app-bar [data]="barChart"></app-bar>
+      </div>
+    }
+  </div>
+}

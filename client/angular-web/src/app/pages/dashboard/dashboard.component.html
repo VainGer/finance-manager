@@ -1,41 +1,82 @@
-<div>
-  <button (click)="setState('budgets')">סקירת תקציב</button>
-  <button (click)="setState('expenses-display')">הוצאות</button>
-  <button (click)="setState('expenses-summary')">סיכום הוצאות</button>
-  <button (click)="setState('graphs')">גרפים</button>
-  <button (click)="setState('insights')">תובנות AI</button>
+<div class="grid dashboard-container">
+  <div>
+    <p>פעולות מהירות</p>
+    <div class="grid">
+      <app-side-menu-btn
+        title="הוספת הוצאה"
+        subtitle="הוסף עסקה חדשה"
+        icon="card-outline"
+      ></app-side-menu-btn>
+      <app-side-menu-btn
+        title="קטגוריות"
+        subtitle="ארגן הוצאות לפי קטגוריות"
+        icon="pricetags-outline"
+      ></app-side-menu-btn>
+      <app-side-menu-btn
+        title="בעלי עסקים"
+        subtitle="נהל בעלי עסקים"
+        icon="briefcase-outline"
+      ></app-side-menu-btn>
+      <app-side-menu-btn
+        title="תקציבים"
+        subtitle="ניהול תקציבים"
+        icon="wallet-outline"
+      ></app-side-menu-btn>
+      <app-side-menu-btn
+        title="הלעת קובץ"
+        subtitle="יבוא עסקאות מקובץ"
+        icon="cloud-upload-outline"
+      ></app-side-menu-btn>
+      <app-side-menu-btn
+        title="הגדרות"
+        subtitle="עדכן פרטים אישיים"
+        icon="settings-outline"
+      ></app-side-menu-btn>
+    </div>
+  </div>
+  <div>
+    <div>
+      <button (click)="setState('budgets')">סקירת תקציב</button>
+      <button (click)="setState('expenses-display')">הוצאות</button>
+      <button (click)="setState('expenses-summary')">סיכום הוצאות</button>
+      <button (click)="setState('graphs')">גרפים</button>
+      <button (click)="setState('insights')">תובנות AI</button>
+    </div>
+    @switch (displayState) {
+      @case ("budgets") {
+        @if (budgetsData$ | async; as budgets) {
+          <app-budget-summary
+            [profileBudget]="budgets.profile"
+            [categoryBudgets]="budgets.category"
+          ></app-budget-summary>
+        }
+      }
+      @case ("expenses-display") {
+        @if (expensesData$ | async; as expensesData) {
+          <app-expenses-display
+            [expenses]="expensesData.expenses"
+          ></app-expenses-display>
+        }
+      }
+      @case ("expenses-summary") {
+        @if (expensesData$ | async; as expensesData) {
+          <app-expenses-summary
+            [expenses]="expensesData.expenses"
+          ></app-expenses-summary>
+        }
+      }
+      @case ("graphs") {
+        @if (expensesData$ | async; as expensesData) {
+          <app-expenses-graphs
+            [expenses]="expensesData.expenses"
+          ></app-expenses-graphs>
+        }
+      }
+      @case ("insights") {
+        @if (aiHistory$ | async; as history) {
+          <app-insights [history]="history.history"></app-insights>
+        }
+      }
+    }
+  </div>
 </div>
-@switch (displayState) {
-  @case ("budgets") {
-    @if (budgetsData$ | async; as budgets) {
-      <app-budget-summary
-        [profileBudget]="budgets.profile"
-        [categoryBudgets]="budgets.category"
-      ></app-budget-summary>
-    }
-  }
-  @case ("expenses-display") {
-    @if (expensesData$ | async; as expensesData) {
-      <app-expenses-display
-        [expenses]="expensesData.expenses"
-      ></app-expenses-display>
-    }
-  }
-  @case ("expenses-summary") {
-    @if (expensesData$ | async; as expensesData) {
-      <app-expenses-summary
-        [expenses]="expensesData.expenses"
-      ></app-expenses-summary>
-    }
-  }
-  @case ("graphs") {
-    @if (expensesData$ | async; as expensesData) {
-     <app-expenses-graphs
-     [expenses]="expensesData.expenses"
-     ></app-expenses-graphs>
-    }
-  }
-  @case ("insights") {
-    <app-insights></app-insights>
-  }
-}

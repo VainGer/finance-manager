@@ -1,1 +1,262 @@
-<p>insights works!</p>
+@if (!history || history.length === 0 || !historyToDisplay) {
+  <div>
+    <div>
+      <h2>תובנות AI</h2>
+      <p>ניתוח חכם ומתקדם של דפוסי ההוצאה</p>
+    </div>
+    <div>
+      <div>🤖 מנתח את הנתונים שלך</div>
+      <div>התובנות החכמות יהיו זמינות לאחר סיום תקופת תקציב שלך</div>
+      <div>זמין בקרוב</div>
+    </div>
+  </div>
+} @else {
+  <div>
+    <div>
+      <h2>תובנות AI</h2>
+      <p>ניתוח חכם ומתקדם של דפוסי ההוצאה</p>
+    </div>
+
+    <div>
+      <!-- History Selector -->
+      @if (availableDates.length > 1) {
+        <div>
+          <select (change)="setDate($event)">
+            <option value="">בחר תקופת ניתוח</option>
+            @for (date of availableDates; track date) {
+              <option [value]="date">{{ date }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <!-- Global Summary -->
+      <div>
+        <h3>📊 סיכום כללי</h3>
+
+        <div>
+          <div>
+            <div>₪{{ historyToDisplay.coachOutput.summary.global.budget }}</div>
+            <div>💰 תקציב</div>
+          </div>
+          <div>
+            <div>₪{{ historyToDisplay.coachOutput.summary.global.spent }}</div>
+            <div>💸 הוצא</div>
+          </div>
+          <div>
+            <div>
+              ₪{{ historyToDisplay.coachOutput.summary.global.remaining }}
+            </div>
+            <div>
+              {{
+                historyToDisplay.coachOutput.summary.global.remaining >= 0
+                  ? "✅ נותר"
+                  : "⚠️ חריגה"
+              }}
+            </div>
+          </div>
+          <div>
+            <div>
+              {{
+                historyToDisplay.coachOutput.summary.global.utilizationPct.toFixed(
+                  1
+                )
+              }}%
+            </div>
+            <div>📈 ניצול</div>
+          </div>
+        </div>
+
+        <!-- Top Signals -->
+        @if (
+          historyToDisplay.coachOutput.summary.topSignals &&
+          historyToDisplay.coachOutput.summary.topSignals.length > 0
+        ) {
+          <div>
+            <h4>אותות חשובים:</h4>
+            <div>
+              @for (
+                signal of historyToDisplay.coachOutput.summary.topSignals;
+                track $index
+              ) {
+                <div>{{ signal.message }}</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Categories Analysis -->
+      <div>
+        <h3>🎯 ניתוח קטגוריות</h3>
+
+        <div>
+          @for (
+            category of historyToDisplay.coachOutput.categories;
+            track category.name
+          ) {
+            <div>
+              <!-- Category Header -->
+              <div>
+                <h4>{{ category.name }}</h4>
+                <div>{{ category.utilizationPct.toFixed(1) }}%</div>
+              </div>
+
+              <!-- Budget Info -->
+              <div>
+                <span>תקציב: ₪{{ category.budget }}</span>
+                <span>הוצא: ₪{{ category.spent }}</span>
+                <span
+                  >{{ category.variance >= 0 ? "+" : "" }}₪{{
+                    category.variance
+                  }}</span
+                >
+              </div>
+
+              <!-- Progress Bar -->
+              <div>
+                <div
+                  [style.width.%]="
+                    category.utilizationPct > 100
+                      ? 100
+                      : category.utilizationPct
+                  "
+                ></div>
+              </div>
+
+              <!-- Top Drivers -->
+              @if (category.drivers && category.drivers.length > 0) {
+                <div>
+                  <div>🏪 עסקים מובילים:</div>
+                  <div>
+                    @for (
+                      driver of category.drivers.slice(0, 3);
+                      track driver.business
+                    ) {
+                      <span>{{ driver.business }}: ₪{{ driver.amount }}</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Actions -->
+              @if (category.actions && category.actions.length > 0) {
+                <div>
+                  <div>💡 המלצות חכמות:</div>
+                  <div>
+                    @for (
+                      action of category.actions.slice(0, 2);
+                      track $index
+                    ) {
+                      <div>
+                        <div>⭐ {{ action.proposal }}</div>
+                        <div>
+                          💰 חיסכון חודשי: ₪{{
+                            action.quantifiedImpact.monthlySave
+                          }}
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Next Month Plan -->
+      @if (historyToDisplay.coachOutput.nextMonthPlan) {
+        <div>
+          <h3>תוכנית לחודש הבא</h3>
+
+          <!-- Proposed Budgets -->
+          @if (
+            historyToDisplay.coachOutput.nextMonthPlan.proposedBudgets &&
+            historyToDisplay.coachOutput.nextMonthPlan.proposedBudgets.length >
+              0
+          ) {
+            <div>
+              <h4>התאמות תקציב מוצעות:</h4>
+              <div>
+                @for (
+                  budget of historyToDisplay.coachOutput.nextMonthPlan
+                    .proposedBudgets;
+                  track budget.category
+                ) {
+                  <div>
+                    <div>{{ budget.category }}</div>
+                    <div>
+                      <span
+                        >₪{{ budget.current }} ➡ ₪{{ budget.proposed }}</span
+                      >
+                      <span>{{ budget.rationale }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Watch List -->
+          @if (
+            historyToDisplay.coachOutput.nextMonthPlan.watchList &&
+            historyToDisplay.coachOutput.nextMonthPlan.watchList.length > 0
+          ) {
+            <div>
+              <h4>קטגוריות לעקוב אחריהן:</h4>
+              <div>
+                @for (
+                  item of historyToDisplay.coachOutput.nextMonthPlan.watchList;
+                  track item
+                ) {
+                  <span>{{ item }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Reminders -->
+          @if (
+            historyToDisplay.coachOutput.nextMonthPlan.reminders &&
+            historyToDisplay.coachOutput.nextMonthPlan.reminders.length > 0
+          ) {
+            <div>
+              <h4>תזכורות:</h4>
+              <div>
+                @for (
+                  reminder of historyToDisplay.coachOutput.nextMonthPlan
+                    .reminders;
+                  track $index
+                ) {
+                  <div>{{ reminder }}</div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Data Quality Issues -->
+      @if (
+        historyToDisplay.coachOutput.dataQuality &&
+        historyToDisplay.coachOutput.dataQuality.length > 0
+      ) {
+        <div>
+          <h3>איכות נתונים</h3>
+          <div>
+            @for (
+              issue of historyToDisplay.coachOutput.dataQuality;
+              track $index
+            ) {
+              <div>
+                <div>{{ issue.issue }}</div>
+                <div>{{ issue.detail }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

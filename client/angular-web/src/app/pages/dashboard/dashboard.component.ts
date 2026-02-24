@@ -7,6 +7,8 @@ import { BudgetSummaryComponent } from '../../components/budgets/budget-summary/
 import { InsightsComponent } from '../../components/ai/insights/insights.component';
 import { AsyncPipe } from '@angular/common';
 import { combineLatest } from 'rxjs';
+import { SideMenuBtnComponent } from '../../components/ui/side-menu-btn/side-menu-btn.component';
+import { ModalComponent } from '../../components/ui/modal/modal.component';
 
 type dashboardState =
   | 'fetch-error'
@@ -25,6 +27,8 @@ type dashboardState =
     ExpensesGraphsComponent,
     BudgetSummaryComponent,
     InsightsComponent,
+    SideMenuBtnComponent,
+    ModalComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
@@ -36,6 +40,7 @@ export class DashboardComponent implements OnInit {
   profileBudgets$ = this.pdService.profileBudgets$;
   expenses$ = this.pdService.profileExpenses$;
   catAndBisNames$ = this.pdService.categoryAndBusinessNames$;
+  aiHistory$ = this.pdService.aiHistory$;
   isDataFetched$ = this.pdService.isDataFetched$;
 
   budgetsData$ = combineLatest({

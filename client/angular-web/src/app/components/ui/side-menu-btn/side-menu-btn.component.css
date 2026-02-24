@@ -1,0 +1,11 @@
+.btn {
+  grid-template-columns: 1fr 0.2fr;
+  width: 100%;
+}
+
+.main {
+    grid-template-columns: 0.2fr 1fr;
+}
+
+.sub {
+}
