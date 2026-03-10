@@ -1,5 +1,14 @@
-import { Component, Input } from '@angular/core';
-
+import { Component, CUSTOM_ELEMENTS_SCHEMA, Input } from '@angular/core';
+import { AddTransactionComponent } from '../../actions/add-transaction/add-transaction.component';
+import { MenuBtnComponent } from '../menu-btn/menu-btn.component';
+import { CreateCategoryComponent } from '../../actions/categories/create-category/create-category.component';
+import { DeleteCategoryComponent } from '../../actions/categories/delete-category/delete-category.component';
+import { RenameCategoryComponent } from '../../actions/categories/rename-category/rename-category.component';
+import { AddBusinessComponent } from '../../actions/business/add-business/add-business.component';
+import { DeleteBusinessComponent } from '../../actions/business/delete-business/delete-business.component';
+import { RenameBusinessComponent } from '../../actions/business/rename-business/rename-business.component';
+import { CreateBudgetComponent } from '../../actions/budgets/create-budget/create-budget.component';
+import { DeleteBudgetComponent } from '../../actions/budgets/delete-budget/delete-budget.component';
 type MenuAction = {
   id: string;
   icon: string;
@@ -17,13 +26,27 @@ type Menu = {
 
 @Component({
   selector: 'app-actions-menu',
-  imports: [],
+  imports: [
+    AddTransactionComponent,
+    CreateCategoryComponent,
+    DeleteCategoryComponent,
+    RenameCategoryComponent,
+    AddBusinessComponent,
+    DeleteBusinessComponent,
+    RenameBusinessComponent,
+    CreateBudgetComponent,
+    DeleteBudgetComponent,
+    MenuBtnComponent,
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './actions-menu.component.html',
   styleUrl: './actions-menu.component.css',
 })
 export class ActionsMenuComponent {
   @Input() chosenMenu: string = '';
   @Input() isOpen = false;
+  chosenAction: string = '';
+
   menus: Record<string, Menu> = {
     //Budget
     budgets: {
@@ -98,5 +121,28 @@ export class ActionsMenuComponent {
         },
       ],
     },
+    //Transaction
+    transaction: {
+      title: 'הוספת עסקה חדשה',
+      subtitle: 'הוסף הוצאה לפרופיל',
+      icon: '',
+      actions: [],
+    },
   };
+
+  get menuToDisplay(): Menu | null {
+    if (this.chosenMenu) {
+      this.chosenMenu === 'transaction' ? (this.chosenAction = 'create') : '';
+      return this.menus[this.chosenMenu];
+    }
+    return null;
+  }
+
+  get actionKey(): string {
+    return `${this.chosenMenu}-${this.chosenAction}`;
+  }
+
+  setAction(action: string) {
+    this.chosenAction = action;
+  }
 }

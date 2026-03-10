@@ -1,1 +1,55 @@
-<p>actions-menu works!</p>
+@if (!menuToDisplay) {
+  <div></div>
+} @else {
+  <div class="main">
+    <div class="title-container">
+      <div class="title-text">
+        <h2>{{ menuToDisplay.title }}</h2>
+        <h3>{{ menuToDisplay.subtitle }}</h3>
+      </div>
+      <ion-icons></ion-icons>
+    </div>
+    @if (!chosenAction || chosenAction.length === 0) {
+      <div>
+        @for (action of menuToDisplay.actions; track $index) {
+          <app-menu-btn
+            (onClick)="setAction(action.id)"
+            [title]="action.title"
+            [subtitle]="action.subtitle"
+            [icon]="action.icon"
+          ></app-menu-btn>
+        }
+      </div>
+    } @else {
+      @switch (actionKey) {
+        @case ("transaction-create") {
+          <app-add-transaction></app-add-transaction>
+        }
+        @case ("categories-create") {
+          <app-create-category></app-create-category>
+        }
+        @case ("categories-rename") {
+          <app-rename-category></app-rename-category>
+        }
+        @case ("categories-delete") {
+          <app-delete-category></app-delete-category>
+        }
+        @case ("business-create") {
+          <app-add-business></app-add-business>
+        }
+        @case ("business-rename") {
+          <app-rename-business></app-rename-business>
+        }
+        @case ("business-delete") {
+          <app-delete-business></app-delete-business>
+        }
+        @case ("budgets-create") {
+          <app-create-budget></app-create-budget>
+        }
+        @case ("budgets-delete") {
+          <app-delete-budget></app-delete-budget>
+        }
+      }
+    }
+  </div>
+}

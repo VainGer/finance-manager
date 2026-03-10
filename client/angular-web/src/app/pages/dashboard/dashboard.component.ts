@@ -7,8 +7,9 @@ import { BudgetSummaryComponent } from '../../components/budgets/budget-summary/
 import { InsightsComponent } from '../../components/ai/insights/insights.component';
 import { AsyncPipe } from '@angular/common';
 import { combineLatest } from 'rxjs';
-import { SideMenuBtnComponent } from '../../components/ui/side-menu-btn/side-menu-btn.component';
+import { MenuBtnComponent } from '../../components/ui/menu-btn/menu-btn.component';
 import { ModalComponent } from '../../components/ui/modal/modal.component';
+import { ActionsMenuComponent } from '../../components/ui/actions-menu/actions-menu.component';
 
 type dashboardState =
   | 'fetch-error'
@@ -27,8 +28,9 @@ type dashboardState =
     ExpensesGraphsComponent,
     BudgetSummaryComponent,
     InsightsComponent,
-    SideMenuBtnComponent,
+    MenuBtnComponent,
     ModalComponent,
+    ActionsMenuComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
@@ -36,6 +38,7 @@ type dashboardState =
 export class DashboardComponent implements OnInit {
   private pdService = inject(ProfileDataService);
   displayState: dashboardState = 'budgets';
+  actionMenu: string | null = null;
   categoryBudgets$ = this.pdService.categoryBudgets$;
   profileBudgets$ = this.pdService.profileBudgets$;
   expenses$ = this.pdService.profileExpenses$;
@@ -59,5 +62,9 @@ export class DashboardComponent implements OnInit {
 
   setState(state: dashboardState) {
     this.displayState = state;
+  }
+
+  openActionMenu(menu: string | null) {
+    this.actionMenu = menu;
   }
 }

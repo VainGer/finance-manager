@@ -1,1 +1,20 @@
-<p>add-transaction works!</p>
+<div class="grid">
+  <app-category-select (onChange)="setCategory($event)"></app-category-select>
+  @if (selectedCategory) {
+    <app-business-select
+      [selectedCategory]="selectedCategory"
+      (onChange)="setBusiness($event)"
+    ></app-business-select>
+    @if (selectedBusiness) {
+      <form class="grid">
+        <label for="">סכום</label>
+        <input type="text" />
+        <label for="">תאריך</label>
+        <input type="text" />
+        <label for="">תיאור(אופציונלי)</label>
+        <input type="text" />
+        <button type="submit">הוסף עסקה</button>
+      </form>
+    }
+  }
+</div>

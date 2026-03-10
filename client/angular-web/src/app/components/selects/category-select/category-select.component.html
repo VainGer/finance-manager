@@ -1,0 +1,12 @@
+@if (catAndBisNames$ | async; as catAndBis) {
+  <select (change)="handleChange($event)">
+    @if (catAndBis.length === 0) {
+      <option value="">אין קטגוריות זמינות</option>
+    } @else {
+      <option value="">בחר קטגוריה</option>
+      @for (cb of catAndBis; track $index) {
+        <option [value]="cb.category">{{ cb.category }}</option>
+      }
+    }
+  </select>
+}

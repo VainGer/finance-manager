@@ -1,21 +1,21 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject } from "@angular/core";
 import {
   FormBuilder,
   FormGroup,
   Validators,
   ReactiveFormsModule,
-} from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { ErrorComponent } from '../../components/ui/error/error.component';
-import ApiProvider from '../../../services/api.service';
-import AuthService from '../../../services/auth.service';
-import { Router } from '@angular/router';
+} from "@angular/forms";
+import { CommonModule } from "@angular/common";
+import { ErrorComponent } from "../../components/ui/error/error.component";
+import ApiProvider from "../../../services/api.service";
+import AuthService from "../../../services/auth.service";
+import { Router } from "@angular/router";
 
 @Component({
-  selector: 'app-login',
+  selector: "app-login",
   imports: [CommonModule, ReactiveFormsModule, ErrorComponent],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.css',
+  templateUrl: "./login.component.html",
+  styleUrl: "./login.component.css",
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
@@ -27,8 +27,8 @@ export class LoginComponent {
 
   constructor() {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(4)]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      username: ["", [Validators.required, Validators.minLength(4)]],
+      password: ["", [Validators.required, Validators.minLength(6)]],
     });
   }
 
@@ -42,12 +42,12 @@ export class LoginComponent {
         this.handleError(400);
         return;
       }
-      this.api.post('account/validate', { username, password }).subscribe({
+      this.api.post("account/validate", { username, password }).subscribe({
         next: (response) => {
           if (response.ok) {
-            const { _id, username } = response['account'];
+            const { _id, username } = response["account"];
             this.authService.setAccount({ _id, username });
-            this.router.navigate(['/profiles']);
+            this.router.navigate(["/profiles"]);
           }
         },
         error: (err) => {
@@ -60,21 +60,21 @@ export class LoginComponent {
   handleError(status?: number, username?: string) {
     switch (status) {
       case 400:
-        this.error = 'נא למלא את כל השדות';
+        this.error = "נא למלא את כל השדות";
         this.loginForm.setValue({
-          username: '',
-          password: '',
+          username: "",
+          password: "",
         });
         break;
       case 401:
-        this.error = 'שם משתמש או סיסמא שגויים';
+        this.error = "שם משתמש או סיסמא שגויים";
         this.loginForm.setValue({
           username: username,
-          password: '',
+          password: "",
         });
         break;
       default:
-        this.error = 'תקלה בשרת, אנא נסה שוב מאוחר יותר';
+        this.error = "תקלה בשרת, אנא נסה שוב מאוחר יותר";
     }
   }
 }

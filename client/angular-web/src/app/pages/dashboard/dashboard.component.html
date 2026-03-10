@@ -1,37 +1,44 @@
 <div class="grid dashboard-container">
+  <!-- Side menu action buttons -->
   <div>
     <p>פעולות מהירות</p>
     <div class="grid">
-      <app-side-menu-btn
+      <app-menu-btn
         title="הוספת הוצאה"
         subtitle="הוסף עסקה חדשה"
         icon="card-outline"
-      ></app-side-menu-btn>
-      <app-side-menu-btn
+        (onClick)="openActionMenu('transaction')"
+      ></app-menu-btn>
+      <app-menu-btn
         title="קטגוריות"
         subtitle="ארגן הוצאות לפי קטגוריות"
         icon="pricetags-outline"
-      ></app-side-menu-btn>
-      <app-side-menu-btn
+        (onClick)="openActionMenu('categories')"
+      ></app-menu-btn>
+      <app-menu-btn
         title="בעלי עסקים"
         subtitle="נהל בעלי עסקים"
         icon="briefcase-outline"
-      ></app-side-menu-btn>
-      <app-side-menu-btn
+        (onClick)="openActionMenu('business')"
+      ></app-menu-btn>
+      <app-menu-btn
         title="תקציבים"
         subtitle="ניהול תקציבים"
         icon="wallet-outline"
-      ></app-side-menu-btn>
-      <app-side-menu-btn
+        (onClick)="openActionMenu('budgets')"
+      ></app-menu-btn>
+      <app-menu-btn
         title="הלעת קובץ"
         subtitle="יבוא עסקאות מקובץ"
         icon="cloud-upload-outline"
-      ></app-side-menu-btn>
-      <app-side-menu-btn
+        (onClick)="(null)"
+      ></app-menu-btn>
+      <app-menu-btn
         title="הגדרות"
         subtitle="עדכן פרטים אישיים"
         icon="settings-outline"
-      ></app-side-menu-btn>
+        (onClick)="(null)"
+      ></app-menu-btn>
     </div>
   </div>
   <div>
@@ -42,6 +49,7 @@
       <button (click)="setState('graphs')">גרפים</button>
       <button (click)="setState('insights')">תובנות AI</button>
     </div>
+    <!-- Main display state -->
     @switch (displayState) {
       @case ("budgets") {
         @if (budgetsData$ | async; as budgets) {
@@ -80,3 +88,10 @@
     }
   </div>
 </div>
+
+<!-- Actions menus modal -->
+@if (actionMenu) {
+  <app-modal [isOpen]="!!actionMenu" (closeModal)="openActionMenu(null)">
+    <app-actions-menu [chosenMenu]="actionMenu"> </app-actions-menu>
+  </app-modal>
+}

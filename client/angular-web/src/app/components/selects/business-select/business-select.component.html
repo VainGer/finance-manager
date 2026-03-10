@@ -1,0 +1,10 @@
+<select (change)="handleChange($event)">
+  @if (businesses?.length === 0) {
+    <option value="">אין בעלי עסק זמינים בקטגוריה</option>
+  } @else {
+    <option value="">בחר בעל עסק</option>
+    @for (bus of businesses; track bus) {
+      <option [value]="bus">{{ bus }}</option>
+    }
+  }
+</select>

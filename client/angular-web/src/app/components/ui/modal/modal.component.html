@@ -1,7 +1,9 @@
 @if (isOpen) {
-  <div class="modal-overlay" (click)="close()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <ng-content></ng-content>
+  <div>
+    <div class="modal-overlay" (click)="close()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <ng-content></ng-content>
+      </div>
     </div>
   </div>
 }

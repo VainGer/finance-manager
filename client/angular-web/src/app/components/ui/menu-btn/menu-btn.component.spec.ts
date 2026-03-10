@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SideMenuBtnComponent } from './side-menu-btn.component';
+import { SideMenuBtnComponent } from './menu-btn.component';
 
 describe('SideMenuBtnComponent', () => {
   let component: SideMenuBtnComponent;
@@ -8,9 +8,8 @@ describe('SideMenuBtnComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SideMenuBtnComponent]
-    })
-    .compileComponents();
+      imports: [SideMenuBtnComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(SideMenuBtnComponent);
     component = fixture.componentInstance;
