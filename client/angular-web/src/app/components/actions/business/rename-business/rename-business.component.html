@@ -1,1 +1,11 @@
-<p>rename-business works!</p>
+<form [formGroup]="renameForm" (submit)="submitRename()">
+  <app-category-select (onChange)="setCategory($event)"></app-category-select>
+  @if (selectedCategory) {
+    <app-business-select [selectedCategory]="selectedCategory" (onChange)="setBusiness($event)"></app-business-select>
+  }
+  @if (selectedBusiness) {
+    <label for="newName">שם חדש לבעל העסק</label>
+    <input formControlName="newName" id="newName" type="text" />
+    <button type="submit" [disabled]="!renameForm.valid">שנה שם</button>
+  }
+</form>

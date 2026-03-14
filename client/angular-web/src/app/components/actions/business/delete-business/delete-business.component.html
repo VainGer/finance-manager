@@ -1,1 +1,19 @@
-<p>delete-business works!</p>
+@if (phase === 'choice') {
+  <form (submit)="proceedToDelete($event)">
+    <label>בחר קטגוריה</label>
+    <app-category-select (onChange)="setCategory($event)"></app-category-select>
+    @if (selectedCategory) {
+      <app-business-select [selectedCategory]="selectedCategory" (onChange)="setBusiness($event)"></app-business-select>
+    }
+    <button type="submit" [disabled]="!selectedBusiness">המשך למחיקה</button>
+  </form>
+} @else {
+  <div>
+    <p>האם אתה בטוח שברצונך למחוק את בעל העסק "{{ selectedBusiness }}"?</p>
+    <div>
+      <p>⚠️ פעולה זו אינה ניתנת לביטול</p>
+      <p>כל ההוצאות המשויכות לבעל עסק זה יימחקו לצמיתות</p>
+    </div>
+  </div>
+  <button (click)="handleDelete()">כן, מחק בעל עסק</button>
+}

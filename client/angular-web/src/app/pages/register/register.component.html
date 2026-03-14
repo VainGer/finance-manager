@@ -1,1 +1,13 @@
-<p>register works!</p>
+<form class="grid" [formGroup]="registerForm" (submit)="handleRegister()">
+  <label for="username">שם משתמש</label>
+  <input id="username" formControlName="username" type="text" />
+  <label for="password">סיסמא</label>
+  <input formControlName="password" id="password" type="password" />
+  <label for="confirmPassword">אימות סיסמא</label>
+  <input
+    formControlName="confirmPassword"
+    type="password"
+    id="confirmPassword"
+  />
+  <button [disabled]="!registerForm.valid" type="submit">צור חשבון חדש</button>
+</form>

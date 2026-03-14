@@ -1,1 +1,5 @@
-<p>create-category works!</p>
+<form [formGroup]="createForm" (submit)="submitCreate()">
+  <label for="name">שם הקטגוריה</label>
+  <input formControlName="name" id="name" type="text" />
+  <button type="submit" [disabled]="!createForm.valid">הוסף קטגוריה</button>
+</form>

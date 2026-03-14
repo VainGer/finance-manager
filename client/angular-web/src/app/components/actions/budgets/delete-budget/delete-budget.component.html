@@ -1,1 +1,34 @@
-<p>delete-budget works!</p>
+@if (phase === 'choice') {
+  <form (submit)="proceedToDelete($event)">
+    <label>בחר תקציב למחיקה</label>
+    @if (budgets.length === 0) {
+      <p>אין תקציבים זמינים למחיקה</p>
+    } @else {
+      @for (budget of budgets; track budget._id) {
+        <label>
+          <input
+            type="radio"
+            name="budget"
+            [value]="budget._id"
+            [checked]="selectedBudgetId === budget._id"
+            (change)="selectedBudgetId = budget._id"
+          />
+          {{ formatDate(budget.startDate) }} - {{ formatDate(budget.endDate) }} | ₪{{ budget.amount }}
+        </label>
+      }
+    }
+    <button type="submit" [disabled]="!selectedBudgetId">המשך למחיקה</button>
+  </form>
+} @else {
+  <div>
+    <p>האם אתה בטוח שברצונך למחוק את התקציב הנבחר?</p>
+    @if (selectedBudget) {
+      <div>
+        <p>תקופה: {{ formatDate(selectedBudget.startDate) }} - {{ formatDate(selectedBudget.endDate) }}</p>
+        <p>סכום: ₪{{ selectedBudget.amount }}</p>
+      </div>
+    }
+    <p>⚠️ מחיקת התקציב תמחק רק את מסגרת התקציב. הנתונים וההוצאות יישארו שמורים.</p>
+  </div>
+  <button (click)="handleDelete()">כן, מחק תקציב</button>
+}

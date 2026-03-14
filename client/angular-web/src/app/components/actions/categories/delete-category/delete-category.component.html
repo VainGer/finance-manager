@@ -1,1 +1,16 @@
-<p>delete-category works!</p>
+@if (phase === "choice") {
+  <form (submit)="proceedToDelete($event)">
+    <label>בחר קטגוריה למחיקה</label>
+    <app-category-select (onChange)="setCategory($event)"></app-category-select>
+    <button type="submit">המשך למחיקה</button>
+  </form>
+} @else {
+  <div>
+    <p>האם אתה בטוח שברצונך למחוק את הקטגוריה "{{ selectedCategory }}"?</p>
+    <div>
+      <p>⚠️ פעולה זו אינה ניתנת לביטול</p>
+      <p>כל התקציבים וההוצאות המשויכים לקטגוריה זו יימחקו לצמיתות</p>
+    </div>
+  </div>
+  <button (click)="handleDelete()">כן, מחק קטגוריה</button>
+}

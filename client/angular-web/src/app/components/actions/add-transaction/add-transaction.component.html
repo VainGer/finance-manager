@@ -6,14 +6,17 @@
       (onChange)="setBusiness($event)"
     ></app-business-select>
     @if (selectedBusiness) {
-      <form class="grid">
+      <form class="grid" [formGroup]="addTransactionForm" (submit)="addTransaction()">
         <label for="">סכום</label>
-        <input type="text" />
+        <input type="number" 
+        formControlName="amount"/>
         <label for="">תאריך</label>
-        <input type="text" />
+        <input formControlName="date"
+         type="date" />
         <label for="">תיאור(אופציונלי)</label>
-        <input type="text" />
-        <button type="submit">הוסף עסקה</button>
+        <input formControlName="description"
+        type="text" />
+        <button type="submit" [disabled]="!addTransactionForm.valid">הוסף עסקה</button>
       </form>
     }
   }

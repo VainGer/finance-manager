@@ -1,1 +1,43 @@
-<p>create-budget works!</p>
+@if (phase === "dates") {
+  <form [formGroup]="datesForm" (submit)="validateDates($event)">
+    <label for="startDate">תאריך התחלה</label>
+    <input formControlName="startDate" id="startDate" type="date" />
+    <label for="endDate">תאריך סוף</label>
+    <input formControlName="endDate" id="endDate" type="date" />
+    <label for="amount">סכום התקציב</label>
+    <input
+      formControlName="amount"
+      id="amount"
+      type="number"
+      placeholder="0.00"
+    />
+    <button type="submit" [disabled]="!datesForm.valid">המשך</button>
+  </form>
+} @else {
+  <div>
+    <p>
+      תקופה: {{ datesForm.value.startDate }} - {{ datesForm.value.endDate }}
+    </p>
+    <p>תקציב נותר: {{ remainingAmount }} ₪</p>
+  </div>
+  <form (submit)="submitCreate($event)">
+    @for (cat of categoryBudgets; track $index) {
+      <div>
+        <label>{{ cat.name }}</label>
+        <input
+          type="checkbox"
+          [checked]="cat.include"
+          (change)="toggleCategoryInclude($index, $any($event.target).checked)"
+        />
+        <input
+          type="number"
+          [value]="cat.budget"
+          [disabled]="!cat.include"
+          (input)="updateCategoryBudget($index, $any($event.target).value)"
+          placeholder="0.00"
+        />
+      </div>
+    }
+    <button type="submit" [disabled]="remainingAmount !== 0">צור תקציב</button>
+  </form>
+}

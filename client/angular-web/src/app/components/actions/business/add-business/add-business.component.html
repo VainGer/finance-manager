@@ -1,1 +1,7 @@
-<p>add-business works!</p>
+<form [formGroup]="addForm" (submit)="submitAdd()">
+  <label>בחר קטגוריה</label>
+  <app-category-select (onChange)="setCategory($event)"></app-category-select>
+  <label for="businessName">שם בעל העסק</label>
+  <input formControlName="businessName" id="businessName" type="text" />
+  <button type="submit" [disabled]="!addForm.valid || !selectedCategory">הוסף בעל עסק</button>
+</form>

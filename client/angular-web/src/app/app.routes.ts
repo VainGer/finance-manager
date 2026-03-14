@@ -5,6 +5,7 @@ import { RegisterComponent } from './pages/register/register.component';
 import { ProfilesComponent } from './pages/profiles/profiles.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { accountGuard, profileGuard } from '../guards/auth.guard';
+import { UploadFileComponent } from './pages/upload-file/upload-file.component';
 
 export const routes: Routes = [
   //no authentication routes
@@ -17,9 +18,15 @@ export const routes: Routes = [
     component: ProfilesComponent,
     canActivate: [accountGuard],
   },
+  //account + profile requiered path
   {
     path: 'dashboard',
     component: DashboardComponent,
+    canActivate: [profileGuard],
+  },
+  {
+    path: 'upload-file',
+    component: UploadFileComponent,
     canActivate: [profileGuard],
   },
 ];

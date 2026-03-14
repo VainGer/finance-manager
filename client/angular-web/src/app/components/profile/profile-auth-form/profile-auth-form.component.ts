@@ -4,7 +4,6 @@ import {
   FormBuilder,
   FormGroup,
   Validators,
-  ɵInternalFormsSharedModule,
   ReactiveFormsModule,
 } from '@angular/forms';
 import ApiProvider from '../../../../services/api.service';
@@ -13,7 +12,7 @@ import AuthService from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-profile-auth-form',
-  imports: [ɵInternalFormsSharedModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './profile-auth-form.component.html',
   styleUrl: './profile-auth-form.component.css',
 })

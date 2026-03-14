@@ -10,6 +10,7 @@ import { combineLatest } from 'rxjs';
 import { MenuBtnComponent } from '../../components/ui/menu-btn/menu-btn.component';
 import { ModalComponent } from '../../components/ui/modal/modal.component';
 import { ActionsMenuComponent } from '../../components/ui/actions-menu/actions-menu.component';
+import { Router } from '@angular/router';
 
 type dashboardState =
   | 'fetch-error'
@@ -37,6 +38,7 @@ type dashboardState =
 })
 export class DashboardComponent implements OnInit {
   private pdService = inject(ProfileDataService);
+  private router = inject(Router);
   displayState: dashboardState = 'budgets';
   actionMenu: string | null = null;
   categoryBudgets$ = this.pdService.categoryBudgets$;
@@ -66,5 +68,9 @@ export class DashboardComponent implements OnInit {
 
   openActionMenu(menu: string | null) {
     this.actionMenu = menu;
+  }
+
+  navigateTo(page: string) {
+    this.router.navigate([page]);
   }
 }
