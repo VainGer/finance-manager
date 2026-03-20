@@ -5,7 +5,7 @@ SmartFinance is a production-grade personal finance application that bridges the
 
 ---
 
-## 🚀 Live Demo
+##  Live Demo
 
 **Production URL:** [https://finance-manager-m3au.onrender.com](https://finance-manager-m3au.onrender.com)
 
@@ -83,7 +83,7 @@ Feel free to register a new account to test the full onboarding flow, profile cr
 
 ---
 
-###  📱 App Showcase (Mobile Version)
+###   App Showcase (Mobile Version)
 
 | Real-time Budget Health | Conversational AI Coach | Semantic Mapping |
 | :---: | :---: | :---: |
@@ -91,7 +91,7 @@ Feel free to register a new account to test the full onboarding flow, profile cr
 
 ---
 
-### 🛠️ Tech Stack
+###  Tech Stack
 
 | Layer | Technologies |
 | :--- | :--- |
@@ -104,7 +104,7 @@ Feel free to register a new account to test the full onboarding flow, profile cr
 
 ---
 
-### 🔧 Local Development Setup
+###  Local Development Setup
 
 #### Prerequisites
 - Node.js 16+
@@ -160,13 +160,13 @@ Feel free to register a new account to test the full onboarding flow, profile cr
 
 ---
 
-### 📄 License
+###  License
 
 This project was developed as a final capstone project for Practical Software Engineering degree at Shenkar College (2023-2025).
 
 
 ---
 
-### 🙏 Acknowledgments
+###  Acknowledgments
 
 Built as part of the Practical Software Engineering program at Shenkar College of Engineering, Design and Art.
