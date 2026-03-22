@@ -1,0 +1,36 @@
+@if (!state) {
+  <div>
+    <button (click)="setState('edit')">edit</button>
+    <button (click)="setState('confirmDelete')">delete</button>
+  </div>
+}
+@switch (state) {
+  @case ("confirmDelete") {
+    <div>
+      <div>
+        <p>danger-icon</p>
+        <p>פעולה זו תמחק את העסקה לצמיתות</p>
+      </div>
+      <div>
+        <button (click)="deleteTransaction()">כן, מחק</button>
+        <button (click)="setState(null)">ביטול</button>
+      </div>
+    </div>
+  }
+  @case ("edit") {
+    <app-modal [isOpen]="state === 'edit'" (closeModal)="setState(null)">
+      <form [formGroup]="editForm" class="grid" (submit)="saveChanges()">
+        <label for="amount">סכום</label>
+        <input type="number" id="amount" formControlName="amount" />
+        <label for="date">תאריך</label>
+        <input type="date" id="date" formControlName="date" />
+        <label for="description">תיאור</label>
+        <input type="text" id="description" formControlName="description" />
+        <div>
+          <button type="submit">שמור</button>
+          <button (click)="setState(null)">ביטול</button>
+        </div>
+      </form>
+    </app-modal>
+  }
+}

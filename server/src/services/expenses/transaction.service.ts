@@ -206,6 +206,10 @@ export default class TransactionService {
             }
         });
 
+        if(!budget){
+            return { success: true, message: "No budget to update" };
+        }
+
         const categoriesBudgets = (await BudgetService.getCategoriesBudgets(refId)).categoriesBudgets;
 
         const foundCategoryBudget = categoriesBudgets.find((cb) => {

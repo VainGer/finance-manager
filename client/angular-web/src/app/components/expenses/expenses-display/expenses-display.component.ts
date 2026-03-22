@@ -1,7 +1,15 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
 import { Category, FlattenedExpenses } from '../../../../types';
 import * as formatters from '../../../../utils/formatters';
 import { ExpenseService } from '../../../../services/expenses.service';
+import { EditTransactionsComponent } from '../../actions/edit-transactions/edit-transactions.component';
 
 type DisplaySummary = {
   trsNum: number;
@@ -11,11 +19,11 @@ type DisplaySummary = {
 
 @Component({
   selector: 'app-expenses-display',
-  imports: [],
+  imports: [EditTransactionsComponent],
   templateUrl: './expenses-display.component.html',
   styleUrl: './expenses-display.component.css',
 })
-export class ExpensesDisplayComponent implements OnInit {
+export class ExpensesDisplayComponent implements OnInit, OnChanges {
   @Input() expenses: Category[] = [];
   private expensesService = inject(ExpenseService);
   flatExpenses: FlattenedExpenses[] = [];
@@ -125,6 +133,15 @@ export class ExpensesDisplayComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.processExpenses();
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['expenses'] && !changes['expenses'].firstChange) {
+      this.processExpenses();
+    }
+  }
+
+  private processExpenses() {
     const { flatExpenses, monthlyExpenses, availableDates } =
       this.expensesService.processExpenses(this.expenses);
     this.flatExpenses = [...flatExpenses];

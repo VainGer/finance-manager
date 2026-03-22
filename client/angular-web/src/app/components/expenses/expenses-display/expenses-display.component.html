@@ -86,7 +86,11 @@
         <td>{{ expense.category }}</td>
         <td>{{ expense.business }}</td>
         <td>{{ formatters.formatCurrency(expense.amount) }}</td>
-        <td>TODO ACTIONS</td>
+        <td>
+          <app-edit-transactions
+            [transaction]="expense"
+          ></app-edit-transactions>
+        </td>
       </tr>
     }
   </table>
