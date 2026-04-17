@@ -7,7 +7,7 @@ SmartFinance is a production-grade personal finance application that bridges the
 
 ##  Live Demo
 
-**Production URL:** [https://finance-manager-m3au.onrender.com](https://finance-manager-m3au.onrender.com)
+**DEMO URL:** [https://finance-manager-m3au.onrender.com](https://finance-manager-m3au.onrender.com)
 
 ### User Demo Account
 Explore the full application with pre-loaded sample data:
