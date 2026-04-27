@@ -9,15 +9,6 @@ SmartFinance is a production-grade personal finance application that bridges the
 
 **DEMO URL:** [https://finance-manager-m3au.onrender.com](https://finance-manager-m3au.onrender.com)
 
-### User Demo Account
-Explore the full application with pre-loaded sample data:
-
-- **Username:** `levifamily`
-- **Password:** `123456`
-- **Profile PIN:** `1234` (for all profiles)
-
-*Note: This is a shared demo account. Data may be modified by other users.*
-
 ### Admin Panel (Optional)
 Access administrative features at `/admin`:
 
